@@ -1,39 +1,119 @@
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: system-ui, sans-serif;
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
+import './App.css';
+
+function App() {
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [newTopic, setNewTopic] = useState({
+    topic: '',
+    partitions: '1',
+    replication: '1',
+    configs: '',
+  });
+
+  const fetchTopics = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/api/topics');
+      setTopics(response.data.topics || []);
+    } catch (error) {
+      console.error(error);
+      toast.error('Ошибка загрузки топиков');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopics();
+  }, []);
+
+  const handleCreateTopic = async (e) => {
+    e.preventDefault();
+    if (!newTopic.topic.trim()) {
+      toast.error('Введите имя топика');
+      return;
+    }
+
+    try {
+      const response = await axios.post('/api/topics', newTopic);
+      if (response.data.success) {
+        toast.success(`Топик "${newTopic.topic}" создан!`);
+        setNewTopic({ topic: '', partitions: '1', replication: '1', configs: '' });
+        fetchTopics();
+      } else {
+        toast.error(response.data.error || 'Ошибка создания топика');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Ошибка соединения с сервером');
+    }
+  };
+
+  const handleChange = (e) => {
+    setNewTopic({ ...newTopic, [e.target.name]: e.target.value });
+  };
+
+  return (
+    <div className="container">
+      <Toaster position="top-right" />
+      <h1>🐘 Kafka System Control 4.0</h1>
+
+      <div className="card">
+        <h2>Создать топик</h2>
+        <form onSubmit={handleCreateTopic}>
+          <input
+            type="text"
+            name="topic"
+            placeholder="Имя топика *"
+            value={newTopic.topic}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="partitions"
+            placeholder="Партиции (по умолч. 1)"
+            value={newTopic.partitions}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="replication"
+            placeholder="Репликация (по умолч. 1)"
+            value={newTopic.replication}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="configs"
+            placeholder="Конфиги (key=value, через запятую)"
+            value={newTopic.configs}
+            onChange={handleChange}
+          />
+          <button type="submit">Создать</button>
+        </form>
+      </div>
+
+      <div className="card">
+        <h2>Список топиков</h2>
+        {loading ? (
+          <p>Загрузка...</p>
+        ) : topics.length === 0 ? (
+          <p>Нет топиков</p>
+        ) : (
+          <ul>
+            {topics.map((topic) => (
+              <li key={topic}>{topic}</li>
+            ))}
+          </ul>
+        )}
+        <button onClick={fetchTopics} className="secondary">Обновить список</button>
+      </div>
+    </div>
+  );
 }
-.card {
-  background: #f5f5f5;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-input, button {
-  display: block;
-  width: 100%;
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  font-size: 1rem;
-}
-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-button.secondary {
-  background: #6c757d;
-}
-ul {
-  list-style: none;
-  padding: 0;
-}
-li {
-  background: white;
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
+
+export default App;
