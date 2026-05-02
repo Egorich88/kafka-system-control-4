@@ -1,11 +1,13 @@
+sh 'echo "TAG_NAME = ${TAG_NAME}"'
 pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'docker.io/egorich27'                     // замените на свой Docker Hub логин
-        BACKEND_IMAGE  = "${DOCKER_REGISTRY}/kafka-control-backend:${BUILD_NUMBER}"
+        DOCKER_REGISTRY = 'docker.io/egorich27'               // ваш Docker Hub логин
+        BACKEND_IMAGE = "${DOCKER_REGISTRY}/kafka-control-backend:${BUILD_NUMBER}"
         FRONTEND_IMAGE = "${DOCKER_REGISTRY}/kafka-control-frontend:${BUILD_NUMBER}"
-        // KUBECONFIG = credentials('kubeconfig')                  // временно отключено, пока нет кластера
+        GITHUB_TOKEN = credentials('github-token')            // GitHub токен (Secret text)
+        GITHUB_REPO = 'Egorich88/kafka-system-control-4'      // ваш репозиторий
     }
 
     stages {
@@ -52,12 +54,41 @@ pipeline {
 
         // stage('Deploy to Kubernetes') {
         //     steps {
-        //         sh """
-        //             kubectl set image deployment/backend backend=${BACKEND_IMAGE} -n kafka-system
-        //             kubectl set image deployment/frontend frontend=${FRONTEND_IMAGE} -n kafka-system
-        //         """
+        //         withKubeConfig([credentialsId: 'kubeconfig']) {
+        //             sh "kubectl set image deployment/backend backend=${BACKEND_IMAGE} -n kafka-system"
+        //             sh "kubectl set image deployment/frontend nginx=${FRONTEND_IMAGE} -n kafka-system"
+        //         }
         //     }
         // }
+
+        stage('Create GitHub Release') {
+            when {
+                // Запускаем только если переменная TAG_NAME определена (т.е. сборка по тегу)
+                expression { env.TAG_NAME != null && env.TAG_NAME != '' }
+                // Дополнительно можно проверить формат тега, например, v4.0.0
+                // tag pattern: "v\\d+\\.\\d+\\.\\d+", comparator: "REGEXP"
+            }
+            steps {
+                script {
+                    def tagName = env.TAG_NAME
+                    // Если нужно, можно сгенерировать описание релиза из файла CHANGELOG.md или просто сделать стандартное
+                    def releaseBody = "Автоматический релиз от Jenkins.\n\nСборка #${BUILD_NUMBER}\n\n## Что нового\n- Исправлены ошибки сборки фронтенда\n- Настроен автоматический деплой\n- Добавлена поддержка тегов"
+                    sh """
+                        curl -X POST \
+                          -H "Authorization: token ${GITHUB_TOKEN}" \
+                          -H "Accept: application/vnd.github.v3+json" \
+                          https://api.github.com/repos/${GITHUB_REPO}/releases \
+                          -d '{
+                            "tag_name": "${tagName}",
+                            "name": "Release ${tagName}",
+                            "body": "${releaseBody}",
+                            "draft": false,
+                            "prerelease": false
+                          }'
+                    """
+                }
+            }
+        }
     }
 
     post {
