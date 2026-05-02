@@ -1,12 +1,16 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'TAG_NAME', defaultValue: '', description: 'Git tag name (например, v4.0.1)')
+    }
+
     environment {
-        DOCKER_REGISTRY = 'docker.io/egorich27'               // ваш Docker Hub логин
-        BACKEND_IMAGE = "${DOCKER_REGISTRY}/kafka-control-backend:${BUILD_NUMBER}"
+        DOCKER_REGISTRY = 'docker.io/egorich27'
+        BACKEND_IMAGE  = "${DOCKER_REGISTRY}/kafka-control-backend:${BUILD_NUMBER}"
         FRONTEND_IMAGE = "${DOCKER_REGISTRY}/kafka-control-frontend:${BUILD_NUMBER}"
-        GITHUB_TOKEN = credentials('github-token')            // GitHub токен (Secret text)
-        GITHUB_REPO = 'Egorich88/kafka-system-control-4'      // ваш репозиторий
+        GITHUB_TOKEN   = credentials('github-token')
+        GITHUB_REPO    = 'Egorich88/kafka-system-control-4'
     }
 
     stages {
@@ -24,7 +28,7 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh "docker login -u $DOCKER_USER -p $DOCKER_PASS"
+                    sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
                 }
             }
         }
@@ -52,27 +56,14 @@ pipeline {
             }
         }
 
-        // stage('Deploy to Kubernetes') {
-        //     steps {
-        //         withKubeConfig([credentialsId: 'kubeconfig']) {
-        //             sh "kubectl set image deployment/backend backend=${BACKEND_IMAGE} -n kafka-system"
-        //             sh "kubectl set image deployment/frontend nginx=${FRONTEND_IMAGE} -n kafka-system"
-        //         }
-        //     }
-        // }
-
         stage('Create GitHub Release') {
             when {
-                // Запускаем только если переменная TAG_NAME определена (т.е. сборка по тегу)
-                expression { env.TAG_NAME != null && env.TAG_NAME != '' }
-                // Дополнительно можно проверить формат тега, например, v4.0.0
-                // tag pattern: "v\\d+\\.\\d+\\.\\d+", comparator: "REGEXP"
+                expression { params.TAG_NAME != null && params.TAG_NAME != '' }
             }
             steps {
                 script {
-                    def tagName = env.TAG_NAME
-                    // Если нужно, можно сгенерировать описание релиза из файла CHANGELOG.md или просто сделать стандартное
-                    def releaseBody = "Автоматический релиз от Jenkins.\n\nСборка #${BUILD_NUMBER}\n\n## Что нового\n- Исправлены ошибки сборки фронтенда\n- Настроен автоматический деплой\n- Добавлена поддержка тегов"
+                    def tagName = params.TAG_NAME
+                    def releaseBody = "Автоматический релиз от Jenkins.\n\nСборка #${BUILD_NUMBER}\n\nТег: ${tagName}"
                     sh """
                         curl -X POST \
                           -H "Authorization: token ${GITHUB_TOKEN}" \
