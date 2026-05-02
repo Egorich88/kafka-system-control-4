@@ -1,4 +1,3 @@
-sh 'echo "TAG_NAME = ${TAG_NAME}"'
 pipeline {
     agent any
 
