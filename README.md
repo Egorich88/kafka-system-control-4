@@ -65,26 +65,25 @@ docker-compose up --build
 
 ---
 
-🔁 CI/CD (Jenkins)
-Что происходит автоматически при пуше в main?
+## 🔁 CI/CD (GitHub Actions)
 
-Jenkins клонирует репозиторий.
+**Что происходит автоматически при пуше в `main`?**
+1. GitHub Actions клонирует репозиторий
+2. Логинится в Docker Hub
+3. Собирает образы `backend` и `frontend`
+4. Пушит их в Docker Hub
 
-Логинится в Docker Hub.
+**При пуше тега (например, `v4.0.2`):**
+- ✅ Всё то же самое
+- ✅ Автоматически создаётся GitHub Release
 
-Собирает образы backend и frontend (тег = ${BUILD_NUMBER}).
+**Преимущества перед Jenkins:**
+- Бесплатно для open‑source
+- Не нужен отдельный сервер
+- Всё в одном месте (GitHub)
+- Автоматические релизы по тегам
 
-Пушит образы в Docker Hub (egorich27/kafka-control-backend, egorich27/kafka-control-frontend).
 
-Как создать GitHub Release (архив исходного кода)?
-
-Откройте Jenkins‑задачу → Build with Parameters.
-
-В поле TAG_NAME введите тег (например, v4.0.2).
-
-Jenkins создаст релиз на GitHub с этим тегом.
-
-Важно: автоматическая сборка по тегу не настроена (только ручной параметр) – это следующий шаг.
 
 ---
 
