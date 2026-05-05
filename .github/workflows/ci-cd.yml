@@ -1,0 +1,102 @@
+name: CI/CD для Kafka System Control 4.0
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'               # теги вида v4.0.0, v4.0.1 и т.д.
+  workflow_dispatch:       # возможность запустить вручную
+
+env:
+  DOCKER_REGISTRY: docker.io
+  DOCKER_IMAGE_BACKEND: egorich27/kafka-control-backend
+  DOCKER_IMAGE_FRONTEND: egorich27/kafka-control-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # ---- BACKEND ----
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE_BACKEND }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha,prefix=sha-
+
+      - name: Build and push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ---- FRONTEND ----
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE_FRONTEND }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha,prefix=sha-
+
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ---- СОЗДАНИЕ GITHUB RELEASE (только для тегов) ----
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## Kafka System Control ${{ github.ref_name }}
+
+            ✅ **Что внутри:**
+            - Docker образы backend и frontend загружены в Docker Hub (`${{ env.DOCKER_IMAGE_BACKEND }}`, `${{ env.DOCKER_IMAGE_FRONTEND }}`)
+            - Тег: `${{ github.ref_name }}`
+
+            🚀 **Как запустить:**
+            См. [README](https://github.com/Egorich88/kafka-system-control-4/blob/main/README.md)
+
+            ---
+            _Автоматически создано GitHub Actions_
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
