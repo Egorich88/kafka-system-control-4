@@ -26,3 +26,10 @@ Thumbs.db
 
 # Kubernetes secrets (если будут)
 *.secret.yaml
+
+# Terraform
+terraform/.terraform/
+terraform/terraform.tfstate*
+terraform/terraform.tfvars
+terraform/*.tfvars
+terraform/.terraform.lock.hcl

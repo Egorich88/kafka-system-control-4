@@ -1,0 +1,10 @@
+yc_token   = ""
+cloud_id   = ""
+folder_id  = ""
+zone       = "ru-central1-a"
+
+cluster_name  = "kafka-system-cluster"
+node_cores    = 2
+node_memory   = 4
+node_count    = 2
+node_disk_size = 64
