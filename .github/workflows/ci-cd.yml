@@ -105,19 +105,23 @@ jobs:
           echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
           sudo apt update
           sudo apt install -y jq
-          yc version
 
-      - name: Authenticate to Yandex Cloud via service account key
+      - name: Configure YC and authenticate
         run: |
-          echo '${{ secrets.YC_SA_JSON_KEY }}' > key.json
+          # Ensure yc is in PATH for this step
+          export PATH="$HOME/yandex-cloud/bin:$PATH"
+          yc version
+          echo "${{ secrets.YC_SA_JSON_KEY }}" > key.json
           yc config set service-account-key key.json
-          yc config set folder-id $(cat key.json | jq -r .folder_id)
-          # Определяем cloud-id по первому облаку в списке (обычно одно)
-          yc config set cloud-id $(yc resource-manager cloud list --format json | jq -r '.[0].id')
-          # Проверка: можно выполнить yc resource-manager folder list для отладки
+          FOLDER_ID=$(cat key.json | jq -r .folder_id)
+          yc config set folder-id $FOLDER_ID
+          CLOUD_ID=$(yc resource-manager cloud list --format json | jq -r '.[0].id')
+          yc config set cloud-id $CLOUD_ID
+          yc iam create-token
 
       - name: Get Kubeconfig for cluster
         run: |
+          export PATH="$HOME/yandex-cloud/bin:$PATH"
           yc managed-kubernetes cluster get-credentials kafka-system-cluster --external --force
           kubectl cluster-info
 
