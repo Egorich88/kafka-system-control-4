@@ -1,10 +1,16 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import packageJson from '../../package.json'; // путь к package.json
 
-const Layout = ({ children }) => {
+const Layout = () => {
+  const version = packageJson.version;
+  const author = "Egor Khomenko";
+  const githubUrl = "https://github.com/Egorich88";
+
   return (
-    <div className="app-layout">
+    <div className="app-layout sidebar-dark">
       <aside className="sidebar">
         <div className="logo">
+          <img src="/logo.svg" alt="Kafka Control" width="32" height="32" style={{ marginRight: 8 }} />
           <h3>Kafka System Control</h3>
         </div>
         <nav>
@@ -21,9 +27,17 @@ const Layout = ({ children }) => {
             Поиск сообщений
           </NavLink>
         </nav>
+        <div className="sidebar-footer">
+          <div className="version">Версия: {version}</div>
+          <div className="author">
+            <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+              {author}
+            </a>
+          </div>
+        </div>
       </aside>
       <main className="main-content">
-        {children}
+        <Outlet />
       </main>
     </div>
   );
