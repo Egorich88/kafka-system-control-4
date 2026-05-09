@@ -120,6 +120,11 @@ jobs:
       - name: Get Kubeconfig for cluster
         run: |
           export PATH="$HOME/yandex-cloud/bin:$PATH"
+          echo "=== YC config ==="
+          yc config list
+          echo "=== Clusters in folder ==="
+          yc managed-kubernetes cluster list
+          echo "=== Attempt to get credentials ==="
           yc managed-kubernetes cluster get-credentials kafka-system-cluster --external --force
           kubectl cluster-info
 
