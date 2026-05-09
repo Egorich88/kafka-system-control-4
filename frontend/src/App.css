@@ -127,3 +127,14 @@ li {
   border: 1px solid #e5e7eb;
   font-family: monospace;
 }
+
+.sidebar-footer .author a {
+  color: inherit;           /* белый (наследуется от родителя) */
+  text-decoration: none;   /* убираем подчёркивание */
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  display: inline-block;
+}
+
+.sidebar-footer .author a:hover {
+  transform: scale(1.05);  /* небольшое увеличение */
+}

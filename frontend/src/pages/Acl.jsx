@@ -1,8 +1,8 @@
 export default function Acl() {
   return (
     <div>
-      <h1>Управление ACL</h1>
-      <p>Здесь будут списки ACL и форма создания новых правил.</p>
+      <h1>ACL – Access Control Lists</h1>
+      <p>Правила доступа к топикам и группам.</p>
     </div>
   );
 }
