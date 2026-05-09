@@ -108,10 +108,8 @@ jobs:
 
       - name: Configure YC and authenticate
         run: |
-          # Ensure yc is in PATH for this step
           export PATH="$HOME/yandex-cloud/bin:$PATH"
-          yc version
-          echo "${{ secrets.YC_SA_JSON_KEY }}" > key.json
+          echo "${{ secrets.YC_SA_JSON_KEY_BASE64 }}" | base64 -d > key.json
           yc config set service-account-key key.json
           FOLDER_ID=$(cat key.json | jq -r .folder_id)
           yc config set folder-id $FOLDER_ID
