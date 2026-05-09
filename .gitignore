@@ -33,3 +33,6 @@ terraform/terraform.tfstate*
 terraform/terraform.tfvars
 terraform/*.tfvars
 terraform/.terraform.lock.hcl
+
+# key
+key.json

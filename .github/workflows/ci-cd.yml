@@ -5,8 +5,8 @@ on:
     branches:
       - main
     tags:
-      - 'v*'               # теги вида v4.0.0, v4.0.1 и т.д.
-  workflow_dispatch:       # возможность запустить вручную
+      - 'v*'
+  workflow_dispatch:
 
 env:
   DOCKER_REGISTRY: docker.io
@@ -32,7 +32,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # ---- BACKEND ----
       - name: Extract metadata for backend
         id: meta-backend
         uses: docker/metadata-action@v5
@@ -54,7 +53,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ---- FRONTEND ----
       - name: Extract metadata for frontend
         id: meta-frontend
         uses: docker/metadata-action@v5
@@ -76,7 +74,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ---- СОЗДАНИЕ GITHUB RELEASE (только для тегов) ----
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
@@ -85,23 +82,15 @@ jobs:
           name: Release ${{ github.ref_name }}
           body: |
             ## Kafka System Control ${{ github.ref_name }}
-
             ✅ **Что внутри:**
-            - Docker образы backend и frontend загружены в Docker Hub (`${{ env.DOCKER_IMAGE_BACKEND }}`, `${{ env.DOCKER_IMAGE_FRONTEND }}`)
+            - Docker образы backend и frontend загружены в Docker Hub
             - Тег: `${{ github.ref_name }}`
-
-            🚀 **Как запустить:**
-            См. [README](https://github.com/Egorich88/kafka-system-control-4/blob/main/README.md)
-
-            ---
-            _Автоматически создано GitHub Actions_
+            🚀 **Как запустить:** см. README
           draft: false
           prerelease: false
-          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # ---- ДЕПЛОЙ В KUBERNETES (только для main) ----
   deploy-to-kubernetes:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -110,18 +99,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'latest'
-
-      - name: Configure kubeconfig
+      - name: Install YC CLI and jq
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > $HOME/.kube/config
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
+          sudo apt update
+          sudo apt install -y jq
+          yc version
+
+      - name: Authenticate to Yandex Cloud via service account key
+        run: |
+          echo '${{ secrets.YC_SA_JSON_KEY }}' > key.json
+          yc config set service-account-key key.json
+          yc config set folder-id $(cat key.json | jq -r .folder_id)
+          # Определяем cloud-id по первому облаку в списке (обычно одно)
+          yc config set cloud-id $(yc resource-manager cloud list --format json | jq -r '.[0].id')
+          # Проверка: можно выполнить yc resource-manager folder list для отладки
+
+      - name: Get Kubeconfig for cluster
+        run: |
+          yc managed-kubernetes cluster get-credentials kafka-system-cluster --external --force
+          kubectl cluster-info
 
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/
-          kubectl rollout status deployment/backend -n kafka-system
-          kubectl rollout status deployment/frontend -n kafka-system
+          kubectl rollout status deployment/backend -n kafka-system --timeout=90s
+          kubectl rollout status deployment/frontend -n kafka-system --timeout=90s
