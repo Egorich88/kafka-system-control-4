@@ -1,9 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import packageJson from '../../package.json'; // путь к package.json
+import { useCluster } from '../contexts/ClusterContext';
+import packageJson from '../../package.json';
 
 const Layout = () => {
+  const { clusters, currentCluster, changeCluster } = useCluster();
   const version = packageJson.version;
-  const author = "Egor Khomenko";
+  const author = "Егор Хоменко";
   const githubUrl = "https://github.com/Egorich88";
 
   return (
@@ -13,6 +15,23 @@ const Layout = () => {
           <img src="/logo.svg" alt="Kafka Control" width="32" height="32" style={{ marginRight: 8 }} />
           <h3>Kafka System Control</h3>
         </div>
+        {/* Выбор кластера */}
+        {clusters.length > 0 && currentCluster && (
+          <div className="cluster-selector">
+            <label>Кластер:</label>
+            <select
+              value={currentCluster.id}
+              onChange={(e) => {
+                const selected = clusters.find(c => c.id === e.target.value);
+                if (selected) changeCluster(selected);
+              }}
+            >
+              {clusters.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <nav>
           <NavLink to="/topics" className={({ isActive }) => (isActive ? 'active' : '')}>
             Топики
