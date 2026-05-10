@@ -26,11 +26,69 @@ type CreateTopicResponse struct {
 	Error   string `json:"error,omitempty"`
 }
 
+type ClusterInfo struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Bootstrap string `json:"bootstrap"`
+}
+
+// Карта соответствия ID кластера -> bootstrap сервер
+var clusterBootstrapMap = map[string]string{
+	"local": "localhost:9092",
+	"dev":   "dev-kafka.example.com:9092",
+	"prod":  "prod-kafka.example.com:9092",
+}
+
+// Список доступных кластеров
+func getAvailableClusters() []ClusterInfo {
+	return []ClusterInfo{
+		{ID: "local", Name: "Локальный (WSL)", Bootstrap: clusterBootstrapMap["local"]},
+		{ID: "dev", Name: "DEV", Bootstrap: clusterBootstrapMap["dev"]},
+		{ID: "prod", Name: "PROD", Bootstrap: clusterBootstrapMap["prod"]},
+	}
+}
+
+// Возвращает bootstrap для кластера (или fallback)
+func getBootstrapForCluster(clusterID string) string {
+	if bs, ok := clusterBootstrapMap[clusterID]; ok {
+		return bs
+	}
+	if env := os.Getenv("KAFKA_BOOTSTRAP_SERVERS"); env != "" {
+		return env
+	}
+	return "localhost:9092"
+}
+
+// Чтение заголовка X-Kafka-Cluster
+func getBootstrapFromRequest(r *http.Request) string {
+	if clusterID := r.Header.Get("X-Kafka-Cluster"); clusterID != "" {
+		return getBootstrapForCluster(clusterID)
+	}
+	if env := os.Getenv("KAFKA_BOOTSTRAP_SERVERS"); env != "" {
+		return env
+	}
+	return "localhost:9092"
+}
+
+// Старый метод для обратной совместимости
+func getBootstrapServer() string {
+	if env := os.Getenv("KAFKA_BOOTSTRAP_SERVERS"); env != "" {
+		return env
+	}
+	return "localhost:9092"
+}
+
+func getClustersHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(getAvailableClusters())
+}
+
 func getTopicsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
-	bootstrapServer := getBootstrapServer()
+	bootstrapServer := getBootstrapFromRequest(r)
 
 	cmdPath, err := exec.LookPath("kafka-topics.sh")
 	if err != nil {
@@ -59,7 +117,7 @@ func createTopicHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Kafka-Cluster")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -80,7 +138,7 @@ func createTopicHandler(w http.ResponseWriter, r *http.Request) {
 	if replication == "" {
 		replication = "1"
 	}
-	bootstrapServer := getBootstrapServer()
+	bootstrapServer := getBootstrapFromRequest(r)
 	cmdPath, _ := exec.LookPath("kafka-topics.sh")
 	args := []string{
 		"--bootstrap-server", bootstrapServer,
@@ -107,19 +165,13 @@ func createTopicHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(CreateTopicResponse{Success: true})
 }
 
-func getBootstrapServer() string {
-	if env := os.Getenv("KAFKA_BOOTSTRAP_SERVERS"); env != "" {
-		return env
-	}
-	return "localhost:9092"
-}
-
 func sendJSONError(w http.ResponseWriter, msg string, status int) {
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": msg})
 }
 
 func main() {
+	http.HandleFunc("/api/clusters", getClustersHandler)
 	http.HandleFunc("/api/topics", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
