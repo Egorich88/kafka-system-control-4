@@ -33,6 +33,7 @@ terraform/terraform.tfstate*
 terraform/terraform.tfvars
 terraform/*.tfvars
 terraform/.terraform.lock.hcl
+terraform/kubectl
 
 # key
 key.json
