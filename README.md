@@ -1,4 +1,4 @@
-# Kafka System Control 4🚀
+# Kafka System Control version 4🚀
 
 **Веб‑интерфейс для управления Apache Kafka** (React + Go).  
 Проект переродился из консольных скриптов в современный микросервис с CI/CD (GitHub Actions), контейнеризацией и автоматическими релизами.
