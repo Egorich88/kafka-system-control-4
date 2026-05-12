@@ -112,45 +112,44 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    deploy-to-kubernetes:
+      needs: build-and-push
+      runs-on: ubuntu-latest
+      if: github.ref == 'refs/heads/main'
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
 
-   deploy-to-kubernetes:
-     needs: build-and-push
-     runs-on: ubuntu-latest
-     if: github.ref == 'refs/heads/main'
-     steps:
-       - name: Checkout code
-         uses: actions/checkout@v4
+        - name: Install YC CLI and jq
+          run: |
+            curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+            echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
+            sudo apt update
+            sudo apt install -y jq
 
-       - name: Install YC CLI and jq
-         run: |
-           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-           echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
-           sudo apt update
-           sudo apt install -y jq
+        - name: Configure YC and authenticate
+          run: |
+            export PATH="$HOME/yandex-cloud/bin:$PATH"
+            # 1. Создать key.json из base64-секрета (этот шаг был пропущен)
+            echo "${{ secrets.YC_SA_JSON_KEY_BASE64 }}" | base64 -d > key.json
+            # 2. Установить сервисный ключ
+            yc config set service-account-key key.json
+            # 3. Установить folder-id и cloud-id (должны быть добавлены в секреты GitHub)
+            yc config set folder-id ${{ secrets.YC_FOLDER_ID }}
+            yc config set cloud-id ${{ secrets.YC_CLOUD_ID }}
+            # 4. Проверить доступ (опционально)
+            yc resource-manager folder get ${{ secrets.YC_FOLDER_ID }}
 
-       - name: Configure YC and authenticate
-         run: |
-           export PATH="$HOME/yandex-cloud/bin:$PATH"
-           # 1. Создать key.json из base64-секрета (этот шаг был пропущен)
-           echo "${{ secrets.YC_SA_JSON_KEY_BASE64 }}" | base64 -d > key.json
-           # 2. Установить сервисный ключ
-           yc config set service-account-key key.json
-           # 3. Установить folder-id и cloud-id (должны быть добавлены в секреты GitHub)
-           yc config set folder-id ${{ secrets.YC_FOLDER_ID }}
-           yc config set cloud-id ${{ secrets.YC_CLOUD_ID }}
-           # 4. Проверить доступ (опционально)
-           yc resource-manager folder get ${{ secrets.YC_FOLDER_ID }}
+        - name: Get Kubeconfig for cluster
+          run: |
+            export PATH="$HOME/yandex-cloud/bin:$PATH"
+            yc managed-kubernetes cluster get-credentials kafka-system-cluster --external --force
+            kubectl cluster-info
 
-       - name: Get Kubeconfig for cluster
-         run: |
-           export PATH="$HOME/yandex-cloud/bin:$PATH"
-           yc managed-kubernetes cluster get-credentials kafka-system-cluster --external --force
-           kubectl cluster-info
-
-       - name: Deploy to Kubernetes
-         run: |
-           kubectl apply -f k8s/namespace.yaml
-           kubectl wait --for=jsonpath='{.status.phase}'=Active namespace/kafka-system --timeout=30s
-           kubectl apply -f k8s/
-           kubectl rollout status deployment/backend -n kafka-system --timeout=90s
-           kubectl rollout status deployment/frontend -n kafka-system --timeout=90s
+        - name: Deploy to Kubernetes
+          run: |
+            kubectl apply -f k8s/namespace.yaml
+            kubectl wait --for=jsonpath='{.status.phase}'=Active namespace/kafka-system --timeout=30s
+            kubectl apply -f k8s/
+            kubectl rollout status deployment/backend -n kafka-system --timeout=90s
+            kubectl rollout status deployment/frontend -n kafka-system --timeout=90s
