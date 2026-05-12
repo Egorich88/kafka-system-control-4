@@ -33,7 +33,12 @@ terraform/terraform.tfstate*
 terraform/terraform.tfvars
 terraform/*.tfvars
 terraform/.terraform.lock.hcl
-terraform/kubectl
+
+kubectl
+
+#https
+tls.key
+tls.crt
 
 # key
 key.json
