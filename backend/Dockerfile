@@ -8,8 +8,8 @@ RUN go build -o kafka-backend main.go
 FROM alpine:latest
 RUN apk add --no-cache bash openjdk21
 
-# Скачиваем и распаковываем Kafka (например, версию 3.5.0)
-ADD https://archive.apache.org/dist/kafka/3.5.0/kafka_2.13-3.5.0.tgz /tmp/kafka.tgz
+# Копируем и распаковываем Kafka (например, версию 3.5.0)
+COPY kafka_2.13-3.5.0.tgz /tmp/kafka.tgz
 RUN tar -xzf /tmp/kafka.tgz -C /opt && \
     mv /opt/kafka_2.13-3.5.0 /opt/kafka && \
     rm /tmp/kafka.tgz
