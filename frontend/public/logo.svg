@@ -1,4 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="45" fill="#1e1e2f" stroke="#3b82f6" stroke-width="4"/>
-    <text x="50" y="68" font-size="50" text-anchor="middle" fill="#ffffff" font-family="Arial">K</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <style>
+      .stroke-bold { stroke: white; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <!-- Верхний центральный узел: толстое кольцо с заполненным центром -->
+  <!-- Внешнее кольцо: радиус 12, толщина 6 (центр 50,20) -->
+  <circle cx="50" cy="25" r="13" fill="none" stroke="white" stroke-width="3"/>
+  <!-- Внутренний заполненный круг: радиус 9 -->
+  <circle cx="50" cy="25" r="7" fill="white"/>
+
+  <!-- Вертикальная линия от нижней части большого узла до центральной точки (50,32) -> (50,50) -->
+  <line x1="50" y1="39" x2="50" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Горизонтальная линия через центр, от левого до правого конца, с закруглёнными концами -->
+  <!-- Левая точка на x=20, правая на x=80, центр x=50, y=50 -->
+  <line x1="26" y1="50" x2="74" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Три нижних узла: кольца с пустым центром, толщина 5, внешний радиус 7 -->
+  <!-- Левый узел: центр (26, 68) -->
+  <circle cx="26" cy="68" r="7" fill="none" stroke="white" stroke-width="4"/>
+  <!-- Центральный узел: центр (50, 68) -->
+  <circle cx="50" cy="68" r="7" fill="none" stroke="white" stroke-width="4"/>
+  <!-- Правый узел: центр (74, 68) -->
+  <circle cx="74" cy="68" r="7" fill="none" stroke="white" stroke-width="4"/>
+
+  <!-- Короткие вертикальные соединительные линии под каждым узлом -->
+  <!-- Левый: от y=75 до y=80 -->
+   <line x1="26" y1="50" x2="26" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <!-- Центральный: от y=75 до y=80 -->
+  <line x1="50" y1="50" x2="50" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <!-- Правый: от y=75 до y=80 -->
+   <line x1="74" y1="50" x2="74" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Вертикальные статусные точки (маленькие кружки) -->
+  <!-- Левый: 2 точки ниже (26, 86) и (26, 92) -->
+  <circle cx="26" cy="81" r="2" fill="white"/>
+  <circle cx="26" cy="88" r="2" fill="white"/>
+  <!-- Центральный: 3 точки ниже (50, 83), (50, 88), (50, 93) -->
+  <circle cx="50" cy="81" r="2" fill="white"/>
+  <circle cx="50" cy="88" r="2" fill="white"/>
+  <circle cx="50" cy="95" r="2" fill="white"/>
+  <!-- Правый: 2 точки ниже (74, 86) и (74, 92) -->
+  <circle cx="74" cy="81" r="2" fill="white"/>
+  <circle cx="74" cy="88" r="2" fill="white"/>
 </svg>
