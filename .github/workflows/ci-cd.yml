@@ -23,9 +23,15 @@ on:
       - 'README.md'
       - 'docs/**'
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to Kubernetes?'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
-  contents: write   # необходимо для создания релизов через GITHUB_TOKEN
+  contents: write
 
 env:
   DOCKER_REGISTRY: docker.io
@@ -132,7 +138,8 @@ jobs:
   deploy-to-kubernetes:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    # Деплой запускается ТОЛЬКО при ручном запуске с флагом deploy=true
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy == true
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
