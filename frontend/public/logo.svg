@@ -1,37 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
   <!-- Верхний центральный узел -->
-  <circle cx="100" cy="50" r="26" fill="none" stroke="white" stroke-width="6"/>
-  <circle cx="100" cy="50" r="16" fill="white"/>
+  <circle cx="200" cy="100" r="52" fill="none" stroke="white" stroke-width="12"/>
+  <circle cx="200" cy="100" r="32" fill="white"/>
 
   <!-- Вертикальная линия вниз -->
-  <line x1="100" y1="78" x2="100" y2="100" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="200" y1="156" x2="200" y2="200" stroke="white" stroke-width="12" stroke-linecap="round"/>
 
   <!-- Горизонтальная линия -->
-  <line x1="52" y1="100" x2="148" y2="100" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="104" y1="200" x2="296" y2="200" stroke="white" stroke-width="12" stroke-linecap="round"/>
 
   <!-- Вертикальные линии от горизонтали к нижним узлам -->
-  <line x1="52" y1="100" x2="52" y2="120" stroke="white" stroke-width="6" stroke-linecap="round"/>
-  <line x1="100" y1="100" x2="100" y2="120" stroke="white" stroke-width="6" stroke-linecap="round"/>
-  <line x1="148" y1="100" x2="148" y2="120" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <line x1="104" y1="200" x2="104" y2="240" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <line x1="200" y1="200" x2="200" y2="240" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <line x1="296" y1="200" x2="296" y2="240" stroke="white" stroke-width="12" stroke-linecap="round"/>
 
   <!-- Три нижних узла (кольца) -->
-  <circle cx="52" cy="136" r="14" fill="none" stroke="white" stroke-width="5"/>
-  <circle cx="100" cy="136" r="14" fill="none" stroke="white" stroke-width="5"/>
-  <circle cx="148" cy="136" r="14" fill="none" stroke="white" stroke-width="5"/>
+  <circle cx="104" cy="272" r="28" fill="none" stroke="white" stroke-width="10"/>
+  <circle cx="200" cy="272" r="28" fill="none" stroke="white" stroke-width="10"/>
+  <circle cx="296" cy="272" r="28" fill="none" stroke="white" stroke-width="10"/>
 
   <!-- Короткие линии под узлами к точкам -->
-  <line x1="52" y1="150" x2="52" y2="158" stroke="white" stroke-width="5" stroke-linecap="round"/>
-  <line x1="100" y1="150" x2="100" y2="158" stroke="white" stroke-width="5" stroke-linecap="round"/>
-  <line x1="148" y1="150" x2="148" y2="158" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <line x1="104" y1="300" x2="104" y2="316" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <line x1="200" y1="300" x2="200" y2="316" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <line x1="296" y1="300" x2="296" y2="316" stroke="white" stroke-width="10" stroke-linecap="round"/>
 
   <!-- Статусные точки -->
-  <circle cx="52" cy="168" r="4" fill="white"/>
-  <circle cx="52" cy="180" r="4" fill="white"/>
+  <circle cx="104" cy="336" r="8" fill="white"/>
+  <circle cx="104" cy="360" r="8" fill="white"/>
 
-  <circle cx="100" cy="164" r="4" fill="white"/>
-  <circle cx="100" cy="174" r="4" fill="white"/>
-  <circle cx="100" cy="184" r="4" fill="white"/>
+  <circle cx="200" cy="328" r="8" fill="white"/>
+  <circle cx="200" cy="348" r="8" fill="white"/>
+  <circle cx="200" cy="368" r="8" fill="white"/>
 
-  <circle cx="148" cy="168" r="4" fill="white"/>
-  <circle cx="148" cy="180" r="4" fill="white"/>
+  <circle cx="296" cy="336" r="8" fill="white"/>
+  <circle cx="296" cy="360" r="8" fill="white"/>
 </svg>
