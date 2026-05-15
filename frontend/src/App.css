@@ -173,4 +173,19 @@ li {
   padding: 6px 10px;
   font-size: 0.9rem;
   cursor: pointer;
+} display: block;
+  font-size: 0.8rem;
+  color: #a0a0b0;
+  margin-bottom: 4px;
+}
+
+.cluster-selector select {
+  width: 100%;
+  background: #2a2a3b;
+  color: white;
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
