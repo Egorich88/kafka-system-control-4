@@ -15,10 +15,59 @@
  */
 import { NavLink, Outlet } from 'react-router-dom';
 import { useCluster } from '../contexts/ClusterContext';
+import { useState } from 'react';
+import ClusterConfigPanel from './ClusterConfigPanel';
 import packageJson from '../../package.json';
 
 const Layout = () => {
-  const { clusters, currentCluster, changeCluster } = useCluster();
+  const {
+    clusters,
+    currentCluster,
+    changeCluster,
+    addCluster,
+    updateCluster,
+    removeCluster
+  } = useCluster();
+
+  const [showPanel, setShowPanel] = useState(false);
+  const [editingCluster, setEditingCluster] = useState(null);
+
+  const handleAdd = () => {
+    setEditingCluster(null);
+    setShowPanel(true);
+  };
+
+  const handleEdit = () => {
+    if (!currentCluster) return;
+    setEditingCluster(currentCluster);
+    setShowPanel(true);
+  };
+
+  const handleSave = (clusterConfig) => {
+    if (editingCluster) {
+      // Редактирование
+      updateCluster({ ...clusterConfig, id: editingCluster.id });
+    } else {
+      // Добавление
+      addCluster(clusterConfig);
+    }
+    setShowPanel(false);
+    setEditingCluster(null);
+  };
+
+  const handleCancel = () => {
+    setShowPanel(false);
+    setEditingCluster(null);
+  };
+
+  const handleDelete = () => {
+    if (!currentCluster) return;
+    const confirmDelete = window.confirm(`Удалить кластер "${currentCluster.name}"?`);
+    if (confirmDelete) {
+      removeCluster(currentCluster.id);
+    }
+  };
+
   const version = packageJson.version;
   const author = "Егор Хоменко";
   const githubUrl = "https://github.com/Egorich88";
@@ -30,23 +79,35 @@ const Layout = () => {
           <img src="/logo.svg" alt="Kafka Control" width="72" height="72" style={{ marginRight: 8 }} />
           <h3>Kafka System Control</h3>
         </div>
-        {/* Выбор кластера */}
-        {clusters.length > 0 && currentCluster && (
-          <div className="cluster-selector">
-            <label>Кластер:</label>
-            <select
-              value={currentCluster.id}
-              onChange={(e) => {
-                const selected = clusters.find(c => c.id === e.target.value);
-                if (selected) changeCluster(selected);
-              }}
-            >
-              {clusters.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+
+        {/* Блок кластера */}
+        <div className="cluster-section">
+          <div className="cluster-header">
+            <span>Кластер</span>
+            <button onClick={handleAdd} className="add-cluster-btn" title="Добавить кластер">+</button>
           </div>
-        )}
+          {clusters.length > 0 && currentCluster ? (
+            <div className="cluster-select-row">
+              <select
+                className="cluster-select"
+                value={currentCluster.id}
+                onChange={(e) => {
+                  const selected = clusters.find(c => c.id === e.target.value);
+                  if (selected) changeCluster(selected);
+                }}
+              >
+                {clusters.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <button onClick={handleEdit} className="edit-cluster-btn" title="Редактировать">⚙️</button>
+              <button onClick={handleDelete} className="delete-cluster-btn" title="Удалить">❌</button>
+            </div>
+          ) : (
+            <div className="no-cluster">Нет кластеров. Нажмите +</div>
+          )}
+        </div>
+
         <nav>
           <NavLink to="/topics" className={({ isActive }) => (isActive ? 'active' : '')}>
             Топики
@@ -61,6 +122,7 @@ const Layout = () => {
             Поиск сообщений
           </NavLink>
         </nav>
+
         <div className="sidebar-footer">
           <div className="version">Версия: {version}</div>
           <div className="author">
@@ -70,9 +132,22 @@ const Layout = () => {
           </div>
         </div>
       </aside>
+
       <main className="main-content">
         <Outlet />
       </main>
+
+      {showPanel && (
+        <div className="config-overlay">
+          <div className="config-panel">
+            <ClusterConfigPanel
+              cluster={editingCluster}
+              onSave={handleSave}
+              onCancel={handleCancel}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

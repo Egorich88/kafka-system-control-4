@@ -13,42 +13,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const ClusterContext = createContext();
 
-export const useCluster = () => useContext(ClusterContext);
-
-export const ClusterProvider = ({ children }) => {
+export function ClusterProvider({ children }) {
   const [clusters, setClusters] = useState([]);
   const [currentCluster, setCurrentCluster] = useState(null);
 
   useEffect(() => {
-    // Загружаем список кластеров при монтировании
-    axios.get('/api/clusters')
-      .then(res => {
-        setClusters(res.data);
-        // Восстанавливаем выбранный кластер из localStorage или берём первый
-        const savedId = localStorage.getItem('current-cluster-id');
-        let cluster = res.data.find(c => c.id === savedId);
-        if (!cluster && res.data.length > 0) cluster = res.data[0];
-        if (cluster) setCurrentCluster(cluster);
-      })
-      .catch(err => console.error('Failed to load clusters:', err));
+    const stored = localStorage.getItem('kafka_clusters');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setClusters(parsed);
+        if (parsed.length > 0) setCurrentCluster(parsed[0]);
+      } catch (e) {}
+    }
   }, []);
+
+  const addCluster = (cluster) => {
+    const newCluster = { ...cluster, id: Date.now().toString() };
+    const newClusters = [...clusters, newCluster];
+    setClusters(newClusters);
+    localStorage.setItem('kafka_clusters', JSON.stringify(newClusters));
+    setCurrentCluster(newCluster);
+  };
+
+  const updateCluster = (updatedCluster) => {
+    const newClusters = clusters.map(c => c.id === updatedCluster.id ? updatedCluster : c);
+    setClusters(newClusters);
+    localStorage.setItem('kafka_clusters', JSON.stringify(newClusters));
+    if (currentCluster?.id === updatedCluster.id) setCurrentCluster(updatedCluster);
+  };
+
+  const removeCluster = (clusterId) => {
+    const newClusters = clusters.filter(c => c.id !== clusterId);
+    setClusters(newClusters);
+    localStorage.setItem('kafka_clusters', JSON.stringify(newClusters));
+    if (currentCluster?.id === clusterId) {
+      setCurrentCluster(newClusters[0] || null);
+    }
+  };
 
   const changeCluster = (cluster) => {
     setCurrentCluster(cluster);
-    localStorage.setItem('current-cluster-id', cluster.id);
-    // Можно также обновить глобальный baseURL для axios (если бэкенд один, но нужно передавать кластер)
-    // Либо добавить перехватчик, который вставляет заголовок X-Kafka-Cluster
-    axios.defaults.headers.common['X-Kafka-Cluster'] = cluster.id;
   };
 
   return (
-    <ClusterContext.Provider value={{ clusters, currentCluster, changeCluster }}>
+    <ClusterContext.Provider value={{ clusters, currentCluster, addCluster, updateCluster, removeCluster, changeCluster }}>
       {children}
     </ClusterContext.Provider>
   );
-};
+}
+
+export const useCluster = () => useContext(ClusterContext);
