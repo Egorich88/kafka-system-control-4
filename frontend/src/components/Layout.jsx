@@ -27,7 +27,7 @@ const Layout = () => {
     <div className="app-layout sidebar-dark">
       <aside className="sidebar">
         <div className="logo">
-          <img src="/logo.svg" alt="Kafka Control" width="32" height="32" style={{ marginRight: 8 }} />
+          <img src="/logo.svg" alt="Kafka Control" width="72" height="72" style={{ marginRight: 8 }} />
           <h3>Kafka System Control</h3>
         </div>
         {/* Выбор кластера */}
