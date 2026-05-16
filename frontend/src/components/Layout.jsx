@@ -44,7 +44,6 @@ const Layout = () => {
   };
 
   const handleSave = (clusterConfig) => {
-    // Если редактируемый кластер был удалён — просто закрываем панель
     if (editingCluster && !clusters.find(c => c.id === editingCluster.id)) {
       setShowPanel(false);
       setEditingCluster(null);
@@ -92,7 +91,7 @@ const Layout = () => {
             <span>Кластер</span>
             <button onClick={handleAdd} className="add-cluster-btn" title="Добавить кластер">Add</button>
           </div>
-          {clusters.length > 0 && currentCluster ? (
+          {clusters.length > 0 && currentCluster && (
             <div className="cluster-select-row">
               <select
                 className="cluster-select"
@@ -109,14 +108,15 @@ const Layout = () => {
               <button onClick={handleEdit} className="edit-cluster-btn" title="Редактировать">Edit</button>
               <button onClick={handleDelete} className="delete-cluster-btn" title="Удалить">Delete</button>
             </div>
-          ) : (
-            <div className="no-cluster" style={{ display: 'none' }}></div>
           )}
         </div>
 
         {/* Навигация — показываем только если есть выбранный кластер */}
         {clusters.length > 0 && currentCluster ? (
           <nav>
+            <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
+              Обзор
+            </NavLink>
             <NavLink to="/topics" className={({ isActive }) => (isActive ? 'active' : '')}>
               Топики
             </NavLink>

@@ -291,3 +291,40 @@ li {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
+/* Dashboard страница */
+.dashboard-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.dashboard-container h1 {
+  margin-bottom: 24px;
+  font-size: 1.8rem;
+}
+.welcome-message, .cluster-info {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+.welcome-message h2, .cluster-info h2 {
+  margin-bottom: 16px;
+}
+.info-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  border: 1px solid #e5e7eb;
+}
+.stats-placeholder {
+  margin-top: 24px;
+  padding: 16px;
+  background: #fef9e3;
+  border-radius: 8px;
+  color: #9a6e0f;
+}
+.hint {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
