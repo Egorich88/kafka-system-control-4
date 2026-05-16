@@ -1,18 +1,3 @@
-/*
- * Copyright 2026 Egor Khomenko (Egorich88)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package main
 
 import (
@@ -20,8 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
+	"strconv"
 	"strings"
+
+	"github.com/IBM/sarama"
 )
 
 type TopicsResponse struct {
@@ -41,43 +28,10 @@ type CreateTopicResponse struct {
 	Error   string `json:"error,omitempty"`
 }
 
-type ClusterInfo struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Bootstrap string `json:"bootstrap"`
-}
-
-// Карта соответствия ID кластера -> bootstrap сервер
-var clusterBootstrapMap = map[string]string{
-	"local": "localhost:9092",
-	"dev":   "dev-kafka.example.com:9092",
-	"prod":  "prod-kafka.example.com:9092",
-}
-
-// Список доступных кластеров
-func getAvailableClusters() []ClusterInfo {
-	return []ClusterInfo{
-		{ID: "local", Name: "Локальный (WSL)", Bootstrap: clusterBootstrapMap["local"]},
-		{ID: "dev", Name: "DEV", Bootstrap: clusterBootstrapMap["dev"]},
-		{ID: "prod", Name: "PROD", Bootstrap: clusterBootstrapMap["prod"]},
-	}
-}
-
-// Возвращает bootstrap для кластера (или fallback)
-func getBootstrapForCluster(clusterID string) string {
-	if bs, ok := clusterBootstrapMap[clusterID]; ok {
-		return bs
-	}
-	if env := os.Getenv("KAFKA_BOOTSTRAP_SERVERS"); env != "" {
-		return env
-	}
-	return "localhost:9092"
-}
-
-// Чтение заголовка X-Kafka-Cluster
+// Получаем bootstrap-адрес из заголовка X-Kafka-Bootstrap, переменной окружения или по умолчанию
 func getBootstrapFromRequest(r *http.Request) string {
-	if clusterID := r.Header.Get("X-Kafka-Cluster"); clusterID != "" {
-		return getBootstrapForCluster(clusterID)
+	if bootstrap := r.Header.Get("X-Kafka-Bootstrap"); bootstrap != "" {
+		return bootstrap
 	}
 	if env := os.Getenv("KAFKA_BOOTSTRAP_SERVERS"); env != "" {
 		return env
@@ -85,46 +39,46 @@ func getBootstrapFromRequest(r *http.Request) string {
 	return "localhost:9092"
 }
 
-// Старый метод для обратной совместимости
-func getBootstrapServer() string {
-	if env := os.Getenv("KAFKA_BOOTSTRAP_SERVERS"); env != "" {
-		return env
+func createAdminClient(bootstrap string) (sarama.ClusterAdmin, error) {
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_6_0_0
+	client, err := sarama.NewClient([]string{bootstrap}, config)
+	if err != nil {
+		return nil, err
 	}
-	return "localhost:9092"
-}
-
-func getClustersHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(getAvailableClusters())
+	admin, err := sarama.NewClusterAdminFromClient(client)
+	if err != nil {
+		client.Close()
+		return nil, err
+	}
+	return admin, nil
 }
 
 func getTopicsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
-	bootstrapServer := getBootstrapFromRequest(r)
+	bootstrap := getBootstrapFromRequest(r)
+	admin, err := createAdminClient(bootstrap)
+	if err != nil {
+		log.Printf("AdminClient error: %v", err)
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer admin.Close()
 
-	cmdPath, err := exec.LookPath("kafka-topics.sh")
+	topics, err := admin.ListTopics()
 	if err != nil {
-		sendJSONError(w, "kafka-topics.sh not found", http.StatusInternalServerError)
+		log.Printf("ListTopics error: %v", err)
+		sendJSONError(w, "Failed to list topics: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	cmd := exec.Command(cmdPath, "--bootstrap-server", bootstrapServer, "--list")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Printf("Ошибка: %v, вывод: %s", err, output)
-		sendJSONError(w, string(output), http.StatusInternalServerError)
-		return
+
+	names := make([]string, 0, len(topics))
+	for name := range topics {
+		names = append(names, name)
 	}
-	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-	topics := make([]string, 0)
-	for _, line := range lines {
-		if line != "" {
-			topics = append(topics, line)
-		}
-	}
-	json.NewEncoder(w).Encode(TopicsResponse{Topics: topics})
+	json.NewEncoder(w).Encode(TopicsResponse{Topics: names})
 }
 
 func createTopicHandler(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +86,7 @@ func createTopicHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Kafka-Cluster")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Kafka-Bootstrap")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -145,36 +99,53 @@ func createTopicHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONError(w, "Topic name required", http.StatusBadRequest)
 		return
 	}
-	partitions := req.Partitions
-	if partitions == "" {
-		partitions = "1"
-	}
-	replication := req.Replication
-	if replication == "" {
-		replication = "1"
-	}
-	bootstrapServer := getBootstrapFromRequest(r)
-	cmdPath, _ := exec.LookPath("kafka-topics.sh")
-	args := []string{
-		"--bootstrap-server", bootstrapServer,
-		"--create",
-		"--topic", req.Topic,
-		"--partitions", partitions,
-		"--replication-factor", replication,
-	}
-	if req.Configs != "" {
-		for _, cfg := range strings.Split(req.Configs, ",") {
-			cfg = strings.TrimSpace(cfg)
-			if cfg != "" {
-				args = append(args, "--config", cfg)
-			}
+	partitions := int32(1)
+	if req.Partitions != "" {
+		if p, err := strconv.Atoi(req.Partitions); err == nil && p > 0 {
+			partitions = int32(p)
 		}
 	}
-	cmd := exec.Command(cmdPath, args...)
-	output, err := cmd.CombinedOutput()
+	replication := int16(1)
+	if req.Replication != "" {
+		if rf, err := strconv.Atoi(req.Replication); err == nil && rf > 0 {
+			replication = int16(rf)
+		}
+	}
+	bootstrap := getBootstrapFromRequest(r)
+	admin, err := createAdminClient(bootstrap)
 	if err != nil {
-		log.Printf("Ошибка создания топика: %v, вывод: %s", err, output)
-		sendJSONError(w, string(output), http.StatusInternalServerError)
+		log.Printf("AdminClient error: %v", err)
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer admin.Close()
+
+	topicDetail := &sarama.TopicDetail{
+		NumPartitions:     partitions,
+		ReplicationFactor: replication,
+	}
+	if req.Configs != "" {
+		configMap := make(map[string]*string)
+		for _, cfg := range strings.Split(req.Configs, ",") {
+			cfg = strings.TrimSpace(cfg)
+			if cfg == "" {
+				continue
+			}
+			parts := strings.SplitN(cfg, "=", 2)
+			if len(parts) == 2 {
+				val := parts[1]
+				configMap[parts[0]] = &val
+			} else {
+				empty := ""
+				configMap[cfg] = &empty
+			}
+		}
+		topicDetail.ConfigEntries = configMap
+	}
+
+	if err := admin.CreateTopic(req.Topic, topicDetail, false); err != nil {
+		log.Printf("CreateTopic error: %v", err)
+		sendJSONError(w, "Failed to create topic: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(CreateTopicResponse{Success: true})
@@ -186,7 +157,6 @@ func sendJSONError(w http.ResponseWriter, msg string, status int) {
 }
 
 func main() {
-	http.HandleFunc("/api/clusters", getClustersHandler)
 	http.HandleFunc("/api/topics", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -198,6 +168,6 @@ func main() {
 		}
 	})
 	port := ":8080"
-	log.Printf("Server running on port %s", port)
+	log.Printf("Server running on %s", port)
 	log.Fatal(http.ListenAndServe(port, nil))
 }

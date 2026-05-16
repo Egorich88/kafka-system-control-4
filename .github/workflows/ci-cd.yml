@@ -37,8 +37,6 @@ env:
   DOCKER_REGISTRY: docker.io
   DOCKER_IMAGE_BACKEND: egorich27/kafka-control-backend
   DOCKER_IMAGE_FRONTEND: egorich27/kafka-control-frontend
-  KAFKA_VERSION: 3.5.0
-  KAFKA_SCALA_VERSION: 2.13
 
 jobs:
   build-and-push:
@@ -49,20 +47,6 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-
-      # ---- КЭШИРОВАНИЕ АРХИВА KAFKA ДЛЯ BACKEND ----
-      - name: Cache Kafka archive for backend
-        id: cache-kafka-backend
-        uses: actions/cache@v3
-        with:
-          path: backend/kafka_${{ env.KAFKA_SCALA_VERSION }}-${{ env.KAFKA_VERSION }}.tgz
-          key: kafka-${{ env.KAFKA_VERSION }}-backend
-
-      - name: Download Kafka archive if not cached (backend)
-        if: steps.cache-kafka-backend.outputs.cache-hit != 'true'
-        run: |
-          wget -O backend/kafka_${{ env.KAFKA_SCALA_VERSION }}-${{ env.KAFKA_VERSION }}.tgz \
-            https://archive.apache.org/dist/kafka/${{ env.KAFKA_VERSION }}/kafka_${{ env.KAFKA_SCALA_VERSION }}-${{ env.KAFKA_VERSION }}.tgz
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
