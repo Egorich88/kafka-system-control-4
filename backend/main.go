@@ -1,3 +1,18 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package main
 
 import (
@@ -7,6 +22,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/IBM/sarama"
 )
@@ -26,6 +42,17 @@ type CreateTopicRequest struct {
 type CreateTopicResponse struct {
 	Success bool   `json:"success"`
 	Error   string `json:"error,omitempty"`
+}
+
+type MessagesResponse struct {
+	Messages []Message `json:"messages"`
+}
+
+type Message struct {
+	Offset    int64  `json:"offset"`
+	Key       string `json:"key"`
+	Value     string `json:"value"`
+	Timestamp string `json:"timestamp"`
 }
 
 // Получаем bootstrap-адрес из заголовка X-Kafka-Bootstrap, переменной окружения или по умолчанию
@@ -151,6 +178,85 @@ func createTopicHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(CreateTopicResponse{Success: true})
 }
 
+func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Извлекаем topic из пути /api/topics/{topic}/messages
+	pathParts := strings.Split(r.URL.Path, "/")
+	if len(pathParts) < 4 {
+		sendJSONError(w, "Invalid topic path", http.StatusBadRequest)
+		return
+	}
+	topic := pathParts[3]
+	if topic == "" {
+		sendJSONError(w, "Topic name required", http.StatusBadRequest)
+		return
+	}
+
+	// Парсим query параметры
+	partitionStr := r.URL.Query().Get("partition")
+	offsetStr := r.URL.Query().Get("offset")
+	limitStr := r.URL.Query().Get("limit")
+
+	partition := int32(0)
+	if partitionStr != "" {
+		if p, err := strconv.Atoi(partitionStr); err == nil && p >= 0 {
+			partition = int32(p)
+		}
+	}
+	offset := int64(0)
+	if offsetStr != "" {
+		if o, err := strconv.ParseInt(offsetStr, 10, 64); err == nil && o >= 0 {
+			offset = o
+		}
+	}
+	limit := int32(10)
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 1000 {
+			limit = int32(l)
+		}
+	}
+
+	bootstrap := getBootstrapFromRequest(r)
+
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_6_0_0
+	config.Consumer.Return.Errors = true
+	consumer, err := sarama.NewConsumer([]string{bootstrap}, config)
+	if err != nil {
+		log.Printf("Consumer error: %v", err)
+		sendJSONError(w, "Failed to create consumer: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer consumer.Close()
+
+	pc, err := consumer.ConsumePartition(topic, partition, offset)
+	if err != nil {
+		log.Printf("ConsumePartition error: %v", err)
+		sendJSONError(w, "Failed to consume partition: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer pc.Close()
+
+	messages := make([]Message, 0, limit)
+	for i := int32(0); i < limit; i++ {
+		select {
+		case msg := <-pc.Messages():
+			messages = append(messages, Message{
+				Offset:    msg.Offset,
+				Key:       string(msg.Key),
+				Value:     string(msg.Value),
+				Timestamp: msg.Timestamp.Format(time.RFC3339),
+			})
+		case err := <-pc.Errors():
+			log.Printf("Consumer error: %v", err)
+		}
+	}
+
+	json.NewEncoder(w).Encode(MessagesResponse{Messages: messages})
+}
+
 func sendJSONError(w http.ResponseWriter, msg string, status int) {
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": msg})
@@ -167,6 +273,16 @@ func main() {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
 	})
+
+	// Маршрут для получения сообщений /api/topics/{topic}/messages
+	http.HandleFunc("/api/topics/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/messages") {
+			getMessagesHandler(w, r)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	})
+
 	port := ":8080"
 	log.Printf("Server running on %s", port)
 	log.Fatal(http.ListenAndServe(port, nil))

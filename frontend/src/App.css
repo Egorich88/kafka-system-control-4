@@ -328,3 +328,57 @@ li {
   font-size: 0.85rem;
   color: #6c757d;
 }
+
+.topics-page {
+  display: flex;
+  height: 100%;
+  gap: 24px;
+}
+.topics-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid #e5e7eb;
+  padding-right: 16px;
+}
+.topics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.topics-details {
+  flex: 1;
+}
+.placeholder {
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.search-container .form-row {
+  margin-bottom: 12px;
+}
+.search-container label {
+  display: inline-block;
+  width: 180px;
+  font-weight: 500;
+}
+.search-container input,
+.search-container select {
+  width: 300px;
+  display: inline-block;
+  margin: 0;
+}
+.messages-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+.message-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  font-family: monospace;
+  font-size: 0.85rem;
+}

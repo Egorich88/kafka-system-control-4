@@ -1,129 +1,80 @@
-/*
- * Copyright 2026 Egor Khomenko (Egorich88)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Topics.jsx (новая версия)
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useCluster } from '../contexts/ClusterContext';
+import { useKafkaFetch } from '../hooks/useKafkaFetch'; // создадим
+import TopicsList from '../components/TopicsList';
+import TopicDetails from '../components/TopicDetails';
+import CreateTopicModal from '../components/CreateTopicModal';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function Topics() {
+  const { currentCluster } = useCluster();
+  const kafkaFetch = useKafkaFetch();
   const [topics, setTopics] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [newTopic, setNewTopic] = useState({
-    topic: '',
-    partitions: '1',
-    replication: '1',
-    configs: '',
-  });
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const fetchTopics = async () => {
+  const loadTopics = async () => {
+    if (!currentCluster) return;
     setLoading(true);
     try {
-      const response = await axios.get('/api/topics');
-      setTopics(response.data.topics || []);
-    } catch (error) {
-      console.error(error);
-      toast.error('Ошибка загрузки топиков');
+      const data = await kafkaFetch('/api/topics');
+      setTopics(data.topics || []);
+    } catch (err) {
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTopics();
-  }, []);
+    loadTopics();
+  }, [currentCluster]);
 
-  const handleCreateTopic = async (e) => {
-    e.preventDefault();
-    if (!newTopic.topic.trim()) {
-      toast.error('Введите имя топика');
-      return;
-    }
-
-    try {
-      const response = await axios.post('/api/topics', newTopic);
-      if (response.data.success) {
-        toast.success(`Топик "${newTopic.topic}" создан!`);
-        setNewTopic({ topic: '', partitions: '1', replication: '1', configs: '' });
-        fetchTopics();
-      } else {
-        toast.error(response.data.error || 'Ошибка создания топика');
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('Ошибка соединения с сервером');
-    }
+  const handleTopicCreated = () => {
+    loadTopics();
+    setShowCreateModal(false);
   };
 
-  const handleChange = (e) => {
-    setNewTopic({ ...newTopic, [e.target.name]: e.target.value });
+  const handleTopicDeleted = (topicName) => {
+    if (selectedTopic === topicName) setSelectedTopic(null);
+    loadTopics();
   };
 
   return (
-    <div>
+    <div className="topics-page">
       <Toaster position="top-right" />
-      <h1>Управление топиками</h1>
-      <div className="card">
-        <h2>Создать топик</h2>
-        <form onSubmit={handleCreateTopic}>
-          <input
-            type="text"
-            name="topic"
-            placeholder="Имя топика *"
-            value={newTopic.topic}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="partitions"
-            placeholder="Партиции (по умолч. 1)"
-            value={newTopic.partitions}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="replication"
-            placeholder="Репликация (по умолч. 1)"
-            value={newTopic.replication}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="configs"
-            placeholder="Конфиги (key=value, через запятую)"
-            value={newTopic.configs}
-            onChange={handleChange}
-          />
-          <button type="submit">Создать</button>
-        </form>
+      <div className="topics-sidebar">
+        <div className="topics-header">
+          <h2>Топики</h2>
+          <button onClick={() => setShowCreateModal(true)} className="create-topic-btn">+ Создать</button>
+        </div>
+        <TopicsList
+          topics={topics}
+          selectedTopic={selectedTopic}
+          onSelectTopic={setSelectedTopic}
+          loading={loading}
+        />
       </div>
-      <div className="card">
-        <h2>Список топиков</h2>
-        {loading ? (
-          <p>Загрузка...</p>
-        ) : topics.length === 0 ? (
-          <p>Нет топиков</p>
+      <div className="topics-details">
+        {selectedTopic ? (
+          <TopicDetails
+            topicName={selectedTopic}
+            cluster={currentCluster}
+            onDelete={handleTopicDeleted}
+          />
         ) : (
-          <ul>
-            {topics.map((topic) => (
-              <li key={topic}>{topic}</li>
-            ))}
-          </ul>
+          <div className="placeholder">Выберите топик из списка</div>
         )}
-        <button onClick={fetchTopics} className="secondary">Обновить список</button>
       </div>
+      {showCreateModal && (
+        <CreateTopicModal
+          cluster={currentCluster}
+          onSuccess={handleTopicCreated}
+          onClose={() => setShowCreateModal(false)}
+        />
+      )}
     </div>
   );
 }
