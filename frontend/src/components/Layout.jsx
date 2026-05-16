@@ -65,6 +65,8 @@ const Layout = () => {
     const confirmDelete = window.confirm(`Удалить кластер "${currentCluster.name}"?`);
     if (confirmDelete) {
       removeCluster(currentCluster.id);
+      setShowPanel(false);       // закрываем панель, если открыта
+      setEditingCluster(null);   // сбрасываем редактируемый кластер
     }
   };
 

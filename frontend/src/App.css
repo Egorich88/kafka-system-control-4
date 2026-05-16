@@ -98,6 +98,7 @@ nav a.active {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+/* Общие стили для input и button */
 input, button {
   display: block;
   width: 100%;
@@ -127,6 +128,49 @@ button.secondary {
 
 button.secondary:hover {
   background: #5a6268;
+}
+
+/* Специальные стили для текстовых кнопок (Add, Edit, Delete) — переопределяем глобальные */
+.add-cluster-btn,
+.edit-cluster-btn,
+.delete-cluster-btn {
+  display: inline-block;
+  width: auto;
+  margin: 0;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #9CA3AF;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.edit-cluster-btn,
+.delete-cluster-btn {
+  min-width: 56px;
+}
+
+.add-cluster-btn {
+  padding: 4px 12px;
+  color: #3b82f6;
+}
+
+.add-cluster-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.edit-cluster-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.delete-cluster-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 ul {
@@ -168,24 +212,7 @@ li {
   color: #e0e0e0;
 }
 
-/* Текстовая кнопка добавления */
-.add-cluster-btn {
-  background: none;
-  border: none;
-  padding: 4px 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  color: #3b82f6;
-  transition: all 0.2s;
-}
-
-.add-cluster-btn:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 4px;
-}
-
-/* Строка с селектором и текстовыми кнопками */
+/* Строка с селектором и кнопками */
 .cluster-select-row {
   display: flex;
   gap: 8px;
@@ -201,37 +228,13 @@ li {
   padding: 6px 10px;
 }
 
-/* Текстовые кнопки Edit и Delete */
-.edit-cluster-btn,
-.delete-cluster-btn {
-  background: none;
-  border: none;
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.2s;
-  color: #9CA3AF;
-}
-
-.edit-cluster-btn:hover {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
-
-.delete-cluster-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
 .no-cluster {
   color: #aaa;
   font-size: 12px;
   padding: 4px 0;
 }
 
-/* Панель редактирования (справа) */
+/* Панель конфигурации (выезжающая справа) */
 .config-overlay {
   position: fixed;
   top: 0;
@@ -239,7 +242,7 @@ li {
   width: 450px;
   height: 100vh;
   background: white;
-  box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   overflow: auto;
 }
@@ -262,4 +265,17 @@ li {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+/* Сообщение, когда нет кластера */
+.no-cluster-message {
+  padding: 20px;
+  text-align: center;
+  color: #9CA3AF;
+  font-size: 0.9rem;
+}
+.no-cluster-message .hint {
+  font-size: 0.8rem;
+  margin-top: 8px;
+  color: #6B7280;
 }
