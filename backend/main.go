@@ -240,19 +240,23 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	defer pc.Close()
 
 	messages := make([]Message, 0, limit)
-	for i := int32(0); i < limit; i++ {
-		select {
-		case msg := <-pc.Messages():
-			messages = append(messages, Message{
-				Offset:    msg.Offset,
-				Key:       string(msg.Key),
-				Value:     string(msg.Value),
-				Timestamp: msg.Timestamp.Format(time.RFC3339),
-			})
-		case err := <-pc.Errors():
-			log.Printf("Consumer error: %v", err)
-		}
-	}
+    timeout := time.After(3 * time.Second)
+    for i := int32(0); i < limit; i++ {
+        select {
+        case msg := <-pc.Messages():
+            messages = append(messages, Message{
+                Offset:    msg.Offset,
+                Key:       string(msg.Key),
+                Value:     string(msg.Value),
+                Timestamp: msg.Timestamp.Format(time.RFC3339),
+            })
+        case err := <-pc.Errors():
+            log.Printf("Consumer error: %v", err)
+        case <-timeout:
+            // По таймауту выходим из цикла, не дожидаясь limit сообщений
+            break
+        }
+    }
 
 	json.NewEncoder(w).Encode(MessagesResponse{Messages: messages})
 }

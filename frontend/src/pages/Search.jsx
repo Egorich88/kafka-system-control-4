@@ -48,9 +48,9 @@ export default function Search() {
       }
     };
     loadTopics();
-  }, [currentCluster, kafkaFetch]);
+  }, [currentCluster]);
 
-  // Обновление параметров URL при изменении топика/партиции
+  // Обновление URL при изменении топика/партиции
   useEffect(() => {
     if (selectedTopic) {
       setSearchParams({ topic: selectedTopic, partition });
