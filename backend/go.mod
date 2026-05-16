@@ -1,6 +1,6 @@
 module kafka-system-control-4/backend
 
-go 1.25.0
+go 1.25.3
 
 require github.com/IBM/sarama v1.48.2
 
