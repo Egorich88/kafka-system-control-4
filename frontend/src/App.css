@@ -187,10 +187,20 @@ li {
   font-family: monospace;
 }
 
+/* Футер сайдбара — прижат к низу */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid #2a2a3b;
+  font-size: 0.8rem;
+  color: #9CA3AF;
+}
+
 .sidebar-footer .author a {
   color: inherit;
   text-decoration: none;
 }
+
 .sidebar-footer .author a:hover {
   text-decoration: underline;
 }
@@ -228,10 +238,25 @@ li {
   padding: 6px 10px;
 }
 
+/* Сообщение, когда нет кластера (вместо селектора) */
 .no-cluster {
   color: #aaa;
   font-size: 12px;
   padding: 4px 0;
+}
+
+/* Блок, отображаемый вместо навигации, когда нет активного кластера */
+.no-cluster-message {
+  padding: 20px;
+  text-align: center;
+  color: #9CA3AF;
+  font-size: 0.9rem;
+}
+
+.no-cluster-message .hint {
+  font-size: 0.8rem;
+  margin-top: 8px;
+  color: #6B7280;
 }
 
 /* Панель конфигурации (выезжающая справа) */
@@ -265,17 +290,4 @@ li {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-}
-
-/* Сообщение, когда нет кластера */
-.no-cluster-message {
-  padding: 20px;
-  text-align: center;
-  color: #9CA3AF;
-  font-size: 0.9rem;
-}
-.no-cluster-message .hint {
-  font-size: 0.8rem;
-  margin-top: 8px;
-  color: #6B7280;
 }

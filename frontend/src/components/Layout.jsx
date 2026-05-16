@@ -44,11 +44,15 @@ const Layout = () => {
   };
 
   const handleSave = (clusterConfig) => {
+    // Если редактируемый кластер был удалён — просто закрываем панель
+    if (editingCluster && !clusters.find(c => c.id === editingCluster.id)) {
+      setShowPanel(false);
+      setEditingCluster(null);
+      return;
+    }
     if (editingCluster) {
-      // Редактирование
       updateCluster({ ...clusterConfig, id: editingCluster.id });
     } else {
-      // Добавление
       addCluster(clusterConfig);
     }
     setShowPanel(false);
@@ -65,8 +69,8 @@ const Layout = () => {
     const confirmDelete = window.confirm(`Удалить кластер "${currentCluster.name}"?`);
     if (confirmDelete) {
       removeCluster(currentCluster.id);
-      setShowPanel(false);       // закрываем панель, если открыта
-      setEditingCluster(null);   // сбрасываем редактируемый кластер
+      setShowPanel(false);
+      setEditingCluster(null);
     }
   };
 
@@ -106,24 +110,32 @@ const Layout = () => {
               <button onClick={handleDelete} className="delete-cluster-btn" title="Удалить">Delete</button>
             </div>
           ) : (
-            <div className="no-cluster">Нет кластеров. Нажмите Add</div>
+            <div className="no-cluster" style={{ display: 'none' }}></div>
           )}
         </div>
 
-        <nav>
-          <NavLink to="/topics" className={({ isActive }) => (isActive ? 'active' : '')}>
-            Топики
-          </NavLink>
-          <NavLink to="/groups" className={({ isActive }) => (isActive ? 'active' : '')}>
-            Группы потребителей
-          </NavLink>
-          <NavLink to="/acls" className={({ isActive }) => (isActive ? 'active' : '')}>
-            ACL
-          </NavLink>
-          <NavLink to="/search" className={({ isActive }) => (isActive ? 'active' : '')}>
-            Поиск сообщений
-          </NavLink>
-        </nav>
+        {/* Навигация — показываем только если есть выбранный кластер */}
+        {clusters.length > 0 && currentCluster ? (
+          <nav>
+            <NavLink to="/topics" className={({ isActive }) => (isActive ? 'active' : '')}>
+              Топики
+            </NavLink>
+            <NavLink to="/groups" className={({ isActive }) => (isActive ? 'active' : '')}>
+              Группы потребителей
+            </NavLink>
+            <NavLink to="/acls" className={({ isActive }) => (isActive ? 'active' : '')}>
+              ACL
+            </NavLink>
+            <NavLink to="/search" className={({ isActive }) => (isActive ? 'active' : '')}>
+              Поиск сообщений
+            </NavLink>
+          </nav>
+        ) : (
+          <div className="no-cluster-message">
+            <p>Нет активного кластера</p>
+            <p className="hint">Добавьте кластер через кнопку Add</p>
+          </div>
+        )}
 
         <div className="sidebar-footer">
           <div className="version">Версия: {version}</div>
