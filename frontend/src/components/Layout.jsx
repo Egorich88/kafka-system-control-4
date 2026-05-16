@@ -84,7 +84,7 @@ const Layout = () => {
         <div className="cluster-section">
           <div className="cluster-header">
             <span>Кластер</span>
-            <button onClick={handleAdd} className="add-cluster-btn" title="Добавить кластер">+</button>
+            <button onClick={handleAdd} className="add-cluster-btn" title="Добавить кластер">Add</button>
           </div>
           {clusters.length > 0 && currentCluster ? (
             <div className="cluster-select-row">
@@ -100,11 +100,11 @@ const Layout = () => {
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
-              <button onClick={handleEdit} className="edit-cluster-btn" title="Редактировать">⚙️</button>
-              <button onClick={handleDelete} className="delete-cluster-btn" title="Удалить">❌</button>
+              <button onClick={handleEdit} className="edit-cluster-btn" title="Редактировать">Edit</button>
+              <button onClick={handleDelete} className="delete-cluster-btn" title="Удалить">Delete</button>
             </div>
           ) : (
-            <div className="no-cluster">Нет кластеров. Нажмите +</div>
+            <div className="no-cluster">Нет кластеров. Нажмите Add</div>
           )}
         </div>
 

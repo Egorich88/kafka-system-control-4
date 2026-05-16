@@ -15,7 +15,8 @@
  */
 * {
   margin: 0;
-  padding: 0;  box-sizing: border-box;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
@@ -28,49 +29,6 @@ body {
   min-height: 100vh;
 }
 
-/* Строка выбора кластера с кнопками редактирования/удаления */
-.cluster-select-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.cluster-select {
-  flex: 1;
-}
-
-.edit-cluster-btn,
-.delete-cluster-btn {
-  width: 32px;
-  height: 32px;
-  background: #2a2a3b;
-  border: 1px solid #3b82f6;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  margin: 0; /* убираем глобальные отступы */
-}
-
-.edit-cluster-btn:hover {
-  background: #3b82f6;
-  color: white;
-}
-
-.delete-cluster-btn {
-  border-color: #ef4444;
-  color: #ef4444;
-}
-
-.delete-cluster-btn:hover {
-  background: #ef4444;
-  color: white;
-}
-
 /* Боковое меню (тёмное) */
 .sidebar {
   width: 280px;
@@ -79,7 +37,6 @@ body {
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-  transition: width 0.2s;
 }
 
 .logo {
@@ -95,6 +52,7 @@ body {
   color: #ffffff;
 }
 
+/* Навигация */
 nav {
   flex: 1;
 }
@@ -130,7 +88,7 @@ nav a.active {
   overflow-y: auto;
 }
 
-/* Карточки и формы (из предыдущих стилей) */
+/* Карточки и формы */
 .card {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -193,88 +151,87 @@ li {
   text-decoration: underline;
 }
 
-.cluster-selector {
-  padding: 12px 20px;
-  border-bottom: 1px solid #2a2a3b;
-  margin-bottom: 12px;
-}
-
-.cluster-selector label {
-  display: block;
-  font-size: 0.8rem;
-  color: #a0a0b0;
-  margin-bottom: 4px;
-}
-
-.cluster-selector select {
-  width: 100%;
-  background: #2a2a3b;
-  color: white;
-  border: 1px solid #3b82f6;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
-} display: block;
-  font-size: 0.8rem;
-  color: #a0a0b0;
-  margin-bottom: 4px;
-}
-
-.cluster-selector select {
-  width: 100%;
-  background: #2a2a3b;
-  color: white;
-  border: 1px solid #3b82f6;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
+/* Блок выбора кластера */
 .cluster-section {
   padding: 12px 16px;
   border-bottom: 1px solid #2a2a3b;
   margin-bottom: 16px;
 }
+
 .cluster-header {
   display: flex;
-  justify-content: space-between;  /* текст слева, кнопка справа */
+  justify-content: space-between;
   align-items: center;
   width: 100%;
   margin-bottom: 8px;
   font-weight: bold;
   color: #e0e0e0;
 }
+
+/* Текстовая кнопка добавления */
 .add-cluster-btn {
-  background: #3b82f6;
+  background: none;
   border: none;
-  color: white;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-left: auto; /* дополнительная страховка */
+  color: #3b82f6;
+  transition: all 0.2s;
 }
+
+.add-cluster-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+}
+
+/* Строка с селектором и текстовыми кнопками */
+.cluster-select-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .cluster-select {
-  width: 100%;
+  flex: 1;
   background: #2a2a3b;
   color: white;
   border: 1px solid #3b82f6;
   border-radius: 6px;
   padding: 6px 10px;
 }
+
+/* Текстовые кнопки Edit и Delete */
+.edit-cluster-btn,
+.delete-cluster-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  color: #9CA3AF;
+}
+
+.edit-cluster-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.delete-cluster-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
 .no-cluster {
   color: #aaa;
   font-size: 12px;
   padding: 4px 0;
 }
+
+/* Панель редактирования (справа) */
 .config-overlay {
   position: fixed;
   top: 0;
@@ -286,15 +243,18 @@ li {
   z-index: 1000;
   overflow: auto;
 }
+
 .config-panel {
   padding: 20px;
 }
+
 .config-panel label {
   display: block;
   margin-top: 12px;
   margin-bottom: 4px;
   font-weight: bold;
 }
+
 .config-panel input,
 .config-panel select,
 .config-panel textarea {
