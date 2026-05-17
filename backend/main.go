@@ -218,6 +218,78 @@ func deleteTopicHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusNoContent)
 }
 
+// ---------- Структуры для деталей топика ----------
+type PartitionInfo struct {
+    ID       int32   `json:"id"`
+    Leader   int32   `json:"leader"`
+    Replicas []int32 `json:"replicas"`
+    Isr      []int32 `json:"isr"`
+}
+
+type TopicDetailResponse struct {
+    Name              string          `json:"name"`
+    Partitions        []PartitionInfo `json:"partitions"`
+    ReplicationFactor int16           `json:"replicationFactor"`
+}
+
+func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Content-Type", "application/json")
+
+    // Извлекаем имя топика из пути /api/topics/{topic}
+    topic := strings.TrimPrefix(r.URL.Path, "/api/topics/")
+    topic = strings.TrimSuffix(topic, "/")
+    if topic == "" {
+        sendJSONError(w, "Topic name required", http.StatusBadRequest)
+        return
+    }
+    bootstrap := getBootstrapFromRequest(r)
+
+    admin, err := createAdminClient(bootstrap)
+    if err != nil {
+        sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer admin.Close()
+
+    metadata, err := admin.DescribeTopics([]string{topic})
+    if err != nil {
+        sendJSONError(w, "Failed to describe topic: "+err.Error(), http.StatusInternalServerError)
+        return
+    }
+    if len(metadata) == 0 {
+        sendJSONError(w, "Topic not found", http.StatusNotFound)
+        return
+    }
+    topicMeta := metadata[0]
+    if topicMeta.Err != sarama.ErrNoError {
+        sendJSONError(w, topicMeta.Err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    partitions := make([]PartitionInfo, 0, len(topicMeta.Partitions))
+    for _, p := range topicMeta.Partitions {
+        partitions = append(partitions, PartitionInfo{
+            ID:       p.ID,
+            Leader:   p.Leader,
+            Replicas: p.Replicas,
+            Isr:      p.Isr,
+        })
+    }
+
+    replicationFactor := int16(1)
+    if len(topicMeta.Partitions) > 0 {
+        replicationFactor = int16(len(topicMeta.Partitions[0].Replicas))
+    }
+
+    response := TopicDetailResponse{
+        Name:              topic,
+        Partitions:        partitions,
+        ReplicationFactor: replicationFactor,
+    }
+    json.NewEncoder(w).Encode(response)
+}
+
 func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -302,28 +374,37 @@ func sendJSONError(w http.ResponseWriter, msg string, status int) {
 }
 
 func main() {
-	http.HandleFunc("/api/topics", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			getTopicsHandler(w, r)
-		case http.MethodPost:
-			createTopicHandler(w, r)
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
-		}
-	})
+    http.HandleFunc("/api/topics", func(w http.ResponseWriter, r *http.Request) {
+        switch r.Method {
+        case http.MethodGet:
+            getTopicsHandler(w, r)
+        case http.MethodPost:
+            createTopicHandler(w, r)
+        default:
+            w.WriteHeader(http.StatusMethodNotAllowed)
+        }
+    })
 
-	http.HandleFunc("/api/topics/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodDelete {
-			deleteTopicHandler(w, r)
-		} else if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/messages") {
-			getMessagesHandler(w, r)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-		}
-	})
+    http.HandleFunc("/api/topics/", func(w http.ResponseWriter, r *http.Request) {
+        if r.URL.Path == "/api/topics/" {
+            getTopicsHandler(w, r)
+            return
+        }
+        switch r.Method {
+        case http.MethodDelete:
+            deleteTopicHandler(w, r)
+        case http.MethodGet:
+            if strings.Contains(r.URL.Path, "/messages") {
+                getMessagesHandler(w, r)
+            } else {
+                getTopicDetailHandler(w, r)
+            }
+        default:
+            w.WriteHeader(http.StatusNotFound)
+        }
+    })
 
-	port := ":8080"
-	log.Printf("Server running on %s", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+    port := ":8080"
+    log.Printf("Server running on %s", port)
+    log.Fatal(http.ListenAndServe(port, nil))
 }

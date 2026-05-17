@@ -37,12 +37,21 @@ export default function Topics() {
     if (!currentCluster) return;
     setLoading(true);
     try {
-      const response = await axios.get('/api/topics', {
+      const response = await axios.get('/api/topics/', {
         headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
       });
-      setTopics(response.data.topics || []);
+      console.log('Topics response:', response.data);
+      const topicsData = response.data.topics || [];
+      // Убедимся, что каждый элемент имеет нужные поля
+      const normalized = topicsData.map(t => ({
+        name: t.name || t,
+        partitions: t.partitions || 0,
+        replicationFactor: t.replicationFactor || 1,
+      }));
+      setTopics(normalized);
     } catch (error) {
-      toast.error('Ошибка загрузки топиков');
+      console.error('Fetch topics error:', error);
+      toast.error('Ошибка загрузки топиков: ' + (error.response?.data?.error || error.message));
     } finally {
       setLoading(false);
     }
@@ -68,7 +77,8 @@ export default function Topics() {
       setShowCreateModal(false);
       fetchTopics();
     } catch (error) {
-      toast.error('Ошибка создания топика');
+      console.error('Create topic error:', error);
+      toast.error('Ошибка создания топика: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -77,7 +87,7 @@ export default function Topics() {
       toast.error('Выберите топик для удаления');
       return;
     }
-    const topicName = selectedTopic.name || selectedTopic;
+    const topicName = selectedTopic.name;
     if (!window.confirm(`Удалить топик "${topicName}"?`)) return;
     try {
       await axios.delete(`/api/topics/${encodeURIComponent(topicName)}`, {
@@ -87,7 +97,8 @@ export default function Topics() {
       setSelectedTopic(null);
       fetchTopics();
     } catch (error) {
-      toast.error('Ошибка удаления топика');
+      console.error('Delete topic error:', error);
+      toast.error('Ошибка удаления топика: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -203,7 +214,8 @@ export default function Topics() {
             <h2>Детали топика: {selectedTopic.name}</h2>
             <p><strong>Партиции:</strong> {selectedTopic.partitions}</p>
             <p><strong>Фактор репликации:</strong> {selectedTopic.replicationFactor}</p>
-            <p><em>Редактирование конфигурации будет добавлено позже.</em></p>
+            <p><em>Подробная информация (партиции, лидеры, ISR) будет загружена по клику.</em></p>
+            {/* Здесь позже добавим таблицу партиций */}
             <div className="modal-buttons">
               <button onClick={() => setShowDetailModal(false)}>Закрыть</button>
             </div>
