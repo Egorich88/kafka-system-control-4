@@ -50,15 +50,29 @@ type CreateTopicResponse struct {
 	Error   string `json:"error,omitempty"`
 }
 
-type MessagesResponse struct {
-	Messages []Message `json:"messages"`
-}
-
 type Message struct {
 	Offset    int64  `json:"offset"`
 	Key       string `json:"key"`
 	Value     string `json:"value"`
 	Timestamp string `json:"timestamp"`
+}
+
+type MessagesResponse struct {
+	Messages []Message `json:"messages"`
+}
+
+type PartitionInfo struct {
+	ID       int32   `json:"id"`
+	Leader   int32   `json:"leader"`
+	Replicas []int32 `json:"replicas"`
+	Isr      []int32 `json:"isr"`
+}
+
+type TopicDetailResponse struct {
+	Name              string            `json:"name"`
+	Partitions        []PartitionInfo   `json:"partitions"`
+	ReplicationFactor int16             `json:"replicationFactor"`
+	Configs           map[string]string `json:"configs"`
 }
 
 func getBootstrapFromRequest(r *http.Request) string {
@@ -90,15 +104,15 @@ func getTopicsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer admin.Close()
 
-	topicsMetadata, err := admin.ListTopics()
+	topicsMap, err := admin.ListTopics()
 	if err != nil {
 		log.Printf("ListTopics error: %v", err)
 		sendJSONError(w, "Failed to list topics: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make([]TopicMetadata, 0, len(topicsMetadata))
-	for name, metadata := range topicsMetadata {
+	result := make([]TopicMetadata, 0, len(topicsMap))
+	for name, metadata := range topicsMap {
 		result = append(result, TopicMetadata{
 			Name:              name,
 			Partitions:        metadata.NumPartitions,
@@ -179,64 +193,39 @@ func createTopicHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteTopicHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
-    // Извлекаем topic из пути /api/topics/{topic}
-    path := strings.TrimPrefix(r.URL.Path, "/api/topics/")
-    topic := strings.TrimSuffix(path, "/") // на случай, если есть завершающий слэш
-    if topic == "" {
-        sendJSONError(w, "Topic name required", http.StatusBadRequest)
-        return
-    }
+	path := strings.TrimPrefix(r.URL.Path, "/api/topics/")
+	topic := strings.TrimSuffix(path, "/")
+	if topic == "" {
+		sendJSONError(w, "Topic name required", http.StatusBadRequest)
+		return
+	}
+	bootstrap := getBootstrapFromRequest(r)
+	log.Printf("Deleting topic: %s, bootstrap: %s", topic, bootstrap)
 
-    bootstrap := getBootstrapFromRequest(r)
-    log.Printf("Deleting topic: %s, bootstrap: %s", topic, bootstrap)
+	admin, err := createAdminClient(bootstrap)
+	if err != nil {
+		log.Printf("AdminClient error: %v", err)
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer admin.Close()
 
-    admin, err := createAdminClient(bootstrap)
-    if err != nil {
-        log.Printf("AdminClient error: %v", err)
-        sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
-        return
-    }
-    defer admin.Close()
-
-    err = admin.DeleteTopic(topic)
-    if err != nil {
-        log.Printf("DeleteTopic error: %v", err)
-        // Проверим, существует ли топик
-        topics, listErr := admin.ListTopics()
-        if listErr == nil {
-            if _, exists := topics[topic]; !exists {
-                sendJSONError(w, "Topic does not exist", http.StatusNotFound)
-                return
-            }
-        }
-        sendJSONError(w, "Failed to delete topic: "+err.Error(), http.StatusInternalServerError)
-        return
-    }
-    w.WriteHeader(http.StatusNoContent)
-}
-
-// ---------- Структуры для деталей топика ----------
-type PartitionInfo struct {
-    ID       int32   `json:"id"`
-    Leader   int32   `json:"leader"`
-    Replicas []int32 `json:"replicas"`
-    Isr      []int32 `json:"isr"`
-}
-
-type TopicDetailResponse struct {
-    Name              string          `json:"name"`
-    Partitions        []PartitionInfo `json:"partitions"`
-    ReplicationFactor int16           `json:"replicationFactor"`
+	err = admin.DeleteTopic(topic)
+	if err != nil {
+		log.Printf("DeleteTopic error: %v", err)
+		sendJSONError(w, "Failed to delete topic: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Access-Control-Allow-Origin", "*")
     w.Header().Set("Content-Type", "application/json")
 
-    // Извлекаем имя топика из пути /api/topics/{topic}
     topic := strings.TrimPrefix(r.URL.Path, "/api/topics/")
     topic = strings.TrimSuffix(topic, "/")
     if topic == "" {
@@ -282,10 +271,24 @@ func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
         replicationFactor = int16(len(topicMeta.Partitions[0].Replicas))
     }
 
+    // Получаем конфигурацию
+    configs := make(map[string]string)
+    configResource := sarama.ConfigResource{Type: sarama.TopicResource, Name: topic}
+    entries, err := admin.DescribeConfig(configResource)
+    if err != nil {
+        log.Printf("DescribeConfig error for topic %s: %v", topic, err)
+    } else {
+        for _, entry := range entries {
+            configs[entry.Name] = entry.Value
+        }
+        log.Printf("Loaded %d config entries for topic %s", len(configs), topic)
+    }
+
     response := TopicDetailResponse{
         Name:              topic,
         Partitions:        partitions,
         ReplicationFactor: replicationFactor,
+        Configs:           configs,
     }
     json.NewEncoder(w).Encode(response)
 }
@@ -374,37 +377,37 @@ func sendJSONError(w http.ResponseWriter, msg string, status int) {
 }
 
 func main() {
-    http.HandleFunc("/api/topics", func(w http.ResponseWriter, r *http.Request) {
-        switch r.Method {
-        case http.MethodGet:
-            getTopicsHandler(w, r)
-        case http.MethodPost:
-            createTopicHandler(w, r)
-        default:
-            w.WriteHeader(http.StatusMethodNotAllowed)
-        }
-    })
+	http.HandleFunc("/api/topics", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			getTopicsHandler(w, r)
+		case http.MethodPost:
+			createTopicHandler(w, r)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
+	})
 
-    http.HandleFunc("/api/topics/", func(w http.ResponseWriter, r *http.Request) {
-        if r.URL.Path == "/api/topics/" {
-            getTopicsHandler(w, r)
-            return
-        }
-        switch r.Method {
-        case http.MethodDelete:
-            deleteTopicHandler(w, r)
-        case http.MethodGet:
-            if strings.Contains(r.URL.Path, "/messages") {
-                getMessagesHandler(w, r)
-            } else {
-                getTopicDetailHandler(w, r)
-            }
-        default:
-            w.WriteHeader(http.StatusNotFound)
-        }
-    })
+	http.HandleFunc("/api/topics/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/topics/" {
+			getTopicsHandler(w, r)
+			return
+		}
+		switch r.Method {
+		case http.MethodDelete:
+			deleteTopicHandler(w, r)
+		case http.MethodGet:
+			if strings.Contains(r.URL.Path, "/messages") {
+				getMessagesHandler(w, r)
+			} else {
+				getTopicDetailHandler(w, r)
+			}
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	})
 
-    port := ":8080"
-    log.Printf("Server running on %s", port)
-    log.Fatal(http.ListenAndServe(port, nil))
+	port := ":8080"
+	log.Printf("Server running on %s", port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }

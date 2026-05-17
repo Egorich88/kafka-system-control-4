@@ -536,3 +536,14 @@ li {
   padding: 8px 16px;
   margin: 0;
 }
+
+.partitions-table, .configs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+.partitions-table th, .partitions-table td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: left;
+}

@@ -26,6 +26,8 @@ export default function Topics() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailTopic, setDetailTopic] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [newTopic, setNewTopic] = useState({
     topic: '',
     partitions: '1',
@@ -42,7 +44,6 @@ export default function Topics() {
       });
       console.log('Topics response:', response.data);
       const topicsData = response.data.topics || [];
-      // Убедимся, что каждый элемент имеет нужные поля
       const normalized = topicsData.map(t => ({
         name: t.name || t,
         partitions: t.partitions || 0,
@@ -106,9 +107,22 @@ export default function Topics() {
     setSelectedTopic(topic);
   };
 
-  const handleRowDoubleClick = (topic) => {
+  const handleRowDoubleClick = async (topic) => {
     setSelectedTopic(topic);
+    setDetailLoading(true);
     setShowDetailModal(true);
+    try {
+      const response = await axios.get(`/api/topics/${encodeURIComponent(topic.name)}`, {
+        headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
+      });
+      setDetailTopic(response.data);
+    } catch (error) {
+      console.error('Fetch topic details error:', error);
+      toast.error('Ошибка загрузки деталей топика: ' + (error.response?.data?.error || error.message));
+      setShowDetailModal(false);
+    } finally {
+      setDetailLoading(false);
+    }
   };
 
   const filteredTopics = topics.filter(t =>
@@ -159,7 +173,9 @@ export default function Topics() {
               </tr>
             ))}
             {filteredTopics.length === 0 && (
-              <tr><td colSpan="3">Нет топиков</td></tr>
+              <tr>
+                <td colSpan="3">Нет топиков</td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -208,14 +224,47 @@ export default function Topics() {
         </div>
       )}
 
-      {showDetailModal && selectedTopic && (
+      {showDetailModal && (
         <div className="modal-overlay" onClick={() => setShowDetailModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h2>Детали топика: {selectedTopic.name}</h2>
-            <p><strong>Партиции:</strong> {selectedTopic.partitions}</p>
-            <p><strong>Фактор репликации:</strong> {selectedTopic.replicationFactor}</p>
-            <p><em>Подробная информация (партиции, лидеры, ISR) будет загружена по клику.</em></p>
-            {/* Здесь позже добавим таблицу партиций */}
+            <h2>Детали топика: {selectedTopic?.name}</h2>
+            {detailLoading ? (
+              <p>Загрузка деталей...</p>
+            ) : detailTopic ? (
+              <>
+                <p><strong>Фактор репликации:</strong> {detailTopic.replicationFactor}</p>
+                <h3>Партиции</h3>
+                <table className="partitions-table">
+                  <thead>
+                    <tr><th>ID</th><th>Лидер</th><th>Реплики</th><th>ISR</th></tr>
+                  </thead>
+                  <tbody>
+                    {detailTopic.partitions?.map(p => (
+                      <tr key={p.id}>
+                        <td>{p.id}</td>
+                        <td>{p.leader}</td>
+                        <td>{p.replicas?.join(', ')}</td>
+                        <td>{p.isr?.join(', ')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <h3>Конфигурация</h3>
+                <table className="configs-table">
+                  <thead>
+                    <tr><th>Параметр</th><th>Значение</th></tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(detailTopic.configs || {}).map(([key, value]) => (
+                      <tr key={key}><td>{key}</td><td>{value}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            ) : (
+              <p>Не удалось загрузить детали</p>
+            )}
             <div className="modal-buttons">
               <button onClick={() => setShowDetailModal(false)}>Закрыть</button>
             </div>
