@@ -241,6 +241,7 @@ func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
     }
     defer admin.Close()
 
+    // Получаем метаданные (партиции)
     metadata, err := admin.DescribeTopics([]string{topic})
     if err != nil {
         sendJSONError(w, "Failed to describe topic: "+err.Error(), http.StatusInternalServerError)
@@ -271,14 +272,14 @@ func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
         replicationFactor = int16(len(topicMeta.Partitions[0].Replicas))
     }
 
-    // Получаем конфигурацию
+    // Получаем конфигурацию (исправленный вариант)
     configs := make(map[string]string)
-    configResource := sarama.ConfigResource{Type: sarama.TopicResource, Name: topic}
-    entries, err := admin.DescribeConfig(configResource)
+    cfgResource := sarama.ConfigResource{Type: sarama.TopicResource, Name: topic}
+    resp, err := admin.DescribeConfig(cfgResource)
     if err != nil {
         log.Printf("DescribeConfig error for topic %s: %v", topic, err)
     } else {
-        for _, entry := range entries {
+        for _, entry := range resp {
             configs[entry.Name] = entry.Value
         }
         log.Printf("Loaded %d config entries for topic %s", len(configs), topic)
