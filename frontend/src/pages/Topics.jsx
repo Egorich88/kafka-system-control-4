@@ -33,12 +33,11 @@ export default function Topics() {
     replication: '1',
     configs: '',
   });
-  const [editingParam, setEditingParam] = useState(null);      // редактируемый параметр (ключ)
-  const [editValue, setEditValue] = useState('');             // новое значение
-  const [originalValue, setOriginalValue] = useState('');     // исходное значение (для отмены)
+  const [editingParam, setEditingParam] = useState(null);
+  const [editValue, setEditValue] = useState('');
+  const [originalValue, setOriginalValue] = useState('');
   const panelRef = useRef(null);
 
-  // --- Загрузка списка топиков ---
   const fetchTopics = async () => {
     if (!currentCluster) return;
     setLoading(true);
@@ -65,11 +64,10 @@ export default function Topics() {
     if (currentCluster) fetchTopics();
   }, [currentCluster]);
 
-  // --- Загрузка деталей топика ---
   const loadTopicDetails = async (topicName) => {
     setDetailLoading(true);
     setDetailTopic(null);
-    setEditingParam(null); // сбрасываем редактирование
+    setEditingParam(null);
     try {
       const response = await axios.get(`/api/topics/${encodeURIComponent(topicName)}`, {
         headers: { 'X-Kafka-Bootstrap': currentCluster.brokers },
@@ -83,25 +81,22 @@ export default function Topics() {
     }
   };
 
-  // --- Выделение топика (одинарный клик) ---
   const handleRowClick = (topic) => {
     setSelectedTopic(topic);
+    // не открываем панель
   };
 
-  // --- Открытие панели (двойной клик) ---
   const handleRowDoubleClick = (topic) => {
     setSelectedTopic(topic);
     loadTopicDetails(topic.name);
   };
 
-  // --- Закрыть панель ---
   const closePanel = () => {
     setSelectedTopic(null);
     setDetailTopic(null);
     setEditingParam(null);
   };
 
-  // Закрытие по клику вне панели
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (selectedTopic && panelRef.current && !panelRef.current.contains(event.target)) {
@@ -112,7 +107,7 @@ export default function Topics() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [selectedTopic]);
 
-  // --- Редактирование конфигурации: двойной клик по строке параметра ---
+  // Редактирование конфигурации (двойной клик по значению)
   const handleConfigDoubleClick = (key, currentValue) => {
     setEditingParam(key);
     setEditValue(currentValue);
@@ -132,7 +127,6 @@ export default function Topics() {
         { headers: { 'X-Kafka-Bootstrap': currentCluster.brokers } }
       );
       toast.success(`Параметр ${editingParam} обновлён`);
-      // Обновляем локальные данные
       setDetailTopic((prev) => ({
         ...prev,
         configs: { ...prev.configs, [editingParam]: editValue },
@@ -149,7 +143,6 @@ export default function Topics() {
     setEditValue('');
   };
 
-  // --- Создание топика ---
   const handleCreateTopic = async (e) => {
     e.preventDefault();
     if (!currentCluster) return;
@@ -171,7 +164,6 @@ export default function Topics() {
     }
   };
 
-  // --- Удаление топика ---
   const handleDeleteTopic = async () => {
     if (!selectedTopic) {
       toast.error('Выберите топик для удаления');
@@ -208,13 +200,18 @@ export default function Topics() {
           className="filter-input"
         />
         <div className="action-buttons">
-          <button className="action-btn" onClick={() => setShowCreateModal(true)}>
+          <button
+            className="action-btn"
+            onClick={() => setShowCreateModal(true)}
+            title="Создать новый топик"
+          >
             Create
           </button>
           <button
             className="action-btn delete"
             onClick={handleDeleteTopic}
             disabled={!selectedTopic}
+            title="Удалить выбранный топик"
           >
             Delete
           </button>
@@ -238,6 +235,7 @@ export default function Topics() {
                 onClick={() => handleRowClick(topic)}
                 onDoubleClick={() => handleRowDoubleClick(topic)}
                 className={selectedTopic?.name === topic.name ? 'selected' : ''}
+                title="Двойной клик – показать детали"
               >
                 <td>{topic.name}</td>
                 <td>{topic.partitions}</td>
@@ -253,8 +251,7 @@ export default function Topics() {
         </table>
       )}
 
-      {/* Плавающая панель деталей */}
-      {selectedTopic && (
+      {selectedTopic && detailTopic && (
         <div className="floating-details-panel" ref={panelRef}>
           <div className="panel-header">
             <h2>Детали топика</h2>
@@ -290,13 +287,14 @@ export default function Topics() {
                         <td>{p.leader}</td>
                         <td>{p.replicas?.join(', ')}</td>
                         <td>{p.isr?.join(', ')}</td>
-                      </tr>
+                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+              <div className="config-hint">Двойной клик по значению параметра – редактирование</div>
               <h3>Конфигурация</h3>
-              <div className="configs-scroll">
+              <div className="config-table-wrapper">
                 <table className="configs-table">
                   <thead>
                     <tr>
@@ -309,10 +307,15 @@ export default function Topics() {
                       <tr
                         key={key}
                         className={editingParam === key ? 'editing-row' : ''}
-                        onDoubleClick={() => handleConfigDoubleClick(key, value)}
                       >
                         <td className="config-key">{key}</td>
-                        <td className="config-value">{value}</td>
+                        <td
+                          className="config-value"
+                          onDoubleClick={() => handleConfigDoubleClick(key, value)}
+                          title="Двойной клик – редактировать параметр"
+                        >
+                          {value}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -340,6 +343,7 @@ export default function Topics() {
                   </div>
                 </div>
               )}
+
             </>
           )}
           {!detailLoading && !detailTopic && (
@@ -347,8 +351,16 @@ export default function Topics() {
           )}
         </div>
       )}
+      {!detailTopic && selectedTopic && detailLoading && (
+        <div className="floating-details-panel" ref={panelRef}>
+          <div className="panel-header">
+            <h2>Детали топика</h2>
+            <button className="close-panel" onClick={closePanel}>Скрыть</button>
+          </div>
+          <div className="loading">Загрузка деталей...</div>
+        </div>
+      )}
 
-      {/* Модальное окно создания топика */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

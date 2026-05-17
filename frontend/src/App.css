@@ -29,7 +29,7 @@ body {
   min-height: 100vh;
 }
 
-/* Боковое меню (тёмное) */
+/* Боковое меню (тёмное) – фиксируется при скролле */
 .sidebar {
   width: 280px;
   background: #1e1e2f;
@@ -37,6 +37,10 @@ body {
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .logo {
@@ -330,7 +334,6 @@ li {
 }
 
 /* --- Стили для страницы "Топики" --- */
-/* Таблица топиков */
 .topics-container {
   width: 100%;
   height: 100%;
@@ -402,84 +405,154 @@ li {
   background: #e0e7ff;
 }
 
-/* Оверлей и правая панель деталей */
-.panel-overlay {
+/* Плавающая панель деталей топика */
+.floating-details-panel {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 1000;
-  display: flex;
-  justify-content: flex-end;
-  align-items: stretch;
-}
-
-.topic-details-panel {
+  right: 0;
   width: 550px;
-  max-width: 90%;
+  max-width: calc(100% - 40px);
+  height: 100vh;
   background: white;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-  padding: 20px;
+  z-index: 1000;
   overflow-y: auto;
+  padding: 20px;
   display: flex;
   flex-direction: column;
 }
 
-.panel-header {
+.floating-details-panel .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
-.close-panel {
+.floating-details-panel .close-panel {
   background: none;
   border: none;
   font-size: 0.9rem;
   cursor: pointer;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 4px;
   color: #3b82f6;
   transition: background 0.2s;
+  width: auto;
+  display: inline-block;
+  white-space: nowrap;
 }
-.close-panel:hover {
+
+.floating-details-panel .close-panel:hover {
   background: rgba(59, 130, 246, 0.1);
 }
 
-/* Прокрутка для партиций и конфигурации */
-.partitions-scroll {
-  max-height: 300px;
+/* Прокрутка таблицы партиций */
+.floating-details-panel .partitions-scroll {
+  max-height: 250px;
   overflow-y: auto;
   margin-bottom: 20px;
 }
-.configs-scroll {
-  overflow-x: auto;
-}
 
-.partitions-table,
-.configs-table {
+.floating-details-panel .partitions-table,
+.floating-details-panel .configs-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 400px;
 }
-.partitions-table th,
-.partitions-table td,
-.configs-table th,
-.configs-table td {
+
+.floating-details-panel .partitions-table th,
+.floating-details-panel .partitions-table td,
+.floating-details-panel .configs-table th,
+.floating-details-panel .configs-table td {
   border: 1px solid #e5e7eb;
   padding: 8px;
   text-align: left;
 }
-.config-key {
+
+.floating-details-panel .config-key {
   font-family: monospace;
   font-size: 0.85rem;
 }
-.config-value {
+
+.floating-details-panel .config-value {
   font-family: monospace;
   font-size: 0.85rem;
-  word-break: break-all;
+  white-space: nowrap;
+}
+
+/* Подсветка редактируемой строки конфигурации */
+.configs-table tr.editing-row {
+  background-color: #fffbeb;
+  border-left: 3px solid #f59e0b;
+}
+
+/* Блок редактирования внизу панели */
+.edit-panel {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+.edit-panel h4 {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+.edit-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.edit-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.save-edit-btn, .cancel-edit-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  color: #3b82f6;
+}
+.save-edit-btn:hover, .cancel-edit-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Подсказка над таблицей конфигурации */
+.config-hint {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+/* Контейнер для таблицы конфигурации с фиксированной высотой и прокруткой */
+.config-table-wrapper {
+  max-height: 350px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+/* Фиксация заголовка таблицы конфигурации */
+.config-table-wrapper .configs-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f9fafb;
+  z-index: 1;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 /* Модальное окно создания топика */
@@ -554,139 +627,11 @@ li {
   .main-content {
     padding: 16px;
   }
-  .topic-details-panel {
+  .floating-details-panel {
     width: 95%;
+    max-width: 95%;
   }
   .config-panel {
     width: 95%;
   }
-}
-
-/* Плавающая панель деталей топика (исправленная – на всю высоту) */
-.floating-details-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 550px;
-  max-width: calc(100% - 40px);
-  height: 100vh;
-  background: white;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  overflow-y: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.floating-details-panel .panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
-}
-
-.floating-details-panel .close-panel {
-  background: none;
-  border: none;
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 4px 10px;
-  border-radius: 4px;
-  color: #3b82f6;
-  transition: background 0.2s;
-  width: auto;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.floating-details-panel .close-panel:hover {
-  background: rgba(59, 130, 246, 0.1);
-}
-
-/* Прокрутки внутри панели */
-.floating-details-panel .partitions-scroll {
-  max-height: 250px;
-  overflow-y: auto;
-  margin-bottom: 20px;
-}
-
-.floating-details-panel .configs-scroll {
-  overflow-x: auto;
-}
-
-/* Таблицы внутри панели */
-.floating-details-panel .partitions-table,
-.floating-details-panel .configs-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 400px;
-}
-
-.floating-details-panel .partitions-table th,
-.floating-details-panel .partitions-table td,
-.floating-details-panel .configs-table th,
-.floating-details-panel .configs-table td {
-  border: 1px solid #e5e7eb;
-  padding: 8px;
-  text-align: left;
-}
-
-.floating-details-panel .config-key {
-  font-family: monospace;
-  font-size: 0.85rem;
-}
-
-.floating-details-panel .config-value {
-  font-family: monospace;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-/* Подсветка редактируемой строки конфигурации */
-.configs-table tr.editing-row {
-  background-color: #fffbeb;
-  border-left: 3px solid #f59e0b;
-}
-
-/* Блок редактирования в стиле Kubernetes */
-.edit-panel {
-  margin-top: 20px;
-  padding: 16px;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-.edit-panel h4 {
-  margin-bottom: 12px;
-  font-size: 0.9rem;
-  color: #374151;
-}
-.edit-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  margin-bottom: 12px;
-}
-.edit-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
-.save-edit-btn, .cancel-edit-btn {
-  background: none;
-  border: none;
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 4px 12px;      /* компактные отступы 1-2 символа */
-  border-radius: 4px;
-  transition: background 0.2s;
-  color: #3b82f6;         /* синий, как у action-btn */
-}
-.save-edit-btn:hover, .cancel-edit-btn:hover {
-  background: rgba(59, 130, 246, 0.1); /* лёгкая подсветка */
 }
