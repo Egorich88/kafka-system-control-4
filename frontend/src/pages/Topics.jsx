@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
@@ -34,8 +33,12 @@ export default function Topics() {
     replication: '1',
     configs: '',
   });
+  const [editingParam, setEditingParam] = useState(null);      // редактируемый параметр (ключ)
+  const [editValue, setEditValue] = useState('');             // новое значение
+  const [originalValue, setOriginalValue] = useState('');     // исходное значение (для отмены)
   const panelRef = useRef(null);
 
+  // --- Загрузка списка топиков ---
   const fetchTopics = async () => {
     if (!currentCluster) return;
     setLoading(true);
@@ -62,9 +65,11 @@ export default function Topics() {
     if (currentCluster) fetchTopics();
   }, [currentCluster]);
 
+  // --- Загрузка деталей топика ---
   const loadTopicDetails = async (topicName) => {
     setDetailLoading(true);
     setDetailTopic(null);
+    setEditingParam(null); // сбрасываем редактирование
     try {
       const response = await axios.get(`/api/topics/${encodeURIComponent(topicName)}`, {
         headers: { 'X-Kafka-Bootstrap': currentCluster.brokers },
@@ -78,17 +83,25 @@ export default function Topics() {
     }
   };
 
+  // --- Выделение топика (одинарный клик) ---
+  const handleRowClick = (topic) => {
+    setSelectedTopic(topic);
+  };
+
+  // --- Открытие панели (двойной клик) ---
   const handleRowDoubleClick = (topic) => {
     setSelectedTopic(topic);
     loadTopicDetails(topic.name);
   };
 
+  // --- Закрыть панель ---
   const closePanel = () => {
     setSelectedTopic(null);
     setDetailTopic(null);
+    setEditingParam(null);
   };
 
-  // Закрытие при клике вне панели
+  // Закрытие по клику вне панели
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (selectedTopic && panelRef.current && !panelRef.current.contains(event.target)) {
@@ -99,6 +112,44 @@ export default function Topics() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [selectedTopic]);
 
+  // --- Редактирование конфигурации: двойной клик по строке параметра ---
+  const handleConfigDoubleClick = (key, currentValue) => {
+    setEditingParam(key);
+    setEditValue(currentValue);
+    setOriginalValue(currentValue);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedTopic || !editingParam) return;
+    if (editValue === originalValue) {
+      setEditingParam(null);
+      return;
+    }
+    try {
+      await axios.patch(
+        `/api/topics/${encodeURIComponent(selectedTopic.name)}/config`,
+        { configs: { [editingParam]: editValue } },
+        { headers: { 'X-Kafka-Bootstrap': currentCluster.brokers } }
+      );
+      toast.success(`Параметр ${editingParam} обновлён`);
+      // Обновляем локальные данные
+      setDetailTopic((prev) => ({
+        ...prev,
+        configs: { ...prev.configs, [editingParam]: editValue },
+      }));
+      setEditingParam(null);
+    } catch (error) {
+      console.error(error);
+      toast.error('Ошибка сохранения: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingParam(null);
+    setEditValue('');
+  };
+
+  // --- Создание топика ---
   const handleCreateTopic = async (e) => {
     e.preventDefault();
     if (!currentCluster) return;
@@ -120,6 +171,7 @@ export default function Topics() {
     }
   };
 
+  // --- Удаление топика ---
   const handleDeleteTopic = async () => {
     if (!selectedTopic) {
       toast.error('Выберите топик для удаления');
@@ -183,6 +235,7 @@ export default function Topics() {
             {filteredTopics.map((topic) => (
               <tr
                 key={topic.name}
+                onClick={() => handleRowClick(topic)}
                 onDoubleClick={() => handleRowDoubleClick(topic)}
                 className={selectedTopic?.name === topic.name ? 'selected' : ''}
               >
@@ -253,7 +306,11 @@ export default function Topics() {
                   </thead>
                   <tbody>
                     {Object.entries(detailTopic.configs || {}).map(([key, value]) => (
-                      <tr key={key}>
+                      <tr
+                        key={key}
+                        className={editingParam === key ? 'editing-row' : ''}
+                        onDoubleClick={() => handleConfigDoubleClick(key, value)}
+                      >
                         <td className="config-key">{key}</td>
                         <td className="config-value">{value}</td>
                       </tr>
@@ -261,6 +318,28 @@ export default function Topics() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Блок редактирования внизу панели */}
+              {editingParam && (
+                <div className="edit-panel">
+                  <h4>Редактирование параметра: {editingParam}</h4>
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="edit-input"
+                    autoFocus
+                  />
+                  <div className="edit-buttons">
+                    <button className="save-edit-btn" onClick={handleSaveEdit}>
+                      Сохранить
+                    </button>
+                    <button className="cancel-edit-btn" onClick={handleCancelEdit}>
+                      Отмена
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
           {!detailLoading && !detailTopic && (

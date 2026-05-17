@@ -645,3 +645,48 @@ li {
   font-size: 0.85rem;
   white-space: nowrap;
 }
+
+/* Подсветка редактируемой строки конфигурации */
+.configs-table tr.editing-row {
+  background-color: #fffbeb;
+  border-left: 3px solid #f59e0b;
+}
+
+/* Блок редактирования в стиле Kubernetes */
+.edit-panel {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+.edit-panel h4 {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+.edit-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.edit-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.save-edit-btn, .cancel-edit-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 12px;      /* компактные отступы 1-2 символа */
+  border-radius: 4px;
+  transition: background 0.2s;
+  color: #3b82f6;         /* синий, как у action-btn */
+}
+.save-edit-btn:hover, .cancel-edit-btn:hover {
+  background: rgba(59, 130, 246, 0.1); /* лёгкая подсветка */
+}
