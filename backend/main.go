@@ -55,7 +55,6 @@ type Message struct {
 	Timestamp string `json:"timestamp"`
 }
 
-// Получаем bootstrap-адрес из заголовка X-Kafka-Bootstrap, переменной окружения или по умолчанию
 func getBootstrapFromRequest(r *http.Request) string {
 	if bootstrap := r.Header.Get("X-Kafka-Bootstrap"); bootstrap != "" {
 		return bootstrap
@@ -68,17 +67,8 @@ func getBootstrapFromRequest(r *http.Request) string {
 
 func createAdminClient(bootstrap string) (sarama.ClusterAdmin, error) {
 	config := sarama.NewConfig()
-	config.Version = sarama.V2_6_0_0
-	client, err := sarama.NewClient([]string{bootstrap}, config)
-	if err != nil {
-		return nil, err
-	}
-	admin, err := sarama.NewClusterAdminFromClient(client)
-	if err != nil {
-		client.Close()
-		return nil, err
-	}
-	return admin, nil
+	config.Version = sarama.V2_8_0_0
+	return sarama.NewClusterAdmin([]string{bootstrap}, config)
 }
 
 func getTopicsHandler(w http.ResponseWriter, r *http.Request) {
@@ -178,11 +168,40 @@ func createTopicHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(CreateTopicResponse{Success: true})
 }
 
+func deleteTopicHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	pathParts := strings.Split(r.URL.Path, "/")
+	if len(pathParts) < 3 {
+		sendJSONError(w, "Invalid topic path", http.StatusBadRequest)
+		return
+	}
+	topic := pathParts[2]
+	if topic == "" {
+		sendJSONError(w, "Topic name required", http.StatusBadRequest)
+		return
+	}
+	bootstrap := getBootstrapFromRequest(r)
+	admin, err := createAdminClient(bootstrap)
+	if err != nil {
+		log.Printf("AdminClient error: %v", err)
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer admin.Close()
+	err = admin.DeleteTopic(topic)
+	if err != nil {
+		log.Printf("DeleteTopic error: %v", err)
+		sendJSONError(w, "Failed to delete topic: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
-	// Извлекаем topic из пути /api/topics/{topic}/messages
 	pathParts := strings.Split(r.URL.Path, "/")
 	if len(pathParts) < 4 {
 		sendJSONError(w, "Invalid topic path", http.StatusBadRequest)
@@ -193,8 +212,6 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONError(w, "Topic name required", http.StatusBadRequest)
 		return
 	}
-
-	// Парсим query параметры
 	partitionStr := r.URL.Query().Get("partition")
 	offsetStr := r.URL.Query().Get("offset")
 	limitStr := r.URL.Query().Get("limit")
@@ -219,9 +236,8 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	config := sarama.NewConfig()
-	config.Version = sarama.V2_6_0_0
+	config.Version = sarama.V2_8_0_0
 	config.Consumer.Return.Errors = true
 	consumer, err := sarama.NewConsumer([]string{bootstrap}, config)
 	if err != nil {
@@ -240,24 +256,23 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	defer pc.Close()
 
 	messages := make([]Message, 0, limit)
-    timeout := time.After(3 * time.Second)
-    for i := int32(0); i < limit; i++ {
-        select {
-        case msg := <-pc.Messages():
-            messages = append(messages, Message{
-                Offset:    msg.Offset,
-                Key:       string(msg.Key),
-                Value:     string(msg.Value),
-                Timestamp: msg.Timestamp.Format(time.RFC3339),
-            })
-        case err := <-pc.Errors():
-            log.Printf("Consumer error: %v", err)
-        case <-timeout:
-            // По таймауту выходим из цикла, не дожидаясь limit сообщений
-            break
-        }
-    }
-
+	timeout := time.After(3 * time.Second)
+	done := false
+	for i := int32(0); i < limit && !done; i++ {
+		select {
+		case msg := <-pc.Messages():
+			messages = append(messages, Message{
+				Offset:    msg.Offset,
+				Key:       string(msg.Key),
+				Value:     string(msg.Value),
+				Timestamp: msg.Timestamp.Format(time.RFC3339),
+			})
+		case err := <-pc.Errors():
+			log.Printf("Consumer error: %v", err)
+		case <-timeout:
+			done = true
+		}
+	}
 	json.NewEncoder(w).Encode(MessagesResponse{Messages: messages})
 }
 
@@ -278,9 +293,10 @@ func main() {
 		}
 	})
 
-	// Маршрут для получения сообщений /api/topics/{topic}/messages
 	http.HandleFunc("/api/topics/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/messages") {
+		if r.Method == http.MethodDelete {
+			deleteTopicHandler(w, r)
+		} else if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/messages") {
 			getMessagesHandler(w, r)
 		} else {
 			w.WriteHeader(http.StatusNotFound)

@@ -30,20 +30,14 @@ export default function Topics() {
   });
 
   const fetchTopics = async () => {
-    if (!currentCluster) {
-      toast.error('Кластер не выбран');
-      return;
-    }
+    if (!currentCluster) return;
     setLoading(true);
     try {
       const response = await axios.get('/api/topics', {
-        headers: {
-          'X-Kafka-Bootstrap': currentCluster.brokers,
-        },
+        headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
       });
       setTopics(response.data.topics || []);
     } catch (error) {
-      console.error(error);
       toast.error('Ошибка загрузки топиков');
     } finally {
       setLoading(false);
@@ -56,30 +50,20 @@ export default function Topics() {
 
   const handleCreateTopic = async (e) => {
     e.preventDefault();
-    if (!currentCluster) {
-      toast.error('Кластер не выбран');
-      return;
-    }
+    if (!currentCluster) return;
     if (!newTopic.topic.trim()) {
       toast.error('Введите имя топика');
       return;
     }
     try {
-      const response = await axios.post('/api/topics', newTopic, {
-        headers: {
-          'X-Kafka-Bootstrap': currentCluster.brokers,
-        },
+      await axios.post('/api/topics', newTopic, {
+        headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
       });
-      if (response.data.success) {
-        toast.success(`Топик "${newTopic.topic}" создан!`);
-        setNewTopic({ topic: '', partitions: '1', replication: '1', configs: '' });
-        fetchTopics();
-      } else {
-        toast.error(response.data.error || 'Ошибка создания топика');
-      }
+      toast.success(`Топик "${newTopic.topic}" создан!`);
+      setNewTopic({ topic: '', partitions: '1', replication: '1', configs: '' });
+      fetchTopics();
     } catch (error) {
-      console.error(error);
-      toast.error('Ошибка соединения с сервером');
+      toast.error('Ошибка создания топика');
     }
   };
 
@@ -94,51 +78,16 @@ export default function Topics() {
       <div className="card">
         <h2>Создать топик</h2>
         <form onSubmit={handleCreateTopic}>
-          <input
-            type="text"
-            name="topic"
-            placeholder="Имя топика *"
-            value={newTopic.topic}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="partitions"
-            placeholder="Партиции (по умолч. 1)"
-            value={newTopic.partitions}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="replication"
-            placeholder="Репликация (по умолч. 1)"
-            value={newTopic.replication}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="configs"
-            placeholder="Конфиги (key=value, через запятую)"
-            value={newTopic.configs}
-            onChange={handleChange}
-          />
+          <input type="text" name="topic" placeholder="Имя топика *" value={newTopic.topic} onChange={handleChange} required />
+          <input type="text" name="partitions" placeholder="Партиции (по умолч. 1)" value={newTopic.partitions} onChange={handleChange} />
+          <input type="text" name="replication" placeholder="Репликация (по умолч. 1)" value={newTopic.replication} onChange={handleChange} />
+          <input type="text" name="configs" placeholder="Конфиги (key=value, через запятую)" value={newTopic.configs} onChange={handleChange} />
           <button type="submit">Создать</button>
         </form>
       </div>
       <div className="card">
         <h2>Список топиков</h2>
-        {loading ? (
-          <p>Загрузка...</p>
-        ) : topics.length === 0 ? (
-          <p>Нет топиков</p>
-        ) : (
-          <ul>
-            {topics.map((topic) => (
-              <li key={topic}>{topic}</li>
-            ))}
-          </ul>
-        )}
+        {loading ? <p>Загрузка...</p> : topics.length === 0 ? <p>Нет топиков</p> : <ul>{topics.map(topic => <li key={topic}>{topic}</li>)}</ul>}
         <button onClick={fetchTopics} className="secondary">Обновить список</button>
       </div>
     </div>
