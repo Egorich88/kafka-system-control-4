@@ -15,15 +15,13 @@
  */
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useCluster } from '../contexts/ClusterContext';
-import { useKafkaFetch } from '../hooks/useKafkaFetch';
+import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
+import { useCluster } from '../contexts/ClusterContext';
 
 export default function Search() {
   const { currentCluster } = useCluster();
-  const kafkaFetch = useKafkaFetch();
   const [searchParams, setSearchParams] = useSearchParams();
-
   const [topics, setTopics] = useState([]);
   const [loadingTopics, setLoadingTopics] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(searchParams.get('topic') || '');
@@ -33,14 +31,19 @@ export default function Search() {
   const [messages, setMessages] = useState([]);
   const [searching, setSearching] = useState(false);
 
-  // Загрузка списка топиков
   useEffect(() => {
     if (!currentCluster) return;
     const loadTopics = async () => {
       setLoadingTopics(true);
       try {
-        const data = await kafkaFetch('/api/topics');
-        setTopics(data.topics || []);
+        const response = await axios.get('/api/topics', {
+          headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
+        });
+        let topicsList = response.data.topics || [];
+        if (topicsList.length > 0 && typeof topicsList[0] === 'object') {
+          topicsList = topicsList.map(t => t.name);
+        }
+        setTopics(topicsList);
       } catch (err) {
         toast.error('Ошибка загрузки топиков: ' + err.message);
       } finally {
@@ -50,7 +53,6 @@ export default function Search() {
     loadTopics();
   }, [currentCluster]);
 
-  // Обновление URL при изменении топика/партиции
   useEffect(() => {
     if (selectedTopic) {
       setSearchParams({ topic: selectedTopic, partition });
@@ -72,11 +74,13 @@ export default function Search() {
     setSearching(true);
     try {
       const url = `/api/topics/${encodeURIComponent(selectedTopic)}/messages?partition=${partition}&offset=${offset}&limit=${limit}`;
-      const data = await kafkaFetch(url);
-      setMessages(data.messages || []);
-      toast.success(`Получено ${data.messages?.length || 0} сообщений`);
+      const response = await axios.get(url, {
+        headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
+      });
+      setMessages(response.data.messages || []);
+      toast.success(`Получено ${response.data.messages?.length || 0} сообщений`);
     } catch (err) {
-      toast.error('Ошибка чтения сообщений: ' + err.message);
+      toast.error('Ошибка чтения сообщений: ' + (err.response?.data?.error || err.message));
       setMessages([]);
     } finally {
       setSearching(false);
@@ -145,7 +149,7 @@ export default function Search() {
             {messages.map((msg, idx) => (
               <div key={idx} className="message-item">
                 <div><strong>Offset:</strong> {msg.offset}</div>
-                <div><strong>Key:</strong> {msg.key}</div>
+                <div><strong>Key:</strong> {msg.key || '—'}</div>
                 <div><strong>Value:</strong> {msg.value}</div>
                 <div><strong>Timestamp:</strong> {msg.timestamp}</div>
               </div>

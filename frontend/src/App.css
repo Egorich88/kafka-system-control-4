@@ -439,3 +439,100 @@ li {
 .topics-table tbody tr.selected {
   background: #e0e7ff;
 }
+
+/* Стили для страницы топиков */
+.topics-container {
+  width: 100%;
+}
+.topics-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.filter-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: #3b82f6;
+}
+.action-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+.action-btn.delete {
+  color: #ef4444;
+}
+.action-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.topics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.topics-table th, .topics-table td {
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  text-align: left;
+}
+.topics-table tbody tr {
+  cursor: pointer;
+}
+.topics-table tbody tr:hover {
+  background: #f9fafb;
+}
+.topics-table tbody tr.selected {
+  background: #e0e7ff;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  min-width: 400px;
+  max-width: 90%;
+}
+.modal-content h2 {
+  margin-bottom: 16px;
+}
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.modal-buttons button {
+  width: auto;
+  padding: 8px 16px;
+  margin: 0;
+}
