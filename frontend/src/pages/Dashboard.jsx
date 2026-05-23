@@ -1,35 +1,169 @@
+ /*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+import {
+  FiInfo,
+  FiCode,
+  FiPlus
+} from 'react-icons/fi';
+
 import { useCluster } from '../contexts/ClusterContext';
 
 export default function Dashboard() {
+
   const { currentCluster } = useCluster();
 
+  if (currentCluster) {
+
+    return (
+
+      <div className="overview-page">
+
+        <div className="overview-card">
+
+          <h1>Обзор кластера</h1>
+
+          <p>
+            Здесь будет отображаться мониторинг Kafka-кластера.
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
+
   return (
-    <div className="dashboard-container">
-      <h1>Kafka System Control 4.1</h1>
-      {currentCluster ? (
-        <div className="cluster-info">
-          <h2>Активный кластер: {currentCluster.name}</h2>
-          <div className="info-card">
-            <p><strong>Брокеры:</strong> {currentCluster.brokers}</p>
-            <p><strong>Аутентификация:</strong> {currentCluster.authType}</p>
-            {currentCluster.authType !== 'PLAINTEXT' && (
-              <p><strong>Пользователь:</strong> {currentCluster.username || '—'}</p>
-            )}
-          </div>
-          <div className="stats-placeholder">
-            <p>📊 Статистика кластера появится после подключения к API.</p>
-            <p className="hint">Здесь будут отображаться количество топиков, групп, активные consumer’ы и т.д.</p>
-          </div>
+
+    <div className="welcome-page">
+
+      <div className="welcome-card">
+
+        <div className="welcome-logo-wrap">
+
+          <img
+            src="/kafka-system-logo.png"
+            alt="Kafka System Control"
+            className="welcome-logo"
+          />
+
         </div>
-      ) : (
-        <div className="welcome-message">
-          <h2>Добро пожаловать!</h2>
-          <p>Kafka System Control — веб‑интерфейс для администрирования Apache Kafka.</p>
-          <p>Чтобы начать работу, <strong>добавьте кластер</strong> через кнопку <strong>Add</strong> в левом меню.</p>
-          <p>После добавления и выбора кластера здесь появится сводная информация о нём.</p>
-          <p>Используйте меню для управления топиками, ACL и группами потребителей.</p>
+
+        <h1 className="welcome-title">
+          Kafka System Control
+        </h1>
+
+        <p className="welcome-subtitle">
+
+          Open-source платформа
+
+        </p>
+
+        <div className="welcome-divider-small" />
+
+        {/* INFO */}
+
+        <div className="welcome-feature">
+
+          <div className="welcome-icon-box">
+
+            <FiInfo />
+
+          </div>
+
+          <div className="welcome-feature-text">
+
+            Современный интерфейс для работы с{' '}
+
+            <a
+              href="https://kafka.apache.org/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Apache Kafka
+            </a>
+
+          </div>
+
         </div>
-      )}
+
+        {/* ADD */}
+
+        <div className="welcome-feature">
+
+          <div className="welcome-icon-box">
+
+            <FiPlus />
+
+          </div>
+
+          <div className="welcome-feature-text">
+
+            Чтобы начать работу — добавьте кластер
+            через кнопку{' '}
+
+            <span className="welcome-highlight">
+              + Добавить
+            </span>
+
+            {' '}в боковом меню
+
+          </div>
+
+        </div>
+
+        {/* LICENSE */}
+
+        <div className="welcome-feature">
+
+          <div className="welcome-icon-box">
+
+            <FiCode />
+
+          </div>
+
+          <div className="welcome-feature-text">
+
+            Проект распространяется по лицензии{' '}
+
+            <a
+              href="https://www.apache.org/licenses/LICENSE-2.0"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Apache License 2.0
+            </a>
+
+          </div>
+
+        </div>
+
+        <div className="welcome-divider large" />
+
+        <a
+          href="https://github.com/Egorich88/kafka-system-control-4"
+          target="_blank"
+          rel="noreferrer"
+          className="welcome-github"
+        >
+
+          <img
+            src="/github-mark-white.svg"
+            alt="GitHub"
+            className="github-logo"
+          />
+
+          <span>
+            Поддержите проект на GitHub
+          </span>
+
+        </a>
+
+      </div>
+
     </div>
   );
 }

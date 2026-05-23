@@ -35,7 +35,7 @@ terraform/*.tfvars
 terraform/.terraform.lock.hcl
 
 kubectl
-
+kafka-backend
 #https
 tls.key
 tls.crt

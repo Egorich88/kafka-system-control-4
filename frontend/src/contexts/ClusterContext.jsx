@@ -13,58 +13,208 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createContext, useContext, useState, useEffect } from 'react';
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect
+} from 'react';
 
 const ClusterContext = createContext();
 
 export function ClusterProvider({ children }) {
+
   const [clusters, setClusters] = useState([]);
-  const [currentCluster, setCurrentCluster] = useState(null);
+
+  const [currentCluster, setCurrentCluster] =
+    useState(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('kafka_clusters');
+
+    const stored =
+      localStorage.getItem('kafka_clusters');
+
     if (stored) {
+
       try {
+
         const parsed = JSON.parse(stored);
+
         setClusters(parsed);
-        if (parsed.length > 0) setCurrentCluster(parsed[0]);
-      } catch (e) {}
+
+        if (parsed.length > 0) {
+
+          setCurrentCluster(parsed[0]);
+        }
+
+      } catch (e) {
+
+        console.error(e);
+      }
     }
+
   }, []);
 
   const addCluster = (cluster) => {
-    const newCluster = { ...cluster, id: Date.now().toString() };
-    const newClusters = [...clusters, newCluster];
+
+    const newCluster = {
+
+      ...cluster,
+
+      id: Date.now().toString(),
+
+      // unknown | checking | connected | error
+      connectionStatus: 'unknown'
+    };
+
+    const newClusters = [
+      ...clusters,
+      newCluster
+    ];
+
     setClusters(newClusters);
-    localStorage.setItem('kafka_clusters', JSON.stringify(newClusters));
+
+    localStorage.setItem(
+      'kafka_clusters',
+      JSON.stringify(newClusters)
+    );
+
     setCurrentCluster(newCluster);
   };
 
   const updateCluster = (updatedCluster) => {
-    const newClusters = clusters.map(c => c.id === updatedCluster.id ? updatedCluster : c);
+
+    const newClusters = clusters.map(cluster => {
+
+      if (cluster.id === updatedCluster.id) {
+
+        return updatedCluster;
+      }
+
+      return cluster;
+    });
+
     setClusters(newClusters);
-    localStorage.setItem('kafka_clusters', JSON.stringify(newClusters));
-    if (currentCluster?.id === updatedCluster.id) setCurrentCluster(updatedCluster);
+
+    localStorage.setItem(
+      'kafka_clusters',
+      JSON.stringify(newClusters)
+    );
+
+    if (currentCluster?.id === updatedCluster.id) {
+
+      setCurrentCluster(updatedCluster);
+    }
   };
 
   const removeCluster = (clusterId) => {
-    const newClusters = clusters.filter(c => c.id !== clusterId);
+
+    const newClusters = clusters.filter(
+      cluster => cluster.id !== clusterId
+    );
+
     setClusters(newClusters);
-    localStorage.setItem('kafka_clusters', JSON.stringify(newClusters));
+
+    localStorage.setItem(
+      'kafka_clusters',
+      JSON.stringify(newClusters)
+    );
+
     if (currentCluster?.id === clusterId) {
-      setCurrentCluster(newClusters[0] || null);
+
+      setCurrentCluster(
+        newClusters[0] || null
+      );
     }
   };
 
   const changeCluster = (cluster) => {
-    setCurrentCluster(cluster);
+
+    const updatedCluster = {
+      ...cluster,
+      connectionStatus: 'connected'
+    };
+
+    const updatedClusters = clusters.map(c =>
+      c.id === cluster.id
+        ? updatedCluster
+        : c
+    );
+
+    setClusters(updatedClusters);
+
+    localStorage.setItem(
+      'kafka_clusters',
+      JSON.stringify(updatedClusters)
+    );
+
+    setCurrentCluster(updatedCluster);
+  };
+
+  const updateClusterStatus = (
+    clusterId,
+    status
+  ) => {
+
+    const newClusters = clusters.map(cluster => {
+
+      if (cluster.id === clusterId) {
+
+        return {
+
+          ...cluster,
+
+          connectionStatus: status
+        };
+      }
+
+      return cluster;
+    });
+
+    setClusters(newClusters);
+
+    localStorage.setItem(
+      'kafka_clusters',
+      JSON.stringify(newClusters)
+    );
+
+    if (currentCluster?.id === clusterId) {
+
+      const updated = newClusters.find(
+        cluster => cluster.id === clusterId
+      );
+
+      setCurrentCluster(updated);
+    }
   };
 
   return (
-    <ClusterContext.Provider value={{ clusters, currentCluster, addCluster, updateCluster, removeCluster, changeCluster }}>
+
+    <ClusterContext.Provider
+      value={{
+
+        clusters,
+
+        currentCluster,
+
+        addCluster,
+
+        updateCluster,
+
+        removeCluster,
+
+        changeCluster,
+
+        updateClusterStatus
+      }}
+    >
+
       {children}
+
     </ClusterContext.Provider>
   );
 }
 
-export const useCluster = () => useContext(ClusterContext);
+export const useCluster = () =>
+  useContext(ClusterContext);

@@ -13,155 +13,183 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { NavLink, Outlet } from 'react-router-dom';
+
+import { Outlet } from 'react-router-dom';
+
 import { useCluster } from '../contexts/ClusterContext';
+
 import { useState } from 'react';
-import ClusterConfigPanel from './ClusterConfigPanel';
+
+import CreateClusterPanel from './CreateClusterPanel';
+
+import ClusterSettingsPanel from './ClusterSettingsPanel';
+
+import Sidebar from './layout/Sidebar';
+
 import packageJson from '../../package.json';
 
+import { useTranslation } from 'react-i18next';
+
 const Layout = () => {
+
+  const { t } = useTranslation();
+
   const {
+
     clusters,
     currentCluster,
     changeCluster,
     addCluster,
     updateCluster,
     removeCluster
+
   } = useCluster();
 
-  const [showPanel, setShowPanel] = useState(false);
-  const [editingCluster, setEditingCluster] = useState(null);
+  const [showPanel, setShowPanel] =
+    useState(false);
+
+  const [panelMode, setPanelMode] =
+    useState(null);
+
+  const [editingCluster, setEditingCluster] =
+    useState(null);
 
   const handleAdd = () => {
+
+    setPanelMode('create');
+
     setEditingCluster(null);
+
     setShowPanel(true);
   };
 
   const handleEdit = () => {
+
     if (!currentCluster) return;
+
+    setPanelMode('settings');
+
     setEditingCluster(currentCluster);
+
     setShowPanel(true);
   };
 
   const handleSave = (clusterConfig) => {
-    if (editingCluster && !clusters.find(c => c.id === editingCluster.id)) {
+
+    if (
+      editingCluster &&
+      !clusters.find(
+        c => c.id === editingCluster.id
+      )
+    ) {
+
       setShowPanel(false);
+
       setEditingCluster(null);
+
+      setPanelMode(null);
+
       return;
     }
+
     if (editingCluster) {
-      updateCluster({ ...clusterConfig, id: editingCluster.id });
+
+      updateCluster({
+
+        ...clusterConfig,
+
+        id: editingCluster.id
+      });
+
     } else {
+
       addCluster(clusterConfig);
     }
+
     setShowPanel(false);
+
     setEditingCluster(null);
+
+    setPanelMode(null);
   };
 
   const handleCancel = () => {
-    setShowPanel(false);
-    setEditingCluster(null);
-  };
 
-  const handleDelete = () => {
-    if (!currentCluster) return;
-    const confirmDelete = window.confirm(`Удалить кластер "${currentCluster.name}"?`);
-    if (confirmDelete) {
-      removeCluster(currentCluster.id);
-      setShowPanel(false);
-      setEditingCluster(null);
-    }
+    setShowPanel(false);
+
+    setEditingCluster(null);
+
+    setPanelMode(null);
   };
 
   const version = packageJson.version;
-  const author = "Егор Хоменко";
-  const githubUrl = "https://github.com/Egorich88";
+
+  const author = 'Егор Хоменко';
+
+  const githubUrl =
+    'https://github.com/Egorich88';
 
   return (
+
     <div className="app-layout sidebar-dark">
-      <aside className="sidebar">
-        <div className="logo">
-          <img src="/logo.svg" alt="Kafka Control" width="72" height="72" style={{ marginRight: 8 }} />
-          <h3>Kafka System Control</h3>
-        </div>
 
-        {/* Блок кластера */}
-        <div className="cluster-section">
-          <div className="cluster-header">
-            <span>Кластер</span>
-            <button onClick={handleAdd} className="add-cluster-btn" title="Добавить кластер">Add</button>
-          </div>
-          {clusters.length > 0 && currentCluster && (
-            <div className="cluster-select-row">
-              <select
-                className="cluster-select"
-                value={currentCluster.id}
-                onChange={(e) => {
-                  const selected = clusters.find(c => c.id === e.target.value);
-                  if (selected) changeCluster(selected);
-                }}
-              >
-                {clusters.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              <button onClick={handleEdit} className="edit-cluster-btn" title="Редактировать">Edit</button>
-              <button onClick={handleDelete} className="delete-cluster-btn" title="Удалить">Delete</button>
-            </div>
-          )}
-        </div>
-
-        {/* Навигация — показываем только если есть выбранный кластер */}
-        {clusters.length > 0 && currentCluster ? (
-          <nav>
-            <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
-              Обзор
-            </NavLink>
-            <NavLink to="/topics" className={({ isActive }) => (isActive ? 'active' : '')}>
-              Топики
-            </NavLink>
-            <NavLink to="/groups" className={({ isActive }) => (isActive ? 'active' : '')}>
-              Группы потребителей
-            </NavLink>
-            <NavLink to="/acls" className={({ isActive }) => (isActive ? 'active' : '')}>
-              ACL
-            </NavLink>
-            <NavLink to="/search" className={({ isActive }) => (isActive ? 'active' : '')}>
-              Поиск сообщений
-            </NavLink>
-          </nav>
-        ) : (
-          <div className="no-cluster-message">
-            <p>Нет активного кластера</p>
-            <p className="hint">Добавьте кластер через кнопку Add</p>
-          </div>
-        )}
-
-        <div className="sidebar-footer">
-          <div className="version">Версия: {version}</div>
-          <div className="author">
-            <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-              {author}
-            </a>
-          </div>
-        </div>
-      </aside>
+      <Sidebar
+        onAddCluster={handleAdd}
+        onEditCluster={handleEdit}
+      />
 
       <main className="main-content">
+
         <Outlet />
+
       </main>
 
       {showPanel && (
-        <div className="config-overlay">
-          <div className="config-panel">
-            <ClusterConfigPanel
-              cluster={editingCluster}
-              onSave={handleSave}
-              onCancel={handleCancel}
-            />
+
+        <div
+          className="config-overlay"
+          onClick={handleCancel}
+        >
+
+          <div
+            className="config-panel"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+
+            {panelMode === 'create' && (
+
+              <CreateClusterPanel
+                onSave={handleSave}
+                onCancel={handleCancel}
+              />
+            )}
+
+            {panelMode === 'settings' && (
+
+              <ClusterSettingsPanel
+                cluster={editingCluster}
+                onSave={handleSave}
+                onCancel={handleCancel}
+                onDelete={(clusterId) => {
+
+                  removeCluster(clusterId);
+
+                  setShowPanel(false);
+
+                  setEditingCluster(null);
+
+                  setPanelMode(null);
+                }}
+              />
+            )}
+
           </div>
+
         </div>
       )}
+
     </div>
   );
 };
