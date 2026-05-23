@@ -1,0 +1,47 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+[data-theme='dark-classic'] {
+
+  --bg-primary: #0f172a;
+
+  --bg-secondary: #111827;
+
+  --panel-bg: #1e293b;
+
+  --sidebar-bg: #111827;
+
+  --sidebar-hover: #1f2937;
+
+  --border-color: #334155;
+
+  --text-primary: #f8fafc;
+
+  --text-secondary: #94a3b8;
+
+  --accent-color: #3b82f6;
+}
+
+[data-theme='kitty'] {
+
+  --bg-primary: #09111f;
+
+  --bg-secondary: #111827;
+
+  --panel-bg: #1e293b;
+
+  --sidebar-bg: #0b1220;
+
+  --sidebar-hover: #1e293b;
+
+  --border-color: #334155;
+
+  --text-primary: #f8fafc;
+
+  --text-secondary: #94a3b8;
+
+  --accent-color: #8b5cf6;
+}

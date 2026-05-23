@@ -1,0 +1,289 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* HEADER */
+
+.dashboard-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.dashboard-header h1 {
+
+  font-size: 2rem;
+
+  margin-bottom: 6px;
+}
+
+.dashboard-header p {
+  color: var(--text-secondary);
+}
+
+/* CLUSTER HEALTH */
+
+.cluster-health {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  background: var(--panel-bg);
+
+  border: 1px solid var(--border-color);
+
+  padding: 12px 18px;
+
+  border-radius: 14px;
+}
+
+.health-dot {
+
+  width: 12px;
+
+  height: 12px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 10px #22c55e,
+    0 0 20px #22c55e;
+}
+
+/* ACTIVE CLUSTER */
+
+.active-cluster-card {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #1d4ed8
+  );
+
+  color: white;
+
+  padding: 28px;
+
+  border-radius: 20px;
+}
+
+.cluster-label {
+
+  font-size: 0.75rem;
+
+  letter-spacing: 1px;
+
+  opacity: 0.8;
+}
+
+/* METRICS */
+
+.metrics-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(220px, 1fr));
+
+  gap: 18px;
+}
+
+.metric-card {
+
+  background: var(--panel-bg);
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  transition: 0.2s;
+}
+
+.metric-card:hover {
+
+  transform: translateY(-2px);
+
+  border-color: var(--accent-color);
+}
+
+.metric-card-top {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+.metric-card-icon {
+
+  font-size: 1.5rem;
+
+  color: var(--accent-color);
+}
+
+.metric-status {
+
+  width: 10px;
+
+  height: 10px;
+
+  border-radius: 50%;
+}
+
+.metric-status.healthy {
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 10px #22c55e;
+}
+
+.metric-status.warning {
+
+  background: #f59e0b;
+
+  box-shadow:
+    0 0 10px #f59e0b;
+}
+
+.metric-title {
+
+  color: var(--text-secondary);
+
+  font-size: 0.9rem;
+}
+
+/* PANELS */
+
+.dashboard-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(320px, 1fr));
+
+  gap: 20px;
+}
+
+.ksc-panel {
+
+  background: var(--panel-bg);
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 18px;
+
+  overflow: hidden;
+}
+
+.ksc-panel-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 18px 20px;
+
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ksc-panel-body {
+
+  padding: 20px;
+}
+
+/* BROKERS */
+
+.broker-list {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.broker-item {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.broker-dot {
+
+  width: 10px;
+
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 10px #22c55e;
+}
+
+/* ACTIVITY */
+
+.activity-list {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.activity-item {
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+  background: rgba(59,130,246,0.08);
+}
+
+/* LAG */
+
+.lag-placeholder {
+
+  height: 140px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: var(--text-secondary);
+}

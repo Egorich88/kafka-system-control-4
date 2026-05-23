@@ -1,0 +1,10 @@
+{
+  "overview": "Обзор",
+  "brokers": "Брокеры",
+  "topics": "Топики",
+  "consumerGroups": "Группы потребителей",
+  "searchMessages": "Поиск сообщений",
+  "settings": "Настройки",
+  "healthy": "Стабильно",
+  "cluster": "Кластер"
+}

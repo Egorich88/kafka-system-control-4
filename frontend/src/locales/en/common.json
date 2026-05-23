@@ -1,0 +1,10 @@
+{
+  "overview": "Overview",
+  "brokers": "Brokers",
+  "topics": "Topics",
+  "consumerGroups": "Consumer Groups",
+  "searchMessages": "Search Messages",
+  "settings": "Settings",
+  "healthy": "Healthy",
+  "cluster": "Cluster"
+}

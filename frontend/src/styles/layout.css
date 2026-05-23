@@ -1,0 +1,649 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+/* =========================
+   APP LAYOUT
+========================= */
+
+.main-layout {
+
+  display: flex;
+
+  min-height: 100vh;
+
+  background: var(--bg-primary);
+
+  color: var(--text-primary);
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+
+  width: 280px;
+
+  min-width: 280px;
+
+  background: var(--sidebar-bg);
+
+  border-right: 1px solid var(--border-color);
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+/* =========================
+   LOGO
+========================= */
+
+.logo {
+
+  padding: 24px;
+
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo h2 {
+
+  font-size: 20px;
+
+  font-weight: 700;
+
+  color: var(--text-primary);
+}
+
+/* =========================
+   CLUSTER SWITCHER
+========================= */
+
+.cluster-switcher {
+
+  padding: 12px 20px 20px 20px;
+}
+
+.cluster-switcher.has-cluster {
+
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cluster-label {
+
+  font-size: 12px;
+
+  color: var(--text-secondary);
+
+  letter-spacing: 0.08em;
+
+  margin-bottom: 10px;
+}
+
+.cluster-row {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+.cluster-status-dot {
+
+  width: 10px;
+
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 8px #22c55e;
+
+  flex-shrink: 0;
+}
+
+.cluster-selector {
+
+  flex: 1;
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  background: var(--sidebar-hover);
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 12px;
+
+  padding: 0 14px;
+
+  height: 44px;
+}
+
+.cluster-settings-btn {
+
+  width: 44px;
+
+  height: 44px;
+
+  min-width: 44px;
+
+  border: 1px solid var(--border-color);
+
+  background: var(--sidebar-hover);
+
+  border-radius: 12px;
+}
+
+.cluster-settings-btn:hover {
+
+  border-color: var(--accent-color);
+}
+
+.add-cluster-link {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  margin-top: 12px;
+
+  font-size: 13px;
+
+  color: #94a3b8;
+
+  cursor: pointer;
+
+  user-select: none;
+
+  transition: color 0.2s ease;
+}
+
+.add-cluster-link:hover {
+
+  color: #f8fafc;
+}
+
+/* =========================
+   SETTINGS BUTTON
+========================= */
+
+.inline-settings-btn {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: none;
+
+  color: var(--text-secondary);
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.inline-settings-btn:hover {
+
+  color: var(--accent-color);
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+.nav-section {
+
+  display: flex;
+
+  flex-direction: column;
+
+  padding: 16px;
+
+  gap: 6px;
+}
+
+.nav-item {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px 16px;
+
+  border-radius: 12px;
+
+  color: var(--text-secondary);
+
+  text-decoration: none;
+
+  transition: 0.2s;
+}
+
+.nav-item:hover {
+
+  background: var(--sidebar-hover);
+
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+
+  background: var(--panel-bg);
+
+  color: var(--text-primary);
+
+  border: 1px solid var(--border-color);
+}
+
+.nav-item svg {
+
+  font-size: 18px;
+}
+
+/* =========================
+   CONTENT
+========================= */
+
+.content-area {
+
+  flex: 1;
+
+  padding: 24px;
+
+  background: var(--bg-primary);
+
+  overflow-y: auto;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.sidebar-footer {
+
+  margin-top: auto;
+
+  padding: 20px;
+
+  border-top: 1px solid var(--border-color);
+
+  color: var(--text-secondary);
+
+  font-size: 13px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+/* =========================
+   DRAWER OVERLAY
+========================= */
+
+.drawer-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  z-index: 1990;
+}
+
+/* =========================
+   CLUSTER DRAWER
+========================= */
+
+.cluster-drawer {
+
+  position: fixed;
+
+  top: 0;
+
+  right: 0;
+
+  width: 420px;
+
+  height: 100vh;
+
+  background: var(--sidebar-bg);
+
+  border-left: 1px solid var(--border-color);
+
+  z-index: 2000;
+
+  padding: 24px;
+
+  overflow-y: auto;
+}
+
+.drawer-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 28px;
+}
+
+.drawer-header h2 {
+
+  font-size: 20px;
+
+  color: var(--text-primary);
+}
+
+.drawer-header button {
+
+  width: auto;
+
+  padding: 6px 12px;
+
+  background: transparent;
+
+  border: 1px solid var(--border-color);
+
+  color: var(--text-secondary);
+
+  border-radius: 10px;
+
+  cursor: pointer;
+}
+
+.cluster-info-block {
+
+  margin-bottom: 16px;
+}
+
+.cluster-info-block label {
+
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: var(--text-secondary);
+
+  font-size: 14px;
+}
+
+.cluster-info-block input,
+.cluster-info-block select {
+
+  width: 100%;
+
+  background: var(--panel-bg);
+
+  border: 1px solid var(--border-color);
+
+  color: var(--text-primary);
+
+  border-radius: 12px;
+
+  padding: 10px;
+}
+
+.drawer-actions {
+
+  margin-top: 24px;
+
+  display: flex;
+
+  gap: 12px;
+}
+
+.drawer-actions button {
+
+  flex: 1;
+
+  padding: 10px;
+
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  border: 1px solid var(--border-color);
+}
+
+.drawer-actions .danger-btn {
+
+  background: #7f1d1d;
+
+  color: #fff;
+
+  border-color: #991b1b;
+}
+
+.drawer-actions .danger-btn:hover {
+
+  background: #991b1b;
+}
+
+/* =========================
+   SETTINGS DRAWER
+========================= */
+
+.settings-drawer {
+
+  position: fixed;
+
+  top: 0;
+
+  right: -420px;
+
+  width: 420px;
+
+  max-width: 95%;
+
+  height: 100vh;
+
+  background: var(--sidebar-bg);
+
+  border-left: 1px solid var(--border-color);
+
+  z-index: 3000;
+
+  transition: right 0.25s ease;
+
+  padding: 24px;
+
+  overflow-y: auto;
+}
+
+.settings-drawer.open {
+
+  right: 0;
+}
+
+.settings-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 32px;
+}
+
+.settings-header h2 {
+
+  color: var(--text-primary);
+
+  font-size: 22px;
+}
+
+.settings-header button {
+
+  width: auto;
+
+  background: transparent;
+
+  border: none;
+
+  color: var(--text-secondary);
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 6px;
+
+  border-radius: 8px;
+
+  transition: all 0.2s;
+}
+
+.settings-header button:hover {
+
+  background: var(--sidebar-hover);
+
+  color: var(--text-primary);
+}
+
+.settings-section {
+
+  margin-bottom: 28px;
+}
+
+.settings-section label {
+
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: var(--text-secondary);
+
+  font-size: 14px;
+}
+
+.settings-section select {
+
+  width: 100%;
+
+  background: var(--panel-bg);
+
+  border: 1px solid var(--border-color);
+
+  color: var(--text-primary);
+
+  border-radius: 12px;
+
+  padding: 12px;
+
+  outline: none;
+}
+
+/* =========================
+   CLUSTER DROPDOWN
+========================= */
+
+.cluster-dropdown {
+
+  position: relative;
+
+  flex: 1;
+
+  width: 100%;
+}
+
+.cluster-dropdown-selected {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  width: 100%;
+
+  cursor: pointer;
+
+  color: var(--text-primary);
+}
+
+.cluster-arrow {
+
+  font-size: 16px;
+
+  color: var(--text-secondary);
+
+  transition: transform 0.2s ease;
+}
+
+.cluster-arrow.open {
+
+  transform: rotate(180deg);
+}
+
+.cluster-dropdown-menu {
+
+  position: absolute;
+
+  top: calc(100% + 6px);
+
+  left: -14px;
+
+  width: calc(100% + 28px);
+
+  background: #111827;
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 12px;
+
+  overflow: hidden;
+
+  z-index: 1000;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.45);
+}
+
+.cluster-dropdown-item {
+
+  padding: 12px 14px;
+
+  cursor: pointer;
+
+  transition: background 0.15s ease;
+
+  color: var(--text-primary);
+}
+
+.cluster-dropdown-item:hover {
+
+  background: rgba(255,255,255,0.05);
+}
+
+.cluster-dropdown-item.active {
+
+  background: rgba(59,130,246,0.18);
+
+  color: #fff;
+}

@@ -1,0 +1,26 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+:root {
+
+  --bg-primary: #111827;
+
+  --bg-secondary: #1f2937;
+
+  --panel-bg: #1e293b;
+
+  --sidebar-bg: #0f172a;
+
+  --sidebar-hover: #1e293b;
+
+  --border-color: #334155;
+
+  --text-primary: #f8fafc;
+
+  --text-secondary: #94a3b8;
+
+  --accent-color: #3b82f6;
+}
