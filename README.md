@@ -9,7 +9,8 @@
 
  # Архитектура
 
- <img width="1520" height="882" alt="image" src="https://github.com/user-attachments/assets/c3683035-e731-4631-b357-97550eefee0a" />
+ <img width="1520" height="882" alt="image" src="https://github.com/user-attachments/assets/ccdf7bc3-770c-4159-94f3-24129e8ed8bd" />
+
 
 
 ---
