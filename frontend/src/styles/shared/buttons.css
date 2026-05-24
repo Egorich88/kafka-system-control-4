@@ -1,0 +1,24 @@
+/* ========================================= ACTION BUTTONS ========================================= */
+ .action-btn {
+     height: 46px;
+     padding: 0 20px;
+     border-radius: 14px;
+     border: 1px solid var(--border-color);
+     background: var(--panel-bg);
+     color: var(--text-primary);
+     cursor: pointer;
+     transition: 0.2s ease;
+     font-weight: 600;
+}
+ .action-btn:hover {
+     border-color: var(--accent-color);
+     transform: translateY(-1px);
+}
+/* ========================================= DELETE BUTTON ========================================= */
+ .action-btn.delete {
+     border-color: rgba(239,68,68,0.35);
+     color: #ef4444;
+}
+ .action-btn.delete:hover {
+     background: rgba(239,68,68,0.12);
+}
