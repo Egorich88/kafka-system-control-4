@@ -56,9 +56,14 @@ export default function Topics() {
     topic: '',
     partitions: '1',
     replication: '1',
-    configs: '',
-  });
 
+    cleanupPolicy: 'delete',
+
+    retentionMs: '604800000',
+
+    minInSyncReplicas: '1',
+  });
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [editingParam, setEditingParam] = useState(null);
   const [editValue, setEditValue] = useState('');
   const [originalValue, setOriginalValue] = useState('');
@@ -309,51 +314,106 @@ export default function Topics() {
     setEditValue('');
   };
 
-  // =========================================================
-  // CREATE TOPIC
-  // =========================================================
+// =========================================================
+// CREATE TOPIC
+// =========================================================
 
-  const handleCreateTopic = async (e) => {
+const handleCreateTopic = async (e) => {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!currentCluster) return;
+  if (!currentCluster) return;
 
-    if (!newTopic.topic.trim()) {
+  if (!newTopic.topic.trim()) {
 
-      toast.error('Введите имя топика');
+    toast.error('Введите имя топика');
 
-      return;
+    return;
+  }
+
+  try {
+
+    const payload = {
+      topic: newTopic.topic.trim(),
+
+      partitions: Number(newTopic.partitions),
+
+      replication: Number(newTopic.replication),
+    };
+
+    if (showAdvanced) {
+
+      payload.configs = {
+        'cleanup.policy': newTopic.cleanupPolicy,
+
+        'retention.ms': newTopic.retentionMs,
+
+        'min.insync.replicas':
+          newTopic.minInSyncReplicas,
+      };
     }
 
-    try {
+    console.log('CREATE TOPIC PAYLOAD:', payload);
 
-      await axios.post('/api/topics', newTopic, {
+    await axios.post(
+      '/api/topics',
+      payload,
+      {
         headers: {
           'X-Kafka-Bootstrap': currentCluster.brokers,
         },
-      });
+      }
+    );
 
-      toast.success(`Топик "${newTopic.topic}" создан`);
+    toast.success(`Топик "${newTopic.topic}" создан`);
 
-      setNewTopic({
-        topic: '',
-        partitions: '1',
-        replication: '1',
-        configs: '',
-      });
+    setNewTopic({
+      topic: '',
+      partitions: '1',
+      replication: '1',
 
-      setShowCreateModal(false);
+      cleanupPolicy: 'delete',
 
-      fetchTopics();
+      retentionMs: '604800000',
 
-    } catch (error) {
+      minInSyncReplicas: '1',
+    });
 
-      console.error(error);
+    setShowAdvanced(false);
 
-      toast.error('Ошибка создания топика. Используйте только латинские символы, цифры, ".", "_" или "-"');
+    setShowCreateModal(false);
+
+    fetchTopics();
+
+  } catch (error) {
+
+    console.error(error);
+
+    console.error(
+      'BACKEND ERROR:',
+      error.response?.data
+    );
+
+    const backendError =
+      error.response?.data?.error || '';
+
+    if (
+      backendError.includes('Topic name is invalid') ||
+      backendError.includes('contains one or more characters')
+    ) {
+
+      toast.error(
+        'Ошибка создания топика. Используйте только латинские символы, цифры, ".", "_" или "-"'
+      );
+
+    } else {
+
+      toast.error(
+        backendError || 'Ошибка создания топика'
+      );
     }
-  };
+  }
+};
 
   // =========================================================
   // DELETE TOPIC
@@ -580,7 +640,7 @@ export default function Topics() {
               </div>
 
               <button
-                className="action-btn"
+                className="topic-drawer-close-btn"
                 onClick={closePanel}
               >
                 Скрыть
@@ -893,6 +953,94 @@ export default function Topics() {
                 />
 
               </div>
+              <button
+                type="button"
+                className="advanced-toggle"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                {showAdvanced
+                  ? 'Скрыть дополнительные параметры'
+                  : 'Дополнительные параметры'}
+              </button>
+
+              {showAdvanced && (
+
+                <div className="advanced-section">
+
+                  {/* CLEANUP POLICY */}
+
+                  <div className="modal-field">
+
+                    <label>cleanup.policy</label>
+
+                    <select
+                      value={newTopic.cleanupPolicy}
+                      onChange={(e) =>
+                        setNewTopic({
+                          ...newTopic,
+                          cleanupPolicy: e.target.value,
+                        })
+                      }
+                    >
+
+                      <option value="delete">
+                        delete
+                      </option>
+
+                      <option value="compact">
+                        compact
+                      </option>
+
+                      <option value="compact,delete">
+                        compact,delete
+                      </option>
+
+                    </select>
+
+                  </div>
+
+                  {/* RETENTION */}
+
+                  <div className="modal-field">
+
+                    <label>retention.ms</label>
+
+                    <input
+                      type="text"
+                      value={newTopic.retentionMs}
+                      onChange={(e) =>
+                        setNewTopic({
+                          ...newTopic,
+                          retentionMs: e.target.value,
+                        })
+                      }
+                    />
+
+                  </div>
+
+                  {/* MIN ISR */}
+
+                  <div className="modal-field">
+
+                    <label>min.insync.replicas</label>
+
+                    <input
+                      type="text"
+                      placeholder="1"
+                      value={newTopic.minInSyncReplicas}
+                      onChange={(e) =>
+                        setNewTopic({
+                          ...newTopic,
+                          minInSyncReplicas: e.target.value,
+                        })
+                      }
+                    />
+
+                  </div>
+
+                </div>
+
+              )}
 
               <div className="modal-buttons">
 
