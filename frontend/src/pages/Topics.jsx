@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import '../styles/topics.css';
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
@@ -48,6 +64,22 @@ export default function Topics() {
   const [originalValue, setOriginalValue] = useState('');
 
   const panelRef = useRef(null);
+  useEffect(() => {
+
+    if (detailTopic) {
+
+      document.body.classList.add('drawer-open');
+
+    } else {
+
+      document.body.classList.remove('drawer-open');
+    }
+
+    return () => {
+      document.body.classList.remove('drawer-open');
+    };
+
+  }, [detailTopic]);
 
   // =========================================================
   // RESET STATE ON CLUSTER CHANGE
@@ -181,8 +213,6 @@ export default function Topics() {
 
   const closePanel = () => {
 
-    setSelectedTopic(null);
-
     setDetailTopic(null);
 
     setEditingParam(null);
@@ -193,7 +223,7 @@ export default function Topics() {
     const handleClickOutside = (event) => {
 
       if (
-        selectedTopic &&
+        detailTopic &&
         panelRef.current &&
         !panelRef.current.contains(event.target)
       ) {
@@ -207,7 +237,7 @@ export default function Topics() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
 
-  }, [selectedTopic]);
+  }, [detailTopic]);
 
   // =========================================================
   // EDIT CONFIG
@@ -217,9 +247,9 @@ export default function Topics() {
 
     setEditingParam(key);
 
-    setEditValue(currentValue);
+    setEditValue(String(currentValue));
 
-    setOriginalValue(currentValue);
+    setOriginalValue(String(currentValue));
   };
 
   const handleSaveEdit = async () => {
@@ -453,14 +483,17 @@ export default function Topics() {
             {loading ? (
 
               <tr>
+
                 <td colSpan="3" className="topics-loading">
                   Загрузка топиков...
                 </td>
+
               </tr>
 
             ) : filteredTopics.length === 0 ? (
 
               <tr>
+
                 <td colSpan="3" className="topics-empty-cell">
 
                   <div className="topics-empty">
@@ -475,6 +508,7 @@ export default function Topics() {
                   </div>
 
                 </td>
+
               </tr>
 
             ) : (
@@ -516,22 +550,34 @@ export default function Topics() {
 
       </div>
 
-      {selectedTopic && detailTopic && (
+      {/* ===================================================== */}
+      {/* DRAWER */}
+      {/* ===================================================== */}
+
+      {detailTopic && (
 
         <div
-          className="floating-details-panel"
+          className="topic-drawer"
           ref={panelRef}
         >
 
-          <div className="panel-header">
+          <div className="topic-drawer-header">
 
-            <h2>Детали топика</h2>
+            <div>
+
+              <h2>Детали топика</h2>
+
+              <span>
+                {selectedTopic?.name}
+              </span>
+
+            </div>
 
             <button
-              className="close-panel"
+              className="action-btn"
               onClick={closePanel}
             >
-              Скрыть
+              Закрыть
             </button>
 
           </div>
@@ -544,27 +590,230 @@ export default function Topics() {
 
           ) : (
 
-            <>
+            <div className="topic-drawer-body">
 
-              <p>
-                <strong>Название:</strong>{' '}
-                {selectedTopic.name}
-              </p>
+              {/* INFO */}
 
-              <p>
-                <strong>
-                  Фактор репликации:
-                </strong>{' '}
-                {detailTopic.replicationFactor}
-              </p>
+              <div className="topic-info-grid">
 
-            </>
+                <div className="topic-info-card">
+
+                  <span>Партиции</span>
+
+                  <strong>
+                    {detailTopic.partitions?.length || 0}
+                  </strong>
+
+                </div>
+
+                <div className="topic-info-card">
+
+                  <span>Репликация</span>
+
+                  <strong>
+                    {detailTopic.replicationFactor}
+                  </strong>
+
+                </div>
+
+              </div>
+
+              {/* PARTITIONS */}
+
+              {detailTopic.partitions && (
+
+                <div className="topic-section">
+
+                  <h3>Партиции</h3>
+
+                  <div className="topic-config-wrapper">
+
+                    <table className="topic-config-table">
+
+                      <thead>
+
+                        <tr>
+
+                          <th>ID</th>
+
+                          <th>Лидер</th>
+
+                          <th>Реплики</th>
+
+                          <th>ISR</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        {detailTopic.partitions.map((partition) => (
+
+                          <tr key={partition.partition}>
+
+                            <td>
+                              {partition.partition}
+                            </td>
+
+                            <td>
+                              {partition.leader}
+                            </td>
+
+                            <td>
+                              {partition.replicas?.join(', ')}
+                            </td>
+
+                            <td>
+                              {partition.isr?.join(', ')}
+                            </td>
+
+                          </tr>
+
+                        ))}
+
+                      </tbody>
+
+                    </table>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {/* CONFIGS */}
+
+              {detailTopic.configs && (
+
+                <div className="topic-section">
+
+                  <div className="config-hint">
+                    Двойной клик по значению параметра — редактирование
+                  </div>
+
+                  <h3>Конфигурация</h3>
+
+                  <div className="topic-config-wrapper">
+
+                    <table className="topic-config-table">
+
+                      <thead>
+
+                        <tr>
+
+                          <th>Параметр</th>
+
+                          <th>Значение</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        {Object.entries(detailTopic.configs).map(
+                          ([key, value]) => (
+
+                            <tr
+                              key={key}
+                              className={
+                                editingParam === key
+                                  ? 'active-config'
+                                  : ''
+                              }
+                            >
+
+                              <td className="config-key">
+                                {key}
+                              </td>
+
+                              <td>
+
+                                <span
+                                  className={
+                                    editingParam === key
+                                      ? 'editable-config editing-highlight'
+                                      : 'editable-config'
+                                  }
+                                  onDoubleClick={() =>
+                                    handleConfigDoubleClick(
+                                      key,
+                                      value
+                                    )
+                                  }
+                                >
+                                  {String(value)}
+                                </span>
+
+                              </td>
+
+                            </tr>
+
+                          )
+                        )}
+
+                      </tbody>
+
+                    </table>
+
+                  </div>
+
+                  {/* EDIT BOX */}
+
+                  {editingParam && (
+
+                    <div className="config-edit-box">
+
+                      <h4>
+                        Редактирование параметра:
+                        {' '}
+                        {editingParam}
+                      </h4>
+
+                      <input
+                        type="text"
+                        value={editValue}
+                        onChange={(e) =>
+                          setEditValue(e.target.value)
+                        }
+                      />
+
+                      <div className="config-edit-actions">
+
+                        <button
+                          onClick={handleSaveEdit}
+                        >
+                          Сохранить
+                        </button>
+
+                        <button
+                          onClick={handleCancelEdit}
+                        >
+                          Отмена
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  )}
+
+                </div>
+
+              )}
+
+            </div>
 
           )}
 
         </div>
 
       )}
+
+      {/* ===================================================== */}
+      {/* CREATE MODAL */}
+      {/* ===================================================== */}
 
       {showCreateModal && (
 
