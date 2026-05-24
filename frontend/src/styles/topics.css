@@ -35,27 +35,8 @@
      border: 1px solid var(--border-color);
      background: var(--panel-bg);
 }
-/* SCROLLBAR */
- .topics-table-wrapper::-webkit-scrollbar {
-     width: 10px;
-}
- .topics-table-wrapper::-webkit-scrollbar-track {
-     background: rgba(255,255,255,0.03);
-}
- .topics-table-wrapper::-webkit-scrollbar-thumb {
-     background: rgba(255,255,255,0.12);
-     border-radius: 20px;
-}
- .topics-table-wrapper::-webkit-scrollbar-thumb:hover {
-     background: rgba(255,255,255,0.18);
-}
 /* ========================= TABLE ========================= */
- .topics-table {
-     width: 100%;
-     border-collapse: collapse;
-     background: var(--panel-bg);
-}
- .topics-table thead {
+  .topics-table thead {
      position: sticky;
      top: 0;
      z-index: 20;
@@ -81,13 +62,6 @@
      border-right: 1px solid rgba(255,255,255,0.06);
 }
 /* ROWS */
- .topics-table tbody tr {
-     transition: 0.18s ease;
-     cursor: pointer;
-}
- .topics-table tbody tr:hover {
-     background: rgba(59,130,246,0.08);
-}
  .topics-table tbody tr.selected {
      background: rgba(59,130,246,0.16);
 }
@@ -191,24 +165,7 @@
      overflow-y: auto;
 }
 /* CONFIG SCROLLBAR */
- .topic-config-wrapper::-webkit-scrollbar {
-     width: 10px;
-}
- .topic-config-wrapper::-webkit-scrollbar-track {
-     background: rgba(255,255,255,0.02);
-}
- .topic-config-wrapper::-webkit-scrollbar-thumb {
-     background: rgba(255,255,255,0.10);
-     border-radius: 20px;
-}
- .topic-config-wrapper::-webkit-scrollbar-thumb:hover {
-     background: rgba(255,255,255,0.18);
-}
- .topic-config-table {
-     width: 100%;
-     border-collapse: collapse;
-}
- .topic-config-table thead {
+  .topic-config-table thead {
      position: sticky;
      top: 0;
      z-index: 15;
@@ -227,10 +184,7 @@
      font-size: 14px;
      color: white;
 }
- .topic-config-table tr:hover {
-     background: rgba(255,255,255,0.03);
-}
- .topic-config-table tr.active-config {
+  .topic-config-table tr.active-config {
      background: rgba(250,204,21,0.08);
 }
  .topic-config-table td:not(:last-child), .topic-config-table th:not(:last-child) {
