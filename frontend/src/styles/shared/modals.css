@@ -1,0 +1,92 @@
+/* ========================================= OVERLAYS ========================================= */
+
+.modal-overlay,
+.topic-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(2, 6, 23, 0.42);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: overlayFade 0.18s ease;
+}
+
+/* ========================================= DRAWERS / MODALS ========================================= */
+
+.modal-content,
+.topic-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 560px;
+    max-width: 92vw;
+    height: 100vh;
+    overflow-y: auto;
+
+    background: linear-gradient(
+        180deg,
+        #0b1220 0%,
+        #0f172a 100%
+    );
+
+    border-left: 1px solid rgba(255,255,255,0.08);
+
+    box-shadow: -12px 0 40px rgba(0,0,0,0.45);
+
+    animation: slidePanel 0.22s ease;
+
+    color: white;
+}
+
+/* ========================================= SCROLLBARS ========================================= */
+
+.modal-content::-webkit-scrollbar,
+.topic-drawer::-webkit-scrollbar {
+    width: 10px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+.topic-drawer::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.03);
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.topic-drawer::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.12);
+    border-radius: 20px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.topic-drawer::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.18);
+}
+
+/* ========================================= ANIMATIONS ========================================= */
+
+@keyframes slidePanel {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes overlayFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ========================================= BODY LOCK ========================================= */
+
+body.drawer-open {
+    overflow: hidden;
+}

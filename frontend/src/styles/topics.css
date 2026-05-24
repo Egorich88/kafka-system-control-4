@@ -161,46 +161,6 @@
      padding: 32px;
      color: rgba(255,255,255,0.55);
 }
-/* ========================================= DRAWER OVERLAY ========================================= */
- .topic-drawer-overlay {
-     position: fixed;
-     inset: 0;
-     z-index: 9998;
-     background: rgba(2, 6, 23, 0.42);
-     backdrop-filter: blur(10px);
-     -webkit-backdrop-filter: blur(10px);
-     animation: overlayFade 0.18s ease;
-}
-/* ========================================= TOPIC DRAWER ========================================= */
- .topic-drawer {
-     position: fixed;
-     top: 0;
-     right: 0;
-     width: 560px;
-     max-width: 92vw;
-     height: 100vh;
-     z-index: 9999;
-     background: linear-gradient( 180deg, #0b1220 0%, #0f172a 100% );
-     border-left: 1px solid rgba(255,255,255,0.08);
-     box-shadow: -12px 0 40px rgba(0,0,0,0.45);
-     overflow-y: auto;
-     animation: slidePanel 0.22s ease;
-     color: white;
-}
-/* DRAWER SCROLLBAR */
- .topic-drawer::-webkit-scrollbar {
-     width: 10px;
-}
- .topic-drawer::-webkit-scrollbar-track {
-     background: rgba(255,255,255,0.03);
-}
- .topic-drawer::-webkit-scrollbar-thumb {
-     background: rgba(255,255,255,0.12);
-     border-radius: 20px;
-}
- .topic-drawer::-webkit-scrollbar-thumb:hover {
-     background: rgba(255,255,255,0.18);
-}
  .topic-drawer-header {
      position: sticky;
      top: 0;
@@ -399,28 +359,6 @@
  .config-edit-actions button:last-child:hover {
      background: rgba(255,255,255,0.10);
 }
-/* ========================= ANIMATIONS ========================= */
- @keyframes slidePanel {
-     from {
-         transform: translateX(100%);
-         opacity: 0;
-    }
-     to {
-         transform: translateX(0);
-         opacity: 1;
-    }
-}
- @keyframes overlayFade {
-     from {
-         opacity: 0;
-    }
-     to {
-         opacity: 1;
-    }
-}
- body.drawer-open {
-     overflow: hidden;
-}
 /* ========================================= DRAWER HEADER ========================================= */
  .topic-drawer-header {
      position: sticky;
@@ -448,45 +386,6 @@
      line-height: 1.3;
      letter-spacing: 0.2px;
      word-break: break-word;
-}
-/* ========================================= CREATE TOPIC MODAL ========================================= */
- .modal-overlay {
-     position: fixed;
-     inset: 0;
-     z-index: 9998;
-     display: flex;
-     justify-content: flex-end;
-     background: rgba(2, 6, 23, 0.42);
-     backdrop-filter: blur(10px);
-     -webkit-backdrop-filter: blur(10px);
-     animation: overlayFade 0.18s ease;
-}
- .modal-content {
-     position: relative;
-     width: 560px;
-     max-width: 92vw;
-     height: 100vh;
-     overflow-y: auto;
-     padding: 32px;
-     background: linear-gradient( 180deg, #0b1220 0%, #0f172a 100% );
-     border-left: 1px solid rgba(255,255,255,0.08);
-     box-shadow: -12px 0 40px rgba(0,0,0,0.45);
-     animation: slidePanel 0.22s ease;
-     color: white;
-}
-/* MODAL SCROLLBAR */
- .modal-content::-webkit-scrollbar {
-     width: 10px;
-}
- .modal-content::-webkit-scrollbar-track {
-     background: rgba(255,255,255,0.03);
-}
- .modal-content::-webkit-scrollbar-thumb {
-     background: rgba(255,255,255,0.12);
-     border-radius: 20px;
-}
- .modal-content::-webkit-scrollbar-thumb:hover {
-     background: rgba(255,255,255,0.18);
 }
 /* TITLE */
  .modal-content h2 {

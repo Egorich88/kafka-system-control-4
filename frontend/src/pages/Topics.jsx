@@ -31,6 +31,7 @@
  */
 
 import '../styles/topics.css';
+import '../styles/shared/modals.css';
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
