@@ -351,7 +351,7 @@ export default function Topics() {
 
       console.error(error);
 
-      toast.error('Ошибка создания топика');
+      toast.error('Ошибка создания топика. Используйте только латинские символы, цифры, ".", "_" или "-"');
     }
   };
 
@@ -557,255 +557,263 @@ export default function Topics() {
       {detailTopic && (
 
         <div
-          className="topic-drawer"
-          ref={panelRef}
+          className="topic-drawer-overlay"
+          onClick={closePanel}
         >
 
-          <div className="topic-drawer-header">
+          <div
+            className="topic-drawer"
+            ref={panelRef}
+            onClick={(e) => e.stopPropagation()}
+          >
 
-            <div>
+            <div className="topic-drawer-header">
 
-              <h2>Детали топика</h2>
+              <div>
 
-              <span>
-                {selectedTopic?.name}
-              </span>
+                <h2>Детали топика</h2>
 
-            </div>
-
-            <button
-              className="action-btn"
-              onClick={closePanel}
-            >
-              Закрыть
-            </button>
-
-          </div>
-
-          {detailLoading ? (
-
-            <div className="loading">
-              Загрузка деталей...
-            </div>
-
-          ) : (
-
-            <div className="topic-drawer-body">
-
-              {/* INFO */}
-
-              <div className="topic-info-grid">
-
-                <div className="topic-info-card">
-
-                  <span>Партиции</span>
-
-                  <strong>
-                    {detailTopic.partitions?.length || 0}
-                  </strong>
-
-                </div>
-
-                <div className="topic-info-card">
-
-                  <span>Репликация</span>
-
-                  <strong>
-                    {detailTopic.replicationFactor}
-                  </strong>
-
+                <div className="topic-selected-name">
+                  {selectedTopic?.name}
                 </div>
 
               </div>
 
-              {/* PARTITIONS */}
+              <button
+                className="action-btn"
+                onClick={closePanel}
+              >
+                Скрыть
+              </button>
 
-              {detailTopic.partitions && (
+            </div>
 
-                <div className="topic-section">
+            {detailLoading ? (
 
-                  <h3>Партиции</h3>
+              <div className="loading">
+                Загрузка деталей...
+              </div>
 
-                  <div className="topic-config-wrapper">
+            ) : (
 
-                    <table className="topic-config-table">
+              <div className="topic-drawer-body">
 
-                      <thead>
+                {/* INFO */}
 
-                        <tr>
+                <div className="topic-info-grid">
 
-                          <th>ID</th>
+                  <div className="topic-info-card">
 
-                          <th>Лидер</th>
+                    <span>Партиции</span>
 
-                          <th>Реплики</th>
+                    <strong>
+                      {detailTopic.partitions?.length || 0}
+                    </strong>
 
-                          <th>ISR</th>
+                  </div>
 
-                        </tr>
+                  <div className="topic-info-card">
 
-                      </thead>
+                    <span>Репликация</span>
 
-                      <tbody>
-
-                        {detailTopic.partitions.map((partition) => (
-
-                          <tr key={partition.partition}>
-
-                            <td>
-                              {partition.partition}
-                            </td>
-
-                            <td>
-                              {partition.leader}
-                            </td>
-
-                            <td>
-                              {partition.replicas?.join(', ')}
-                            </td>
-
-                            <td>
-                              {partition.isr?.join(', ')}
-                            </td>
-
-                          </tr>
-
-                        ))}
-
-                      </tbody>
-
-                    </table>
+                    <strong>
+                      {detailTopic.replicationFactor}
+                    </strong>
 
                   </div>
 
                 </div>
 
-              )}
+                {/* PARTITIONS */}
 
-              {/* CONFIGS */}
+                {detailTopic.partitions && (
 
-              {detailTopic.configs && (
+                  <div className="topic-section">
 
-                <div className="topic-section">
+                    <h3>Партиции</h3>
 
-                  <div className="config-hint">
-                    Двойной клик по значению параметра — редактирование
-                  </div>
+                    <div className="topic-config-wrapper">
 
-                  <h3>Конфигурация</h3>
+                      <table className="topic-config-table">
 
-                  <div className="topic-config-wrapper">
+                        <thead>
 
-                    <table className="topic-config-table">
+                          <tr>
 
-                      <thead>
+                            <th>ID</th>
 
-                        <tr>
+                            <th>Лидер</th>
 
-                          <th>Параметр</th>
+                            <th>Реплики</th>
 
-                          <th>Значение</th>
+                            <th>ISR</th>
 
-                        </tr>
+                          </tr>
 
-                      </thead>
+                        </thead>
 
-                      <tbody>
+                        <tbody>
 
-                        {Object.entries(detailTopic.configs).map(
-                          ([key, value]) => (
+                          {detailTopic.partitions.map((partition) => (
 
-                            <tr
-                              key={key}
-                              className={
-                                editingParam === key
-                                  ? 'active-config'
-                                  : ''
-                              }
-                            >
+                            <tr key={partition.partition}>
 
-                              <td className="config-key">
-                                {key}
+                              <td>
+                                {partition.partition}
                               </td>
 
                               <td>
+                                {partition.leader}
+                              </td>
 
-                                <span
-                                  className={
-                                    editingParam === key
-                                      ? 'editable-config editing-highlight'
-                                      : 'editable-config'
-                                  }
-                                  onDoubleClick={() =>
-                                    handleConfigDoubleClick(
-                                      key,
-                                      value
-                                    )
-                                  }
-                                >
-                                  {String(value)}
-                                </span>
+                              <td>
+                                {partition.replicas?.join(', ')}
+                              </td>
 
+                              <td>
+                                {partition.isr?.join(', ')}
                               </td>
 
                             </tr>
 
-                          )
-                        )}
+                          ))}
 
-                      </tbody>
+                        </tbody>
 
-                    </table>
-
-                  </div>
-
-                  {/* EDIT BOX */}
-
-                  {editingParam && (
-
-                    <div className="config-edit-box">
-
-                      <h4>
-                        Редактирование параметра:
-                        {' '}
-                        {editingParam}
-                      </h4>
-
-                      <input
-                        type="text"
-                        value={editValue}
-                        onChange={(e) =>
-                          setEditValue(e.target.value)
-                        }
-                      />
-
-                      <div className="config-edit-actions">
-
-                        <button
-                          onClick={handleSaveEdit}
-                        >
-                          Сохранить
-                        </button>
-
-                        <button
-                          onClick={handleCancelEdit}
-                        >
-                          Отмена
-                        </button>
-
-                      </div>
+                      </table>
 
                     </div>
 
-                  )}
+                  </div>
 
-                </div>
+                )}
 
-              )}
+                {/* CONFIGS */}
 
-            </div>
+                {detailTopic.configs && (
 
-          )}
+                  <div className="topic-section">
+
+                    <div className="config-hint">
+                      Двойной клик по значению параметра — редактирование
+                    </div>
+
+                    <h3>Конфигурация</h3>
+
+                    <div className="topic-config-wrapper">
+
+                      <table className="topic-config-table">
+
+                        <thead>
+
+                          <tr>
+
+                            <th>Параметр</th>
+
+                            <th>Значение</th>
+
+                          </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                          {Object.entries(detailTopic.configs).map(
+                            ([key, value]) => (
+
+                              <tr
+                                key={key}
+                                className={
+                                  editingParam === key
+                                    ? 'active-config'
+                                    : ''
+                                }
+                              >
+
+                                <td className="config-key">
+                                  {key}
+                                </td>
+
+                                <td>
+
+                                  <span
+                                    className={
+                                      editingParam === key
+                                        ? 'editable-config editing-highlight'
+                                        : 'editable-config'
+                                    }
+                                    onDoubleClick={() =>
+                                      handleConfigDoubleClick(
+                                        key,
+                                        value
+                                      )
+                                    }
+                                  >
+                                    {String(value)}
+                                  </span>
+
+                                </td>
+
+                              </tr>
+
+                            )
+                          )}
+
+                        </tbody>
+
+                      </table>
+
+                    </div>
+
+                    {/* EDIT BOX */}
+
+                    {editingParam && (
+
+                      <div className="config-edit-box">
+
+                        <h4>
+                          Редактирование параметра:
+                          {' '}
+                          {editingParam}
+                        </h4>
+
+                        <input
+                          type="text"
+                          value={editValue}
+                          onChange={(e) =>
+                            setEditValue(e.target.value)
+                          }
+                        />
+
+                        <div className="config-edit-actions">
+
+                          <button
+                            onClick={handleSaveEdit}
+                          >
+                            Сохранить
+                          </button>
+
+                          <button
+                            onClick={handleCancelEdit}
+                          >
+                            Отмена
+                          </button>
+
+                        </div>
+
+                      </div>
+
+                    )}
+
+                  </div>
+
+                )}
+
+              </div>
+
+            )}
+
+          </div>
 
         </div>
 
@@ -831,42 +839,60 @@ export default function Topics() {
 
             <form onSubmit={handleCreateTopic}>
 
-              <input
-                type="text"
-                placeholder="Имя топика"
-                value={newTopic.topic}
-                onChange={(e) =>
-                  setNewTopic({
-                    ...newTopic,
-                    topic: e.target.value,
-                  })
-                }
-                required
-              />
+              <div className="modal-field">
 
-              <input
-                type="text"
-                placeholder="Партиции"
-                value={newTopic.partitions}
-                onChange={(e) =>
-                  setNewTopic({
-                    ...newTopic,
-                    partitions: e.target.value,
-                  })
-                }
-              />
+                <label>Имя топика</label>
 
-              <input
-                type="text"
-                placeholder="Репликация"
-                value={newTopic.replication}
-                onChange={(e) =>
-                  setNewTopic({
-                    ...newTopic,
-                    replication: e.target.value,
-                  })
-                }
-              />
+                <input
+                  type="text"
+                  placeholder="Например: orders.events"
+                  value={newTopic.topic}
+                  onChange={(e) =>
+                    setNewTopic({
+                      ...newTopic,
+                      topic: e.target.value,
+                    })
+                  }
+                  required
+                />
+
+              </div>
+
+              <div className="modal-field">
+
+                <label>Количество партиций</label>
+
+                <input
+                  type="text"
+                  placeholder="1"
+                  value={newTopic.partitions}
+                  onChange={(e) =>
+                    setNewTopic({
+                      ...newTopic,
+                      partitions: e.target.value,
+                    })
+                  }
+                />
+
+              </div>
+
+              <div className="modal-field">
+
+                <label>Фактор репликации</label>
+
+                <input
+                  type="text"
+                  placeholder="1"
+                  value={newTopic.replication}
+                  onChange={(e) =>
+                    setNewTopic({
+                      ...newTopic,
+                      replication: e.target.value,
+                    })
+                  }
+                />
+
+              </div>
 
               <div className="modal-buttons">
 
