@@ -20,7 +20,7 @@ export function ThemeProvider({
   const [theme, setTheme] =
     useState(
       localStorage.getItem('ksc_theme')
-      || 'dark-classic'
+      || 'dark'
     );
 
   useEffect(() => {

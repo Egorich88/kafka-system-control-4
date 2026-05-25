@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import './styles/themes.css';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './styles/shared/variables.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -24,11 +26,15 @@ import { LanguageProvider } from './contexts/LanguageContext';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
 
-    <LanguageProvider>
+    <ThemeProvider>
 
-      <App />
+      <LanguageProvider>
 
-    </LanguageProvider>
+        <App />
+
+      </LanguageProvider>
+
+    </ThemeProvider>
 
   </React.StrictMode>
 );
