@@ -136,7 +136,7 @@
          topicSearch.toLowerCase()
        )
      );
-     return ( <div className="search-page"> <Toaster position="top-right" /> <div className="search-header"> <div> <h1>Поиск сообщений</h1> <p> Kafka Message Explorer </p> </div> </div> <div className="search-toolbar-card"> <form className="search-toolbar" onSubmit={
+     return ( <div className="search-page"> <Toaster position="top-right" /> <div className="search-header"> <div> <h1>Поиск сообщений</h1>  </div> </div> <div className="search-toolbar-card"> <form className="search-toolbar" onSubmit={
         handleSearch
     }
      > <div className="search-field"> <label>Топик</label> <div className="topic-dropdown-wrapper">
