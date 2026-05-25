@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 import { useCluster } from '../contexts/ClusterContext';
 
@@ -31,7 +31,7 @@ import packageJson from '../../package.json';
 import { useTranslation } from 'react-i18next';
 
 const Layout = () => {
-
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const {
@@ -181,6 +181,8 @@ const Layout = () => {
                   setEditingCluster(null);
 
                   setPanelMode(null);
+
+                  navigate('/');
                 }}
               />
             )}
