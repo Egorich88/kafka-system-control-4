@@ -74,6 +74,9 @@ type TopicDetailResponse struct {
 	ReplicationFactor int16             `json:"replicationFactor"`
 	Configs           map[string]string `json:"configs"`
 }
+type UpdateTopicConfigRequest struct {
+	Configs map[string]string `json:"configs"`
+}
 
 func getBootstrapFromRequest(r *http.Request) string {
 
@@ -418,6 +421,91 @@ func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func updateTopicConfigHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == http.MethodOptions {
+
+		w.Header().Set("Access-Control-Allow-Methods", "PATCH, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Kafka-Bootstrap")
+
+		w.WriteHeader(http.StatusNoContent)
+
+		return
+	}
+
+	path := strings.TrimPrefix(r.URL.Path, "/api/topics/")
+	path = strings.TrimSuffix(path, "/config")
+
+	topic := strings.TrimSuffix(path, "/")
+
+	if topic == "" {
+
+		sendJSONError(w, "Topic name required", http.StatusBadRequest)
+
+		return
+	}
+
+	var req UpdateTopicConfigRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+
+		sendJSONError(w, "Invalid JSON", http.StatusBadRequest)
+
+		return
+	}
+
+	bootstrap := getBootstrapFromRequest(r)
+
+	admin, err := createAdminClient(bootstrap)
+
+	if err != nil {
+
+		sendJSONError(
+			w,
+			"Failed to connect to Kafka: "+err.Error(),
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	defer admin.Close()
+
+	configs := make(map[string]*string)
+
+	for key, value := range req.Configs {
+
+		v := value
+
+		configs[key] = &v
+	}
+
+	err = admin.AlterConfig(
+    	sarama.TopicResource,
+    	topic,
+    	configs,
+    	false,
+    )
+
+	if err != nil {
+
+		sendJSONError(
+			w,
+			"Failed to update config: "+err.Error(),
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]bool{
+		"success": true,
+	})
+}
+
 func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -584,20 +672,28 @@ func main() {
 
 		switch r.Method {
 
-		case http.MethodDelete:
-			deleteTopicHandler(w, r)
+        case http.MethodDelete:
+        	deleteTopicHandler(w, r)
 
-		case http.MethodGet:
+        case http.MethodPatch:
 
-			if strings.Contains(r.URL.Path, "/messages") {
-				getMessagesHandler(w, r)
-			} else {
-				getTopicDetailHandler(w, r)
-			}
+        	if strings.Contains(r.URL.Path, "/config") {
+        		updateTopicConfigHandler(w, r)
+        	} else {
+        		w.WriteHeader(http.StatusNotFound)
+        	}
 
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
+        case http.MethodGet:
+
+        	if strings.Contains(r.URL.Path, "/messages") {
+        		getMessagesHandler(w, r)
+        	} else {
+        		getTopicDetailHandler(w, r)
+        	}
+
+        default:
+        	w.WriteHeader(http.StatusNotFound)
+        }
 	})
 
 	port := ":8080"
