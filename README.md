@@ -1,5 +1,6 @@
 # Kafka System Control-4
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/1f091300-78f1-49b1-ba75-1f9770048216" />
+<img width="1254" height="1254" alt="image" src="https://github.com/user-attachments/assets/4d3f6079-6787-42f1-9d54-9b508c35cd06" />
+
 
 **Веб‑интерфейс для управления Apache Kafka** (React + Go).  
 Проект переродился из консольных скриптов в современный микросервис с CI/CD (GitHub Actions), контейнеризацией и автоматическими релизами.
