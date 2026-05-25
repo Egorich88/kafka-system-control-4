@@ -75,14 +75,14 @@
      color: rgba(255,255,255,0.6);
 }
  .cluster-add-link {
-     font-size: 14px;
-     color: #ffffff;
-     cursor: pointer;
-     transition: 0.2s ease;
-     user-select: none;
-}
+      font-size: 14px;
+      color: rgba(255,255,255,0.72);
+      cursor: pointer;
+      transition: 0.2s ease;
+      user-select: none;
+ }
  .cluster-add-link:hover {
-     color: #60a5fa;
+     color: #ffffff;
 }
 /* ========================= CLUSTER ROW ========================= */
  .cluster-row {
