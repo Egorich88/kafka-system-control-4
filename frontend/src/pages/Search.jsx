@@ -1,5 +1,10 @@
 /* * Copyright 2026 Egor Khomenko (Egorich88) * * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. * You may obtain a copy of the License at * * http://www.apache.org/licenses/LICENSE-2.0 * * Unless required by applicable law or agreed to in writing, software * distributed under the License is distributed on an "AS IS" BASIS, * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. * See the License for the specific language governing permissions and * limitations under the License. */
+ import {
+   FiChevronDown,
+   FiChevronUp,
+   FiSearch
+ } from 'react-icons/fi';
  import '../styles/Search.css';
  import {
      useEffect, useState
@@ -120,31 +125,105 @@
         }
     }
     ;
+     const [isTopicDropdownOpen, setIsTopicDropdownOpen] =
+       useState(false);
+
+     const [topicSearch, setTopicSearch] =
+       useState('');
+
+     const filteredTopics = topics.filter(topic =>
+       topic.toLowerCase().includes(
+         topicSearch.toLowerCase()
+       )
+     );
      return ( <div className="search-page"> <Toaster position="top-right" /> <div className="search-header"> <div> <h1>Поиск сообщений</h1> <p> Kafka Message Explorer </p> </div> </div> <div className="search-toolbar-card"> <form className="search-toolbar" onSubmit={
         handleSearch
     }
-     > <div className="search-field"> <label>Топик</label> <select value={
-        selectedTopic
-    }
-     onChange={
-        (e) => setSelectedTopic(e.target.value)
-    }
-     required disabled={
-        loadingTopics
-    }
-     > <option value=""> Выберите топик </option> {
-        topics.map((topic) => ( <option key={
-            topic
-        }
-         value={
-            topic
-        }
-         > {
-            topic
-        }
-         </option> ))
-    }
-     </select> </div> <div className="search-field"> <label>Партиция</label> <input type="number" value={
+     > <div className="search-field"> <label>Топик</label> <div className="topic-dropdown-wrapper">
+
+                                                             <button
+                                                               type="button"
+                                                               className={`topic-dropdown-trigger ${
+                                                                 isTopicDropdownOpen ? 'open' : ''
+                                                               }`}
+                                                               onClick={() =>
+                                                                 setIsTopicDropdownOpen(
+                                                                   !isTopicDropdownOpen
+                                                                 )
+                                                               }
+                                                             >
+
+                                                               <span className="topic-dropdown-value">
+
+                                                                 {selectedTopic || 'Выберите топик'}
+
+                                                               </span>
+
+                                                               <div className="topic-dropdown-chevron">
+
+                                                                 {isTopicDropdownOpen ? (
+                                                                   <FiChevronUp />
+                                                                 ) : (
+                                                                   <FiChevronDown />
+                                                                 )}
+
+                                                               </div>
+
+                                                             </button>
+
+                                                             {isTopicDropdownOpen && (
+
+                                                               <div className="topic-dropdown-menu">
+
+                                                                 <div className="topic-dropdown-search">
+
+                                                                   <FiSearch />
+
+                                                                   <input
+                                                                     type="text"
+                                                                     placeholder="Поиск топика..."
+                                                                     value={topicSearch}
+                                                                     onChange={(e) =>
+                                                                       setTopicSearch(e.target.value)
+                                                                     }
+                                                                   />
+
+                                                                 </div>
+
+                                                                 <div className="topic-dropdown-list">
+
+                                                                   {filteredTopics.map(topic => (
+
+                                                                     <div
+                                                                       key={topic}
+                                                                       className={`topic-dropdown-item ${
+                                                                         selectedTopic === topic
+                                                                           ? 'active'
+                                                                           : ''
+                                                                       }`}
+                                                                       onClick={() => {
+
+                                                                         setSelectedTopic(topic);
+
+                                                                         setIsTopicDropdownOpen(false);
+
+                                                                         setTopicSearch('');
+                                                                       }}
+                                                                     >
+
+                                                                       {topic}
+
+                                                                     </div>
+
+                                                                   ))}
+
+                                                                 </div>
+
+                                                               </div>
+
+                                                             )}
+
+                                                           </div> </div> <div className="search-field"> <label>Партиция</label> <input type="number" value={
         partition
     }
      onChange={
