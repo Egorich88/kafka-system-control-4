@@ -13,32 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/*
- * Copyright 2026 Egor Khomenko (Egorich88)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../styles/topics.css';
 import '../styles/shared/modals.css';
 import '../styles/shared/buttons.css';
 import '../styles/shared/forms.css';
 import '../styles/shared/tables.css';
 import '../styles/shared/scrollbars.css';
+
 import { useEffect, useState, useRef } from 'react';
+
 import axios from 'axios';
+
 import toast, { Toaster } from 'react-hot-toast';
+
 import { useCluster } from '../contexts/ClusterContext';
 
 export default function Topics() {
@@ -68,12 +55,17 @@ export default function Topics() {
 
     minInSyncReplicas: '1',
   });
+
   const [showAdvanced, setShowAdvanced] = useState(false);
+
   const [editingParam, setEditingParam] = useState(null);
+
   const [editValue, setEditValue] = useState('');
+
   const [originalValue, setOriginalValue] = useState('');
 
   const panelRef = useRef(null);
+
   useEffect(() => {
 
     if (detailTopic) {
@@ -319,106 +311,99 @@ export default function Topics() {
     setEditValue('');
   };
 
-// =========================================================
-// CREATE TOPIC
-// =========================================================
+  // =========================================================
+  // CREATE TOPIC
+  // =========================================================
 
-const handleCreateTopic = async (e) => {
+  const handleCreateTopic = async (e) => {
 
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!currentCluster) return;
+    if (!currentCluster) return;
 
-  if (!newTopic.topic.trim()) {
+    if (!newTopic.topic.trim()) {
 
-    toast.error('Введите имя топика');
+      toast.error('Введите имя топика');
 
-    return;
-  }
+      return;
+    }
 
-  try {
+    try {
 
-    const payload = {
-      topic: newTopic.topic.trim(),
+      const payload = {
+        topic: newTopic.topic.trim(),
 
-      partitions: Number(newTopic.partitions),
+        partitions: Number(newTopic.partitions),
 
-      replication: Number(newTopic.replication),
-    };
-
-    if (showAdvanced) {
-
-      payload.configs = {
-        'cleanup.policy': newTopic.cleanupPolicy,
-
-        'retention.ms': newTopic.retentionMs,
-
-        'min.insync.replicas':
-          newTopic.minInSyncReplicas,
+        replication: Number(newTopic.replication),
       };
-    }
 
-    console.log('CREATE TOPIC PAYLOAD:', payload);
+      if (showAdvanced) {
 
-    await axios.post(
-      '/api/topics',
-      payload,
-      {
-        headers: {
-          'X-Kafka-Bootstrap': currentCluster.brokers,
-        },
+        payload.configs = {
+          'cleanup.policy': newTopic.cleanupPolicy,
+
+          'retention.ms': newTopic.retentionMs,
+
+          'min.insync.replicas':
+            newTopic.minInSyncReplicas,
+        };
       }
-    );
 
-    toast.success(`Топик "${newTopic.topic}" создан`);
-
-    setNewTopic({
-      topic: '',
-      partitions: '1',
-      replication: '1',
-
-      cleanupPolicy: 'delete',
-
-      retentionMs: '604800000',
-
-      minInSyncReplicas: '1',
-    });
-
-    setShowAdvanced(false);
-
-    setShowCreateModal(false);
-
-    fetchTopics();
-
-  } catch (error) {
-
-    console.error(error);
-
-    console.error(
-      'BACKEND ERROR:',
-      error.response?.data
-    );
-
-    const backendError =
-      error.response?.data?.error || '';
-
-    if (
-      backendError.includes('Topic name is invalid') ||
-      backendError.includes('contains one or more characters')
-    ) {
-
-      toast.error(
-        'Ошибка создания топика. Используйте только латинские символы, цифры, ".", "_" или "-"'
+      await axios.post(
+        '/api/topics',
+        payload,
+        {
+          headers: {
+            'X-Kafka-Bootstrap': currentCluster.brokers,
+          },
+        }
       );
 
-    } else {
+      toast.success(`Топик "${newTopic.topic}" создан`);
 
-      toast.error(
-        backendError || 'Ошибка создания топика'
-      );
+      setNewTopic({
+        topic: '',
+        partitions: '1',
+        replication: '1',
+
+        cleanupPolicy: 'delete',
+
+        retentionMs: '604800000',
+
+        minInSyncReplicas: '1',
+      });
+
+      setShowAdvanced(false);
+
+      setShowCreateModal(false);
+
+      fetchTopics();
+
+    } catch (error) {
+
+      console.error(error);
+
+      const backendError =
+        error.response?.data?.error || '';
+
+      if (
+        backendError.includes('Topic name is invalid') ||
+        backendError.includes('contains one or more characters')
+      ) {
+
+        toast.error(
+          'Ошибка создания топика. Используйте только латинские символы, цифры, ".", "_" или "-"'
+        );
+
+      } else {
+
+        toast.error(
+          backendError || 'Ошибка создания топика'
+        );
+      }
     }
-  }
-};
+  };
 
   // =========================================================
   // DELETE TOPIC
@@ -615,9 +600,7 @@ const handleCreateTopic = async (e) => {
 
       </div>
 
-      {/* ===================================================== */}
       {/* DRAWER */}
-      {/* ===================================================== */}
 
       {detailTopic && (
 
@@ -637,10 +620,6 @@ const handleCreateTopic = async (e) => {
               <div>
 
                 <h2>Детали топика</h2>
-
-                <div className="topic-selected-name">
-                  {selectedTopic?.name}
-                </div>
 
               </div>
 
@@ -663,13 +642,23 @@ const handleCreateTopic = async (e) => {
 
               <div className="topic-drawer-body">
 
-                {/* INFO */}
+                {/* TOPIC META */}
 
-                <div className="topic-info-grid">
+                <div className="topic-meta">
 
-                  <div className="topic-info-card">
+                  <div className="topic-meta-item">
 
-                    <span>Партиции</span>
+                    <span>Название топика:</span>
+
+                    <strong>
+                      {selectedTopic?.name}
+                    </strong>
+
+                  </div>
+
+                  <div className="topic-meta-item">
+
+                    <span>Партиции:</span>
 
                     <strong>
                       {detailTopic.partitions?.length || 0}
@@ -677,9 +666,9 @@ const handleCreateTopic = async (e) => {
 
                   </div>
 
-                  <div className="topic-info-card">
+                  <div className="topic-meta-item">
 
-                    <span>Репликация</span>
+                    <span>Репликация:</span>
 
                     <strong>
                       {detailTopic.replicationFactor}
@@ -721,10 +710,10 @@ const handleCreateTopic = async (e) => {
 
                           {detailTopic.partitions.map((partition) => (
 
-                            <tr key={partition.partition}>
+                            <tr key={partition.partition ?? partition.id}>
 
                               <td>
-                                {partition.partition}
+                                {partition.partition ?? partition.id}
                               </td>
 
                               <td>
@@ -830,8 +819,6 @@ const handleCreateTopic = async (e) => {
 
                     </div>
 
-                    {/* EDIT BOX */}
-
                     {editingParam && (
 
                       <div className="config-edit-box">
@@ -877,192 +864,6 @@ const handleCreateTopic = async (e) => {
               </div>
 
             )}
-
-          </div>
-
-        </div>
-
-      )}
-
-      {/* ===================================================== */}
-      {/* CREATE MODAL */}
-      {/* ===================================================== */}
-
-      {showCreateModal && (
-
-        <div
-          className="modal-overlay"
-          onClick={() => setShowCreateModal(false)}
-        >
-
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-
-            <h2>Создать топик</h2>
-
-            <form onSubmit={handleCreateTopic}>
-
-              <div className="modal-field">
-
-                <label>Имя топика</label>
-
-                <input
-                  type="text"
-                  placeholder="Например: orders.events"
-                  value={newTopic.topic}
-                  onChange={(e) =>
-                    setNewTopic({
-                      ...newTopic,
-                      topic: e.target.value,
-                    })
-                  }
-                  required
-                />
-
-              </div>
-
-              <div className="modal-field">
-
-                <label>Количество партиций</label>
-
-                <input
-                  type="text"
-                  placeholder="1"
-                  value={newTopic.partitions}
-                  onChange={(e) =>
-                    setNewTopic({
-                      ...newTopic,
-                      partitions: e.target.value,
-                    })
-                  }
-                />
-
-              </div>
-
-              <div className="modal-field">
-
-                <label>Фактор репликации</label>
-
-                <input
-                  type="text"
-                  placeholder="1"
-                  value={newTopic.replication}
-                  onChange={(e) =>
-                    setNewTopic({
-                      ...newTopic,
-                      replication: e.target.value,
-                    })
-                  }
-                />
-
-              </div>
-              <button
-                type="button"
-                className="advanced-toggle"
-                onClick={() => setShowAdvanced(!showAdvanced)}
-              >
-                {showAdvanced
-                  ? 'Скрыть дополнительные параметры'
-                  : 'Дополнительные параметры'}
-              </button>
-
-              {showAdvanced && (
-
-                <div className="advanced-section">
-
-                  {/* CLEANUP POLICY */}
-
-                  <div className="modal-field">
-
-                    <label>cleanup.policy</label>
-
-                    <select
-                      value={newTopic.cleanupPolicy}
-                      onChange={(e) =>
-                        setNewTopic({
-                          ...newTopic,
-                          cleanupPolicy: e.target.value,
-                        })
-                      }
-                    >
-
-                      <option value="delete">
-                        delete
-                      </option>
-
-                      <option value="compact">
-                        compact
-                      </option>
-
-                      <option value="compact,delete">
-                        compact,delete
-                      </option>
-
-                    </select>
-
-                  </div>
-
-                  {/* RETENTION */}
-
-                  <div className="modal-field">
-
-                    <label>retention.ms</label>
-
-                    <input
-                      type="text"
-                      value={newTopic.retentionMs}
-                      onChange={(e) =>
-                        setNewTopic({
-                          ...newTopic,
-                          retentionMs: e.target.value,
-                        })
-                      }
-                    />
-
-                  </div>
-
-                  {/* MIN ISR */}
-
-                  <div className="modal-field">
-
-                    <label>min.insync.replicas</label>
-
-                    <input
-                      type="text"
-                      placeholder="1"
-                      value={newTopic.minInSyncReplicas}
-                      onChange={(e) =>
-                        setNewTopic({
-                          ...newTopic,
-                          minInSyncReplicas: e.target.value,
-                        })
-                      }
-                    />
-
-                  </div>
-
-                </div>
-
-              )}
-
-              <div className="modal-buttons">
-
-                <button type="submit">
-                  Создать
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Отмена
-                </button>
-
-              </div>
-
-            </form>
 
           </div>
 
