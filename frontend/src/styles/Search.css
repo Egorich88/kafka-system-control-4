@@ -1,0 +1,235 @@
+.search-page {
+    padding: 34px;
+    color: white;
+}
+
+.search-header {
+    margin-bottom: 28px;
+}
+
+.search-header h1 {
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.search-header p {
+    color: rgba(255,255,255,0.55);
+    font-size: 15px;
+}
+
+.search-toolbar-card,
+.search-results-card {
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+}
+
+.search-toolbar {
+    display: grid;
+    grid-template-columns: 2fr 120px 140px 120px auto;
+    gap: 18px;
+    align-items: end;
+}
+
+.search-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.search-field label {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+}
+
+/* ========================= INPUTS ========================= */
+
+.search-field input,
+.search-field select {
+    width: 100%;
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: white;
+    padding: 0 14px;
+    outline: none;
+    transition: 0.18s ease;
+
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* SELECT */
+
+.search-field select {
+    cursor: pointer;
+}
+
+/* FOCUS */
+
+.search-field input:focus,
+.search-field select:focus {
+    border-color: rgba(59,130,246,0.75);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.14);
+
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* DROPDOWN OPTIONS */
+
+.search-field select option {
+    background: #0f172a;
+    color: white;
+    border: none;
+}
+
+/* BUTTON */
+
+.search-submit-btn {
+    height: 46px;
+    padding: 0 24px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(
+        180deg,
+        #3b82f6,
+        #2563eb
+    );
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.search-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(37,99,235,0.32);
+}
+
+.search-submit-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ========================= RESULTS ========================= */
+
+.search-results-card {
+    margin-top: 28px;
+}
+
+.search-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.search-results-header h2 {
+    font-size: 22px;
+}
+
+.search-results-count {
+    color: rgba(255,255,255,0.55);
+    font-size: 14px;
+}
+
+.messages-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ========================= MESSAGE CARD ========================= */
+
+.message-card {
+    padding: 20px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: 0.18s ease;
+}
+
+.message-card:hover {
+    border-color: rgba(59,130,246,0.22);
+    background: rgba(255,255,255,0.04);
+}
+
+.message-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+}
+
+.message-key {
+    margin-bottom: 14px;
+    color: rgba(255,255,255,0.9);
+}
+
+.message-key code {
+    background: rgba(255,255,255,0.06);
+    padding: 4px 8px;
+    border-radius: 8px;
+    color: #dbeafe;
+    font-size: 13px;
+}
+
+.message-value {
+    color: rgba(255,255,255,0.9);
+}
+
+.message-value pre {
+    margin-top: 10px;
+    padding: 16px;
+    border-radius: 14px;
+    overflow-x: auto;
+    background: #08101d;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #dbeafe;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ========================= RESPONSIVE ========================= */
+
+@media (max-width: 1200px) {
+    .search-toolbar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .search-submit-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 720px) {
+    .search-page {
+        padding: 20px;
+    }
+
+    .search-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .search-results-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .message-meta {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
