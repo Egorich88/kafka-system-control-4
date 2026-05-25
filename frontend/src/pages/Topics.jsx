@@ -700,7 +700,7 @@ export default function Topics() {
 
                             <th>Реплики</th>
 
-                            <th>ISR</th>
+                            <th>In-Sync Replicas</th>
 
                           </tr>
 
@@ -870,7 +870,186 @@ export default function Topics() {
         </div>
 
       )}
+      {/* ===================================================== */}
+      {/* CREATE MODAL */}
+      {/* ===================================================== */}
 
+      {showCreateModal && (
+
+        <div
+          className="modal-overlay"
+          onClick={() => setShowCreateModal(false)}
+        >
+
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            <h2>Создать топик</h2>
+
+            <form onSubmit={handleCreateTopic}>
+
+              <div className="modal-field">
+
+                <label>Имя топика</label>
+
+                <input
+                  type="text"
+                  placeholder="Например: orders.events"
+                  value={newTopic.topic}
+                  onChange={(e) =>
+                    setNewTopic({
+                      ...newTopic,
+                      topic: e.target.value,
+                    })
+                  }
+                  required
+                />
+
+              </div>
+
+              <div className="modal-field">
+
+                <label>Количество партиций</label>
+
+                <input
+                  type="text"
+                  placeholder="1"
+                  value={newTopic.partitions}
+                  onChange={(e) =>
+                    setNewTopic({
+                      ...newTopic,
+                      partitions: e.target.value,
+                    })
+                  }
+                />
+
+              </div>
+
+              <div className="modal-field">
+
+                <label>Фактор репликации</label>
+
+                <input
+                  type="text"
+                  placeholder="1"
+                  value={newTopic.replication}
+                  onChange={(e) =>
+                    setNewTopic({
+                      ...newTopic,
+                      replication: e.target.value,
+                    })
+                  }
+                />
+
+              </div>
+
+              <button
+                type="button"
+                className="advanced-toggle"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                {showAdvanced
+                  ? 'Скрыть дополнительные параметры'
+                  : 'Дополнительные параметры'}
+              </button>
+
+              {showAdvanced && (
+
+                <div className="advanced-section">
+
+                  <div className="modal-field">
+
+                    <label>cleanup.policy</label>
+
+                    <select
+                      value={newTopic.cleanupPolicy}
+                      onChange={(e) =>
+                        setNewTopic({
+                          ...newTopic,
+                          cleanupPolicy: e.target.value,
+                        })
+                      }
+                    >
+
+                      <option value="delete">
+                        delete
+                      </option>
+
+                      <option value="compact">
+                        compact
+                      </option>
+
+                      <option value="compact,delete">
+                        compact,delete
+                      </option>
+
+                    </select>
+
+                  </div>
+
+                  <div className="modal-field">
+
+                    <label>retention.ms</label>
+
+                    <input
+                      type="text"
+                      value={newTopic.retentionMs}
+                      onChange={(e) =>
+                        setNewTopic({
+                          ...newTopic,
+                          retentionMs: e.target.value,
+                        })
+                      }
+                    />
+
+                  </div>
+
+                  <div className="modal-field">
+
+                    <label>min.insync.replicas</label>
+
+                    <input
+                      type="text"
+                      placeholder="1"
+                      value={newTopic.minInSyncReplicas}
+                      onChange={(e) =>
+                        setNewTopic({
+                          ...newTopic,
+                          minInSyncReplicas: e.target.value,
+                        })
+                      }
+                    />
+
+                  </div>
+
+                </div>
+
+              )}
+
+              <div className="modal-buttons">
+
+                <button type="submit">
+                  Создать
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Отмена
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+
+      )}
     </div>
   );
 }

@@ -33,7 +33,7 @@
      overflow-x: hidden;
      border-radius: 18px;
      border: 1px solid var(--border-color);
-     background: var(--panel-bg);
+     background: rgba(255,255,255,0.03);
 }
 /* ========================= TABLE ========================= */
   .topics-table thead {
@@ -132,15 +132,17 @@
 
 .topic-meta-item {
     display: flex;
-    gap: 8px;
     align-items: center;
-    font-size: 14px;
-    color: rgba(255,255,255,0.72);
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.58);
 }
 
 .topic-meta-item strong {
-    color: white;
-    font-weight: 600;
+    color: rgba(255,255,255,0.96);
+    font-weight: 700;
+    font-size: 16px;
 }
 /* ========================= SECTION ========================= */
  .topic-section {
@@ -379,8 +381,8 @@
     background: transparent;
     border: none;
     color: rgba(255,255,255,0.45);
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 400;
     cursor: pointer;
     transition: 0.18s ease;
 }
