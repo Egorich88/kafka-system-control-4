@@ -125,6 +125,8 @@ export default function Sidebar({
 
               <button
                 className={`cluster-selected ${
+                  isClusterOpen ? 'open' : ''
+                } ${
                   clusters.length <= 1
                     ? 'single'
                     : ''
@@ -181,7 +183,9 @@ export default function Sidebar({
 
                 <div className="cluster-dropdown">
 
-                  {clusters.map(cluster => (
+                  {clusters
+                    .filter(cluster => cluster.id !== currentCluster.id)
+                    .map(cluster => (
 
                     <div
                       key={cluster.id}
