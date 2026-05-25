@@ -229,15 +229,11 @@ export default function Sidebar({
 
             </div>
 
-            <button
-              className="cluster-settings-btn"
+            <FiSettings
+              className="cluster-settings-icon"
               title="Cluster settings"
               onClick={onEditCluster}
-            >
-
-              <FiSettings />
-
-            </button>
+            />
 
           </div>
 
