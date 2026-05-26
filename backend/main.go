@@ -567,22 +567,86 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	config.Version = sarama.V2_8_0_0
 	config.Consumer.Return.Errors = true
 
-	consumer, err := sarama.NewConsumer([]string{bootstrap}, config)
+	client, err := sarama.NewClient([]string{bootstrap}, config)
 
-	if err != nil {
+    if err != nil {
 
-		log.Printf("Consumer error: %v", err)
+    	log.Printf("Client error: %v", err)
 
-		sendJSONError(
-			w,
-			"Failed to create consumer: "+err.Error(),
-			http.StatusInternalServerError,
-		)
+    	sendJSONError(
+    		w,
+    		"Failed to create client: "+err.Error(),
+    		http.StatusInternalServerError,
+    	)
 
-		return
-	}
+    	return
+    }
 
-	defer consumer.Close()
+    defer client.Close()
+
+    consumer, err := sarama.NewConsumerFromClient(client)
+
+    if err != nil {
+
+    	log.Printf("Consumer error: %v", err)
+
+    	sendJSONError(
+    		w,
+    		"Failed to create consumer: "+err.Error(),
+    		http.StatusInternalServerError,
+    	)
+
+    	return
+    }
+
+    defer consumer.Close()
+
+    earliestOffset, err := client.GetOffset(
+    	topic,
+    	partition,
+    	sarama.OffsetOldest,
+    )
+
+    if err != nil {
+
+    	sendJSONError(
+    		w,
+    		"Failed to get earliest offset: "+err.Error(),
+    		http.StatusInternalServerError,
+    	)
+
+    	return
+    }
+
+    latestOffset, err := client.GetOffset(
+    	topic,
+    	partition,
+    	sarama.OffsetNewest,
+    )
+
+    if err != nil {
+
+    	sendJSONError(
+    		w,
+    		"Failed to get latest offset: "+err.Error(),
+    		http.StatusInternalServerError,
+    	)
+
+    	return
+    }
+
+    if offset < earliestOffset {
+    	offset = earliestOffset
+    }
+
+    if offset >= latestOffset {
+
+    	json.NewEncoder(w).Encode(MessagesResponse{
+    		Messages: []Message{},
+    	})
+
+    	return
+    }
 
 	pc, err := consumer.ConsumePartition(topic, partition, offset)
 

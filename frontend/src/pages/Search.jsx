@@ -157,7 +157,10 @@ export default function Search() {
 
     e.preventDefault();
 
-    if (!selectedTopic) {
+    if (
+      !selectedTopic ||
+      !topics.includes(selectedTopic)
+    ) {
 
       toast.error('Выберите топик');
 
@@ -332,7 +335,7 @@ useEffect(() => {
                   value={
                     isTopicDropdownOpen
                       ? topicSearch
-                      : selectedTopic
+                      : (selectedTopic || '')
                   }
                   onChange={(e) => {
                     setTopicSearch(e.target.value);
@@ -380,15 +383,11 @@ useEffect(() => {
                           }`}
                           onClick={() => {
 
-                            setSelectedTopic(
-                              topic
-                            );
-
-                            setIsTopicDropdownOpen(
-                              false
-                            );
+                            setSelectedTopic(topic);
 
                             setTopicSearch('');
+
+                            setIsTopicDropdownOpen(false);
                           }}
                         >
 
