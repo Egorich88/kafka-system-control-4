@@ -617,7 +617,7 @@
      color: #3b82f6;
 }
  .welcome-github svg {
-     font-size: 34px;
+     font-size: 28px;
 }
  .welcome-star {
      color: #3b82f6;
@@ -827,12 +827,12 @@
 }
 
 .footer-project-link:hover {
-  color: var(--text-primary);
+  color: #3b82f6;
 }
 
 .footer-github-icon {
-  font-size: 18px;
-  opacity: 0.9;
+  font-size: 22px;
+  opacity: 0.95;
   flex-shrink: 0;
 }
 .footer-license {
