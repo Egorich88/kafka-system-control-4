@@ -22,8 +22,10 @@ import {
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import packageJson from '../../../package.json';
+
 import { useTranslation } from 'react-i18next';
 import { useCluster } from '../../contexts/ClusterContext';
+
 export default function Sidebar({
 
   onAddCluster,
@@ -45,193 +47,193 @@ export default function Sidebar({
   const version =
     packageJson.version;
 
+  const hasCluster =
+    clusters.length > 0 &&
+    currentCluster;
+
   return (
 
     <aside className="sidebar">
 
-      {/* LOGO */}
+      {/* ========================= HEADER ========================= */}
 
-      <div className="sidebar-logo">
+      <div className="sidebar-top">
 
-        <img
-          src="/logo.svg"
-          alt="Kafka System Control"
-        />
+        {/* LOGO */}
 
-        <div>
+        <div className="sidebar-logo">
 
-          <h2>
-            Kafka System Control
-          </h2>
+          <img
+            src="/logo.svg"
+            alt="Kafka System Control"
+          />
 
-          <span className="sidebar-version">
-            Version {version}
-          </span>
+          <div>
 
-        </div>
+            <h2>
+              Kafka System Control
+            </h2>
 
-      </div>
-
-      {/* CLUSTER */}
-
-      <div className="sidebar-cluster">
-
-        <div className="cluster-top">
-
-          <span>
-            КЛАСТЕР
-          </span>
-
-          <div
-            className="cluster-add-link"
-            onClick={onAddCluster}
-          >
-
-            + Добавить
+            <span className="sidebar-version">
+              Version {version}
+            </span>
 
           </div>
 
         </div>
 
-        {clusters.length > 0 &&
-          currentCluster ? (
+        {/* CLUSTER */}
 
-          <div className="cluster-row">
+        <div className="sidebar-cluster">
 
-            <div className="cluster-dropdown-wrapper">
+          <div className="cluster-top">
 
-              {/* SELECTED */}
+            <span>
+              КЛАСТЕР
+            </span>
 
-              <button
-                className={`cluster-selected ${
-                  isClusterOpen ? 'open' : ''
-                } ${
-                  clusters.length <= 1
-                    ? 'single'
-                    : ''
-                }`}
-                onClick={() => {
+            <div
+              className="cluster-add-link"
+              onClick={onAddCluster}
+            >
 
-                  if (clusters.length > 1) {
+              + Добавить
 
-                    setIsClusterOpen(
-                      !isClusterOpen
-                    );
-                  }
-                }}
-              >
+            </div>
 
-                <div className="cluster-selected-left">
+          </div>
 
-                  <div
-                    className={`cluster-status-dot ${
-                      currentCluster?.id
-                        ? 'connected'
-                        : 'unknown'
-                    }`}
-                  />
+          {hasCluster ? (
 
-                  <span className="cluster-selected-name">
+            <div className="cluster-row">
 
-                    {currentCluster.name}
+              <div className="cluster-dropdown-wrapper">
 
-                  </span>
+                {/* SELECTED */}
 
-                </div>
+                <button
+                  type="button"
+                  className={`cluster-selected ${
+                    isClusterOpen ? 'open' : ''
+                  } ${
+                    clusters.length <= 1
+                      ? 'single'
+                      : ''
+                  }`}
+                  onClick={() => {
 
-                {clusters.length > 1 && (
+                    if (clusters.length > 1) {
 
-                  <div className="cluster-chevron">
+                      setIsClusterOpen(
+                        !isClusterOpen
+                      );
+                    }
+                  }}
+                >
 
-                    {isClusterOpen ? (
-                      <FiChevronUp />
-                    ) : (
-                      <FiChevronDown />
-                    )}
+                  <div className="cluster-selected-left">
+
+                    <div
+                      className={`cluster-status-dot ${
+                        currentCluster?.id
+                          ? 'connected'
+                          : 'unknown'
+                      }`}
+                    />
+
+                    <span className="cluster-selected-name">
+
+                      {currentCluster.name}
+
+                    </span>
+
+                  </div>
+
+                  {clusters.length > 1 && (
+
+                    <div className="cluster-chevron">
+
+                      {isClusterOpen ? (
+                        <FiChevronUp />
+                      ) : (
+                        <FiChevronDown />
+                      )}
+
+                    </div>
+
+                  )}
+
+                </button>
+
+                {/* DROPDOWN */}
+
+                {isClusterOpen &&
+                  clusters.length > 1 && (
+
+                  <div className="cluster-dropdown">
+
+                    {clusters
+                      .filter(
+                        cluster =>
+                          cluster.id !== currentCluster.id
+                      )
+                      .map(cluster => (
+
+                      <div
+                        key={cluster.id}
+                        className="cluster-dropdown-item"
+                        onClick={() => {
+
+                          changeCluster(cluster);
+
+                          setIsClusterOpen(false);
+                        }}
+                      >
+
+                        <div
+                          className={`cluster-status-dot ${
+                            cluster?.connectionStatus ||
+                            'unknown'
+                          }`}
+                        />
+
+                        <span>
+
+                          {cluster.name}
+
+                        </span>
+
+                      </div>
+
+                    ))}
 
                   </div>
 
                 )}
 
-              </button>
+              </div>
 
-              {/* DROPDOWN */}
-
-              {isClusterOpen &&
-                clusters.length > 1 && (
-
-                <div className="cluster-dropdown">
-
-                  {clusters
-                    .filter(cluster => cluster.id !== currentCluster.id)
-                    .map(cluster => (
-
-                    <div
-                      key={cluster.id}
-                      className={`cluster-dropdown-item ${
-                        currentCluster.id === cluster.id
-                          ? 'active'
-                          : ''
-                      }`}
-                      onClick={() => {
-
-                        changeCluster(cluster);
-
-                        setIsClusterOpen(false);
-                      }}
-                    >
-
-                      <div
-                        className={`cluster-status-dot ${
-                          currentCluster.id === cluster.id
-                            ? 'connected'
-                            : (
-                              cluster?.connectionStatus ||
-                              'unknown'
-                            )
-                        }`}
-                      />
-
-                      <span>
-
-                        {cluster.name}
-
-                      </span>
-
-                    </div>
-
-                  ))}
-
-                </div>
-
-              )}
+              <FiSettings
+                className="cluster-settings-icon"
+                title="Настройки кластера"
+                onClick={onEditCluster}
+              />
 
             </div>
 
-            <FiSettings
-              className="cluster-settings-icon"
-              title="Cluster settings"
-              onClick={onEditCluster}
-            />
+          ) : (
 
-          </div>
+            <div className="no-cluster-card">
 
-        ) : (
+              Нет подключенного кластера
 
-          <div className="no-cluster-card">
+            </div>
 
-            {t('noActiveCluster')}
+          )}
 
-          </div>
+        </div>
 
-        )}
-
-      </div>
-
-      {/* NAVIGATION */}
-
-      {clusters.length > 0 &&
-        currentCluster && (
+        {/* ========================= NAVIGATION ========================= */}
 
         <nav className="sidebar-nav">
 
@@ -244,40 +246,46 @@ export default function Sidebar({
             <FiHome />
 
             <span>
-              {t('overview')}
+              Главная
             </span>
 
           </NavLink>
 
           <NavLink
             to="/topics"
-            className="sidebar-link"
+            className={`sidebar-link ${
+              !hasCluster ? 'disabled' : ''
+            }`}
           >
 
             <FiLayers />
 
             <span>
-              {t('topics')}
+              Топики
             </span>
 
           </NavLink>
 
           <NavLink
             to="/groups"
-            className="sidebar-link"
+            className={`sidebar-link ${
+              !hasCluster ? 'disabled' : ''
+            }`}
           >
 
             <FiUsers />
 
             <span>
-              {t('consumerGroups')}
+              Консьюмеры
             </span>
 
           </NavLink>
 
           <NavLink
             to="/offset-reset"
-            className="sidebar-link"
+            className={`sidebar-link ${
+              !hasCluster ? 'disabled' : ''
+            }`}
           >
 
             <FiRotateCcw />
@@ -290,20 +298,24 @@ export default function Sidebar({
 
           <NavLink
             to="/search"
-            className="sidebar-link"
+            className={`sidebar-link ${
+              !hasCluster ? 'disabled' : ''
+            }`}
           >
 
             <FiSearch />
 
             <span>
-              {t('searchMessages')}
+              Поиск сообщений
             </span>
 
           </NavLink>
 
           <NavLink
             to="/acls"
-            className="sidebar-link"
+            className={`sidebar-link ${
+              !hasCluster ? 'disabled' : ''
+            }`}
           >
 
             <FiShield />
@@ -316,7 +328,9 @@ export default function Sidebar({
 
           <NavLink
             to="/alerts"
-            className="sidebar-link"
+            className={`sidebar-link ${
+              !hasCluster ? 'disabled' : ''
+            }`}
           >
 
             <FiAlertTriangle />
@@ -329,7 +343,9 @@ export default function Sidebar({
 
           <NavLink
             to="/logs"
-            className="sidebar-link"
+            className={`sidebar-link ${
+              !hasCluster ? 'disabled' : ''
+            }`}
           >
 
             <FiFileText />
@@ -340,6 +356,18 @@ export default function Sidebar({
 
           </NavLink>
 
+        </nav>
+
+      </div>
+
+      {/* ========================= BOTTOM ========================= */}
+
+      <div className="sidebar-bottom">
+
+        {/* SETTINGS */}
+
+        <nav className="sidebar-nav sidebar-settings-nav">
+
           <NavLink
             to="/settings"
             className="sidebar-link"
@@ -348,43 +376,44 @@ export default function Sidebar({
             <FiSettings />
 
             <span>
-              {t('settings')}
+              Настройки
             </span>
 
           </NavLink>
 
         </nav>
-      )}
 
-      {/* FOOTER */}
+        {/* FOOTER */}
 
-      <div className="sidebar-footer">
+        <div className="sidebar-footer">
 
-        <a
-          href="https://github.com/Egorich88/kafka-system-control-4"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="footer-project-link"
-        >
+          <a
+            href="https://github.com/Egorich88/kafka-system-control-4"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-project-link"
+          >
 
-          <FiGithub className="footer-github-icon" />
+            <FiGithub className="footer-github-icon" />
 
-          <span>
-            Egorich88
-          </span>
+            <span>
+              Egorich88
+            </span>
 
-        </a>
+          </a>
 
-        <a
-          href="https://www.apache.org/licenses/LICENSE-2.0"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="footer-license"
-        >
+          <a
+            href="https://www.apache.org/licenses/LICENSE-2.0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-license"
+          >
 
-          Apache License 2.0
+            Apache License 2.0
 
-        </a>
+          </a>
+
+        </div>
 
       </div>
 
