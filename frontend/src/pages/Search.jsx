@@ -233,6 +233,7 @@ useEffect(() => {
     ) {
 
       setIsTopicDropdownOpen(false);
+      setTopicSearch('');
     }
   };
 
