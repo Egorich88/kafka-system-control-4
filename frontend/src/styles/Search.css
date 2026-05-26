@@ -42,7 +42,7 @@
 
 .search-field label {
     font-size: 13px;
-    color: rgba(255,255,255,0.65);
+    color: var(--text-secondary);
 }
 
 /* ========================= INPUTS ========================= */
@@ -152,7 +152,7 @@
 .message-card {
     padding: 20px;
     border-radius: 18px;
-    background: rgba(255,255,255,0.03);
+    background: var(--panel-bg);
     border: 1px solid rgba(255,255,255,0.06);
     transition: 0.18s ease;
 }
@@ -299,7 +299,7 @@
 
     width: 100%;
 
-    background: #0f172a;
+    background: var(--card-bg);
 
     border: 1px solid rgba(59,130,246,0.7);
     border-top: none;
@@ -327,11 +327,11 @@
 
     border-bottom: 1px solid rgba(255,255,255,0.06);
 
-    background: rgba(255,255,255,0.03);
+    background: var(--panel-bg);
 }
 
 .topic-dropdown-search svg {
-    color: rgba(255,255,255,0.45);
+    color: var(--text-secondary);
     font-size: 16px;
 }
 
@@ -366,12 +366,12 @@
 }
 
 .topic-dropdown-list::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.12);
+    background: rgba(148,163,184,0.35);
     border-radius: 999px;
 }
 
 .topic-dropdown-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.22);
+    background: rgba(148,163,184,0.55);
 }
 
 /* ITEM */
@@ -385,7 +385,7 @@
 
     font-size: 14px;
 
-    border-bottom: 1px solid rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .topic-dropdown-item:hover {

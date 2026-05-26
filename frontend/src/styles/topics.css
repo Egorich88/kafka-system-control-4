@@ -40,9 +40,11 @@
      position: sticky;
      top: 0;
      z-index: 20;
-     background: linear-gradient( 180deg, rgba(20,20,28,0.98) 0%, rgba(20,20,28,0.98) 100% );
+     background: var(--card-bg);
+     color: var(--text-primary);
      backdrop-filter: blur(8px);
-}
+     box-shadow: inset 0 -1px 0 var(--border-color);
+  }
  .topics-table th {
      text-align: left;
      padding: 16px 18px;
@@ -50,10 +52,11 @@
      font-weight: 700;
      color: var(--text-secondary);
      border-bottom: 1px solid var(--border-color);
-}
+     background: var(--card-bg);
+ }
  .topics-table td {
      padding: 16px 18px;
-     border-bottom: 1px solid rgba(255,255,255,0.05);
+     border-bottom: 1px solid var(--border-color);
      color: var(--text-primary);
      font-size: 15px;
 }
@@ -83,31 +86,13 @@
      color: var(--text-primary);
 }
  .topics-empty p {
-     color: rgba(255,255,255,0.55);
+     color: var(--text-secondary);
 }
 /* ========================= LOADING ========================= */
  .topics-loading {
      text-align: center;
      padding: 32px;
-     color: rgba(255,255,255,0.55);
-}
- .topic-drawer-header {
-     position: sticky;
-     top: 0;
-     z-index: 50;
-     display: flex;
-     justify-content: space-between;
-     align-items: center;
-     padding: 28px;
-     background: var(--panel-bg);
-     backdrop-filter: blur(12px);
-     border-bottom: 1px solid var(--border-color);
-}
- .topic-drawer-header h2 {
-     font-size: 24px;
-     margin-bottom: 10px;
-     color: var(--text-primary);
-     font-weight: 700;
+     color: var(--text-secondary);
 }
  .topic-drawer-body {
      padding: 28px;
@@ -145,15 +130,15 @@
  .config-hint {
      text-align: center;
      font-size: 13px;
-     color: rgba(255,255,255,0.45);
+     color: var(--text-secondary);
      margin-bottom: 16px;
 }
 /* ========================= CONFIG TABLE ========================= */
  .topic-config-wrapper {
      border-radius: 16px;
      overflow: hidden;
-     border: 1px solid rgba(255,255,255,0.08);
-     background: var(--card-bg);
+     border: 1px solid var(--border-color);
+     background: var(--panel-bg);
      max-height: 360px;
      overflow-y: auto;
 }
@@ -162,18 +147,18 @@
      position: sticky;
      top: 0;
      z-index: 15;
-     background: linear-gradient(180deg,rgba(20,20,28,0.98) 0%,rgba(20,20,28,0.98) 100%);
-}
- .topic-config-table th {
+     background: var(--panel-bg);
+  }
+.topic-config-table th {
      text-align: left;
      padding: 14px 16px;
      font-size: 13px;
-     color: rgba(255,255,255,0.65);
-     border-bottom: 1px solid rgba(255,255,255,0.08);
+     color: var(--text-secondary);
+     border-bottom: 1px solid var(--border-color);
 }
  .topic-config-table td {
      padding: 13px 16px;
-     border-bottom: 1px solid rgba(255,255,255,0.05);
+     border-bottom: 1px solid var(--border-color);
      font-size: 14px;
      color: var(--text-primary);
 }
@@ -181,11 +166,11 @@
      background: rgba(250,204,21,0.08);
 }
  .topic-config-table td:not(:last-child), .topic-config-table th:not(:last-child) {
-     border-right: 1px solid rgba(255,255,255,0.05);
+     border-right: 1px solid var(--border-color);
 }
 /* ========================= EDITABLE CONFIG ========================= */
- .config-key {
-     color: rgba(255,255,255,0.68);
+.config-key {
+     color: var(--text-secondary);
      word-break: break-word;
 }
  .editable-config {
@@ -209,14 +194,14 @@
      margin-top: 22px;
      padding: 20px;
      border-radius: 18px;
-     background: rgba(255,255,255,0.04);
-     border: 1px solid rgba(255,255,255,0.06);
-}
+     background: var(--card-bg);
+     border: 1px solid var(--border-color);
+ }
  .config-edit-box h4 {
      margin-bottom: 16px;
-     color: rgba(255,255,255,0.75);
+     color: var(--text-secondary);
      font-size: 15px;
-}
+ }
  .config-edit-box input {
      width: 100%;
      height: 48px;
@@ -268,15 +253,15 @@
      justify-content: space-between;
      align-items: flex-start;
      padding: 28px;
-     background: linear-gradient( 180deg, rgba(11,18,32,0.98) 0%, rgba(15,23,42,0.98) 100% );
+     background: var(--card-bg);
      backdrop-filter: blur(12px);
-     border-bottom: 1px solid rgba(255,255,255,0.06);
-}
+     border-bottom: 1px solid var(--border-color);
+ }
  .topic-drawer-header h2 {
      font-size: 28px;
      margin-bottom: 14px;
-     color: #ffffff;
-}
+     color: var(--text-primary);
+ }
 /* ========================================= TOPIC NAME ========================================= */
  .topic-selected-name {
      margin-top: 6px;
@@ -309,8 +294,8 @@
      height: 48px;
      padding: 0 20px;
      border-radius: 14px;
-     border: 1px solid rgba(255,255,255,0.08);
-     background: rgba(255,255,255,0.05);
+     border: 1px solid var(--border-color);
+     background: var(--card-bg);
      color: var(--text-primary);
      cursor: pointer;
      font-weight: 600;
@@ -327,24 +312,24 @@
      background: #1d4ed8;
 }
  .modal-buttons button[type="button"]:hover {
-     background: rgba(255,255,255,0.08);
+     background: var(--sidebar-hover);
 }
 /* ========================================= ADVANCED TOPIC SETTINGS ========================================= */
  .advanced-toggle {
      margin-top: 6px;
      height: 46px;
      border-radius: 14px;
-     border: 1px solid rgba(255,255,255,0.08);
-     background: rgba(255,255,255,0.04);
-     color: rgba(255,255,255,0.88);
+     border: 1px solid var(--border-color);
+     background: var(--card-bg);
+     color: var(--text-primary);
      font-weight: 600;
      cursor: pointer;
      transition: 0.2s ease;
 }
  .advanced-toggle:hover {
-     background: rgba(255,255,255,0.07);
-     border-color: rgba(255,255,255,0.14);
-}
+     background: var(--sidebar-hover);
+     border-color: var(--border-color);
+ }
  .advanced-section {
      display: flex;
      flex-direction: column;
@@ -352,8 +337,8 @@
      margin-top: 18px;
      padding: 22px;
      border-radius: 18px;
-     background: var(--card-bg);
-     border: 1px solid rgba(255,255,255,0.06);
+     background: var(--panel-bg);
+     border: 1px solid var(--border-color);
      animation: fadeAdvanced 0.18s ease;
 }
 /* ANIMATION */
@@ -370,7 +355,7 @@
 .topic-drawer-close-btn {
     background: transparent;
     border: none;
-    color: rgba(255,255,255,0.45);
+    color: var(--text-secondary);
     font-size: 14px;
     font-weight: 400;
     cursor: pointer;
@@ -378,5 +363,25 @@
 }
 
 .topic-drawer-close-btn:hover {
-    color: #ffffff;
+    color: var(--text-primary);
+}
+/* ========================= CREATE TOPIC MODAL ========================= */
+.modal-content {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+.modal-content input,
+.modal-content select {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+.modal-content input:focus,
+.modal-content select:focus {
+    border-color: rgba(59,130,246,0.7);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.modal-content label {
+    color: var(--text-secondary);
 }
