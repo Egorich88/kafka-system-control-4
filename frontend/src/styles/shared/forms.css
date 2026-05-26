@@ -3,26 +3,26 @@
      height: 52px;
      border-radius: 14px;
      padding: 0 16px;
-     background: rgba(255,255,255,0.05);
-     border: 1px solid rgba(255,255,255,0.10);
-     color: white;
+     background: var(--input-bg);
+     border: 1px solid var(--border-color);
+     color: var(--text-primary);
      font-size: 15px;
      outline: none;
      transition: 0.2s ease;
 }
 /* ========================================= PLACEHOLDERS ========================================= */
  .filter-input::placeholder, .modal-content input::placeholder {
-     color: rgba(255,255,255,0.38);
+     color: var(--text-secondary);
 }
 /* ========================================= HOVER ========================================= */
  .filter-input:hover, .modal-content input:hover, .modal-content select:hover {
-     border-color: rgba(255,255,255,0.18);
+     border-color: var(--border-color);
 }
 /* ========================================= FOCUS ========================================= */
  .filter-input:focus, .modal-content input:focus, .modal-content select:focus {
      border-color: var(--accent-color);
      box-shadow: 0 0 0 3px rgba(59,130,246,0.14);
-     background: rgba(255,255,255,0.06);
+     background: var(--input-bg);
 }
 /* ========================================= SELECT ========================================= */
  .modal-content select {
@@ -30,8 +30,8 @@
 }
 /* ========================================= OPTIONS ========================================= */
  .modal-content option {
-     background: #0f172a;
-     color: white;
+     background: var(--panel-bg);
+     color: var(--text-primary);
 }
 /* ========================================= FORM FIELDS ========================================= */
  .modal-field {
@@ -42,6 +42,6 @@
  .modal-field label {
      font-size: 14px;
      font-weight: 600;
-     color: rgba(255,255,255,0.82);
+     color: var(--text-secondary);
      padding-left: 2px;
 }

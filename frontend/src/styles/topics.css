@@ -1,10 +1,5 @@
-/*
- * Copyright 2026 Egor Khomenko (Egorich88)
- *
- * Licensed under the Apache License, Version 2.0
- */
-
-.topics-container {
+/* * Copyright 2026 Egor Khomenko (Egorich88) * * Licensed under the Apache License, Version 2.0 */
+ .topics-container {
      display: flex;
      flex-direction: column;
      gap: 20px;
@@ -25,7 +20,7 @@
      display: flex;
      gap: 12px;
 }
- /* ========================= TABLE WRAPPER ========================= */
+/* ========================= TABLE WRAPPER ========================= */
  .topics-table-wrapper {
      width: 100%;
      max-height: calc(100vh - 240px);
@@ -36,7 +31,7 @@
      background: var(--card-bg);
 }
 /* ========================= TABLE ========================= */
-  .topics-table thead {
+ .topics-table thead {
      position: sticky;
      top: 0;
      z-index: 20;
@@ -44,7 +39,7 @@
      color: var(--text-primary);
      backdrop-filter: blur(8px);
      box-shadow: inset 0 -1px 0 var(--border-color);
-  }
+}
  .topics-table th {
      text-align: left;
      padding: 16px 18px;
@@ -53,7 +48,7 @@
      color: var(--text-secondary);
      border-bottom: 1px solid var(--border-color);
      background: var(--card-bg);
- }
+}
  .topics-table td {
      padding: 16px 18px;
      border-bottom: 1px solid var(--border-color);
@@ -65,8 +60,8 @@
      border-right: 1px solid var(--border-color);
 }
 /* ROWS */
-.topics-table tbody tr {
-    cursor: pointer;
+ .topics-table tbody tr {
+     cursor: pointer;
 }
  .topics-table tbody tr.selected {
      background: rgba(59,130,246,0.16);
@@ -98,26 +93,24 @@
      padding: 28px;
 }
 /* ========================= META ========================= */
-.topic-meta {
-    display: flex;
-    gap: 24px;
-    margin-top: 14px;
-    flex-wrap: wrap;
+ .topic-meta {
+     display: flex;
+     gap: 24px;
+     margin-top: 14px;
+     flex-wrap: wrap;
 }
-
-.topic-meta-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 15px;
-    line-height: 1.5;
-    color: var(--text-secondary);
+ .topic-meta-item {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     font-size: 15px;
+     line-height: 1.5;
+     color: var(--text-secondary);
 }
-
-.topic-meta-item strong {
-    color: var(--text-primary);
-    font-weight: 700;
-    font-size: 16px;
+ .topic-meta-item strong {
+     color: var(--text-primary);
+     font-weight: 700;
+     font-size: 16px;
 }
 /* ========================= SECTION ========================= */
  .topic-section {
@@ -143,13 +136,13 @@
      overflow-y: auto;
 }
 /* CONFIG SCROLLBAR */
-  .topic-config-table thead {
+ .topic-config-table thead {
      position: sticky;
      top: 0;
      z-index: 15;
      background: var(--panel-bg);
-  }
-.topic-config-table th {
+}
+ .topic-config-table th {
      text-align: left;
      padding: 14px 16px;
      font-size: 13px;
@@ -162,14 +155,14 @@
      font-size: 14px;
      color: var(--text-primary);
 }
-  .topic-config-table tr.active-config {
+ .topic-config-table tr.active-config {
      background: rgba(59,130,246,0.10);
 }
  .topic-config-table td:not(:last-child), .topic-config-table th:not(:last-child) {
      border-right: 1px solid var(--border-color);
 }
 /* ========================= EDITABLE CONFIG ========================= */
-.config-key {
+ .config-key {
      color: var(--text-secondary);
      word-break: break-word;
 }
@@ -196,12 +189,12 @@
      border-radius: 18px;
      background: var(--card-bg);
      border: 1px solid var(--border-color);
- }
+}
  .config-edit-box h4 {
      margin-bottom: 16px;
      color: var(--text-secondary);
      font-size: 15px;
- }
+}
  .config-edit-box input {
      width: 100%;
      height: 48px;
@@ -257,12 +250,12 @@
      background: var(--card-bg);
      backdrop-filter: blur(12px);
      border-bottom: 1px solid var(--border-color);
- }
+}
  .topic-drawer-header h2 {
      font-size: 28px;
      margin-bottom: 14px;
      color: var(--text-primary);
- }
+}
 /* ========================================= TOPIC NAME ========================================= */
  .topic-selected-name {
      margin-top: 6px;
@@ -285,7 +278,7 @@
      flex-direction: column;
      gap: 18px;
 }
- /* BUTTONS */
+/* BUTTONS */
  .modal-buttons {
      display: flex;
      gap: 14px;
@@ -330,7 +323,7 @@
  .advanced-toggle:hover {
      background: var(--sidebar-hover);
      border-color: var(--border-color);
- }
+}
  .advanced-section {
      display: flex;
      flex-direction: column;
@@ -353,58 +346,48 @@
          transform: translateY(0);
     }
 }
-.topic-drawer-close-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 400;
-    cursor: pointer;
-    transition: 0.18s ease;
+ .topic-drawer-close-btn {
+     background: transparent;
+     border: none;
+     color: var(--text-secondary);
+     font-size: 14px;
+     font-weight: 400;
+     cursor: pointer;
+     transition: 0.18s ease;
 }
-
-.topic-drawer-close-btn:hover {
-    color: var(--text-primary);
+ .topic-drawer-close-btn:hover {
+     color: var(--text-primary);
 }
 /* ========================= CREATE TOPIC MODAL ========================= */
-.modal-content {
-    background: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+ .modal-content {
+     background: var(--panel-bg);
+     border: 1px solid var(--border-color);
+     color: var(--text-primary);
 }
-.modal-content input,
-.modal-content select {
-    background: var(--input-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+ .modal-content input, .modal-content select {
+     background: var(--input-bg);
+     border: 1px solid var(--border-color);
+     color: var(--text-primary);
 }
-.modal-content input:focus,
-.modal-content select:focus {
-    border-color: rgba(59,130,246,0.7);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+ .modal-content input:focus, .modal-content select:focus {
+     border-color: rgba(59,130,246,0.7);
+     box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
 }
-.modal-content label {
-    color: var(--text-secondary);
+ .modal-content label {
+     color: var(--text-secondary);
 }
 /* ========================= TOPIC DRAWER ========================= */
-
-.topic-drawer,
-.topic-drawer-content,
-.topic-details-drawer {
-    background: var(--bg-primary);
-    color: var(--text-primary);
+ .topic-drawer, .topic-drawer-content, .topic-details-drawer {
+     background: var(--bg-primary);
+     color: var(--text-primary);
 }
-
 /* ========================= CREATE TOPIC MODAL ========================= */
-
-.modal-overlay {
-    background: rgba(15, 23, 42, 0.35);
-    backdrop-filter: blur(4px);
+ .modal-overlay {
+     background: rgba(15, 23, 42, 0.35);
+     backdrop-filter: blur(4px);
 }
-
-.modal-panel,
-.modal-wrapper {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+ .modal-panel, .modal-wrapper {
+     background: var(--bg-primary);
+     border: 1px solid var(--border-color);
+     color: var(--text-primary);
 }

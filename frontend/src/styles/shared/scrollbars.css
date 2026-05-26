@@ -11,20 +11,21 @@
 .topic-config-wrapper::-webkit-scrollbar-track,
 .modal-content::-webkit-scrollbar-track,
 .topic-drawer::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.03);
+    background: var(--panel-bg);
 }
 
 .topics-table-wrapper::-webkit-scrollbar-thumb,
 .topic-config-wrapper::-webkit-scrollbar-thumb,
 .modal-content::-webkit-scrollbar-thumb,
 .topic-drawer::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.12);
+    background: var(--border-color);
     border-radius: 20px;
+    border: 2px solid var(--panel-bg);
 }
 
 .topics-table-wrapper::-webkit-scrollbar-thumb:hover,
 .topic-config-wrapper::-webkit-scrollbar-thumb:hover,
 .modal-content::-webkit-scrollbar-thumb:hover,
 .topic-drawer::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.18);
+    background: var(--sidebar-hover);
 }

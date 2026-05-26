@@ -31,16 +31,12 @@
     height: 100vh;
     overflow-y: auto;
     z-index: 5001;
-    background: linear-gradient(
-        180deg,
-        #0b1220 0%,
-        #0f172a 100%
-    );
-    border-left: 1px solid rgba(255,255,255,0.08);
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
     box-shadow: -12px 0 40px rgba(0,0,0,0.45);
     animation: slidePanel 0.22s ease;
     padding: 28px;
-    color: white;
+    color: var(--text-primary);
 }
 .topic-drawer {
     position: fixed;
@@ -51,19 +47,11 @@
     height: 100vh;
     overflow-y: auto;
 
-    background: linear-gradient(
-        180deg,
-        #0b1220 0%,
-        #0f172a 100%
-    );
-
-    border-left: 1px solid rgba(255,255,255,0.08);
-
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
     box-shadow: -12px 0 40px rgba(0,0,0,0.45);
-
     animation: slidePanel 0.22s ease;
-
-    color: white;
+    color: var(--text-primary);
 }
 /* ========================================= ANIMATIONS ========================================= */
 
