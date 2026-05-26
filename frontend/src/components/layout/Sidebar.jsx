@@ -23,17 +23,12 @@ import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import packageJson from '../../../package.json';
 
-import { useTranslation } from 'react-i18next';
 import { useCluster } from '../../contexts/ClusterContext';
 
 export default function Sidebar({
-
   onAddCluster,
   onEditCluster
-
 }) {
-
-  const { t } = useTranslation();
 
   const {
     clusters,
@@ -49,13 +44,13 @@ export default function Sidebar({
 
   const hasCluster =
     clusters.length > 0 &&
-    currentCluster;
+    Boolean(currentCluster);
 
   return (
 
     <aside className="sidebar">
 
-      {/* ========================= HEADER ========================= */}
+      {/* ========================= TOP ========================= */}
 
       <div className="sidebar-top">
 
@@ -179,33 +174,33 @@ export default function Sidebar({
                       )
                       .map(cluster => (
 
-                      <div
-                        key={cluster.id}
-                        className="cluster-dropdown-item"
-                        onClick={() => {
-
-                          changeCluster(cluster);
-
-                          setIsClusterOpen(false);
-                        }}
-                      >
-
                         <div
-                          className={`cluster-status-dot ${
-                            cluster?.connectionStatus ||
-                            'unknown'
-                          }`}
-                        />
+                          key={cluster.id}
+                          className="cluster-dropdown-item"
+                          onClick={() => {
 
-                        <span>
+                            changeCluster(cluster);
 
-                          {cluster.name}
+                            setIsClusterOpen(false);
+                          }}
+                        >
 
-                        </span>
+                          <div
+                            className={`cluster-status-dot ${
+                              cluster?.connectionStatus ||
+                              'unknown'
+                            }`}
+                          />
 
-                      </div>
+                          <span>
 
-                    ))}
+                            {cluster.name}
+
+                          </span>
+
+                        </div>
+
+                      ))}
 
                   </div>
 
@@ -235,128 +230,118 @@ export default function Sidebar({
 
         {/* ========================= NAVIGATION ========================= */}
 
-        <nav className="sidebar-nav">
+        {hasCluster && (
 
-          <NavLink
-            to="/"
-            end
-            className="sidebar-link"
-          >
+          <nav className="sidebar-nav">
 
-            <FiHome />
+            <NavLink
+              to="/"
+              end
+              className="sidebar-link"
+            >
 
-            <span>
-              Главная
-            </span>
+              <FiHome />
 
-          </NavLink>
+              <span>
+                Обзор
+              </span>
 
-          <NavLink
-            to="/topics"
-            className={`sidebar-link ${
-              !hasCluster ? 'disabled' : ''
-            }`}
-          >
+            </NavLink>
 
-            <FiLayers />
+            <NavLink
+              to="/topics"
+              className="sidebar-link"
+            >
 
-            <span>
-              Топики
-            </span>
+              <FiLayers />
 
-          </NavLink>
+              <span>
+                Топики
+              </span>
 
-          <NavLink
-            to="/groups"
-            className={`sidebar-link ${
-              !hasCluster ? 'disabled' : ''
-            }`}
-          >
+            </NavLink>
 
-            <FiUsers />
+            <NavLink
+              to="/groups"
+              className="sidebar-link"
+            >
 
-            <span>
-              Консьюмеры
-            </span>
+              <FiUsers />
 
-          </NavLink>
+              <span>
+                Консьюмеры
+              </span>
 
-          <NavLink
-            to="/offset-reset"
-            className={`sidebar-link ${
-              !hasCluster ? 'disabled' : ''
-            }`}
-          >
+            </NavLink>
 
-            <FiRotateCcw />
+            <NavLink
+              to="/offset-reset"
+              className="sidebar-link"
+            >
 
-            <span>
-              Сброс оффсетов
-            </span>
+              <FiRotateCcw />
 
-          </NavLink>
+              <span>
+                Сброс оффсетов
+              </span>
 
-          <NavLink
-            to="/search"
-            className={`sidebar-link ${
-              !hasCluster ? 'disabled' : ''
-            }`}
-          >
+            </NavLink>
 
-            <FiSearch />
+            <NavLink
+              to="/search"
+              className="sidebar-link"
+            >
 
-            <span>
-              Поиск сообщений
-            </span>
+              <FiSearch />
 
-          </NavLink>
+              <span>
+                Поиск сообщений
+              </span>
 
-          <NavLink
-            to="/acls"
-            className={`sidebar-link ${
-              !hasCluster ? 'disabled' : ''
-            }`}
-          >
+            </NavLink>
 
-            <FiShield />
+            <NavLink
+              to="/acls"
+              className="sidebar-link"
+            >
 
-            <span>
-              ACL
-            </span>
+              <FiShield />
 
-          </NavLink>
+              <span>
+                ACL
+              </span>
 
-          <NavLink
-            to="/alerts"
-            className={`sidebar-link ${
-              !hasCluster ? 'disabled' : ''
-            }`}
-          >
+            </NavLink>
 
-            <FiAlertTriangle />
+            <NavLink
+              to="/alerts"
+              className="sidebar-link"
+            >
 
-            <span>
-              Оповещения
-            </span>
+              <FiAlertTriangle />
 
-          </NavLink>
+              <span>
+                Оповещения
+              </span>
 
-          <NavLink
-            to="/logs"
-            className={`sidebar-link ${
-              !hasCluster ? 'disabled' : ''
-            }`}
-          >
+            </NavLink>
 
-            <FiFileText />
+            <NavLink
+              to="/logs"
+              className="sidebar-link"
+            >
 
-            <span>
-              Логи
-            </span>
+              <FiFileText />
 
-          </NavLink>
+              <span>
+                Логи
+              </span>
 
-        </nav>
+            </NavLink>
+
+          </nav>
+
+        )}
 
       </div>
 

@@ -927,13 +927,39 @@
   outline: none;
   transition: 0.2s ease;
 }
-.sidebar-nav-top {
+/* ========================= SIDEBAR LAYOUT ========================= */
+.sidebar {
+    width: 290px;
+    min-width: 290px;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
-.sidebar-nav-bottom {
+.sidebar-top {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+.sidebar-bottom {
     margin-top: auto;
-    padding-top: 18px;
+    display: flex;
+    flex-direction: column;
+    padding-top: 14px;
+}
+
+/* SETTINGS BLOCK */
+.sidebar-settings-nav {
+    padding: 0 16px 14px;
+}
+
+/* FOOTER */
+.sidebar-footer {
+    padding: 20px 24px;
     border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 13px;
 }
