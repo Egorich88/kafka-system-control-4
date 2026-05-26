@@ -20,6 +20,7 @@ import Topics from './pages/Topics';
 import Groups from './pages/Groups';
 import Acl from './pages/Acl';
 import Search from './pages/Search';
+import Settings from './pages/Settings';
 import { ClusterProvider } from './contexts/ClusterContext';
 import './App.css';
 
@@ -35,6 +36,7 @@ function App() {
             <Route path="groups" element={<Groups />} />
             <Route path="acls" element={<Acl />} />
             <Route path="search" element={<Search />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>

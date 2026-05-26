@@ -7,7 +7,8 @@
 import {
   FiInfo,
   FiCode,
-  FiPlus
+  FiPlus,
+  FiStar
 } from 'react-icons/fi';
 
 import { useCluster } from '../contexts/ClusterContext';
@@ -150,11 +151,7 @@ export default function Dashboard() {
           className="welcome-github"
         >
 
-          <img
-            src="/github-mark-white.svg"
-            alt="GitHub"
-            className="github-logo"
-          />
+          <FiStar className="welcome-github-icon" />
 
           <span>
             Поддержите проект на GitHub

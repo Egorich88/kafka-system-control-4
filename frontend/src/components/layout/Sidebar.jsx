@@ -4,12 +4,6 @@
  * Licensed under the Apache License, Version 2.0
  */
 
-/*
- * Copyright 2026 Egor Khomenko (Egorich88)
- *
- * Licensed under the Apache License, Version 2.0
- */
-
 import {
   FiHome,
   FiLayers,
@@ -25,24 +19,11 @@ import {
   FiChevronUp
 } from 'react-icons/fi';
 
-import {
-  NavLink
-} from 'react-router-dom';
-
-import {
-  useState
-} from 'react';
-
+import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
 import packageJson from '../../../package.json';
-
-import {
-  useTranslation
-} from 'react-i18next';
-
-import {
-  useCluster
-} from '../../contexts/ClusterContext';
-
+import { useTranslation } from 'react-i18next';
+import { useCluster } from '../../contexts/ClusterContext';
 export default function Sidebar({
 
   onAddCluster,
@@ -50,9 +31,7 @@ export default function Sidebar({
 
 }) {
 
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
 
   const {
     clusters,
@@ -388,11 +367,7 @@ export default function Sidebar({
           className="footer-project-link"
         >
 
-          <img
-            src="/github-mark-white.svg"
-            alt="GitHub"
-            className="footer-github-logo"
-          />
+          <FiGithub className="footer-github-icon" />
 
           <span>
             Egorich88
