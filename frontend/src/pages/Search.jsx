@@ -282,6 +282,86 @@ useEffect(() => {
 
 }, []);
 
+  const exportMessages = (format) => {
+
+      const rows = selectedRows.length > 0
+
+          ? messages.filter((m) =>
+              selectedRows.includes(m.offset)
+          )
+
+          : messages
+
+      if (rows.length === 0) {
+
+          toast.error("Нет сообщений для выгрузки")
+
+          return
+      }
+
+      if (format === "json") {
+
+          const blob = new Blob(
+              [
+                  JSON.stringify(rows, null, 2)
+              ],
+              {
+                  type: "application/json"
+              }
+          )
+
+          downloadBlob(blob, "messages.json")
+      }
+
+      if (format === "csv") {
+
+          const csv = [
+              [
+                  "offset",
+                  "key",
+                  "timestamp",
+                  "value"
+              ].join(","),
+              ...rows.map((m) => [
+
+                  m.offset,
+
+                  `"${m.key || ""}"`,
+
+                  `"${m.timestamp}"`,
+
+                  `"${(m.value || "")
+                      .replace(/"/g, '""')}"`
+
+              ].join(","))
+          ].join("\n")
+
+          const blob = new Blob(
+              [csv],
+              {
+                  type: "text/csv"
+              }
+          )
+
+          downloadBlob(blob, "messages.csv")
+      }
+  }
+
+  const downloadBlob = (blob, filename) => {
+
+      const url = URL.createObjectURL(blob)
+
+      const a = document.createElement("a")
+
+      a.href = url
+
+      a.download = filename
+
+      a.click()
+
+      URL.revokeObjectURL(url)
+  }
+
 /* ========================= FILTERED TOPICS ========================= */
 
   const filteredTopics = topics.filter(
@@ -532,15 +612,35 @@ useEffect(() => {
 
           <div className="search-results-header">
 
-            <h2>
-              Результаты поиска
-            </h2>
+              <div>
 
-            <div className="search-results-count">
+                  <h2>
+                      Результаты поиска
+                  </h2>
 
-              {messages.length} сообщений
+                  <div className="search-results-count">
+                      {messages.length} сообщений
+                  </div>
 
-            </div>
+              </div>
+
+              <div className="search-actions">
+
+                  <button
+                      className="export-btn"
+                      onClick={() => exportMessages("json")}
+                  >
+                      Export JSON
+                  </button>
+
+                  <button
+                      className="export-btn"
+                      onClick={() => exportMessages("csv")}
+                  >
+                      Export CSV
+                  </button>
+
+              </div>
 
           </div>
 
@@ -606,7 +706,7 @@ useEffect(() => {
 
                                   <td>{msg.offset}</td>
 
-                                  <td>0</td>
+                                  <td>{partition}</td>
 
                                   <td className="message-key-cell">
                                       {msg.key || "-"}
@@ -671,15 +771,26 @@ useEffect(() => {
                   <pre className="message-detail-content">
 
                       {
-                          viewFormat === "json"
+                          (() => {
 
-                              ? JSON.stringify(
-                                  JSON.parse(selectedMessage.value),
-                                  null,
-                                  2
-                              )
+                              if (viewFormat === "raw") {
+                                  return selectedMessage.value
+                              }
 
-                              : selectedMessage.value
+                              try {
+
+                                  return JSON.stringify(
+                                      JSON.parse(selectedMessage.value),
+                                      null,
+                                      2
+                                  )
+
+                              } catch {
+
+                                  return selectedMessage.value
+                              }
+
+                          })()
                       }
 
                   </pre>

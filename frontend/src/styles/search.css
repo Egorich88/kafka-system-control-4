@@ -523,9 +523,29 @@
 .message-detail-content {
     padding: 18px;
     border-radius: 16px;
-    background: #08101d;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
     overflow-x: auto;
-    color: #dbeafe;
+    color: var(--text-primary);
     line-height: 1.6;
     font-size: 13px;
+}
+/*CSS кнопок */
+.search-actions {
+    display: flex;
+    gap: 12px;
+}
+.export-btn {
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--panel-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+.export-btn:hover {
+    background: rgba(59,130,246,0.12);
+    border-color: rgba(59,130,246,0.35);
 }
