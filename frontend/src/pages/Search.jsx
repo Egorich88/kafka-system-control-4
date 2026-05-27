@@ -282,9 +282,9 @@ useEffect(() => {
 
 }, []);
 
-  const exportMessages = (format) => {
+  const exportMessages = (format, onlySelected = false) => {
 
-      const rows = selectedRows.length > 0
+      const rows = onlySelected
 
           ? messages.filter((m) =>
               selectedRows.includes(m.offset)
@@ -618,8 +618,12 @@ useEffect(() => {
                       Результаты поиска
                   </h2>
 
-                  <div className="search-results-count">
-                      {messages.length} сообщений
+                  <div className="search-results-badge">
+
+                      <span className="badge-dot"></span>
+
+                      Найдено: {messages.length}
+
                   </div>
 
               </div>
@@ -628,16 +632,20 @@ useEffect(() => {
 
                   <button
                       className="export-btn"
-                      onClick={() => exportMessages("json")}
+                      onClick={() => exportMessages("json", true)}
                   >
-                      Export JSON
+
+                      ⬇ Экспорт выбранных
+
                   </button>
 
                   <button
-                      className="export-btn"
-                      onClick={() => exportMessages("csv")}
+                      className="export-btn secondary"
+                      onClick={() => exportMessages("json", false)}
                   >
-                      Export CSV
+
+                      ⬇ Экспорт всех ({messages.length})
+
                   </button>
 
               </div>
@@ -663,12 +671,12 @@ useEffect(() => {
                               />
                           </th>
 
-                          <th>Offset</th>
-                          <th>Partition</th>
-                          <th>Key</th>
-                          <th>Timestamp</th>
-                          <th>Size</th>
-                          <th>Preview</th>
+                          <th>Оффсет</th>
+                          <th>Партиция</th>
+                          <th>Ключ</th>
+                          <th>Время</th>
+                          <th>Размер</th>
+                          <th>Предпросмотр</th>
 
                       </tr>
 
@@ -733,6 +741,59 @@ useEffect(() => {
                   </tbody>
 
               </table>
+
+          </div>
+
+          <div className="table-footer">
+
+              <div className="table-footer-left">
+
+                  <span className="selected-count">
+
+                      Выбрано: {selectedRows.length}
+
+                  </span>
+
+                  <button
+                      className="clear-selection-btn"
+                      onClick={() => setSelectedRows([])}
+                  >
+
+                      Очистить выбор
+
+                  </button>
+
+              </div>
+
+              <div className="table-footer-right">
+
+                  <button className="pagination-btn">
+                      &lt;
+                  </button>
+
+                  <button className="pagination-page active">
+                      1
+                  </button>
+
+                  <button className="pagination-page">
+                      2
+                  </button>
+
+                  <button className="pagination-page">
+                      3
+                  </button>
+
+                  <button className="pagination-btn">
+                      &gt;
+                  </button>
+
+                  <button className="rows-per-page">
+
+                      {limit}/стр. ⌄
+
+                  </button>
+
+              </div>
 
           </div>
 

@@ -473,10 +473,12 @@
     font-size: 13px;
     color: var(--text-secondary);
     border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
 }
 .messages-table td {
     padding: 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
     font-size: 14px;
 }
 .messages-table tbody tr {
@@ -548,4 +550,95 @@
 .export-btn:hover {
     background: rgba(59,130,246,0.12);
     border-color: rgba(59,130,246,0.35);
+}
+/* ========================= SEARCH BADGE ========================= */
+
+.search-results-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.18);
+    color: #86efac;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.badge-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow:
+        0 0 10px #22c55e,
+        0 0 20px rgba(34,197,94,0.8);
+}
+
+/* ========================= TABLE FOOTER ========================= */
+
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+}
+
+.table-footer-left,
+.table-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.selected-count {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.clear-selection-btn {
+    border: none;
+    background: transparent;
+    color: #60a5fa;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.clear-selection-btn:hover {
+    text-decoration: underline;
+}
+
+/* ========================= PAGINATION ========================= */
+
+.pagination-btn,
+.pagination-page,
+.rows-per-page {
+    height: 38px;
+    min-width: 38px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--panel-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+
+.pagination-page.active {
+    background: rgba(59,130,246,0.18);
+    border-color: rgba(59,130,246,0.35);
+    color: #93c5fd;
+}
+
+.pagination-btn:hover,
+.pagination-page:hover,
+.rows-per-page:hover,
+.export-btn:hover {
+    background: rgba(59,130,246,0.12);
+    border-color: rgba(59,130,246,0.35);
+}
+
+.export-btn.secondary {
+    opacity: 0.9;
 }
