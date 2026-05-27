@@ -49,9 +49,7 @@ export default function ExportDropdown({
 
                 <>
 
-                    <div className="export-menu-title">
-                        Выберите формат:
-                    </div>
+
 
                     <div className="export-menu">
 

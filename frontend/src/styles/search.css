@@ -77,14 +77,13 @@
 .search-field select {
     width: 100%;
     height: 46px;
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1px solid var(--border-color);
     background: var(--input-bg);
     color: var(--text-primary);
     padding: 0 14px;
     outline: none;
     transition: 0.18s ease;
-
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -101,10 +100,10 @@
 .search-field input:focus,
 .search-field select:focus {
     border-color: rgba(59,130,246,0.75);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.14);
-
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+    outline: none;
+    box-shadow: none;
 }
 
 /* DROPDOWN OPTIONS */
@@ -113,6 +112,7 @@
     background: #0f172a;
     color: var(--text-primary);
     border: none;
+    padding: 8px;
 }
 
 /* BUTTON */

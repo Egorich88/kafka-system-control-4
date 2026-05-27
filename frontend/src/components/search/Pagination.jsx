@@ -11,7 +11,7 @@ export default function Pagination({
     total
 }) {
 
-if (totalPages <= 1) {
+if (totalPages <= 7) {
     return null
 }
     return (
@@ -34,7 +34,17 @@ if (totalPages <= 1) {
             {Array.from(
                 { length: totalPages },
                 (_, i) => i + 1
-            ).map((page) => (
+            )
+            .filter((page) => {
+
+                return (
+                    page === 1 ||
+                    page === totalPages ||
+                    Math.abs(page - currentPage) <= 1
+                )
+
+            })
+            .map((page) => (
 
                 <button
                     key={page}
@@ -64,7 +74,6 @@ if (totalPages <= 1) {
                 </button>
 
             )}
-
 
         </div>
     )

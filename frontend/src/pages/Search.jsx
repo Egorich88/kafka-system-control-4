@@ -24,7 +24,7 @@ export default function Search() {
   const [selectedTopic, setSelectedTopic] = useState(searchParams.get('topic') || '');
   const [partition, setPartition] = useState(searchParams.get('partition') || '0');
   const [messages, setMessages] = useState([])
-  const [maxMessages, setMaxMessages] = useState(500)
+  const [maxMessages, setMaxMessages] = useState(100)
   const [partitions, setPartitions] = useState([])
   const [selectedMessage, setSelectedMessage] = useState(null)
   const [selectedRows, setSelectedRows] = useState([])
@@ -36,7 +36,7 @@ export default function Search() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalMessages, setTotalMessages] = useState(0)
   const pageSize = 7
-  const totalPages = Math.ceil(totalMessages / pageSize)
+  const totalPages = Math.max( 1, Math.ceil(totalMessages / pageSize) )
   const toggleRowSelection = (offset) => {
       setSelectedRows((prev) => {
           if (prev.includes(offset)) {
@@ -52,11 +52,7 @@ export default function Search() {
       }
       setSelectedRows(messages.map((m) => String(m.offset)))
   }
-  const paginatedMessages =
-      messages.slice(
-          (currentPage - 1) * pageSize,
-          currentPage * pageSize
-      )
+
   const dropdownRef = useRef(null);
   useEffect(() => {
     if (!currentCluster) return;
@@ -182,7 +178,8 @@ export default function Search() {
         }&offset=${
           calculatedOffset
         }&limit=${
-            maxMessages
+            pageSize
+        }
         }&endOffset=${
             endOffset || ''
         }`;
@@ -419,7 +416,7 @@ useEffect(() => {
 
           <div className="messages-table-wrapper">
               <MessagesTable
-                  messages={paginatedMessages}
+                  messages={messages}
                   selectedRows={selectedRows}
                   toggleAllRows={toggleAllRows}
                   toggleRowSelection={toggleRowSelection}
