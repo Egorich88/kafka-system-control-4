@@ -79,6 +79,19 @@ export default function Search() {
   const [topicSearch, setTopicSearch] =
     useState('');
 
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const pageSize = Number(limit)
+
+  const totalPages = Math.ceil(
+      messages.length / pageSize
+  )
+
+  const paginatedMessages = messages.slice(
+      (currentPage - 1) * pageSize,
+      currentPage * pageSize
+  )
+
   const toggleRowSelection = (offset) => {
 
       setSelectedRows((prev) => {
@@ -98,7 +111,7 @@ export default function Search() {
           return
       }
 
-      setSelectedRows(messages.map((m) => m.offset))
+      setSelectedRows(messages.map((m) => String(m.offset)))
   }
 
   const dropdownRef = useRef(null);
@@ -287,7 +300,7 @@ useEffect(() => {
       const rows = onlySelected
 
           ? messages.filter((m) =>
-              selectedRows.includes(m.offset)
+              selectedRows.includes(String(m.offset))
           )
 
           : messages
@@ -612,7 +625,7 @@ useEffect(() => {
 
           <div className="search-results-header">
 
-              <div>
+              <div className="search-results-title-row">
 
                   <h2>
                       Результаты поиска
@@ -620,9 +633,7 @@ useEffect(() => {
 
                   <div className="search-results-badge">
 
-                      <span className="badge-dot"></span>
-
-                      Найдено: {messages.length}
+                      Найдено: {messages.length} сообщений
 
                   </div>
 
@@ -684,7 +695,7 @@ useEffect(() => {
 
                   <tbody>
 
-                      {messages.map((msg) => {
+                      {paginatedMessages.map((msg) => {
 
                           const isSelected =
                               selectedMessage?.offset === msg.offset
@@ -706,7 +717,7 @@ useEffect(() => {
 
                                               e.stopPropagation()
 
-                                              toggleRowSelection(msg.offset)
+                                              toggleRowSelection(String(msg.offset))
                                           }}
                                       />
 
@@ -750,7 +761,7 @@ useEffect(() => {
 
                   <span className="selected-count">
 
-                      Выбрано: {selectedRows.length}
+                      Выбрано: {selectedRows.length} сообщений
 
                   </span>
 
@@ -767,31 +778,62 @@ useEffect(() => {
 
               <div className="table-footer-right">
 
-                  <button className="pagination-btn">
-                      &lt;
-                  </button>
+                  {currentPage > 1 && (
 
-                  <button className="pagination-page active">
-                      1
-                  </button>
+                      <button
+                          className="pagination-btn"
+                          onClick={() =>
+                              setCurrentPage(currentPage - 1)
+                          }
+                      >
+                          &lt;
+                      </button>
 
-                  <button className="pagination-page">
-                      2
-                  </button>
+                  )}
 
-                  <button className="pagination-page">
-                      3
-                  </button>
+                  {Array.from(
+                      { length: totalPages },
+                      (_, i) => i + 1
+                  ).map((page) => (
 
-                  <button className="pagination-btn">
-                      &gt;
-                  </button>
+                      <button
+                          key={page}
+                          className={`pagination-page ${
+                              currentPage === page
+                                  ? "active"
+                                  : ""
+                          }`}
+                          onClick={() =>
+                              setCurrentPage(page)
+                          }
+                      >
+                          {page}
+                      </button>
 
-                  <button className="rows-per-page">
+                  ))}
 
-                      {limit}/стр. ⌄
+                  {currentPage < totalPages && (
 
-                  </button>
+                      <button
+                          className="pagination-btn"
+                          onClick={() =>
+                              setCurrentPage(currentPage + 1)
+                          }
+                      >
+                          &gt;
+                      </button>
+
+                  )}
+
+                  {messages.length > pageSize && (
+
+                      <button className="rows-per-page">
+
+                          {limit}/стр. ⌄
+
+                      </button>
+
+                  )}
 
               </div>
 
