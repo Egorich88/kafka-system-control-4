@@ -10,7 +10,7 @@ import {
   FiSearch
 } from 'react-icons/fi';
 
-import '../styles/Search.css';
+import '../styles/search.css';
 
 import {
   useEffect,
@@ -60,8 +60,13 @@ export default function Search() {
   const [limit, setLimit] =
     useState('10');
 
-  const [messages, setMessages] =
-    useState([]);
+  const [messages, setMessages] = useState([])
+
+  const [selectedMessage, setSelectedMessage] = useState(null)
+
+  const [selectedRows, setSelectedRows] = useState([])
+
+  const [viewFormat, setViewFormat] = useState("json")
 
   const [searching, setSearching] =
     useState(false);
@@ -73,6 +78,28 @@ export default function Search() {
 
   const [topicSearch, setTopicSearch] =
     useState('');
+
+  const toggleRowSelection = (offset) => {
+
+      setSelectedRows((prev) => {
+
+          if (prev.includes(offset)) {
+              return prev.filter((v) => v !== offset)
+          }
+
+          return [...prev, offset]
+      })
+  }
+
+  const toggleAllRows = () => {
+
+      if (selectedRows.length === messages.length) {
+          setSelectedRows([])
+          return
+      }
+
+      setSelectedRows(messages.map((m) => m.offset))
+  }
 
   const dropdownRef = useRef(null);
 
@@ -517,56 +544,148 @@ useEffect(() => {
 
           </div>
 
-          <div className="messages-grid">
+          <div className="messages-table-wrapper">
 
-            {messages.map((msg, idx) => (
+              <table className="messages-table">
 
-              <div
-                key={idx}
-                className="message-card"
-              >
+                  <thead>
 
-                <div className="message-meta">
+                      <tr>
 
-                  <span>
-                    Offset: {msg.offset}
-                  </span>
+                          <th>
+                              <input
+                                  type="checkbox"
+                                  checked={
+                                      messages.length > 0 &&
+                                      selectedRows.length === messages.length
+                                  }
+                                  onChange={toggleAllRows}
+                              />
+                          </th>
 
-                  <span>
-                    {msg.timestamp}
-                  </span>
+                          <th>Offset</th>
+                          <th>Partition</th>
+                          <th>Key</th>
+                          <th>Timestamp</th>
+                          <th>Size</th>
+                          <th>Preview</th>
 
-                </div>
+                      </tr>
 
-                <div className="message-key">
+                  </thead>
 
-                  <strong>
-                    Key:
-                  </strong>
+                  <tbody>
 
-                  <code>
-                    {msg.key || '—'}
-                  </code>
+                      {messages.map((msg) => {
 
-                </div>
+                          const isSelected =
+                              selectedMessage?.offset === msg.offset
 
-                <div className="message-value">
+                          return (
 
-                  <strong>
-                    Value:
-                  </strong>
+                              <tr
+                                  key={msg.offset}
+                                  className={isSelected ? "active-row" : ""}
+                                  onClick={() => setSelectedMessage(msg)}
+                              >
 
-                  <pre>
-                    {msg.value}
-                  </pre>
+                                  <td>
 
-                </div>
+                                      <input
+                                          type="checkbox"
+                                          checked={selectedRows.includes(msg.offset)}
+                                          onChange={(e) => {
 
-              </div>
+                                              e.stopPropagation()
 
-            ))}
+                                              toggleRowSelection(msg.offset)
+                                          }}
+                                      />
+
+                                  </td>
+
+                                  <td>{msg.offset}</td>
+
+                                  <td>0</td>
+
+                                  <td className="message-key-cell">
+                                      {msg.key || "-"}
+                                  </td>
+
+                                  <td>
+                                      {msg.timestamp}
+                                  </td>
+
+                                  <td>
+                                      {new Blob([msg.value]).size} B
+                                  </td>
+
+                                  <td className="preview-cell">
+
+                                      {msg.value?.slice(0, 90)}
+
+                                  </td>
+
+                              </tr>
+                          )
+                      })}
+
+                  </tbody>
+
+              </table>
 
           </div>
+
+          {selectedMessage && (
+
+              <div className="message-detail-panel">
+
+                  <div className="message-detail-header">
+
+                      <h3>
+                          Детали сообщения
+                      </h3>
+
+                      <select
+                          value={viewFormat}
+                          onChange={(e) => setViewFormat(e.target.value)}
+                      >
+                          <option value="json">JSON</option>
+                          <option value="raw">RAW</option>
+                      </select>
+
+                  </div>
+
+                  <div className="message-detail-meta">
+
+                      <span>
+                          Offset: {selectedMessage.offset}
+                      </span>
+
+                      <span>
+                          Key: {selectedMessage.key || "-"}
+                      </span>
+
+                  </div>
+
+                  <pre className="message-detail-content">
+
+                      {
+                          viewFormat === "json"
+
+                              ? JSON.stringify(
+                                  JSON.parse(selectedMessage.value),
+                                  null,
+                                  2
+                              )
+
+                              : selectedMessage.value
+                      }
+
+                  </pre>
+
+              </div>
+          )}
 
         </div>
 
