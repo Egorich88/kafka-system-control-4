@@ -421,32 +421,38 @@
     background: rgba(148,163,184,0.55);
 }
 .messages-table-wrapper {
-    overflow: auto;
+    max-height: 520px;
+    overflow-y: auto;
+    overflow-x: auto;
     border-radius: 18px;
     border: 1px solid var(--border-color);
     margin-top: 18px;
+    position: relative;
 }
 .messages-table {
     width: 100%;
     border-collapse: collapse;
     min-width: 1200px;
 }
-.messages-table thead {
+.messages-table thead th {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 30;
     background: var(--card-bg);
+    box-shadow:
+        0 1px 0 var(--border-color),
+        0 2px 6px rgba(0,0,0,0.18);
 }
 .messages-table th {
     text-align: left;
-    padding: 9px 12px;
+    padding: 7px 12px;
     font-size: 13px;
     color: var(--text-secondary);
     border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
 }
 .messages-table td {
-    padding: 8px 12px;
+    padding: 6px 12px;
     border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     font-size: 13px;
