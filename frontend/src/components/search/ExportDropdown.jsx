@@ -23,6 +23,10 @@ export default function ExportDropdown({
                     type === "all"
                         ? "secondary"
                         : ""
+                } ${
+                    exportMenu === type
+                        ? "open"
+                        : ""
                 }`}
                 onClick={() =>
                     setExportMenu(
