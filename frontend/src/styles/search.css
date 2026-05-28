@@ -584,9 +584,17 @@
     background: rgba(59,130,246,0.12);
     border-color: rgba(59,130,246,0.35);
 }
-
+/* ========================= EXPORT ICON ========================= */
 .export-btn.secondary {
     opacity: 0.9;
+}
+.export-icon {
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+.export-chevron {
+    margin-left: 8px;
+    flex-shrink: 0;
 }
 .search-results-title-row {
     display: flex;
