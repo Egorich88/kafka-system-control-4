@@ -421,7 +421,7 @@
     background: rgba(148,163,184,0.55);
 }
 .messages-table-wrapper {
-    max-height: 520px;
+    max-height: 340px;
     overflow-y: auto;
     overflow-x: auto;
     border-radius: 18px;
