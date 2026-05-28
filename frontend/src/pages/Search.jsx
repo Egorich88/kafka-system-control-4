@@ -193,8 +193,15 @@ export default function Search() {
         }
       );
       setMessages(response.data.messages || [])
+
+      console.log("API RESPONSE:", response.data)
+
       setTotalMessages(
-          response.data.total || 0
+          response.data.total ||
+          response.data.count ||
+          response.data.totalMessages ||
+          response.data.messages?.length ||
+          0
       )
       toast.success(
         `Получено ${
