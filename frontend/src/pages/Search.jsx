@@ -35,8 +35,9 @@ export default function Search() {
   const [topicSearch, setTopicSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1)
   const [totalMessages, setTotalMessages] = useState(0)
-  const pageSize = 7
+  const pageSize = 25
   const totalPages = Math.max( 1, Math.ceil(totalMessages / pageSize) )
+
   const toggleRowSelection = (offset) => {
       setSelectedRows((prev) => {
           if (prev.includes(offset)) {
@@ -178,10 +179,9 @@ export default function Search() {
         }&offset=${
           calculatedOffset
         }&limit=${
-            pageSize
-        }
+          maxMessages
         }&endOffset=${
-            endOffset || ''
+          endOffset || ''
         }`;
       const response = await axios.get(
         url,
