@@ -58,7 +58,8 @@ type Message struct {
 }
 
 type MessagesResponse struct {
-	Messages []Message `json:"messages"`
+    Messages []Message `json:"messages"`
+    Total    int       `json:"total"`
 }
 
 type PartitionInfo struct {
@@ -533,18 +534,23 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	partitionStr := r.URL.Query().Get("partition")
 	offsetStr := r.URL.Query().Get("offset")
 	limitStr := r.URL.Query().Get("limit")
 
-	partition := int32(0)
+	partitionStr := r.URL.Query().Get("partition")
+	log.Printf(
+        "partitionStr='%s'",
+        partitionStr,
+    )
 
-	if partitionStr != "" {
+    var partition int32 = -1
 
-		if p, err := strconv.Atoi(partitionStr); err == nil && p >= 0 {
-			partition = int32(p)
-		}
-	}
+    if partitionStr != "" && partitionStr != "all" {
+
+        if p, err := strconv.Atoi(partitionStr); err == nil {
+            partition = int32(p)
+        }
+    }
 
 	offset := int64(0)
 
@@ -605,102 +611,206 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 
     defer consumer.Close()
 
-    earliestOffset, err := client.GetOffset(
-    	topic,
-    	partition,
-    	sarama.OffsetOldest,
-    )
+    var earliestOffset int64
+    var latestOffset int64
 
-    if err != nil {
+    if partition != -1 {
 
-    	sendJSONError(
-    		w,
-    		"Failed to get earliest offset: "+err.Error(),
-    		http.StatusInternalServerError,
-    	)
+        earliestOffset, err = client.GetOffset(
+            topic,
+            partition,
+            sarama.OffsetOldest,
+        )
 
-    	return
-    }
+        if err != nil {
 
-    latestOffset, err := client.GetOffset(
-    	topic,
-    	partition,
-    	sarama.OffsetNewest,
-    )
+            sendJSONError(
+                w,
+                "Failed to get earliest offset: "+err.Error(),
+                http.StatusInternalServerError,
+            )
 
-    if err != nil {
+            return
+        }
 
-    	sendJSONError(
-    		w,
-    		"Failed to get latest offset: "+err.Error(),
-    		http.StatusInternalServerError,
-    	)
+        latestOffset, err = client.GetOffset(
+            topic,
+            partition,
+            sarama.OffsetNewest,
+        )
 
-    	return
+        if err != nil {
+
+            sendJSONError(
+                w,
+                "Failed to get latest offset: "+err.Error(),
+                http.StatusInternalServerError,
+            )
+
+            return
+        }
     }
 
     if offset < earliestOffset {
     	offset = earliestOffset
     }
+    messages := make([]Message, 0)
+    if partition != -1 && offset >= latestOffset {
 
-    if offset >= latestOffset {
+        total := len(messages)
 
-    	json.NewEncoder(w).Encode(MessagesResponse{
-    		Messages: []Message{},
-    	})
+        if partition != -1 {
+            total = int(latestOffset - earliestOffset)
+        }
 
-    	return
+        json.NewEncoder(w).Encode(MessagesResponse{
+            Messages: messages,
+            Total: total,
+        })
+
+        return
     }
 
-	pc, err := consumer.ConsumePartition(topic, partition, offset)
 
-	if err != nil {
+    partitions, err := client.Partitions(topic)
+    log.Printf(
+        "TOPIC %s PARTITIONS: %+v",
+        topic,
+        partitions,
+    )
 
-		log.Printf("ConsumePartition error: %v", err)
+    if err != nil {
 
-		sendJSONError(
-			w,
-			"Failed to consume partition: "+err.Error(),
-			http.StatusInternalServerError,
-		)
+        sendJSONError(
+            w,
+            "Failed to get partitions: "+err.Error(),
+            http.StatusInternalServerError,
+        )
 
-		return
-	}
+        return
+    }
+    if partition == -1 {
 
-	defer pc.Close()
+        for _, p := range partitions {
+            log.Printf(
+                "READ topic=%s partition=%d offset=%d earliest=%d latest=%d",
+                topic,
+                partition,
+                offset,
+                earliestOffset,
+                latestOffset,
+            )
+            pc, err := consumer.ConsumePartition(
+                topic,
+                p,
+                sarama.OffsetOldest,
+            )
 
-	messages := make([]Message, 0, limit)
+            if err != nil {
 
-	timeout := time.After(3 * time.Second)
+                log.Printf(
+                    "Partition %d error: %v",
+                    p,
+                    err,
+                )
 
-	done := false
+                continue
+            }
 
-	for i := int32(0); i < limit && !done; i++ {
+            timeout := time.After(
+                1 * time.Second,
+            )
 
-		select {
+            done := false
 
-		case msg := <-pc.Messages():
+            for !done {
 
-			messages = append(messages, Message{
-				Offset:    msg.Offset,
-				Key:       string(msg.Key),
-				Value:     string(msg.Value),
-				Timestamp: msg.Timestamp.Format(time.RFC3339),
-			})
+                select {
 
-		case err := <-pc.Errors():
+                case msg := <-pc.Messages():
 
-			log.Printf("Consumer error: %v", err)
+                    messages = append(messages, Message{
+                        Offset: msg.Offset,
+                        Key: string(msg.Key),
+                        Value: string(msg.Value),
+                        Timestamp: msg.Timestamp.Format(
+                            time.RFC3339,
+                        ),
+                    })
 
-		case <-timeout:
+                    if len(messages) >= int(limit) {
 
-			done = true
-		}
-	}
+                        done = true
+                    }
 
-	json.NewEncoder(w).Encode(MessagesResponse{
-		Messages: messages,
-	})
+                case <-timeout:
+
+                    done = true
+                }
+            }
+
+            pc.Close()
+        }
+
+    } else {
+
+        pc, err := consumer.ConsumePartition(
+            topic,
+            partition,
+            offset,
+        )
+
+        if err != nil {
+
+            sendJSONError(
+                w,
+                "Failed to consume partition: "+
+                    err.Error(),
+                http.StatusInternalServerError,
+            )
+
+            return
+        }
+
+        defer pc.Close()
+
+        timeout := time.After(
+            3 * time.Second,
+        )
+
+        done := false
+
+        for i := int32(0); i < limit && !done; i++ {
+
+            select {
+
+            case msg := <-pc.Messages():
+
+                messages = append(messages, Message{
+                    Offset: msg.Offset,
+                    Key: string(msg.Key),
+                    Value: string(msg.Value),
+                    Timestamp: msg.Timestamp.Format(
+                        time.RFC3339,
+                    ),
+                })
+
+            case <-timeout:
+
+                done = true
+            }
+        }
+    }
+    total := len(messages)
+
+    if partition != -1 {
+        total = int(latestOffset - earliestOffset)
+    }
+
+    json.NewEncoder(w).Encode(MessagesResponse{
+        Messages: messages,
+        Total: total,
+    })
 }
 
 func sendJSONError(w http.ResponseWriter, msg string, status int) {
@@ -756,6 +866,11 @@ func getPartitionsHandler(w http.ResponseWriter, r *http.Request) {
     defer client.Close()
 
     partitions, err := client.Partitions(topic)
+    log.Printf(
+        "GET PARTITIONS %s -> %+v",
+        topic,
+        partitions,
+    )
 
     if err != nil {
 

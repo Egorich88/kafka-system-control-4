@@ -116,9 +116,14 @@ export default function Search() {
 
       ).then((res) => {
 
-          setPartitions(
-              res.data.partitions || []
-          )
+           console.log(
+               "PARTITIONS RESPONSE:",
+               res.data
+           )
+
+           setPartitions(
+               res.data.partitions || []
+           )
 
       }).catch(() => {
 
@@ -154,6 +159,14 @@ export default function Search() {
   /* ========================= SEARCH ========================= */
 
   const handleSearch = async (e) => {
+    console.log(
+        "SEARCH:",
+        {
+            topic: selectedTopic,
+            partition,
+            currentPage
+        }
+    )
     e.preventDefault();
     if (
       !selectedTopic ||

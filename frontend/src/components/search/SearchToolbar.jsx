@@ -261,6 +261,7 @@ export default function SearchToolbar({
                                         onClick={() => {
 
                                             setPartition(String(p))
+                                            setCurrentPage(1)
                                             setIsPartitionDropdownOpen(false)
 
                                         }}
