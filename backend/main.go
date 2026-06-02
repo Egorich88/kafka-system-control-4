@@ -68,6 +68,10 @@ type PartitionInfo struct {
 	Isr      []int32 `json:"isr"`
 }
 
+type PartitionsResponse struct {
+    Partitions []int32 `json:"partitions"`
+}
+
 type TopicDetailResponse struct {
 	Name              string            `json:"name"`
 	Partitions        []PartitionInfo   `json:"partitions"`
@@ -708,6 +712,69 @@ func sendJSONError(w http.ResponseWriter, msg string, status int) {
 	})
 }
 
+func getPartitionsHandler(w http.ResponseWriter, r *http.Request) {
+
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Content-Type", "application/json")
+
+    path := strings.TrimPrefix(
+        r.URL.Path,
+        "/api/topics/",
+    )
+
+    path = strings.TrimSuffix(
+        path,
+        "/partitions",
+    )
+
+    topic := strings.TrimSuffix(
+        path,
+        "/",
+    )
+
+    bootstrap := getBootstrapFromRequest(r)
+
+    config := sarama.NewConfig()
+    config.Version = sarama.V2_8_0_0
+
+    client, err := sarama.NewClient(
+        []string{bootstrap},
+        config,
+    )
+
+    if err != nil {
+
+        sendJSONError(
+            w,
+            err.Error(),
+            http.StatusInternalServerError,
+        )
+
+        return
+    }
+
+    defer client.Close()
+
+    partitions, err := client.Partitions(topic)
+
+    if err != nil {
+
+        sendJSONError(
+            w,
+            err.Error(),
+            http.StatusInternalServerError,
+        )
+
+        return
+    }
+
+    json.NewEncoder(w).Encode(
+        PartitionsResponse{
+            Partitions: partitions,
+        },
+    )
+}
+
 func main() {
 
 	http.HandleFunc("/api/topics", func(w http.ResponseWriter, r *http.Request) {
@@ -750,10 +817,21 @@ func main() {
         case http.MethodGet:
 
         	if strings.Contains(r.URL.Path, "/messages") {
-        		getMessagesHandler(w, r)
-        	} else {
-        		getTopicDetailHandler(w, r)
-        	}
+
+                getMessagesHandler(w, r)
+
+            } else if strings.Contains(
+                r.URL.Path,
+                "/partitions",
+            ) {
+
+                getPartitionsHandler(w, r)
+
+            } else {
+
+                getTopicDetailHandler(w, r)
+
+            }
 
         default:
         	w.WriteHeader(http.StatusNotFound)

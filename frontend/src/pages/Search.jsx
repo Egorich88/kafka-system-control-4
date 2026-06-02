@@ -22,7 +22,7 @@ export default function Search() {
   const [endOffset, setEndOffset] = useState('')
   const [topics, setTopics] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(searchParams.get('topic') || '');
-  const [partition, setPartition] = useState(searchParams.get('partition') || '0');
+  const [partition, setPartition] = useState(searchParams.get('partition') || 'all');
   const [messages, setMessages] = useState([])
   const [maxMessages, setMaxMessages] = useState(100)
   const [partitions, setPartitions] = useState([])
@@ -32,6 +32,7 @@ export default function Search() {
   const [exportMenu, setExportMenu] = useState(null)
   const [searching, setSearching] = useState(false);
   const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false);
+  const [isPartitionDropdownOpen, setIsPartitionDropdownOpen] = useState(false)
   const [topicSearch, setTopicSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1)
   const [totalMessages, setTotalMessages] = useState(0)
@@ -167,10 +168,13 @@ export default function Search() {
     }
     setSearching(true);
     try {
-      const calculatedOffset =
+      const baseOffset =
           startOffset !== ''
-                  ? Number(startOffset)
-                  : ((currentPage - 1) * pageSize)
+              ? Number(startOffset)
+              : 0
+
+      const calculatedOffset =
+          baseOffset + ((currentPage - 1) * pageSize)
       const url =
         `/api/topics/${
           encodeURIComponent(selectedTopic)
@@ -236,6 +240,7 @@ useEffect(() => {
       !dropdownRef.current.contains(event.target)
     ) {
       setIsTopicDropdownOpen(false);
+      setIsPartitionDropdownOpen(false);
       setTopicSearch('');
     }
   };
@@ -374,6 +379,8 @@ useEffect(() => {
               partition={partition}
               setPartition={setPartition}
               partitions={partitions}
+              isPartitionDropdownOpen={isPartitionDropdownOpen}
+              setIsPartitionDropdownOpen={setIsPartitionDropdownOpen}
               startOffset={startOffset}
               setStartOffset={setStartOffset}
               endOffset={endOffset}

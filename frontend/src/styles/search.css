@@ -58,7 +58,7 @@
     display: grid;
     grid-template-columns:
         0.9fr
-        120px
+        220px
         160px
         160px
         160px
@@ -97,11 +97,6 @@
     -moz-appearance: none;
 }
 
-/* SELECT */
-
-.search-field select {
-    cursor: pointer;
-}
 
 /* FOCUS */
 
@@ -112,15 +107,6 @@
     border-bottom-right-radius: 0;
     outline: none;
     box-shadow: none;
-}
-
-/* DROPDOWN OPTIONS */
-
-.search-field select option {
-    background: #0f172a;
-    color: var(--text-primary);
-    border: none;
-    padding: 8px;
 }
 
 /* BUTTON */
@@ -255,6 +241,7 @@
 
 .topic-dropdown-wrapper {
     position: relative;
+    z-index: 2100;
 }
 
 .topic-dropdown-trigger {
@@ -322,7 +309,7 @@
 
     overflow: hidden;
 
-    z-index: 1000;
+    z-index: 9999;
 
     box-shadow: 0 20px 40px rgba(0,0,0,0.45);
 }
@@ -378,13 +365,6 @@
     color: #93c5fd;
 }
 /* ========================= TOPIC SEARCH DROPDOWN ========================= */
-.topic-search-wrapper.open .topic-dropdown-trigger {
-    border-color: rgba(59,130,246,0.7);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom: none;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.14);
-}
 .topic-dropdown-input {
     flex: 1;
     width: 100% !important;
@@ -639,6 +619,11 @@
     padding: 24px;
     backdrop-filter: blur(10px);
 }
+.search-toolbar-card {
+    position: relative;
+    z-index: 2000;
+}
+
 .search-results-card {
     margin-top: 28px;
     max-height: calc(100vh - 260px);
