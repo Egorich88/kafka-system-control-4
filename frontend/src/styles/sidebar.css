@@ -663,13 +663,11 @@
     top: calc(100% - 1px);
     left: 0;
     right: 0;
-    background: var(--card-bg);
-    backdrop-filter: blur(12px);
+    background: var(--dropdown-bg);
     border: 1px solid var(--border-color);
-    border-radius: 14px;
     border-top: none;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
     overflow: hidden;
     z-index: 1000;
     box-shadow: 0 12px 32px rgba(0,0,0,0.35);
@@ -698,7 +696,7 @@
      height: 46px;
      border-radius: 14px;
      border: 1px solid var(--border-color);
-     background: var(--card-bg);
+     background: var(--sidebar-bg);
      display: flex;
      align-items: center;
      justify-content: space-between;

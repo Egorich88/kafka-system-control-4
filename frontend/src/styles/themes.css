@@ -5,6 +5,7 @@
      --bg-secondary: #0f172a;
      --panel-bg: #111827;
      --card-bg: rgba(255,255,255,0.04);
+     --dropdown-bg: #182133;
      --sidebar-bg: linear-gradient( 180deg, #071226 0%, #08101d 100% );
      --sidebar-hover: rgba(255,255,255,0.06);
      --border-color: rgba(255,255,255,0.08);
@@ -25,6 +26,7 @@
      --bg-secondary: #ffffff;
      --panel-bg: #ffffff;
      --card-bg: #ffffff;
+     --dropdown-bg: #ffffff;
      --sidebar-bg: linear-gradient( 180deg, #ffffff 0%, #f5f7fb 100% );
      --sidebar-hover: rgba(15,23,42,0.05);
      --border-color: rgba(15,23,42,0.08);
@@ -45,6 +47,7 @@
      --bg-secondary: #111827;
      --panel-bg: #1e293b;
      --card-bg: rgba(255,255,255,0.04);
+     --dropdown-bg: #1b2438;
      --sidebar-bg: linear-gradient( 180deg, #0b1220 0%, #111827 100% );
      --sidebar-hover: rgba(255,255,255,0.05);
      --border-color: #334155;
