@@ -9,6 +9,7 @@ import {
   FiLayers,
   FiUsers,
   FiSearch,
+  FiSliders,
   FiShield,
   FiRotateCcw,
   FiAlertTriangle,
@@ -201,7 +202,7 @@ export default function Sidebar({
 
               </div>
 
-              <FiSettings
+              <FiSliders
                 className="cluster-settings-icon"
                 title="Настройки кластера"
                 onClick={onEditCluster}
