@@ -243,17 +243,13 @@ export default function Sidebar({
 
           ) : (
 
-            <button
-              type="button"
-              className="no-cluster-add-btn"
-              onClick={onAddCluster}
-            >
-
-              + Добавить кластер
-
-            </button>
-
-          )}
+            <div
+                className="cluster-add-link"
+                onClick={onAddCluster}
+              >
+                + Добавить кластер
+              </div>
+            )}
 
         </div>
 

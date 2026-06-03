@@ -60,13 +60,19 @@
 }
 .cluster-add-link {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--text-secondary); /* серый цвет обычный */
     cursor: pointer;
     transition: 0.2s ease;
     user-select: none;
+    display: flex;
+    justify-content: center;
+    width: 100%;   /* чтобы заняло всю ширину блока */
+    height: 46px;  /* можно как раньше было у кнопки */
 }
+/* подсветка кнопки "+ Добавить кластер" при hover */
 .cluster-add-link:hover {
-    color: var(--text-primary);
+    color: #3b82f6; /* цвет */
+    text-shadow: 0 0 8px rgba(59,130,246,0.25); /* плавное свечение */
 }
 .cluster-row {
     display: flex;
