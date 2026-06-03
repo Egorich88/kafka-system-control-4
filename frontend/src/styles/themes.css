@@ -4,7 +4,7 @@
      --bg-primary: #0b1220;
      --bg-secondary: #0f172a;
      --panel-bg: #111827;
-     --card-bg: rgba(255,255,255,0.04);
+     --card-bg: #1b1f2a;
      --dropdown-bg: #182133;
      --sidebar-bg: linear-gradient( 180deg, #071226 0%, #08101d 100% );
      --sidebar-hover: rgba(255,255,255,0.06);
@@ -13,7 +13,7 @@
      --text-secondary: rgba(255,255,255,0.65);
      --accent-color: #3b82f6;
      --accent-hover: #60a5fa;
-     --input-bg: rgba(255,255,255,0.04);
+     --input-bg: #1b1f2a;
      --input-focus: rgba(59,130,246,0.15);
      --success-color: #22c55e;
      --danger-color: #ef4444;
