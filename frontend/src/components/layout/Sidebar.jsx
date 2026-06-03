@@ -87,15 +87,6 @@ export default function Sidebar({
               КЛАСТЕР
             </span>
 
-            <div
-              className="cluster-add-link"
-              onClick={onAddCluster}
-            >
-
-              + Добавить
-
-            </div>
-
           </div>
 
           {hasCluster ? (
@@ -117,12 +108,9 @@ export default function Sidebar({
                   }`}
                   onClick={() => {
 
-                    if (clusters.length > 1) {
-
-                      setIsClusterOpen(
-                        !isClusterOpen
-                      );
-                    }
+                    setIsClusterOpen(
+                      !isClusterOpen
+                    );
                   }}
                 >
 
@@ -144,26 +132,19 @@ export default function Sidebar({
 
                   </div>
 
-                  {clusters.length > 1 && (
-
-                    <div className="cluster-chevron">
-
-                      {isClusterOpen ? (
-                        <FiChevronUp />
-                      ) : (
-                        <FiChevronDown />
-                      )}
-
-                    </div>
-
-                  )}
+                  <div className="cluster-chevron">
+                    {isClusterOpen ? (
+                      <FiChevronUp />
+                    ) : (
+                      <FiChevronDown />
+                    )}
+                  </div>
 
                 </button>
 
                 {/* DROPDOWN */}
 
-                {isClusterOpen &&
-                  clusters.length > 1 && (
+                {isClusterOpen && (
 
                   <div className="cluster-dropdown">
 
@@ -201,7 +182,19 @@ export default function Sidebar({
                         </div>
 
                       ))}
+                    <div
+                      className="cluster-dropdown-add"
+                      onClick={() => {
 
+                        setIsClusterOpen(false);
+                        onAddCluster();
+
+                      }}
+                    >
+
+                      + Добавить кластер
+
+                    </div>
                   </div>
 
                 )}
@@ -218,11 +211,15 @@ export default function Sidebar({
 
           ) : (
 
-            <div className="no-cluster-card">
+            <button
+              type="button"
+              className="no-cluster-add-btn"
+              onClick={onAddCluster}
+            >
 
-              Нет подключенного кластера
+              + Добавить кластер
 
-            </div>
+            </button>
 
           )}
 
