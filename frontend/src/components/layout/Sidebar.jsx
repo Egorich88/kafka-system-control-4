@@ -21,7 +21,7 @@ import {
 } from 'react-icons/fi';
 
 import { NavLink } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import packageJson from '../../../package.json';
 
 import { useCluster } from '../../contexts/ClusterContext';
@@ -39,6 +39,37 @@ export default function Sidebar({
 
   const [isClusterOpen, setIsClusterOpen] =
     useState(false);
+  const clusterDropdownRef = useRef(null);
+  useEffect(() => {
+
+    function handleClickOutside(event) {
+
+      if (
+        clusterDropdownRef.current &&
+        !clusterDropdownRef.current.contains(event.target)
+      ) {
+
+        setIsClusterOpen(false);
+
+      }
+
+    }
+
+    document.addEventListener(
+      'mousedown',
+      handleClickOutside
+    );
+
+    return () => {
+
+      document.removeEventListener(
+        'mousedown',
+        handleClickOutside
+      );
+
+    };
+
+  }, []);
 
   const version =
     packageJson.version;
@@ -94,7 +125,7 @@ export default function Sidebar({
 
             <div className="cluster-row">
 
-              <div className="cluster-dropdown-wrapper">
+              <div className="cluster-dropdown-wrapper" ref={clusterDropdownRef} >
 
                 {/* SELECTED */}
 
