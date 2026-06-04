@@ -16,13 +16,15 @@
 
 import '../App.css';
 import '../styles/settings.css';
+
+import { useState } from 'react';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
+
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function Settings() {
-  const {
-    theme,
-    setTheme
-  } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
   return (
     <div className="settings-page">
       <div className="settings-page-header">
@@ -43,26 +45,76 @@ export default function Settings() {
               Настройка внешнего вида интерфейса
             </p>
           </div>
-          <select
-            className="settings-theme-select"
-            value={theme}
-            onChange={(e) =>
-              setTheme(e.target.value)
-            }
-          >
-            <option value="dark">
-              Dark
-            </option>
+          <div className="cluster-dropdown-wrapper">
 
-            <option value="light">
-              Light
-            </option>
+            <button
+              type="button"
+              className={`cluster-selected ${
+                isThemeOpen ? 'open' : ''
+              }`}
+              onClick={() =>
+                setIsThemeOpen(!isThemeOpen)
+              }
+            >
 
-            <option value="kitty">
-              Kitty
-            </option>
+              <div className="cluster-selected-left">
 
-          </select>
+                <span className="cluster-selected-name">
+
+                  {theme === 'dark' && 'Dark'}
+                  {theme === 'light' && 'Light'}
+                  {theme === 'kitty' && 'Kitty'}
+
+                </span>
+
+              </div>
+
+              <div className="cluster-chevron">
+
+                {isThemeOpen ? (
+                  <FiChevronUp />
+                ) : (
+                  <FiChevronDown />
+                )}
+
+              </div>
+
+            </button>
+
+            {isThemeOpen && (
+
+              <div className="cluster-dropdown">
+
+                <div
+                  className="cluster-dropdown-item"
+                  onClick={() => {
+                    setTheme('dark');
+                    setIsThemeOpen(false);
+                  }}
+                >
+                  Dark
+                </div>
+                <div
+                  className="cluster-dropdown-item"
+                  onClick={() => {
+                    setTheme('light');
+                    setIsThemeOpen(false);
+                  }}
+                >
+                  Light
+                </div>
+                <div
+                  className="cluster-dropdown-item"
+                  onClick={() => {
+                    setTheme('kitty');
+                    setIsThemeOpen(false);
+                  }}
+                >
+                  Kitty
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

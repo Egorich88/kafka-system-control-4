@@ -54,18 +54,3 @@
     color: var(--text-secondary);
     font-size: 14px;
 }
-.settings-theme-select {
-    width: 220px;
-    height: 46px;
-    border-radius: 14px;
-    border: 1px solid var(--border-color);
-    background: var(--panel-bg);
-    color: var(--text-primary);
-    padding: 0 14px;
-    outline: none;
-    transition: 0.2s ease;
-}
-.settings-theme-select option {
-    background: var(--dropdown-bg);
-    color: var(--text-primary);
-}
