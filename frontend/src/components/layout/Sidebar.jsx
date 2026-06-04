@@ -34,8 +34,30 @@ import { NavLink } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import packageJson from '../../../package.json';
 
+{/* Импорт версии обновления */}
+import { getLatestVersion } from '../../services/versionService';
+
 import { useCluster } from '../../contexts/ClusterContext';
 
+{/* Нормализация версии */}
+function normalizeVersion(version) { return version.replace(/^v/, ''); }
+function compareVersions(local, remote) {
+
+  const l = local.split('.').map(Number);
+  const r = remote.replace(/^v/, '')
+                  .split('.')
+                  .map(Number);
+
+  for (let i = 0; i < 3; i++) {
+
+    if (r[i] > l[i]) return 1;
+    if (r[i] < l[i]) return -1;
+
+  }
+
+  return 0;
+
+}
 export default function Sidebar({
   onAddCluster,
   onEditCluster
@@ -47,8 +69,18 @@ export default function Sidebar({
     changeCluster
   } = useCluster();
 
-  const [isClusterOpen, setIsClusterOpen] =
-    useState(false);
+  const [isClusterOpen, setIsClusterOpen] = useState(false);
+
+
+  {/* Проверка версии */}
+  useEffect(() => {
+    const lastCheck = localStorage.getItem('lastVersionCheck');
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+    if ( !lastCheck || now - Number(lastCheck) > oneHour ) { getLatestVersion().then(version => { setLatestVersion(version); localStorage.setItem( 'lastVersionCheck', now.toString() ); });
+    }
+  }, []);
+
   const clusterDropdownRef = useRef(null);
   useEffect(() => {
 
@@ -80,9 +112,23 @@ export default function Sidebar({
     };
 
   }, []);
+  {/* объявляем переменную версии */}
+  const version = packageJson.version;
 
-  const version =
-    packageJson.version;
+  {/* обновление версии */}
+  const [latestVersion, setLatestVersion] = useState(null);
+
+  {/* сравнение/нормализация версии */}
+  const versionState =
+    latestVersion
+      ? compareVersions(version, latestVersion)
+      : 0;
+
+  const hasUpdate =
+    versionState === 1;
+
+  const localIsNewer =
+    versionState === -1;
 
   const hasCluster =
     clusters.length > 0 &&
@@ -110,10 +156,30 @@ export default function Sidebar({
             <h2>
               Kafka System Control
             </h2>
-
-            <span className="sidebar-version">
-              Version {version}
-            </span>
+            {/* Отображение версии */}
+            <a
+              href="https://github.com/Egorich88/kafka-system-control-4/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`sidebar-version ${
+                hasUpdate ? 'update-available' : ''
+              }`}
+              title={
+                hasUpdate
+                  ? `Доступна версия ${latestVersion}`
+                  : localIsNewer
+                    ? `Локальная версия новее GitHub`
+                    : `Актуальная версия`
+              }
+            >
+              {/* Светодиод с версией */}
+              <span className="version-label">
+                Version {version}
+                {hasUpdate && (
+                  <span className="version-update-dot" />
+                )}
+              </span>
+            </a>
 
           </div>
 

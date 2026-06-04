@@ -369,13 +369,36 @@
 .footer-license:hover {
     color: var(--text-primary);
 }
+/* версия продукта text-shadow: 0 0 12px rgba(96,165,250,0.28);*/
 .sidebar-version {
+    font-size: 12px;
     color: #60a5fa !important;
     display: inline-block;
     margin-top: 2px;
-    text-shadow: 0 0 12px rgba(96,165,250,0.28);
+    text-decoration: none;
+    transition: 0.2s ease;
 }
-
+.sidebar-version:hover {
+    color: #93c5fd !important;
+}
+}
+.version-update-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: 6px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow:
+        0 0 8px rgba(245,158,11,0.9),
+        0 0 14px rgba(245,158,11,0.5);
+    vertical-align: middle;
+}
+.version-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
 /* ============================================================
    7. Тема оформления (переключатель темы)
    ============================================================ */
