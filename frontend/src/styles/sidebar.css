@@ -725,11 +725,20 @@
     margin: 22px auto 14px;
     background: linear-gradient(90deg, rgba(255,255,255,0), rgba(96,165,250,0.42), rgba(255,255,255,0));
 }
+/* Звезда перед надписью "Поддержите проект на GitHub" */
+.welcome-github-icon {
+    font-size: 32px;/* было 24px */
+    flex-shrink: 0;
+    opacity: 0.95;
+}
+/* надпись "Поддержите проект на GitHub" */
 .welcome-github {
     margin-top: 6px;
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
     align-items: center;
     gap: 12px;
+    width: 100%;
     text-decoration: none;
     color: var(--text-secondary);
     font-size: 15px;
@@ -744,11 +753,6 @@
 }
 .welcome-star {
     color: #3b82f6;
-}
-.welcome-github-icon {
-    font-size: 24px;
-    flex-shrink: 0;
-    opacity: 0.95;
 }
 
 /* ============================================================

@@ -103,11 +103,10 @@ export default function Dashboard() {
 
           <div className="welcome-feature-text">
 
-            Чтобы начать работу — добавьте кластер
-            через кнопку{' '}
+            Чтобы начать работу — нажмите кнопку{' '}
 
             <span className="welcome-highlight">
-              + Добавить
+              + Добавить кластер
             </span>
 
             {' '}в боковом меню
