@@ -402,6 +402,7 @@ export default function Sidebar({
             target="_blank"
             rel="noopener noreferrer"
             className="footer-project-link"
+            title="Автор продукта"
           >
 
             <FiGithub className="footer-github-icon" />
