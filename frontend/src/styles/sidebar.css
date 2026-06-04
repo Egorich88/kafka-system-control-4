@@ -369,7 +369,7 @@
 .footer-license:hover {
     color: var(--text-primary);
 }
-/* версия продукта text-shadow: 0 0 12px rgba(96,165,250,0.28);*/
+/* версия продукта */
 .sidebar-version {
     font-size: 12px;
     color: #60a5fa !important;
@@ -399,38 +399,10 @@
     align-items: center;
     gap: 6px;
 }
-/* ============================================================
-   7. Тема оформления (переключатель темы)
-   ============================================================ */
-.sidebar-theme {
-    margin-top: auto;
-    padding: 18px 20px 0;
-}
-.sidebar-theme-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-    color: var(--text-secondary);
-}
-.sidebar-theme-select {
-    width: 100%;
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    background: var(--panel-bg);
-    color: var(--text-primary);
-    padding: 0 14px;
-    outline: none;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-.sidebar-theme-select:focus {
-    border-color: var(--accent-color);
-}
+
 
 /* ============================================================
-   8. Боковые панели (оверлей и конфигурационная панель)
+   7. Боковые панели (оверлей и конфигурационная панель)
    ============================================================ */
 .config-overlay {
     position: fixed;
@@ -457,7 +429,7 @@
 }
 
 /* ============================================================
-   9. Содержимое конфигурационной панели (форма редактирования кластера)
+   8. Содержимое конфигурационной панели (форма редактирования кластера)
    ============================================================ */
 .cluster-config-modal {
     min-height: 100vh;
@@ -543,7 +515,7 @@
 }
 
 /* ============================================================
-   10. Кнопки (первичные, вторичные, опасные)
+   9. Кнопки (первичные, вторичные, опасные)
    ============================================================ */
 .primary-btn {
     width: auto;
@@ -591,7 +563,7 @@
 }
 
 /* ============================================================
-   11. Блок выбора метода аутентификации (карточки)
+   10. Блок выбора метода аутентификации (карточки)
    ============================================================ */
 .auth-section-title {
     margin-top: 10px;
@@ -659,7 +631,7 @@
 }
 
 /* ============================================================
-   12. Приветственный экран (welcome page)
+   11. Приветственный экран (welcome page)
    ============================================================ */
 .welcome-page {
     width: 100%;
@@ -801,7 +773,7 @@
 }
 
 /* ============================================================
-   13. Страница обзора (Overview)
+   12. Страница обзора (Overview)
    ============================================================ */
 .overview-page {
     padding: 40px;
@@ -821,61 +793,8 @@
     color: var(--text-secondary);
     font-size: 16px;
 }
-
 /* ============================================================
-   14. Страница настроек (Settings)
-   ============================================================ */
-.settings-page {
-    padding: 34px;
-    color: var(--text-primary);
-}
-.settings-page-header {
-    margin-bottom: 28px;
-}
-.settings-page-header h1 {
-    font-size: 34px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-.settings-page-header p {
-    color: var(--text-secondary);
-    font-size: 15px;
-}
-.settings-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 24px;
-    padding: 28px;
-    backdrop-filter: blur(10px);
-}
-.settings-block {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 24px;
-}
-.settings-block-info h3 {
-    font-size: 20px;
-    margin-bottom: 6px;
-}
-.settings-block-info p {
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-.settings-theme-select {
-    width: 220px;
-    height: 46px;
-    border-radius: 14px;
-    border: 1px solid var(--border-color);
-    background: var(--panel-bg);
-    color: var(--text-primary);
-    padding: 0 14px;
-    outline: none;
-    transition: 0.2s ease;
-}
-
-/* ============================================================
-   15. Основной контейнер сайдбара
+   13. Основной контейнер сайдбара
    ============================================================ */
 .sidebar {
     width: 290px;
@@ -904,7 +823,7 @@
 }
 
 /* ============================================================
-   16. Адаптивность для мобильных устройств (медиа-запросы)
+   14. Адаптивность для мобильных устройств (медиа-запросы)
    ============================================================ */
 @media (max-width: 900px) {
     .welcome-card {
