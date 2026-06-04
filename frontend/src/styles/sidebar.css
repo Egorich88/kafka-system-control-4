@@ -58,6 +58,7 @@
     letter-spacing: 1px;
     color: var(--text-secondary);
 }
+/* кнопка текстовая "+ Добавить кластер" когда нет кластера */
 .cluster-add-link {
     font-size: 14px;
     color: var(--text-secondary); /* серый цвет обычный */
@@ -72,7 +73,6 @@
 /* подсветка кнопки "+ Добавить кластер" при hover */
 .cluster-add-link:hover {
     color: #3b82f6; /* цвет */
-    text-shadow: 0 0 8px rgba(59,130,246,0.25); /* плавное свечение */
 }
 .cluster-row {
     display: flex;
