@@ -189,11 +189,13 @@ export default function Search() {
 
       const calculatedOffset =
           baseOffset + ((currentPage - 1) * pageSize)
+      const partitionParam = partition === "all" ? "" : partition;
+
       const url =
         `/api/topics/${
           encodeURIComponent(selectedTopic)
         }/messages?partition=${
-          partition
+          partitionParam
         }&offset=${
           calculatedOffset
         }&limit=${
@@ -239,6 +241,17 @@ export default function Search() {
       setSearching(false);
     }
   };
+  useEffect(() => {
+
+      if (!selectedTopic || !currentCluster) {
+          return
+      }
+
+      handleSearch({
+          preventDefault: () => {}
+      })
+
+  }, [partition])
 useEffect(() => {
   const handleClickOutside = (event) => {
 
