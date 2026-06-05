@@ -25,15 +25,13 @@ import {
   FiAlertTriangle,
   FiFileText,
   FiSettings,
-  FiGithub,
-  FiChevronDown,
-  FiChevronUp
+  FiGithub
 } from 'react-icons/fi';
 
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import packageJson from '../../../package.json';
-import '../../styles/dropdown.css';
+import Dropdown from '../common/Dropdown';
 
 /* Импорт версии обновления */
 import { getLatestVersion } from '../../services/versionService';
@@ -70,9 +68,6 @@ export default function Sidebar({
     changeCluster
   } = useCluster();
 
-  const [isClusterOpen, setIsClusterOpen] = useState(false);
-
-
   {/* Проверка версии */}
   useEffect(() => {
     const lastCheck = localStorage.getItem('lastVersionCheck');
@@ -82,37 +77,6 @@ export default function Sidebar({
     }
   }, []);
 
-  const clusterDropdownRef = useRef(null);
-  useEffect(() => {
-
-    function handleClickOutside(event) {
-
-      if (
-        clusterDropdownRef.current &&
-        !clusterDropdownRef.current.contains(event.target)
-      ) {
-
-        setIsClusterOpen(false);
-
-      }
-
-    }
-
-    document.addEventListener(
-      'mousedown',
-      handleClickOutside
-    );
-
-    return () => {
-
-      document.removeEventListener(
-        'mousedown',
-        handleClickOutside
-      );
-
-    };
-
-  }, []);
   {/* объявляем переменную версии */}
   const version = packageJson.version;
 
@@ -139,7 +103,7 @@ export default function Sidebar({
 
     <aside className="sidebar">
 
-      {/* ========================= TOP ========================= */}
+      {/* ========================= ВЕРХНЯЯ ОБЛАСТЬ (TOP) ========================= */}
 
       <div className="sidebar-top">
 
@@ -202,113 +166,19 @@ export default function Sidebar({
 
             <div className="cluster-row">
 
-              <div className="dropdown-wrapper" ref={clusterDropdownRef} >
-
-                {/* SELECTED */}
-
-                <button
-                  type="button"
-                  className={`dropdown-selected ${
-                    isClusterOpen ? 'open' : ''
-                  } ${
-                    clusters.length <= 1
-                      ? 'single'
-                      : ''
-                  }`}
-                  onClick={() => {
-
-                    setIsClusterOpen(
-                      !isClusterOpen
-                    );
-                  }}
-                >
-
-                  <div className="dropdown-selected-left">
-
-                    <div
-                      className={`dropdown-status-dot ${
-                        currentCluster?.id
-                          ? 'connected'
-                          : 'unknown'
-                      }`}
-                    />
-
-                    <span className="dropdown-selected-name">
-
-                      {currentCluster.name}
-
-                    </span>
-
-                  </div>
-
-                  <div className="dropdown-chevron">
-                    {isClusterOpen ? (
-                      <FiChevronUp />
-                    ) : (
-                      <FiChevronDown />
-                    )}
-                  </div>
-
-                </button>
-
-                {/* DROPDOWN */}
-
-                {isClusterOpen && (
-
-                  <div className="dropdown-menu">
-
-                    {clusters
-                      .filter(
-                        cluster =>
-                          cluster.id !== currentCluster.id
-                      )
-                      .map(cluster => (
-
-                        <div
-                          key={cluster.id}
-                          className="dropdown-item"
-                          onClick={() => {
-
-                            changeCluster(cluster);
-
-                            setIsClusterOpen(false);
-                          }}
-                        >
-
-                          <div
-                            className={`dropdown-status-dot ${
-                              cluster?.connectionStatus ||
-                              'unknown'
-                            }`}
-                          />
-
-                          <span>
-
-                            {cluster.name}
-
-                          </span>
-
-                        </div>
-
-                      ))}
-                    <div
-                      className="dropdown-add"
-                      onClick={() => {
-
-                        setIsClusterOpen(false);
-                        onAddCluster();
-
-                      }}
-                    >
-
-                      + Добавить кластер
-
-                    </div>
-                  </div>
-
+              <Dropdown
+                selectedItem={currentCluster}
+                items={clusters.filter(
+                  cluster =>
+                    cluster.id !== currentCluster.id
                 )}
-
-              </div>
+                onSelect={changeCluster}
+                addLabel="+ Добавить кластер"
+                onAdd={onAddCluster}
+                statusResolver={(cluster) =>
+                  cluster?.connectionStatus || 'unknown'
+                }
+              />
 
               <FiSliders
                 className="cluster-settings-icon"
@@ -330,7 +200,7 @@ export default function Sidebar({
 
         </div>
 
-        {/* ========================= NAVIGATION ========================= */}
+        {/* ========================= НАВИГАЦИЯ (NAVIGATION) ========================= */}
 
         {hasCluster && (
 
@@ -447,11 +317,11 @@ export default function Sidebar({
 
       </div>
 
-      {/* ========================= BOTTOM ========================= */}
+      {/* ========================= НИЖНИЙ КОЛОНТИТУЛ (BOTTOM) ========================= */}
 
       <div className="sidebar-bottom">
 
-        {/* SETTINGS */}
+        {/* НАСТРОЙКИ */}
 
         <nav className="sidebar-nav sidebar-settings-nav">
 
@@ -470,7 +340,7 @@ export default function Sidebar({
 
         </nav>
 
-        {/* FOOTER */}
+        {/* НИЖНИЙ КОЛОНТИТУЛ (FOOTER) */}
 
         <div className="sidebar-footer">
 
