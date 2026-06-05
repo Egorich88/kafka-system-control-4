@@ -33,13 +33,14 @@ import {
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import packageJson from '../../../package.json';
+import '../../styles/dropdown.css';
 
-{/* Импорт версии обновления */}
+/* Импорт версии обновления */
 import { getLatestVersion } from '../../services/versionService';
 
 import { useCluster } from '../../contexts/ClusterContext';
 
-{/* Нормализация версии */}
+/* Нормализация версии */
 function normalizeVersion(version) { return version.replace(/^v/, ''); }
 function compareVersions(local, remote) {
 
@@ -201,13 +202,13 @@ export default function Sidebar({
 
             <div className="cluster-row">
 
-              <div className="cluster-dropdown-wrapper" ref={clusterDropdownRef} >
+              <div className="dropdown-wrapper" ref={clusterDropdownRef} >
 
                 {/* SELECTED */}
 
                 <button
                   type="button"
-                  className={`cluster-selected ${
+                  className={`dropdown-selected ${
                     isClusterOpen ? 'open' : ''
                   } ${
                     clusters.length <= 1
@@ -222,17 +223,17 @@ export default function Sidebar({
                   }}
                 >
 
-                  <div className="cluster-selected-left">
+                  <div className="dropdown-selected-left">
 
                     <div
-                      className={`cluster-status-dot ${
+                      className={`dropdown-status-dot ${
                         currentCluster?.id
                           ? 'connected'
                           : 'unknown'
                       }`}
                     />
 
-                    <span className="cluster-selected-name">
+                    <span className="dropdown-selected-name">
 
                       {currentCluster.name}
 
@@ -240,7 +241,7 @@ export default function Sidebar({
 
                   </div>
 
-                  <div className="cluster-chevron">
+                  <div className="dropdown-chevron">
                     {isClusterOpen ? (
                       <FiChevronUp />
                     ) : (
@@ -254,7 +255,7 @@ export default function Sidebar({
 
                 {isClusterOpen && (
 
-                  <div className="cluster-dropdown">
+                  <div className="dropdown-menu">
 
                     {clusters
                       .filter(
@@ -265,7 +266,7 @@ export default function Sidebar({
 
                         <div
                           key={cluster.id}
-                          className="cluster-dropdown-item"
+                          className="dropdown-item"
                           onClick={() => {
 
                             changeCluster(cluster);
@@ -275,7 +276,7 @@ export default function Sidebar({
                         >
 
                           <div
-                            className={`cluster-status-dot ${
+                            className={`dropdown-status-dot ${
                               cluster?.connectionStatus ||
                               'unknown'
                             }`}
@@ -291,7 +292,7 @@ export default function Sidebar({
 
                       ))}
                     <div
-                      className="cluster-dropdown-add"
+                      className="dropdown-add"
                       onClick={() => {
 
                         setIsClusterOpen(false);

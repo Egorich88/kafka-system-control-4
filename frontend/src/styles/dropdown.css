@@ -1,0 +1,246 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ============================================================
+   Универсальный компонент выпадающих меню (Dropdown)
+   Используется для:
+   - выбора кластера
+   - выбора топиков
+   - поиска сообщений
+   - настроек приложения
+   ============================================================ */
+
+/* ============================================================
+   1. Контейнер выпадающего меню
+   ============================================================ */
+
+/* Контейнер выпадающего меню */
+.dropdown-wrapper {
+    flex: 1;
+    position: relative;
+    min-width: 0;
+}
+
+/* ============================================================
+   2. Выпадающая панель со списком элементов
+   ============================================================ */
+
+/* Выпадающий список */
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% - 1px);
+    left: 0;
+    right: 0;
+    background: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    overflow: hidden;
+    z-index: 1000;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+}
+
+/* ============================================================
+   3. Элемент выпадающего списка
+   ============================================================ */
+
+/* Элемент списка */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: background 0.15s ease;
+}
+.dropdown-item:hover {
+    background: var(--sidebar-hover);
+}
+
+/* ============================================================
+   4. Выбранное значение (закрытое состояние)
+   ============================================================ */
+
+/* Кнопка с текущим выбранным значением */
+.dropdown-selected {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--sidebar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+.dropdown-selected:hover {
+    background: var(--sidebar-hover);
+}
+
+/* ============================================================
+   5. Левая часть выбранного значения
+   ============================================================ */
+
+/* Контейнер текста и индикатора состояния */
+.dropdown-selected-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+/* ============================================================
+   6. Название выбранного элемента
+   ============================================================ */
+
+/* Отображение названия выбранного элемента */
+.dropdown-selected-name {
+    font-size: 15px;
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   7. Иконка раскрытия списка
+   ============================================================ */
+
+/* Иконка раскрытия/сворачивания списка */
+.dropdown-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text-secondary);
+}
+
+/* ============================================================
+   8. Состояния выбранного элемента
+   ============================================================ */
+
+/* Режим единственного элемента без возможности раскрытия */
+.dropdown-selected.single {
+    cursor: default;
+}
+/* Открытое состояние dropdown */
+.dropdown-selected.open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* ============================================================
+   9. Кнопка "Добавить"
+   ============================================================ */
+
+/* Кнопка добавления нового элемента */
+.dropdown-add {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+/* Наведение на кнопку добавления */
+.dropdown-add:hover { color: #3b82f6; background: var(--sidebar-hover);
+}
+
+/* Разделительная линия перед кнопкой добавления */
+.dropdown-add::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 14px;
+    right: 14px;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(96,165,250,0.35),
+        transparent
+    );
+}
+
+
+
+/* ============================================================
+   10. Индикаторы состояния элементов Dropdown
+   ============================================================ */
+
+/* Базовый индикатор состояния */
+.dropdown-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Подключено */
+.dropdown-status-dot.connected {
+    background: #22c55e;
+    box-shadow: 0 0 10px rgba(34,197,94,0.9);
+}
+
+/* Отключено */
+.dropdown-status-dot.disconnected {
+    background: #ef4444;
+    box-shadow: 0 0 10px rgba(239,68,68,0.7);
+}
+
+/* Выполняется подключение или проверка */
+.dropdown-status-dot.connecting,
+.dropdown-status-dot.checking {
+    background: #3b82f6;
+    box-shadow: 0 0 10px rgba(59,130,246,0.8);
+    animation: pulseConnection 1.2s infinite;
+}
+
+/* Состояние неизвестно */
+.dropdown-status-dot.unknown {
+    background: #6b7280;
+    box-shadow: 0 0 8px rgba(107,114,128,0.5);
+}
+
+/* Ошибка подключения */
+.dropdown-status-dot.error {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239,68,68,0.8);
+}
+
+/* ============================================================
+   11. Анимация подключения
+   ============================================================ */
+
+/* Пульсация индикатора во время подключения */
+@keyframes pulseConnection {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 1; }
+}

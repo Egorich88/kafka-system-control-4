@@ -45,11 +45,11 @@ export default function Settings() {
               Настройка внешнего вида интерфейса
             </p>
           </div>
-          <div className="cluster-dropdown-wrapper">
+          <div className="dropdown-wrapper">
 
             <button
               type="button"
-              className={`cluster-selected ${
+              className={`dropdown-selected ${
                 isThemeOpen ? 'open' : ''
               }`}
               onClick={() =>
@@ -57,9 +57,9 @@ export default function Settings() {
               }
             >
 
-              <div className="cluster-selected-left">
+              <div className="dropdown-selected-left">
 
-                <span className="cluster-selected-name">
+                <span className="dropdown-selected-name">
 
                   {theme === 'dark' && 'Dark'}
                   {theme === 'light' && 'Light'}
@@ -69,7 +69,7 @@ export default function Settings() {
 
               </div>
 
-              <div className="cluster-chevron">
+              <div className="dropdown-chevron">
 
                 {isThemeOpen ? (
                   <FiChevronUp />
@@ -83,10 +83,10 @@ export default function Settings() {
 
             {isThemeOpen && (
 
-              <div className="cluster-dropdown">
+              <div className="dropdown-menu">
 
                 <div
-                  className="cluster-dropdown-item"
+                  className="dropdown-item"
                   onClick={() => {
                     setTheme('dark');
                     setIsThemeOpen(false);
@@ -95,7 +95,7 @@ export default function Settings() {
                   Dark
                 </div>
                 <div
-                  className="cluster-dropdown-item"
+                  className="dropdown-item"
                   onClick={() => {
                     setTheme('light');
                     setIsThemeOpen(false);
@@ -104,7 +104,7 @@ export default function Settings() {
                   Light
                 </div>
                 <div
-                  className="cluster-dropdown-item"
+                  className="dropdown-item"
                   onClick={() => {
                     setTheme('kitty');
                     setIsThemeOpen(false);
