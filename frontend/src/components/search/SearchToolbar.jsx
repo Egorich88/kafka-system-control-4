@@ -19,7 +19,7 @@ import {
     FiChevronUp,
     FiSearch
 } from 'react-icons/fi'
-
+import { useState } from 'react';
 export default function SearchToolbar({
 
     handleSearch,
@@ -62,7 +62,7 @@ export default function SearchToolbar({
     currentCluster
 
 }) {
-
+    const [focusedField, setFocusedField] = useState(null);
     return (
 
         <form
@@ -289,55 +289,43 @@ export default function SearchToolbar({
 
             {/* OFFSET */}
 
-            <div className="search-field">
-
-                <label>
-                    Начальный offset
-                </label>
+            <div className={`search-field ${focusedField === 'startOffset' ? 'focused' : ''}`}>
+                <label>Начальный offset</label>
 
                 <input
                     type="number"
                     value={startOffset}
-                    onChange={(e) =>
-                        setStartOffset(e.target.value)
-                    }
+                    onChange={(e) => setStartOffset(e.target.value)}
+                    onFocus={() => setFocusedField('startOffset')}
+                    onBlur={() => setFocusedField(null)}
                 />
-
             </div>
 
-            <div className="search-field">
-
-                <label>
-                    Конечный offset
-                </label>
+            <div className={`search-field ${focusedField === 'endOffset' ? 'focused' : ''}`}>
+                <label>Конечный offset</label>
 
                 <input
                     type="number"
                     value={endOffset}
-                    onChange={(e) =>
-                        setEndOffset(e.target.value)
-                    }
+                    onChange={(e) => setEndOffset(e.target.value)}
+                    onFocus={() => setFocusedField('endOffset')}
+                    onBlur={() => setFocusedField(null)}
                 />
-
             </div>
 
             {/* MAX MESSAGES */}
 
-            <div className="search-field">
-
-                <label>
-                    Макс. сообщений
-                </label>
+            <div className={`search-field ${focusedField === 'maxMessages' ? 'focused' : ''}`}>
+                <label>Макс. сообщений</label>
 
                 <input
                     type="number"
                     value={maxMessages}
-                    onChange={(e) =>
-                        setMaxMessages(Number(e.target.value))
-                    }
+                    onChange={(e) => setMaxMessages(Number(e.target.value))}
                     min="1"
+                    onFocus={() => setFocusedField('maxMessages')}
+                    onBlur={() => setFocusedField(null)}
                 />
-
             </div>
 
             {/* BUTTON */}
