@@ -29,6 +29,9 @@ export default function SearchToolbar({
     isTopicDropdownOpen,
     setIsTopicDropdownOpen,
 
+    partitionDropdownRef,
+    topicDropdownRef,
+
     topicSearch,
     setTopicSearch,
 
@@ -76,7 +79,7 @@ export default function SearchToolbar({
                 </label>
 
                 <div
-                    ref={dropdownRef}
+                    ref={topicDropdownRef}
                     className={`topic-dropdown-wrapper ${
                         isTopicDropdownOpen
                             ? 'open'
@@ -194,7 +197,10 @@ export default function SearchToolbar({
                     Партиция
                 </label>
 
-                <div className="topic-dropdown-wrapper">
+                <div
+                  ref={partitionDropdownRef}
+                  className="topic-dropdown-wrapper"
+                >
 
                     <div
                         className={`topic-dropdown-trigger ${

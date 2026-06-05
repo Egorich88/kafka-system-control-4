@@ -55,7 +55,8 @@ export default function Search() {
       setSelectedRows(messages.map((m) => String(m.offset)))
   }
 
-  const dropdownRef = useRef(null);
+  const topicDropdownRef = useRef(null);
+  const partitionDropdownRef = useRef(null);
   useEffect(() => {
     if (!currentCluster) return;
 
@@ -239,35 +240,31 @@ export default function Search() {
     }
   };
 useEffect(() => {
-    if (!selectedTopic) return
-    handleSearch({
-        preventDefault: () => {}
-    })
-}, [
-    currentPage
-])
-useEffect(() => {
   const handleClickOutside = (event) => {
+
+    // TOPIC dropdown
     if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target)
+      topicDropdownRef.current &&
+      !topicDropdownRef.current.contains(event.target)
     ) {
       setIsTopicDropdownOpen(false);
-      setIsPartitionDropdownOpen(false);
       setTopicSearch('');
     }
-  };
-  document.addEventListener(
-    'mousedown',
-    handleClickOutside
-  );
-  return () => {
-    document.removeEventListener(
-      'mousedown',
-      handleClickOutside
-    );
+
+    // PARTITION dropdown
+    if (
+      partitionDropdownRef.current &&
+      !partitionDropdownRef.current.contains(event.target)
+    ) {
+      setIsPartitionDropdownOpen(false);
+    }
   };
 
+  document.addEventListener('mousedown', handleClickOutside);
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
 }, []);
   const exportMessages = (format, onlySelected = false) => {
       const rows = onlySelected
@@ -381,7 +378,8 @@ useEffect(() => {
 
           <SearchToolbar
               handleSearch={handleSearch}
-              dropdownRef={dropdownRef}
+              topicDropdownRef={topicDropdownRef}
+              partitionDropdownRef={partitionDropdownRef}
               isTopicDropdownOpen={isTopicDropdownOpen}
               setIsTopicDropdownOpen={setIsTopicDropdownOpen}
               topicSearch={topicSearch}
