@@ -156,6 +156,9 @@ export default function Search() {
     partition,
     setSearchParams
   ]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedTopic, partition]);
 
   /* ========================= SEARCH ========================= */
 
@@ -241,17 +244,6 @@ export default function Search() {
       setSearching(false);
     }
   };
-  useEffect(() => {
-
-      if (!selectedTopic || !currentCluster) {
-          return
-      }
-
-      handleSearch({
-          preventDefault: () => {}
-      })
-
-  }, [partition])
 useEffect(() => {
   const handleClickOutside = (event) => {
 
