@@ -955,6 +955,17 @@ func main() {
 
 	port := ":8080"
 
+    /*
+       Dashboard API
+    */
+    http.HandleFunc(
+    	"/api/dashboard/overview",
+    	getDashboardOverviewHandler,
+    )
+    http.HandleFunc(
+    	"/api/dashboard/brokers",
+    	getDashboardBrokersHandler,
+    )
 	log.Printf("Server running on %s", port)
 
 	log.Fatal(http.ListenAndServe(port, nil))
