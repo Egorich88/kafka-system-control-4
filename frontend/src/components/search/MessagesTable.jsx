@@ -21,7 +21,8 @@ export default function MessagesTable({
     toggleRowSelection,
     selectedMessage,
     setSelectedMessage,
-    partition
+    partition,
+    selectedTopic
 
 }) {
 
@@ -46,12 +47,12 @@ export default function MessagesTable({
 
                     </th>
 
-                    <th>Оффсет</th>
+                    <th>Offset</th>
                     <th>Партиция</th>
                     <th>Ключ</th>
                     <th>Время</th>
                     <th>Размер</th>
-                    <th>Предпросмотр</th>
+                    <th>Предпросмотр значения</th>
 
                 </tr>
 
@@ -60,14 +61,15 @@ export default function MessagesTable({
             <tbody>
 
                 {messages.map((msg) => {
-
+                    const rowKey = `${selectedTopic}-${msg.partition}-${msg.offset}`
                     const isSelected =
-                        selectedMessage?.offset === msg.offset
+                        selectedMessage?.offset === msg.offset &&
+                        selectedMessage?.partition === msg.partition
 
                     return (
 
                         <tr
-                            key={msg.offset}
+                            key={`${selectedTopic}-${msg.partition}-${msg.offset}`}
                             className={isSelected ? "active-row" : ""}
                             onClick={() => setSelectedMessage(msg)}
                         >
@@ -76,12 +78,12 @@ export default function MessagesTable({
 
                                 <input
                                     type="checkbox"
-                                    checked={selectedRows.includes(String(msg.offset))}
+                                    checked={selectedRows.includes(rowKey)}
                                     onChange={(e) => {
 
                                         e.stopPropagation()
 
-                                        toggleRowSelection(String(msg.offset))
+                                        toggleRowSelection(rowKey)
                                     }}
                                 />
 

@@ -132,11 +132,7 @@
     padding: 0 24px;
     border: none;
     border-radius: 14px;
-    background: linear-gradient(
-        180deg,
-        #3b82f6,
-        #2563eb
-    );
+    background: linear-gradient( 180deg,#3b82f6, #2563eb );
     color: var(--text-primary);
     font-weight: 600;
     cursor: pointer;

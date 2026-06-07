@@ -453,6 +453,7 @@ useEffect(() => {
                   selectedMessage={selectedMessage}
                   setSelectedMessage={setSelectedMessage}
                   partition={partition}
+                  selectedTopic={selectedTopic}
               />
 
           </div>
