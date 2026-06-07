@@ -980,6 +980,12 @@ func main() {
     	getDashboardConsumerGroupsHandler,
     )
 
+    /* Партиции */
+    http.HandleFunc(
+    	"/api/dashboard/partitions",
+    	getDashboardPartitionsHandler,
+    )
+
 	log.Printf("Server running on %s", port)
 
 	log.Fatal(http.ListenAndServe(port, nil))

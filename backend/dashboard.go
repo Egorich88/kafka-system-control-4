@@ -122,6 +122,16 @@ type DashboardConsumerGroupsResponse struct {
 }
 
 /*
+   DashboardPartitionsResponse
+   Статистика партиций Kafka-кластера.
+*/
+type DashboardPartitionsResponse struct {
+
+	/* Общее количество партиций */
+	Total int `json:"total"`
+}
+
+/*
    getDashboardOverviewHandler
 
    Возвращает агрегированную информацию
@@ -500,6 +510,88 @@ func getDashboardConsumerGroupsHandler(
 	json.NewEncoder(w).Encode(
 		DashboardConsumerGroupsResponse{
 			Groups: result,
+		},
+	)
+}
+
+/*
+   getDashboardPartitionsHandler
+
+   Возвращает общее количество партиций
+   во всех топиках Kafka-кластера.
+*/
+func getDashboardPartitionsHandler(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+
+	w.Header().Set(
+		"Access-Control-Allow-Origin",
+		"*",
+	)
+
+	w.Header().Set(
+		"Content-Type",
+		"application/json",
+	)
+
+	bootstrap := getBootstrapFromRequest(r)
+
+	config := sarama.NewConfig()
+
+	config.Version = sarama.V2_8_0_0
+
+	client, err := sarama.NewClient(
+		[]string{bootstrap},
+		config,
+	)
+
+	if err != nil {
+
+		sendJSONError(
+			w,
+			"Ошибка подключения к Kafka: "+err.Error(),
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	defer client.Close()
+
+	topics, err := client.Topics()
+
+	if err != nil {
+
+		sendJSONError(
+			w,
+			"Не удалось получить список топиков",
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	totalPartitions := 0
+
+	for _, topic := range topics {
+
+		partitions, err := client.Partitions(
+			topic,
+		)
+
+		if err != nil {
+			continue
+		}
+
+		totalPartitions += len(
+			partitions,
+		)
+	}
+
+	json.NewEncoder(w).Encode(
+		DashboardPartitionsResponse{
+			Total: totalPartitions,
 		},
 	)
 }
