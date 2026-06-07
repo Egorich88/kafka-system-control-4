@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 export default function MessageViewer({
 
     selectedMessage,
@@ -60,12 +61,27 @@ export default function MessageViewer({
                     Offset: {selectedMessage.offset}
                 </span>
 
+                {/*
+                    Партиция сообщения:
+                    показывает, из какой партиции Kafka пришло сообщение
+                */}
                 <span>
-                    Key: {selectedMessage.key || "-"}
+                    Партиция: {selectedMessage.partition ?? "—"}
+                </span>
+
+                <span>
+                    Ключ: {selectedMessage.key || "-"}
                 </span>
 
             </div>
 
+            {/*
+                Заголовок секции значения сообщения:
+                показывает в каком формате сейчас отображается payload (JSON или RAW)
+            */}
+            <div className="message-detail-value-title">
+                Значение ({viewFormat.toUpperCase()})
+            </div>
             <pre className="message-detail-content">
 
                 {
