@@ -55,6 +55,7 @@ type Message struct {
 	Key       string `json:"key"`
 	Value     string `json:"value"`
 	Timestamp string `json:"timestamp"`
+	Partition int32  `json:"partition"`
 }
 
 type MessagesResponse struct {
@@ -728,14 +729,15 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
                 select {
 
                 case msg := <-pc.Messages():
+                    //ЛОГ: проверяем, из какой партиции реально пришло сообщение
+                    log.Printf("MSG partition=%d offset=%d", p, msg.Offset)
 
                     messages = append(messages, Message{
                         Offset: msg.Offset,
                         Key: string(msg.Key),
                         Value: string(msg.Value),
-                        Timestamp: msg.Timestamp.Format(
-                            time.RFC3339,
-                        ),
+                        Timestamp: msg.Timestamp.Format(time.RFC3339,),
+                        Partition: int32(p),
                     })
 
                     if len(messages) >= int(limit) {
@@ -785,14 +787,15 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
             select {
 
             case msg := <-pc.Messages():
+                // ЛОГ: проверяем сообщение из конкретной выбранной партиции
+                log.Printf("MSG partition=%d offset=%d", partition, msg.Offset)
 
                 messages = append(messages, Message{
                     Offset: msg.Offset,
                     Key: string(msg.Key),
                     Value: string(msg.Value),
-                    Timestamp: msg.Timestamp.Format(
-                        time.RFC3339,
-                    ),
+                    Timestamp: msg.Timestamp.Format(time.RFC3339,),
+                    Partition: partition,
                 })
 
             case <-timeout:

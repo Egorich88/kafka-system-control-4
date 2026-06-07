@@ -160,6 +160,26 @@ export default function Search() {
     setCurrentPage(1);
   }, [selectedTopic, partition]);
 
+  /* ========================= RESET при смене TOPIC =========================
+     Когда пользователь выбирает новый topic:
+     - сбрасываем партицию на "all"
+     - очищаем сообщения
+     - сбрасываем выделение
+     - сбрасываем выбранное сообщение
+     - возвращаем на первую страницу
+  ========================================================================== */
+
+  useEffect(() => {
+    if (!selectedTopic) return;
+
+    setPartition("all");        // всегда возвращаем "Все партиции"
+    setMessages([]);            // очищаем таблицу результатов
+    setSelectedRows([]);        // сбрасываем чекбоксы
+    setSelectedMessage(null);   // сбрасываем просмотр сообщения
+    setCurrentPage(1);          // возвращаемся на первую страницу
+
+  }, [selectedTopic]);
+
   /* ========================= SEARCH ========================= */
 
   const handleSearch = async (e) => {
@@ -215,6 +235,10 @@ export default function Search() {
           }
         }
       );
+      {/* ЛОГ ДЛЯ ОТЛАДКИ: */}
+      {/* Проверяем первое сообщение, которое пришло с backend, */}
+      {/* чтобы убедиться, что в ответе реально есть поле partition  */}
+      console.log("FIRST MSG:", response.data.messages?.[0]);
       setMessages(response.data.messages || [])
 
       console.log("API RESPONSE:", response.data)

@@ -21,7 +21,6 @@ export default function MessagesTable({
     toggleRowSelection,
     selectedMessage,
     setSelectedMessage,
-    partition,
     selectedTopic
 
 }) {
@@ -91,7 +90,16 @@ export default function MessagesTable({
 
                             <td>{msg.offset}</td>
 
-                            <td>{partition}</td>
+                            <td>
+                              {/*
+                                Партиция ВСЕГДА берётся из сообщения.
+                                Если backend не прислал partition — это проблема API, не UI.
+                              */}
+                              {typeof msg.partition === "number"
+                                ? msg.partition
+                                : "—"
+                              }
+                            </td>
 
                             <td className="message-key-cell">
                                 {msg.key || "-"}
