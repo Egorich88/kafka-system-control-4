@@ -3,7 +3,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o kafka-backend main.go
+RUN go build -o kafka-backend .
 
 FROM alpine:latest
 RUN apk add --no-cache ca-certificates
