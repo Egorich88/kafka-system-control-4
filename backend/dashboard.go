@@ -94,11 +94,31 @@ type DashboardBroker struct {
 
 /*
    DashboardBrokersResponse
-
    Список брокеров кластера.
 */
 type DashboardBrokersResponse struct {
 	Brokers []DashboardBroker `json:"brokers"`
+}
+
+/*
+   DashboardConsumerGroup
+   Информация о группе потребителей.
+*/
+type DashboardConsumerGroup struct {
+
+	/* Название группы */
+	Name string `json:"name"`
+
+	/* Состояние группы */
+	State string `json:"state"`
+}
+
+/*
+   DashboardConsumerGroupsResponse
+   Список групп потребителей Kafka.
+*/
+type DashboardConsumerGroupsResponse struct {
+	Groups []DashboardConsumerGroup `json:"groups"`
 }
 
 /*
@@ -373,6 +393,113 @@ func getDashboardBrokersHandler(
 	json.NewEncoder(w).Encode(
 		DashboardBrokersResponse{
 			Brokers: result,
+		},
+	)
+}
+
+/*
+   getDashboardConsumerGroupsHandler
+
+   Возвращает список consumer groups Kafka-кластера.
+*/
+func getDashboardConsumerGroupsHandler(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+
+	w.Header().Set(
+		"Access-Control-Allow-Origin",
+		"*",
+	)
+
+	w.Header().Set(
+		"Content-Type",
+		"application/json",
+	)
+
+	bootstrap := getBootstrapFromRequest(r)
+
+	admin, err := createAdminClient(
+		bootstrap,
+	)
+
+	if err != nil {
+
+		sendJSONError(
+			w,
+			"Ошибка подключения к Kafka: "+err.Error(),
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	defer admin.Close()
+
+	groupsMap, err := admin.ListConsumerGroups()
+
+	if err != nil {
+
+		sendJSONError(
+			w,
+			"Ошибка получения consumer groups: "+err.Error(),
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	groupNames := make(
+		[]string,
+		0,
+		len(groupsMap),
+	)
+
+	for groupName := range groupsMap {
+
+		groupNames = append(
+			groupNames,
+			groupName,
+		)
+	}
+
+	descriptions, err := admin.DescribeConsumerGroups(
+		groupNames,
+	)
+
+	if err != nil {
+
+		sendJSONError(
+			w,
+			"Ошибка описания consumer groups: "+err.Error(),
+			http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	result := make(
+		[]DashboardConsumerGroup,
+		0,
+		len(descriptions),
+	)
+
+	for _, group := range descriptions {
+
+		result = append(
+			result,
+			DashboardConsumerGroup{
+
+				Name: group.GroupId,
+
+				State: group.State,
+			},
+		)
+	}
+
+	json.NewEncoder(w).Encode(
+		DashboardConsumerGroupsResponse{
+			Groups: result,
 		},
 	)
 }

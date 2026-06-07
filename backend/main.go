@@ -961,14 +961,25 @@ func main() {
     /*
        Dashboard API
     */
+
+    /* Обзор */
     http.HandleFunc(
     	"/api/dashboard/overview",
     	getDashboardOverviewHandler,
     )
+
+    /* Брокеры */
     http.HandleFunc(
     	"/api/dashboard/brokers",
     	getDashboardBrokersHandler,
     )
+
+    /* Консюмер группы */
+    http.HandleFunc(
+    	"/api/dashboard/consumer-groups",
+    	getDashboardConsumerGroupsHandler,
+    )
+
 	log.Printf("Server running on %s", port)
 
 	log.Fatal(http.ListenAndServe(port, nil))
