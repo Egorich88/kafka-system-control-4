@@ -99,10 +99,17 @@
      border-radius: 18px;
     /* Внутренний отступ */
      padding: 22px;
+     /* Выравнивание содержимого по центру карточки */
+     align-items: center;
+     /* Все элементы располагаются вертикально сверху вниз */
+     display: flex;
+     flex-direction: column;
     /* Тень панели */
      box-shadow: var(--shadow-primary);
     /* Анимация наведения */
      transition: all 0.2s ease;
+     /* Минимальная высота карточки. Все KPI становятся одинакового размера. */
+     min-height: 150px;
 }
 /* Эффект наведения мышью */
  .kpi-card:hover {
@@ -204,9 +211,11 @@
 .kpi-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
+
 
 /* Иконка карточки */
 .kpi-icon {
@@ -278,29 +287,38 @@
   font-size: 13px;
 }
 
-/* ==========================================================
-   Цвета KPI-иконок
-========================================================== */
+/*
+==========================================================
+ЦВЕТА ИКОНОК KPI КАРТОЧЕК
 
-.kpi-icon-blue {
-  color: #3b82f6;
+Используются для визуального разделения метрик.
+
+Пользователь моментально понимает,
+какой тип метрики отображается.
+==========================================================
+*/
+
+/* Голубой */
+ .kpi-icon-blue {
+     color: #3b82f6;
+}
+/* Фиолетовый */
+ .kpi-icon-purple {
+     color: #8b5cf6;
+}
+/* Оранжевый */
+ .kpi-icon-orange {
+     color: #f59e0b;
+}
+/* Зеленый */
+ .kpi-icon-green {
+     color: #22c55e;
+}
+/* Красный */
+ .kpi-icon-red {
+     color: #ef4444;
 }
 
-.kpi-icon-purple {
-  color: #8b5cf6;
-}
-
-.kpi-icon-green {
-  color: #22c55e;
-}
-
-.kpi-icon-orange {
-  color: #f59e0b;
-}
-
-.kpi-icon-red {
-  color: #ef4444;
-}
 
 /* ==========================================================
    Верхняя панель управления Dashboard
@@ -309,6 +327,8 @@
      display: flex;
      justify-content: flex-end;
      gap: 12px;
+     margin-bottom: 20px;
+     justify-content: flex-end;
      margin-bottom: 20px;
 }
  .dashboard-time-selector {

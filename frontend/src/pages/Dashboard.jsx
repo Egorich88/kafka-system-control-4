@@ -249,7 +249,7 @@ export default function Dashboard() {
 
           <div className="kpi-header">
 
-            <FiServer className="kpi-icon" />
+            <FiServer className="kpi-icon kpi-icon-blue" />
 
             <div className="kpi-title">
               Брокеры
@@ -274,7 +274,7 @@ export default function Dashboard() {
 
           <div className="kpi-header">
 
-            <FiLayers className="kpi-icon" />
+            <FiLayers className="kpi-icon kpi-icon-purple" />
 
             <div className="kpi-title">
               Топики
@@ -299,7 +299,7 @@ export default function Dashboard() {
 
           <div className="kpi-header">
 
-            <FiGrid className="kpi-icon" />
+            <FiGrid className="kpi-icon kpi-icon-orange" />
 
             <div className="kpi-title">
               Партиции
@@ -324,7 +324,7 @@ export default function Dashboard() {
 
           <div className="kpi-header">
 
-            <FiUsers className="kpi-icon" />
+            <FiUsers className="kpi-icon kpi-icon-green" />
 
             <div className="kpi-title">
               Группы потребителей
