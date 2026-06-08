@@ -1,5 +1,11 @@
 # Kafka System Control-4
+<div align="left">
+<a href="https://github.com/kafbat/kafka-ui/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"/></a>
+<a href="https://github.com/Egorich88/kafka-system-control-4/releases">
+  <img src="https://img.shields.io/github/v/release/Egorich88/kafka-system-control-4" alt="Latest Release">
+</a>
 <img width="1254" height="1254" alt="image" src="https://github.com/user-attachments/assets/4d3f6079-6787-42f1-9d54-9b508c35cd06" />
+
 
 
 **Веб‑интерфейс для управления Apache Kafka** (React + Go).  
