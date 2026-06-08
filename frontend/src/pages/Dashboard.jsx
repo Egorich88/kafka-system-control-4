@@ -342,33 +342,79 @@ export default function Dashboard() {
 
           <div className="panel-body">
 
-            {
-              brokers.map((broker, index) => (
+            {/* Таблица брокеров Kafka */}
+            <div className="broker-table">
 
-                <div
-                  key={index}
-                  className="broker-row"
-                >
+              {/* Заголовок таблицы */}
+              <div className="broker-table-header">
 
-                  {/*
-                     ID брокера и адрес подключения.
-                  */}
-                  {broker.id}
-                  {" — "}
-                  {broker.address}
+                {/* Идентификатор брокера */}
+                <div>ID</div>
 
-                  {/*
-                     Отметка текущего контроллера кластера.
-                  */}
-                  {
-                    broker.controller
-                      ? " (Контроллер)"
-                      : ""
-                  }
+                {/* Адрес подключения */}
+                <div>Адрес</div>
 
-                </div>
-              ))
-            }
+                {/* Состояние брокера */}
+                <div>Статус</div>
+
+                {/* Является ли брокер контроллером */}
+                <div>Контроллер</div>
+
+              </div>
+
+              {/* Список брокеров */}
+              {
+                brokers.map((broker, index) => (
+
+                  <div
+                    key={index}
+                    className="broker-table-row"
+                  >
+
+                    {/* Идентификатор брокера */}
+                    <div>
+                      {broker.id}
+                    </div>
+
+                    {/* Адрес подключения */}
+                    <div>
+                      {broker.address}
+                    </div>
+
+                    {/* Статус брокера */}
+                    <div className="broker-status">
+
+                      <span className="broker-status-dot" />
+
+                      Онлайн
+
+                    </div>
+
+                    {/* Признак контроллера Kafka */}
+                    <div>
+
+                      {
+                        broker.controller
+                          ? (
+                              <span className="broker-controller-badge">
+                                Да
+                              </span>
+                            )
+                          : (
+                              <span className="broker-no-controller">
+                                Нет
+                              </span>
+                            )
+                      }
+
+                    </div>
+
+                  </div>
+
+                ))
+              }
+
+            </div>
 
           </div>
 

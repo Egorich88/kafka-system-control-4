@@ -214,3 +214,66 @@
   color: var(--accent-color);
   flex-shrink: 0;
 }
+
+/* ============================================================ ТАБЛИЦА БРОКЕРОВ KAFKA ============================================================ */
+/* Заголовок таблицы. */
+ .broker-table-header {
+     display: grid;
+     grid-template-columns: 80px 1fr 180px 140px;
+     padding: 12px 16px;
+     font-size: 13px;
+     font-weight: 600;
+     color: var(--text-secondary);
+     border-bottom: 1px solid var(--border-color);
+}
+/* Строка таблицы. */
+ .broker-table-row {
+     display: grid;
+     grid-template-columns: 80px 1fr 180px 140px;
+     align-items: center;
+     padding: 14px 16px;
+     border-bottom: 1px solid var(--border-color);
+}
+/* Последняя строка без нижней линии. */
+ .broker-table-row:last-child {
+     border-bottom: none;
+}
+/* Подсветка строки при наведении. */
+ .broker-table-row:hover {
+     background: var(--table-row-hover);
+}
+/* Статус брокера. */
+ .broker-status {
+     display: flex;
+     align-items: center;
+     gap: 8px;
+     color: var(--success-color);
+     font-weight: 500;
+}
+/* Зелёная точка статуса. */
+ .broker-status-dot {
+     width: 10px;
+     height: 10px;
+     border-radius: 50%;
+     background: var(--success-color);
+     box-shadow: 0 0 8px var(--success-color);
+}
+/* Бейдж контроллера Kafka. */
+ .broker-controller-badge {
+     margin-left: 10px;
+     padding: 4px 10px;
+     border-radius: 999px;
+     background: rgba(59,130,246,0.15);
+     color: var(--accent-color);
+     font-size: 12px;
+     font-weight: 600;
+}
+/*
+============================================================
+Брокер не является контроллером.
+============================================================
+*/
+.broker-no-controller {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
