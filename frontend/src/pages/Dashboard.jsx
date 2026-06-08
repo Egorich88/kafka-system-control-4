@@ -42,7 +42,7 @@ import {
 
   /* Панель управления */
   FiClock,
-  FiRefreshCw
+  FiRotateCw
 } from 'react-icons/fi';
 
 import { useCluster } from '../contexts/ClusterContext';
@@ -222,45 +222,48 @@ export default function Dashboard() {
        ====================================================== */}
        <div className="page-header">
 
-         <h1 className="page-title">
+         {/* Левая часть */}
+         <div className="page-header-text">
 
-           Обзор кластера
+           <h1 className="page-title">
+             Обзор кластера
+           </h1>
 
-         </h1>
-
-       </div>
-
-       <div className="dashboard-toolbar">
-
-         {/* Выбор периода */}
-         <div className="dashboard-time-selector">
-
-           <FiClock />
-
-           {/* Стиль как у выбора кластера */}
-           <Dropdown
-
-             selectedItem={timeRange}
-
-             items={TIME_RANGES}
-
-             onSelect={setTimeRange}
-
-             statusResolver={() => 'unknown'}
-
-           />
+           <div className="page-cluster-name">
+             Кластер: {currentCluster.name}
+           </div>
 
          </div>
 
-         {/* Обновление Dashboard */}
-         <button
-           className="dashboard-refresh-button"
-           onClick={loadDashboard}
-         >
+         {/* Правая часть */}
+         <div className="dashboard-toolbar">
 
-           <FiRefreshCw className="dashboard-refresh-icon" />
+           {/* Выбор периода */}
+           <div className="dashboard-time-selector">
 
-         </button>
+             <FiClock />
+
+             <Dropdown
+               selectedItem={timeRange}
+               items={
+                 TIME_RANGES.filter(
+                   item => item.id !== timeRange.id
+                 )
+               }
+               onSelect={setTimeRange}
+             />
+
+           </div>
+
+           {/* Обновление Dashboard */}
+           <button
+             className="dashboard-refresh-button"
+             onClick={loadDashboard}
+           >
+             <FiRotateCw className="dashboard-refresh-icon" />
+           </button>
+
+         </div>
 
        </div>
 

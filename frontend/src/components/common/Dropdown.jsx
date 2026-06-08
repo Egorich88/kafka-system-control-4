@@ -71,11 +71,15 @@
 
          <div className="dropdown-selected-left">
 
-           <div
-             className={`dropdown-status-dot ${
-               statusResolver(selectedItem)
-             }`}
-           />
+           {
+             statusResolver && (
+               <div
+                 className={`dropdown-status-dot ${
+                   statusResolver(selectedItem)
+                 }`}
+               />
+             )
+           }
 
            <span className="dropdown-selected-name">
              {selectedItem.name}
@@ -105,11 +109,15 @@
                }}
              >
 
-               <div
-                 className={`dropdown-status-dot ${
-                   statusResolver(item)
-                 }`}
-               />
+               {
+                 statusResolver && (
+                   <div
+                     className={`dropdown-status-dot ${
+                       statusResolver(item)
+                     }`}
+                   />
+                 )
+               }
 
                <span>
                  {item.name}
