@@ -14,286 +14,203 @@
  * limitations under the License.
  */
 
-.dashboard-page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+/*
+   =====================================================================
+
+   dashboard.css
+
+   Назначение:
+   Стили страницы Dashboard мониторинга Kafka-кластера.
+
+   Данный файл отвечает исключительно за отображение
+   панели мониторинга.
+
+   Используемая структура страницы:
+
+   1. KPI-карточки
+      - Брокеры
+      - Топики
+      - Партиции
+      - Группы потребителей
+      - Сообщения
+
+   2. Основная область мониторинга
+      - График пропускной способности
+      - Список брокеров
+
+   3. Дополнительная аналитика
+      - Активные топики
+      - Consumer Lag
+      - Последние события
+
+   ВАЖНО:
+
+   Файл НЕ содержит фиксированных цветов.
+
+   Все цвета берутся из themes.css через:
+
+   --panel-bg
+   --border-color
+   --text-primary
+   --text-secondary
+   --accent-color
+   --shadow-primary
+
+   Благодаря этому Dashboard автоматически поддерживает:
+
+   - Light Theme
+   - Dark Theme
+   - Kitty Theme
+
+   без каких-либо дополнительных изменений.
+
+   =====================================================================
+*/
+
+/*
+   =====================================================================
+   Основной контейнер Dashboard
+   =====================================================================
+*/
+ .dashboard-container {
+    /* Вертикальное расположение блоков */
+     display: flex;
+    /* Блоки идут друг под другом */
+     flex-direction: column;
+    /* Отступ между секциями */
+     gap: 24px;
 }
+/* ===================================================================== Верхний ряд KPI карточек ===================================================================== */
+ .dashboard-kpi-grid {
+    /* Используем CSS Grid */
+     display: grid;
+    /* Автоматически переносим карточки. Минимум 220px. */
+     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    /* Расстояние между карточками */
+     gap: 20px;
+}
+/* ===================================================================== KPI карточка ===================================================================== */
+ .kpi-card {
+    /* Цвет панели зависит от темы */
+     background: var(--panel-bg);
+    /* Граница панели */
+     border: 1px solid var(--border-color);
+    /* Скругление */
+     border-radius: 18px;
+    /* Внутренний отступ */
+     padding: 22px;
+    /* Тень панели */
+     box-shadow: var(--shadow-primary);
+    /* Анимация наведения */
+     transition: all 0.2s ease;
+}
+/* Эффект наведения мышью */
+ .kpi-card:hover {
+     transform: translateY(-2px);
+     border-color: var(--accent-color);
+}
+/* Заголовок карточки */
+ .kpi-title {
+     font-size: 0.9rem;
+     color: var(--text-secondary);
+     margin-bottom: 12px;
+}
+/* Большое число */
+ .kpi-value {
+     font-size: 2rem;
+     font-weight: 700;
+     color: var(--text-primary);
+     line-height: 1;
+}
+/* Дополнительная информация */
+ .kpi-sub {
+     margin-top: 10px;
+     font-size: 14px;
+     font-weight: 500;
+     color: var(--success-color);
 
-/* HEADER */
+}
+/* ===================================================================== Средняя область Dashboard ===================================================================== */
+ .dashboard-main-grid {
+     display: grid;
+    /* Левая панель больше правой. График важнее списка брокеров. */
+     grid-template-columns: 2fr 1fr;
+     gap: 20px;
+}
+/* ===================================================================== Нижняя область Dashboard ===================================================================== */
+ .dashboard-bottom-grid {
+     display: grid;
+    /* Три одинаковые панели. */
+     grid-template-columns: repeat(3, 1fr);
+     gap: 20px;
+}
+/* ===================================================================== Универсальная панель Dashboard ===================================================================== */
+ .dashboard-panel {
+     background: var(--panel-bg);
+     border: 1px solid var(--border-color);
+     border-radius: 18px;
+     box-shadow: var(--shadow-primary);
+     overflow: hidden;
+}
+/* ===================================================================== Заголовок панели ===================================================================== */
+ .panel-header {
+     padding: 18px 22px;
+     font-size: 1rem;
+     font-weight: 600;
+     color: var(--text-primary);
+     border-bottom: 1px solid var(--border-color);
+}
+/* ===================================================================== Тело панели ===================================================================== */
+ .panel-body {
+     padding: 22px;
+     color: var(--text-secondary);
+}
+/* ===================================================================== Строка брокера ===================================================================== */
+ .broker-row {
+     padding: 12px 0;
+     color: var(--text-primary);
+     border-bottom: 1px solid var(--border-color);
+}
+/* Последняя строка без линии */
+ .broker-row:last-child {
+     border-bottom: none;
+}
+/* ===================================================================== Адаптация под планшеты ===================================================================== */
+ @media (max-width: 1200px) {
+     .dashboard-main-grid {
+         grid-template-columns: 1fr;
+    }
+     .dashboard-bottom-grid {
+         grid-template-columns: 1fr;
+    }
+}
+/* ===================================================================== Адаптация под мобильные устройства ===================================================================== */
+ @media (max-width: 768px) {
+     .dashboard-kpi-grid {
+         grid-template-columns: 1fr;
+    }
+     .kpi-value {
+         font-size: 1.8rem;
+    }
+}
+/* ============================================================
+   Верхняя строка карточки
 
-.dashboard-header {
-
+   Содержит:
+   - иконку
+   - название метрики
+   ============================================================
+*/
+.kpi-header {
   display: flex;
-
-  justify-content: space-between;
-
   align-items: center;
-}
-
-.dashboard-header h1 {
-
-  font-size: 2rem;
-
-  margin-bottom: 6px;
-}
-
-.dashboard-header p {
-  color: var(--text-secondary);
-}
-
-/* CLUSTER HEALTH */
-
-.cluster-health {
-
-  display: flex;
-
-  align-items: center;
-
   gap: 10px;
-
-  background: var(--panel-bg);
-
-  border: 1px solid var(--border-color);
-
-  padding: 12px 18px;
-
-  border-radius: 14px;
-}
-
-.health-dot {
-
-  width: 12px;
-
-  height: 12px;
-
-  border-radius: 50%;
-
-  background: #22c55e;
-
-  box-shadow:
-    0 0 10px #22c55e,
-    0 0 20px #22c55e;
-}
-
-/* ACTIVE CLUSTER */
-
-.active-cluster-card {
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  background: linear-gradient(
-    135deg,
-    #2563eb,
-    #1d4ed8
-  );
-
-  color: white;
-
-  padding: 28px;
-
-  border-radius: 20px;
-}
-
-.cluster-label {
-
-  font-size: 0.75rem;
-
-  letter-spacing: 1px;
-
-  opacity: 0.8;
-}
-
-/* METRICS */
-
-.metrics-grid {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit, minmax(220px, 1fr));
-
-  gap: 18px;
-}
-
-.metric-card {
-
-  background: var(--panel-bg);
-
-  border: 1px solid var(--border-color);
-
-  border-radius: 18px;
-
-  padding: 20px;
-
-  transition: 0.2s;
-}
-
-.metric-card:hover {
-
-  transform: translateY(-2px);
-
-  border-color: var(--accent-color);
-}
-
-.metric-card-top {
-
-  display: flex;
-
-  justify-content: space-between;
-
   margin-bottom: 18px;
 }
 
-.metric-card-icon {
-
-  font-size: 1.5rem;
-
+/* Иконка карточки */
+.kpi-icon {
+  font-size: 22px;
   color: var(--accent-color);
-}
-
-.metric-status {
-
-  width: 10px;
-
-  height: 10px;
-
-  border-radius: 50%;
-}
-
-.metric-status.healthy {
-
-  background: #22c55e;
-
-  box-shadow:
-    0 0 10px #22c55e;
-}
-
-.metric-status.warning {
-
-  background: #f59e0b;
-
-  box-shadow:
-    0 0 10px #f59e0b;
-}
-
-.metric-title {
-
-  color: var(--text-secondary);
-
-  font-size: 0.9rem;
-}
-
-/* PANELS */
-
-.dashboard-grid {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit, minmax(320px, 1fr));
-
-  gap: 20px;
-}
-
-.ksc-panel {
-
-  background: var(--panel-bg);
-
-  border: 1px solid var(--border-color);
-
-  border-radius: 18px;
-
-  overflow: hidden;
-}
-
-.ksc-panel-header {
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  padding: 18px 20px;
-
-  border-bottom: 1px solid var(--border-color);
-}
-
-.ksc-panel-body {
-
-  padding: 20px;
-}
-
-/* BROKERS */
-
-.broker-list {
-
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 14px;
-}
-
-.broker-item {
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-}
-
-.broker-dot {
-
-  width: 10px;
-
-  height: 10px;
-
-  border-radius: 50%;
-
-  background: #22c55e;
-
-  box-shadow:
-    0 0 10px #22c55e;
-}
-
-/* ACTIVITY */
-
-.activity-list {
-
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 12px;
-}
-
-.activity-item {
-
-  padding: 12px;
-
-  border-radius: 10px;
-
-  background: rgba(59,130,246,0.08);
-}
-
-/* LAG */
-
-.lag-placeholder {
-
-  height: 140px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  color: var(--text-secondary);
+  flex-shrink: 0;
 }

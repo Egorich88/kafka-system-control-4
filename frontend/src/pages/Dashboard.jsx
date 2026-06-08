@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import '../styles/dashboard.css';
 import {
   FiInfo,
   FiCode,
   FiPlus,
-  FiStar
+  FiStar,
+  FiServer,
+  FiLayers,
+  FiGrid,
+  FiUsers,
+  FiMail
 } from 'react-icons/fi';
 
 import { useCluster } from '../contexts/ClusterContext';
@@ -27,25 +35,422 @@ export default function Dashboard() {
 
   const { currentCluster } = useCluster();
 
+  /* Отладка текущего кластера */
+  console.log( "CURRENT CLUSTER:", currentCluster );
+
+  /* Данные мониторинга кластера */
+  const [overview, setOverview] = useState(null);
+  const [brokers, setBrokers] = useState([]);
+  const [consumerGroups, setConsumerGroups] = useState([]);
+  const [messagesTotal, setMessagesTotal] = useState(0);
+
+  /* Загрузка данных мониторинга */
+  useEffect(() => {
+
+    if (!currentCluster) {
+      return;
+    }
+
+    loadDashboard();
+  }, [currentCluster]);
+
+  /* Загружает данные Dashboard */
+  async function loadDashboard() {
+
+    try {
+
+      const headers = {
+        'X-Kafka-Bootstrap':
+          currentCluster.bootstrapServers
+      };
+
+      const [
+        overviewResponse,
+        brokersResponse,
+        groupsResponse,
+        messagesResponse
+      ] = await Promise.all([
+
+        axios.get(
+          '/api/dashboard/overview',
+          { headers }
+        ),
+
+        axios.get(
+          '/api/dashboard/brokers',
+          { headers }
+        ),
+
+        axios.get(
+          '/api/dashboard/consumer-groups',
+          { headers }
+        ),
+
+        axios.get(
+          '/api/dashboard/messages-total',
+          { headers }
+        )
+      ]);
+
+      setOverview(
+        overviewResponse.data
+      );
+
+      setBrokers(
+        brokersResponse.data.brokers || []
+      );
+
+      setConsumerGroups(
+        groupsResponse.data.groups || []
+      );
+
+      setMessagesTotal(
+        messagesResponse.data.total || 0
+      );
+
+    } catch (error) {
+
+      /* Полная информация об ошибке Dashboard */
+      console.error( 'Dashboard load error:', error );
+
+      console.error( 'Dashboard response:', error.response?.data );
+
+      console.error( 'Dashboard status:', error.response?.status );
+    }
+  }
+
   if (currentCluster) {
 
     return (
 
-      <div className="overview-page">
+    /*
+       ============================================================
+       Dashboard мониторинга Kafka-кластера
 
-        <div className="overview-card">
+       Структура страницы:
 
-          <h1>Обзор кластера</h1>
+       1. Верхний ряд KPI-карточек
+          - Брокеры
+          - Топики
+          - Партиции
+          - Группы потребителей
+          - Сообщения
 
-          <p>
-            Здесь будет отображаться мониторинг Kafka-кластера.
-          </p>
+       2. Основная область мониторинга
+          - График пропускной способности кластера
+          - Таблица брокеров
+
+       3. Нижняя область
+          - Топ топиков
+          - Consumer Lag
+          - Последние события
+
+       Все блоки являются контейнерами для будущего
+       наполнения реальными метриками Kafka.
+       ============================================================
+    */
+
+    <div className="dashboard-container">
+
+      {/*
+         ============================================================
+         KPI-КАРТОЧКИ
+
+         Основные показатели состояния Kafka-кластера.
+
+         Отображаются всегда сверху страницы.
+         ============================================================
+      */}
+      <div className="dashboard-kpi-grid">
+
+        {/*
+           Количество брокеров в кластере.
+        */}
+        <div className="kpi-card">
+
+          <div className="kpi-header">
+
+            <FiServer className="kpi-icon" />
+
+            <div className="kpi-title">
+              Брокеры
+            </div>
+
+          </div>
+
+          <div className="kpi-value">
+            {brokers.length}
+          </div>
+
+          <div className="kpi-sub">
+            Онлайн: {brokers.length}
+          </div>
+
+        </div>
+
+        {/*
+           Количество топиков Kafka.
+        */}
+        <div className="kpi-card">
+
+          <div className="kpi-header">
+
+            <FiLayers className="kpi-icon" />
+
+            <div className="kpi-title">
+              Топики
+            </div>
+
+          </div>
+
+          <div className="kpi-value">
+            {overview?.topics ?? 0}
+          </div>
+
+          <div className="kpi-sub">
+            Активных: {overview?.topics ?? 0}
+          </div>
+
+        </div>
+
+        {/*
+           Общее количество партиций.
+        */}
+        <div className="kpi-card">
+
+          <div className="kpi-header">
+
+            <FiGrid className="kpi-icon" />
+
+            <div className="kpi-title">
+              Партиции
+            </div>
+
+          </div>
+
+          <div className="kpi-value">
+            {overview?.partitions ?? 0}
+          </div>
+
+          <div className="kpi-sub">
+            Всего партиций
+          </div>
+
+        </div>
+
+        {/*
+           Количество Consumer Groups.
+        */}
+        <div className="kpi-card">
+
+          <div className="kpi-header">
+
+            <FiUsers className="kpi-icon" />
+
+            <div className="kpi-title">
+              Группы потребителей
+            </div>
+
+          </div>
+
+          <div className="kpi-value">
+            {consumerGroups.length}
+          </div>
+
+          <div className="kpi-sub">
+            Активных групп
+          </div>
+
+        </div>
+
+        {/*
+           Общее количество сообщений,
+           найденных в кластере.
+        */}
+        <div className="kpi-card">
+
+          <div className="kpi-header">
+
+            <FiMail className="kpi-icon" />
+
+            <div className="kpi-title">
+              Сообщения
+            </div>
+
+          </div>
+
+          <div className="kpi-value">
+            {messagesTotal}
+          </div>
+
+          <div className="kpi-sub">
+            Всего сообщений
+          </div>
 
         </div>
 
       </div>
-    );
-  }
+
+      {/*
+         ============================================================
+         ОСНОВНАЯ ОБЛАСТЬ DASHBOARD
+
+         Левая панель:
+         график нагрузки кластера.
+
+         Правая панель:
+         таблица брокеров.
+         ============================================================
+      */}
+      <div className="dashboard-main-grid">
+
+        {/*
+           График пропускной способности кластера.
+
+           В дальнейшем здесь будет отображаться:
+
+           - входящий поток сообщений
+           - исходящий поток сообщений
+           - сообщения в секунду
+           - сообщения в минуту
+        */}
+        <div className="dashboard-panel">
+
+          <div className="panel-header">
+            Пропускная способность кластера
+          </div>
+
+          <div className="panel-body">
+
+            {/*
+               Временная заглушка до реализации графика.
+            */}
+            График входящих и исходящих сообщений
+
+          </div>
+
+        </div>
+
+        {/*
+           Таблица брокеров Kafka-кластера.
+        */}
+        <div className="dashboard-panel">
+
+          <div className="panel-header">
+            Брокеры
+          </div>
+
+          <div className="panel-body">
+
+            {
+              brokers.map((broker, index) => (
+
+                <div
+                  key={index}
+                  className="broker-row"
+                >
+
+                  {/*
+                     ID брокера и адрес подключения.
+                  */}
+                  {broker.id}
+                  {" — "}
+                  {broker.address}
+
+                  {/*
+                     Отметка текущего контроллера кластера.
+                  */}
+                  {
+                    broker.controller
+                      ? " (Контроллер)"
+                      : ""
+                  }
+
+                </div>
+              ))
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/*
+         ============================================================
+         НИЖНЯЯ ОБЛАСТЬ DASHBOARD
+
+         Содержит дополнительные панели мониторинга.
+
+         Будут реализованы позднее.
+         ============================================================
+      */}
+      <div className="dashboard-bottom-grid">
+
+        {/*
+           Топ топиков по активности.
+        */}
+        <div className="dashboard-panel">
+
+          <div className="panel-header">
+            Самые активные топики
+          </div>
+
+          <div className="panel-body">
+
+            Таблица будет реализована позже
+
+          </div>
+
+        </div>
+
+        {/*
+           Топ Consumer Groups по величине Lag.
+        */}
+        <div className="dashboard-panel">
+
+          <div className="panel-header">
+            Отставание групп потребителей
+          </div>
+
+          <div className="panel-body">
+
+            Таблица будет реализована позже
+
+          </div>
+
+        </div>
+
+        {/*
+           Последние события Kafka-кластера.
+
+           В будущем здесь будут отображаться:
+
+           - создание топиков
+           - удаление топиков
+           - подключение брокеров
+           - смена контроллера
+           - ошибки кластера
+        */}
+        <div className="dashboard-panel">
+
+          <div className="panel-header">
+            Последние события
+          </div>
+
+          <div className="panel-body">
+
+            Список событий будет реализован позже
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
 
   return (
 

@@ -49,11 +49,8 @@ import (
 	"github.com/IBM/sarama"
 )
 
-/*
-   DashboardOverviewResponse
-
-   Сводная информация по кластеру Kafka.
-*/
+/* DashboardOverviewResponse
+Сводная информация по кластеру Kafka */
 type DashboardOverviewResponse struct {
 
 	/* Количество брокеров */
@@ -75,11 +72,8 @@ type DashboardOverviewResponse struct {
 	UnderReplicated int `json:"underReplicated"`
 }
 
-/*
-   DashboardBroker
-
-   Информация о брокере Kafka.
-*/
+/* DashboardBroker
+Информация о брокере Kafka */
 type DashboardBroker struct {
 
 	/* ID брокера */
@@ -92,18 +86,14 @@ type DashboardBroker struct {
 	Controller bool `json:"controller"`
 }
 
-/*
-   DashboardBrokersResponse
-   Список брокеров кластера.
-*/
+/* DashboardBrokersResponse
+Список брокеров кластера */
 type DashboardBrokersResponse struct {
 	Brokers []DashboardBroker `json:"brokers"`
 }
 
-/*
-   DashboardConsumerGroup
-   Информация о группе потребителей.
-*/
+/* DashboardConsumerGroup
+Информация о группе потребителей */
 type DashboardConsumerGroup struct {
 
 	/* Название группы */
@@ -113,22 +103,86 @@ type DashboardConsumerGroup struct {
 	State string `json:"state"`
 }
 
-/*
-   DashboardConsumerGroupsResponse
-   Список групп потребителей Kafka.
-*/
-type DashboardConsumerGroupsResponse struct {
-	Groups []DashboardConsumerGroup `json:"groups"`
-}
+/* DashboardConsumerGroupsResponse
+Список групп потребителей Kafka */
+type DashboardConsumerGroupsResponse struct { Groups []DashboardConsumerGroup `json:"groups"` }
 
-/*
-   DashboardPartitionsResponse
-   Статистика партиций Kafka-кластера.
-*/
-type DashboardPartitionsResponse struct {
+/* DashboardPartitionsResponse
+Статистика партиций Kafka-кластера */
+type DashboardPartitionsResponse struct { Total int `json:"total"` }
 
-	/* Общее количество партиций */
-	Total int `json:"total"`
+/* DashboardMessagesTotalResponse
+
+   Ответ API, содержащий общее количество сообщений
+   во всём Kafka-кластере.
+
+   Используется на дашборде для отображения
+   суммарного количества сообщений (входящих событий).
+*/
+/* Общее количество сообщений во всех топиках */
+type DashboardMessagesTotalResponse struct { Total int64 `json:"total"` }
+
+/* getDashboardMessagesTotalHandler
+
+   HTTP-обработчик, возвращающий общее количество сообщений
+   во всех топиках Kafka-кластера.
+
+   Логика:
+   - получает список всех топиков
+   - проходит по всем партициям
+   - суммирует latest offset (как приближение общего числа сообщений)
+
+   Используется на Dashboard в карточке:
+   "Сообщений в кластере"
+*/
+func getDashboardMessagesTotalHandler(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
+	bootstrap := getBootstrapFromRequest(r)
+
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_8_0_0
+
+	client, err := sarama.NewClient([]string{bootstrap}, config)
+	if err != nil {
+		sendJSONError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer client.Close()
+
+	topics, err := client.Topics()
+	if err != nil {
+		sendJSONError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var total int64 = 0
+
+	for _, topic := range topics {
+		partitions, err := client.Partitions(topic)
+		if err != nil {
+			continue
+		}
+
+		for _, p := range partitions {
+			latest, err := client.GetOffset(topic, p, sarama.OffsetNewest)
+			if err != nil {
+				continue
+			}
+			total += latest
+		}
+	}
+
+	json.NewEncoder(w).Encode(
+		DashboardMessagesTotalResponse{
+			Total: total,
+		},
+	)
 }
 
 /*

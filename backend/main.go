@@ -986,6 +986,18 @@ func main() {
     	getDashboardPartitionsHandler,
     )
 
+    /* Endpoint: /api/dashboard/messages-total
+
+    Назначение:
+    Возвращает агрегированное количество сообщений
+    во всём Kafka-кластере.
+
+    Используется фронтендом Dashboard для карточки:
+    "Сообщений в кластере" */
+    http.HandleFunc(
+    	"/api/dashboard/messages-total",
+    	getDashboardMessagesTotalHandler,
+    )
 	log.Printf("Server running on %s", port)
 
 	log.Fatal(http.ListenAndServe(port, nil))
