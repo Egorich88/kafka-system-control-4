@@ -69,10 +69,10 @@
 4. **Откройте http://localhost:5173 – интерфейс готов к работе.**
 
 ## Docker Compose (всё в одном)
-   
+  ```bash
    docker-compose up --build
-   
-  - Фронтенд: http://localhost
+   ```
+  - Фронтенд: http://localhost:5173
   - Бэкенд: http://localhost:8080/api/topics
 
 ## 🔁 CI/CD (GitHub Actions)
@@ -103,6 +103,8 @@
 *   [x] Docker‑образы и CI/CD
 
 *   [x] Автоматические релизы по тегам
+
+*   [x] Переключение кластеров (фронт + бэк)
 
 *   [x] Развёртывание в Kubernetes (Yandex Cloud)
 
