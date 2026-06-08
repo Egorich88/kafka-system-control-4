@@ -277,3 +277,64 @@
   color: var(--text-secondary);
   font-size: 13px;
 }
+
+/* ==========================================================
+   Цвета KPI-иконок
+========================================================== */
+
+.kpi-icon-blue {
+  color: #3b82f6;
+}
+
+.kpi-icon-purple {
+  color: #8b5cf6;
+}
+
+.kpi-icon-green {
+  color: #22c55e;
+}
+
+.kpi-icon-orange {
+  color: #f59e0b;
+}
+
+.kpi-icon-red {
+  color: #ef4444;
+}
+
+/* ==========================================================
+   Верхняя панель управления Dashboard
+========================================================== */
+ .dashboard-toolbar {
+     display: flex;
+     justify-content: flex-end;
+     gap: 12px;
+     margin-bottom: 20px;
+}
+ .dashboard-time-selector {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     padding: 10px 14px;
+     border-radius: 12px;
+     background: var(--panel-bg);
+     border: 1px solid var(--border-color);
+}
+ .dashboard-time-selector select {
+     background: transparent;
+     border: none;
+     color: white;
+     outline: none;
+}
+ .dashboard-refresh-button {
+     width: 48px;
+     height: 48px;
+     border-radius: 12px;
+     border: 1px solid var(--border-color);
+     background: var(--panel-bg);
+     color: white;
+     cursor: pointer;
+}
+ .dashboard-refresh-button:hover {
+     border-color: #3b82f6;
+}

@@ -22,11 +22,26 @@ import {
   FiCode,
   FiPlus,
   FiStar,
+
+  /* KPI карточки */
   FiServer,
   FiLayers,
   FiGrid,
   FiUsers,
-  FiMail
+
+
+  /* Входящий поток */
+  FiArrowDown,
+
+  /* Исходящий поток */
+  FiArrowUp,
+
+  /* Under Replicated */
+  FiAlertTriangle,
+
+  /* Панель управления */
+  FiClock,
+  FiRefreshCw
 } from 'react-icons/fi';
 
 import { useCluster } from '../contexts/ClusterContext';
@@ -42,7 +57,20 @@ export default function Dashboard() {
   const [overview, setOverview] = useState(null);
   const [brokers, setBrokers] = useState([]);
   const [consumerGroups, setConsumerGroups] = useState([]);
-  const [messagesTotal, setMessagesTotal] = useState(0);
+
+
+  /* Входящие сообщения в секунду */
+  const [messagesIn] = useState(0);
+
+  /* Исходящие сообщения в секунду */
+  const [messagesOut] = useState(0);
+
+  /* Недореплицированные партиции */
+  const [underReplicated] = useState(0);
+
+  /* Период отображения */
+  const [timeRange, setTimeRange] =
+    useState('15m');
 
   /* Загрузка данных мониторинга */
   useEffect(() => {
@@ -67,8 +95,7 @@ export default function Dashboard() {
       const [
         overviewResponse,
         brokersResponse,
-        groupsResponse,
-        messagesResponse
+        groupsResponse
       ] = await Promise.all([
 
         axios.get(
@@ -83,11 +110,6 @@ export default function Dashboard() {
 
         axios.get(
           '/api/dashboard/consumer-groups',
-          { headers }
-        ),
-
-        axios.get(
-          '/api/dashboard/messages-total',
           { headers }
         )
       ]);
@@ -104,9 +126,6 @@ export default function Dashboard() {
         groupsResponse.data.groups || []
       );
 
-      setMessagesTotal(
-        messagesResponse.data.total || 0
-      );
 
     } catch (error) {
 
@@ -151,6 +170,66 @@ export default function Dashboard() {
     */
 
     <div className="dashboard-container">
+
+       {/* ==========================================================
+           Панель управления Dashboard
+
+           Содержит:
+
+           - выбор периода отображения
+           - ручное обновление данных
+
+           В дальнейшем:
+           15 минут
+           1 час
+           6 часов
+           24 часа
+       ========================================================== */}
+
+       <div className="dashboard-toolbar">
+
+         {/* Выбор периода */}
+         <div className="dashboard-time-selector">
+
+           <FiClock />
+
+           <select
+             value={timeRange}
+             onChange={(event) =>
+               setTimeRange(event.target.value)
+             }
+           >
+             <option value="15m">
+               Последние 15 минут
+             </option>
+
+             <option value="1h">
+               Последний час
+             </option>
+
+             <option value="6h">
+               Последние 6 часов
+             </option>
+
+             <option value="24h">
+               Последние 24 часа
+             </option>
+
+           </select>
+
+         </div>
+
+         {/* Обновление Dashboard */}
+         <button
+           className="dashboard-refresh-button"
+           onClick={loadDashboard}
+         >
+
+           <FiRefreshCw />
+
+         </button>
+
+       </div>
 
       {/*
          ============================================================
@@ -263,34 +342,94 @@ export default function Dashboard() {
 
         </div>
 
-        {/*
-           Общее количество сообщений,
-           найденных в кластере.
-        */}
+
+
         <div className="kpi-card">
 
           <div className="kpi-header">
 
-            <FiMail className="kpi-icon" />
+            <FiArrowDown
+              className="kpi-icon kpi-icon-blue"
+            />
 
             <div className="kpi-title">
-              Сообщения
+              Входящие сообщения
             </div>
 
           </div>
 
           <div className="kpi-value">
-            {messagesTotal}
+
+            {messagesIn}
+
           </div>
 
           <div className="kpi-sub">
-            Всего сообщений
+
+            сообщений/сек
+
           </div>
 
         </div>
 
-      </div>
+        <div className="kpi-card">
 
+          <div className="kpi-header">
+
+            <FiArrowUp
+              className="kpi-icon kpi-icon-purple"
+            />
+
+            <div className="kpi-title">
+              Исходящие сообщения
+            </div>
+
+          </div>
+
+          <div className="kpi-value">
+
+            {messagesOut}
+
+          </div>
+
+          <div className="kpi-sub">
+
+            сообщений/сек
+
+          </div>
+
+        </div>
+
+        <div className="kpi-card">
+
+          <div className="kpi-header">
+
+            <FiAlertTriangle
+              className="kpi-icon kpi-icon-red"
+            />
+
+            <div className="kpi-title">
+              Недореплицированные
+            </div>
+
+          </div>
+
+          <div className="kpi-value">
+
+            {underReplicated}
+
+          </div>
+
+          <div className="kpi-sub">
+
+            проблемных партиций
+
+          </div>
+
+        </div>
+
+
+      </div>
       {/*
          ============================================================
          ОСНОВНАЯ ОБЛАСТЬ DASHBOARD
@@ -495,6 +634,7 @@ export default function Dashboard() {
       </div>
 
     </div>
+
   );
 }
 
