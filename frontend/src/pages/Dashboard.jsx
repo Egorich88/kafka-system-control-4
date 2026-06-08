@@ -17,6 +17,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/dashboard.css';
+import Dropdown from '../components/common/Dropdown';
 import {
   FiInfo,
   FiCode,
@@ -46,6 +47,37 @@ import {
 
 import { useCluster } from '../contexts/ClusterContext';
 
+/*
+==================================================
+Периоды отображения Dashboard
+
+Используются для выбора диапазона
+отображения метрик и графиков.
+==================================================
+*/
+const TIME_RANGES = [
+
+  {
+    id: '15m',
+    name: 'Последние 15 минут'
+  },
+
+  {
+    id: '1h',
+    name: 'Последний час'
+  },
+
+  {
+    id: '6h',
+    name: 'Последние 6 часов'
+  },
+
+  {
+    id: '24h',
+    name: 'Последние 24 часа'
+  }
+];
+
 export default function Dashboard() {
 
   const { currentCluster } = useCluster();
@@ -69,8 +101,7 @@ export default function Dashboard() {
   const [underReplicated] = useState(0);
 
   /* Период отображения */
-  const [timeRange, setTimeRange] =
-    useState('15m');
+  const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
 
   /* Загрузка данных мониторинга */
   useEffect(() => {
@@ -186,6 +217,19 @@ export default function Dashboard() {
            24 часа
        ========================================================== */}
 
+       {/* ======================================================
+           Заголовок страницы Dashboard
+       ====================================================== */}
+       <div className="page-header">
+
+         <h1 className="page-title">
+
+           Обзор кластера
+
+         </h1>
+
+       </div>
+
        <div className="dashboard-toolbar">
 
          {/* Выбор периода */}
@@ -193,29 +237,18 @@ export default function Dashboard() {
 
            <FiClock />
 
-           <select
-             value={timeRange}
-             onChange={(event) =>
-               setTimeRange(event.target.value)
-             }
-           >
-             <option value="15m">
-               Последние 15 минут
-             </option>
+           {/* Стиль как у выбора кластера */}
+           <Dropdown
 
-             <option value="1h">
-               Последний час
-             </option>
+             selectedItem={timeRange}
 
-             <option value="6h">
-               Последние 6 часов
-             </option>
+             items={TIME_RANGES}
 
-             <option value="24h">
-               Последние 24 часа
-             </option>
+             onSelect={setTimeRange}
 
-           </select>
+             statusResolver={() => 'unknown'}
+
+           />
 
          </div>
 
@@ -225,7 +258,7 @@ export default function Dashboard() {
            onClick={loadDashboard}
          >
 
-           <FiRefreshCw />
+           <FiRefreshCw className="dashboard-refresh-icon" />
 
          </button>
 
