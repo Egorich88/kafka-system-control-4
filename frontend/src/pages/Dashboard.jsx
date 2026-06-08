@@ -18,6 +18,47 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/dashboard.css';
 import Dropdown from '../components/common/Dropdown';
+/*
+==================================================
+Компоненты библиотеки Recharts
+
+Используются для построения графиков
+мониторинга Kafka-кластера.
+
+ResponsiveContainer
+- автоматически растягивает график
+  по размеру панели
+
+LineChart
+- основной контейнер графика
+
+Line
+- отдельная линия метрики
+
+XAxis
+- ось времени
+
+YAxis
+- ось значений
+
+Tooltip
+- всплывающая подсказка
+  при наведении мыши
+
+CartesianGrid
+- сетка графика в стиле Grafana
+==================================================
+*/
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid
+} from 'recharts';
+
 import {
   FiInfo,
   FiCode,
@@ -76,6 +117,65 @@ const TIME_RANGES = [
     id: '24h',
     name: 'Последние 24 часа'
   }
+];
+
+/*
+==================================================
+Временные данные графика
+
+Используются до реализации
+полноценного Kafka Monitoring API.
+
+В дальнейшем будут заменены
+реальными метриками:
+
+- Messages In/sec
+- Messages Out/sec
+- Bytes In/sec
+- Bytes Out/sec
+
+Источник данных:
+Backend Dashboard API.
+==================================================
+*/
+const THROUGHPUT_DATA = [
+
+  {
+    time: '10:00',
+    incoming: 120,
+    outgoing: 100
+  },
+
+  {
+    time: '10:05',
+    incoming: 240,
+    outgoing: 180
+  },
+
+  {
+    time: '10:10',
+    incoming: 430,
+    outgoing: 390
+  },
+
+  {
+    time: '10:15',
+    incoming: 610,
+    outgoing: 570
+  },
+
+  {
+    time: '10:20',
+    incoming: 520,
+    outgoing: 500
+  },
+
+  {
+    time: '10:25',
+    incoming: 720,
+    outgoing: 680
+  }
+
 ];
 
 export default function Dashboard() {
@@ -479,28 +579,65 @@ export default function Dashboard() {
       */}
       <div className="dashboard-main-grid">
 
-        {/*
-           График пропускной способности кластера.
+        {/* ==========================================================
+            График пропускной способности Kafka-кластера
 
-           В дальнейшем здесь будет отображаться:
+            Отображает:
 
-           - входящий поток сообщений
-           - исходящий поток сообщений
-           - сообщения в секунду
-           - сообщения в минуту
-        */}
+            - входящие сообщения в секунду
+            - исходящие сообщения в секунду
+
+            Временной диапазон выбирается
+            через панель управления Dashboard.
+
+            В дальнейшем данные будут
+            поступать из Kafka Monitoring API.
+
+        ========================================================== */}
         <div className="dashboard-panel">
 
           <div className="panel-header">
             Пропускная способность кластера
           </div>
 
-          <div className="panel-body">
+          <div className="panel-body throughput-chart">
 
-            {/*
-               Временная заглушка до реализации графика.
-            */}
-            График входящих и исходящих сообщений
+            <ResponsiveContainer
+              width="100%"
+              height={260}
+            >
+
+              <LineChart data={THROUGHPUT_DATA}>
+
+                <CartesianGrid strokeDasharray="3 3" />
+
+                <XAxis dataKey="time" />
+
+                <YAxis />
+
+                <Tooltip />
+
+                <Line
+                  type="monotone"
+                  dataKey="incoming"
+                  name="Входящие сообщения"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={false}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="outgoing"
+                  name="Исходящие сообщения"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  dot={false}
+                />
+
+              </LineChart>
+
+            </ResponsiveContainer>
 
           </div>
 
