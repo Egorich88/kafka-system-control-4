@@ -119,64 +119,54 @@ const TIME_RANGES = [
   }
 ];
 
+
 /*
 ==================================================
 Временные данные графика
 
-Используются до реализации
-полноценного Kafka Monitoring API.
+Используются до подключения
+реальных метрик Kafka.
 
-В дальнейшем будут заменены
-реальными метриками:
-
-- Messages In/sec
-- Messages Out/sec
-- Bytes In/sec
-- Bytes Out/sec
-
-Источник данных:
-Backend Dashboard API.
+После реализации Monitoring API
+будут заменены ответом backend.
 ==================================================
 */
-const THROUGHPUT_DATA = [
+const THROUGHPUT_DATA = {
 
-  {
-    time: '10:00',
-    incoming: 120,
-    outgoing: 100
-  },
+  '15m': [
+    { time: '00', incoming: 120, outgoing: 100 },
+    { time: '05', incoming: 240, outgoing: 180 },
+    { time: '10', incoming: 430, outgoing: 390 },
+    { time: '15', incoming: 610, outgoing: 570 }
+  ],
 
-  {
-    time: '10:05',
-    incoming: 240,
-    outgoing: 180
-  },
+  '1h': [
+    { time: '00', incoming: 120, outgoing: 100 },
+    { time: '15', incoming: 260, outgoing: 240 },
+    { time: '30', incoming: 430, outgoing: 390 },
+    { time: '45', incoming: 700, outgoing: 640 },
+    { time: '60', incoming: 620, outgoing: 590 }
+  ],
 
-  {
-    time: '10:10',
-    incoming: 430,
-    outgoing: 390
-  },
+  '6h': [
+    { time: '01h', incoming: 200, outgoing: 180 },
+    { time: '02h', incoming: 320, outgoing: 280 },
+    { time: '03h', incoming: 580, outgoing: 520 },
+    { time: '04h', incoming: 720, outgoing: 690 },
+    { time: '05h', incoming: 640, outgoing: 600 },
+    { time: '06h', incoming: 800, outgoing: 760 }
+  ],
 
-  {
-    time: '10:15',
-    incoming: 610,
-    outgoing: 570
-  },
+  '24h': [
+    { time: '04', incoming: 250, outgoing: 200 },
+    { time: '08', incoming: 420, outgoing: 390 },
+    { time: '12', incoming: 800, outgoing: 760 },
+    { time: '16', incoming: 680, outgoing: 630 },
+    { time: '20', incoming: 530, outgoing: 500 },
+    { time: '24', incoming: 910, outgoing: 870 }
+  ]
 
-  {
-    time: '10:20',
-    incoming: 520,
-    outgoing: 500
-  },
-
-  {
-    time: '10:25',
-    incoming: 720,
-    outgoing: 680
-  }
-
-];
+};
 
 export default function Dashboard() {
 
@@ -202,6 +192,16 @@ export default function Dashboard() {
 
   /* Период отображения */
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
+
+  /*
+  ==================================================
+  Данные графика текущего периода
+
+  Автоматически изменяются
+  при выборе периода Dashboard.
+  ==================================================
+  */
+  const chartData = THROUGHPUT_DATA[timeRange.id] || [];
 
   /* Загрузка данных мониторинга */
   useEffect(() => {
@@ -607,7 +607,7 @@ export default function Dashboard() {
               height={260}
             >
 
-              <LineChart data={THROUGHPUT_DATA}>
+              <LineChart data={chartData}>
 
                 <CartesianGrid strokeDasharray="3 3" />
 
