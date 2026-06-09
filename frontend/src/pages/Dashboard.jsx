@@ -168,6 +168,66 @@ const THROUGHPUT_DATA = {
 
 };
 
+/*
+==================================================
+Пользовательский Tooltip графика
+
+Отображает подробную информацию
+о точке графика при наведении.
+
+Используется вместо стандартного
+Tooltip библиотеки Recharts.
+==================================================
+*/
+function ThroughputTooltip({
+  active, /* Показывает наведен ли курсор.*/
+  payload, /* Значения точки графика.*/
+  label /* Значение времени:*/
+}) {
+
+  if (
+    !active ||
+    !payload ||
+    !payload.length
+  ) {
+    return null;
+  }
+
+  return (
+
+    <div className="throughput-tooltip">
+
+      <div className="throughput-tooltip-title">
+
+        Время: {label}
+
+      </div>
+
+      <div className="throughput-tooltip-row">
+
+        Входящие сообщения:
+
+        <strong>
+          {payload[0].value} msg/s
+        </strong>
+
+      </div>
+
+      <div className="throughput-tooltip-row">
+
+        Исходящие сообщения:
+
+        <strong>
+          {payload[1].value} msg/s
+        </strong>
+
+      </div>
+
+    </div>
+
+  );
+}
+
 export default function Dashboard() {
 
   const { currentCluster } = useCluster();
@@ -615,7 +675,9 @@ export default function Dashboard() {
 
                 <YAxis />
 
-                <Tooltip />
+                <Tooltip
+                  content={<ThroughputTooltip />}
+                />
 
                 <Line
                   type="monotone"

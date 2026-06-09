@@ -161,11 +161,11 @@
 }
 /* ===================================================================== Заголовок панели ===================================================================== */
  .panel-header {
-     padding: 18px 22px;
-     font-size: 1rem;
-     font-weight: 600;
-     color: var(--text-primary);
-     border-bottom: 1px solid var(--border-color);
+     padding: 18px 22px; /* Отступы заголовка панели сверху/снизу и слева/справа.*/
+     font-size: 1rem; /* Размер текста заголовка.*/
+     font-weight: 600; /* Полужирный шрифт как в Grafana. */
+     color: var(--text-primary); /* Цвет из темы приложения. */
+     border-bottom: 1px solid var(--border-color); /* Разделитель между заголовком панели и содержимым. */
 }
 /* ===================================================================== Тело панели ===================================================================== */
  .panel-body {
@@ -481,5 +481,35 @@
    ========================================================== */
 
 .throughput-chart {
-    height: 280px;
+    height: 300px;
+    padding-top: 10px;
+}
+/* ==========================================================
+   Tooltip графика пропускной способности
+   ========================================================== */
+
+.throughput-tooltip {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.throughput-tooltip-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.throughput-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.throughput-tooltip-row strong {
+    color: var(--text-primary);
 }
