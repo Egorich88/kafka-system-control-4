@@ -2,7 +2,7 @@
 
 <p align="left">
   <a href="https://github.com/Egorich88/kafka-system-control-4/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Egorich88/kafka-system-control-4?color=blue&label=License" alt="License">
+    <img src="https://badgen.net/github/license/Egorich88/kafka-system-control-4?color=blue&label=License" alt="License">
   </a>
   <a href="https://github.com/Egorich88/kafka-system-control-4/releases">
     <img src="https://img.shields.io/github/v/release/Egorich88/kafka-system-control-4?label=Latest%20Release" alt="GitHub release">
