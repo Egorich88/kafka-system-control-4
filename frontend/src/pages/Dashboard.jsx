@@ -674,9 +674,30 @@ export default function Dashboard() {
                 <XAxis dataKey="time" />
 
                 <YAxis />
+                {/* ==========================================================
+                    Подсказка графика
 
+                    Отображает значения метрик
+                    при наведении курсора мыши.
+
+                    Стилизована под общий интерфейс
+                    Kafka System Control и Grafana.
+                ========================================================== */}
                 <Tooltip
                   content={<ThroughputTooltip />}
+                  contentStyle={{
+                      background: 'var(--panel-bg)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '12px'
+                    }}
+                    labelStyle={{
+                      color: 'var(--text-secondary)'
+                    }}
+                    cursor={{
+                      stroke: '#3b82f6',
+                      strokeWidth: 1,
+                      strokeDasharray: '4 4'
+                    }}
                 />
 
                 <Line
