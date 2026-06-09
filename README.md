@@ -1,145 +1,128 @@
-# Kafka System Control-4
-<img width="1254" height="1254" alt="image" src="https://github.com/user-attachments/assets/4d3f6079-6787-42f1-9d54-9b508c35cd06" />
+# Kafka System Control
 
+<p align="left">
+  <a href="https://github.com/Egorich88/kafka-system-control-4/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/Egorich88/kafka-system-control-4?color=blue&label=License" alt="License">
+  </a>
+  <a href="https://github.com/Egorich88/kafka-system-control-4/releases">
+    <img src="https://img.shields.io/github/v/release/Egorich88/kafka-system-control-4?label=Latest%20Release" alt="GitHub release">
+  </a>
+  <a href="https://github.com/Egorich88/kafka-system-control-4/actions/workflows/ci-cd.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Egorich88/kafka-system-control-4/ci-cd.yml?branch=main&label=CI%2FCD" alt="CI/CD">
+  </a>
+</p>
 
-**Веб‑интерфейс для управления Apache Kafka** (React + Go).  
-Проект переродился из консольных скриптов в современный микросервис с CI/CD (GitHub Actions), контейнеризацией и автоматическими релизами.
+**Kafka System Control** — современный веб‑интерфейс для администрирования Apache Kafka.  
+Построен на **Go** и **React** с нуля, от консольных утилит до production‑готового микросервиса с CI/CD, контейнеризацией и деплоем в Kubernetes.
 
-> ✅ **Работает**: веб‑интерфейс с боковым меню, тёмная тема, переключение кластеров, управление топиками, Docker‑образы, CI/CD через GitHub Actions, автоматические GitHub Releases.  
-> ⏳ **В планах**: управление ACL и группами потребителей, поиск сообщений, мониторинг.
-
- # Архитектура
-
- <img width="1520" height="882" alt="image" src="https://github.com/user-attachments/assets/ccdf7bc3-770c-4159-94f3-24129e8ed8bd" />
-
-
-
----
-
-## ✨ Возможности
-
-- 🖥️ **Современный интерфейс** – боковое меню, тёмная тема, выбор активного кластера.
-- 🌐 **Управление топиками** – просмотр списка, создание через веб‑форму.
-- 🐳 **Контейнеризация** – готовые Docker‑образы для бэкенда (Go) и фронтенда (React + Nginx).
-- 🔁 **CI/CD (GitHub Actions)** – при пуше в `main` или создании тега `v*`:
-  - Сборка образов backend и frontend
-  - Пуш в Docker Hub
-  - (при теге) создание GitHub Release с архивом исходного кода
-- 📦 **Релизы** – архив исходного кода каждой версии на GitHub.
-- 🧩 **Модульность** – чёткое разделение на фронтенд, бэкенд и манифесты (K8s — заготовки).
+![Dashboard preview](https://github.com/user-attachments/assets/4d3f6079-6787-42f1-9d54-9b508c35cd06)
 
 ---
 
-## 📁 Структура проекта
-<img width="570" height="884" alt="image" src="https://github.com/user-attachments/assets/141caba8-cc4e-42e2-841d-6b0532f80874" />
+## ✨ Ключевые возможности
+
+- **Интуитивный UI** – тёмная тема, боковое меню, переключение между несколькими кластерами Kafka.
+- **Управление топиками** – просмотр, создание, удаление, изменение конфигурации (retention, cleanup.policy и др.).
+- **Поиск сообщений** – чтение сообщений из выбранной партиции с фильтром по offset и лимиту.
+- **Многокластерность** – добавление кластеров с разными типами аутентификации (PLAINTEXT, SASL/SCRAM, mTLS в плане).
+- **CI/CD из коробки** – автоматическая сборка, публикация образов в Docker Hub и создание GitHub Release при пуше тега.
+- **Контейнеризация** – готовые Docker‑образы для бэкенда и фронтенда.
+- **Развёртывание в K8s** – манифесты и Terraform для Yandex Cloud.
+
+> ⏳ **В активной разработке:** дашборд мониторинга, управление группами потребителей (сброс офсетов), ACL, встроенный терминал.
 
 ---
 
-## ⚙️ Быстрый старт (локально)
+## 🏗️ Архитектура
 
-### 1️⃣ Клонируйте репозиторий
+![Architecture diagram](https://github.com/user-attachments/assets/ccdf7bc3-770c-4159-94f3-24129e8ed8bd)
 
-```bash
-git clone https://github.com/Egorich88/kafka-system-control-4.git
-cd kafka-system-control-4
-```
+| Компонент       | Технологии                                                                 |
+|----------------|----------------------------------------------------------------------------|
+| **Frontend**   | React, Vite, Axios, CSS Modules                                           |
+| **Backend**    | Go, Sarama (Kafka Admin API), net/http                                    |
+| **Инфраструктура** | Docker, Docker Compose, GitHub Actions, Docker Hub, Terraform, Yandex Cloud |
+| **Оркестрация**   | Kubernetes (Yandex Managed Kubernetes)                                   |
 
-### 2️⃣ Запустите бэкенд и фронтенд в режиме разработки
-# Бэкенд (требуется работающая Kafka на localhost:9092)
+---
 
-```bash
-cd backend
-go run main.go
-```
+## 🚀 Быстрый старт
 
-# Фронтенд (в другом терминале)
-```bash
-cd frontend
-npm install
-npm run dev
-```
+### Локальная разработка
 
-Затем откройте http://localhost:5173 – фронтенд будет обращаться к бэкенду на http://localhost:8080.
+1. **Клонируйте репозиторий**
+   ```bash
+   git clone https://github.com/Egorich88/kafka-system-control-4.git
+   cd kafka-system-control-4
+   
+2. **Запустите бэкенд (требуется работающая Kafka на localhost:9092)**
+   ```bash
+   cd backend
+   go run main.go
+   
+3. **Запустите фронтенд (в другом терминале)**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
 
-### 3️⃣ (Альтернатива) Запуск через Docker Compose
-```bash
-docker-compose up --build
-```
+4. **Откройте http://localhost:5173 – интерфейс готов к работе.**
 
-- Фронтенд: http://localhost
-- Бэкенд: http://localhost:8080/api/topics
+## Docker Compose (всё в одном)
+  ```bash
+   docker-compose up --build
+   ```
+  - Фронтенд: http://localhost:5173
+  - Бэкенд: http://localhost:8080/api/topics
 
-### 🔁 CI/CD (GitHub Actions)
-Что происходит автоматически при пуше в main?
+## 🔁 CI/CD (GitHub Actions)
 
-GitHub Actions клонирует репозиторий.
+При каждом пуше в ветку main или создании тега v* автоматически:
 
-Логинится в Docker Hub.
+- Собираются Docker‑образы бэкенда и фронтенда.
 
-Собирает образы backend и frontend (теги: latest, main, sha-<коммит>).
+- Образы публикуются в Docker Hub (egorich27/kafka-control-backend, egorich27/kafka-control-frontend).
 
-Пушит образы в Docker Hub (egorich27/kafka-control-backend, egorich27/kafka-control-frontend).
+- При пуше тега дополнительно создаётся GitHub Release с приложенными архивами исходного кода и автоматическим описанием изменений (используется generate_release_notes).
 
-При пуше тега (например, v4.1.0) – дополнительно автоматически создаётся GitHub Release с архивом исходного кода.
+|🧪 Ручной запуск деплоя в Kubernetes возможен через флаг deploy в GitHub Actions.
 
-### 🚀 Планы развития
-*   [x] Веб‑интерфейс (React + Go)
-*   [x] Docker‑образы и CI/CD (GitHub Actions)
-*   [x] Автоматические релизы по тегам
-*   [x] Переключение кластеров (фронтенд + бэкенд)
-*   [x] Развёртывание в Kubernetes (Yandex Cloud)
-*   [ ] Управление ACL и группами потребителей
-*   [ ] Поиск сообщений (по ключу/оффсету)
-*   [ ] Мониторинг и метрики
+## 📦 Релизы
+Вся история версий доступна на странице Releases.
+Каждый релиз включает:
 
-### 📜 История версий
-###  v4.1.0 (2026-05-12)
-🔧 Изменения:
+- Docker‑образы, готовые к использованию.
 
-✅ Полный переход на Apache License 2.0
+- Подробный changelog (автоматически собирается из коммитов).
 
-✅ Полностью переработан UI: боковое меню, тёмная тема, переключение кластеров
+Архив исходного кода.
 
-✅ Собственный логотип (public/logo.svg)
+## 🗺️ Планы развития
 
-✅ Улучшена документация и CI/CD
+- ✅ Веб‑интерфейс (React + Go)
+- ✅ Docker‑образы и CI/CD
+- ✅ Автоматические релизы по тегам
+- ✅ Переключение кластеров (фронт + бэк)
+- ✅ Развёртывание в Kubernetes (Yandex Cloud)
+- ✅ Управление конфигурацией топиков (retention, cleanup.policy)
+- ✅ Поиск сообщений (по партиции, offset)
+- ⏳ Дашборд мониторинга (графики лага, throughput, ошибки)
+- ⏳ Управление группами потребителей (просмотр, сброс офсетов)
+- ⏳ Управление ACL (список, создание, удаление)
+- ⏳ Встроенный терминал (web‑shell для Kafka CLI)
+- ⏳ Поддержка Kafka Connect и Kafka Streams
 
-
-### v4.0.2 (2026-05-05)
-🔧 Изменения:
-
-✅ Полный отказ от Jenkins – CI/CD перенесён на GitHub Actions
-
-✅ Автоматические релизы при пуше тега
-
-✅ Упрощена инфраструктура – больше не нужен отдельный сервер Jenkins
-
-✅ Все секреты теперь хранятся в GitHub Secrets
-
-### v4.0.1 (2026-05-02)
-🐛 Исправления:
-
-Настройка CI/CD через Jenkins (промежуточная версия)
-
-### v4.0.0 (2026-05-01)
-🎉 Первый релиз веб-версии:
-
-✅React + Go микросервисы
-
-✅Docker-образы на Docker Hub
-
-✅Ручное создание релизов
-
-### 🤝 Автор
+## 🤝 Автор
 Egorich88
-Проект создан как пример современного DevOps‑подхода: от консольных утилит до микросервисов и CI/CD.
+Проект создан как демонстрация современных DevOps‑подходов: от консольных скриптов до production‑готовых микросервисов с полным CI/CD.
+
 «Movement – life!»
 
-### 📄 Лицензия
-Этот проект распространяется под лицензией Apache License 2.0. См. файл LICENSE для подробной информации.
+## 📄 Лицензия
+Этот проект распространяется под лицензией Apache License 2.0. Подробности в файле LICENSE.
 
-### ⚠️ Товарный знак
+## ⚠️ Товарный знак
 Название «Kafka» и логотип Kafka являются зарегистрированными товарными знаками The Apache Software Foundation (ASF).
-Проект Kafka System Control (KSC) — это независимый инструмент с открытым исходным кодом, разработанный для управления кластерами Apache Kafka.
+Kafka System Control — это независимый инструмент с открытым исходным кодом, предназначенный для управления кластерами Apache Kafka.
 KSC не является частью Apache Kafka, не поддерживается и не спонсируется ASF.
 Все упоминания «Kafka» и «Кафка» используются исключительно в техническом смысле для обозначения совместимой технологии.
