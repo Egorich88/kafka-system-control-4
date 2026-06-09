@@ -21,17 +21,54 @@ import {
   useState
 } from 'react';
 
+/* =========================
+   ALLOWED THEMES (WHITELIST)
+   сюда ВСЕ темы проекта
+   ========================= */
+const ALLOWED_THEMES = [
+  'dark',
+  'light',
+
+  'github-dark',
+  'github-light',
+  'dracula',
+  'nord',
+  'material',
+  'monokai-pro',
+  'monocai',
+  'deep-ocean',
+  'solarized-dark',
+  'solarized-light',
+
+  'coffee',
+  'rainbow',
+  'kitty',
+
+  // 🆕 OS themes
+  'mac',
+  'windows',
+  'windows-dark',
+  'linux'
+];
+
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({
   children
 }) {
 
-  const [theme, setTheme] =
-    useState(
-      localStorage.getItem('ksc_theme')
-      || 'dark'
-    );
+  const getInitialTheme = () => {
+    const saved = localStorage.getItem('ksc_theme');
+
+    // проверка: есть ли тема в whitelist
+    if (ALLOWED_THEMES.includes(saved)) {
+      return saved;
+    }
+
+    return 'dark'; // fallback
+  };
+
+  const [theme, setTheme] = useState(getInitialTheme());
 
   useEffect(() => {
 
@@ -52,7 +89,15 @@ export function ThemeProvider({
     <ThemeContext.Provider
       value={{
         theme,
-        setTheme
+        setTheme: (newTheme) => {
+          // защита от мусора
+          if (!ALLOWED_THEMES.includes(newTheme)) {
+            console.warn('[ThemeContext] Unknown theme:', newTheme);
+            return;
+          }
+
+          setTheme(newTheme);
+        }
       }}
     >
 

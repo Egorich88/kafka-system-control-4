@@ -14,6 +14,65 @@
  * limitations under the License.
  */
 
+// ===============================
+// ПЛОСКИЙ СПИСОК ТЕМ (НОВАЯ СТРУКТУРА UI)
+// ===============================
+// ===============================
+// FLAT THEMES (FINAL CLEAN STRUCTURE)
+// ===============================
+const THEMES = [
+  // ===============================
+  // BASE (самые важные)
+  // ===============================
+  { key: 'dark', label: 'Dark' },
+  { key: 'light', label: 'Light' },
+
+  // разделитель после базовых
+  { type: 'divider' },
+
+  // ===============================
+  // DEVELOPER THEMES
+  // ===============================
+  { key: 'github-dark', label: 'GitHub Dark' },
+  { key: 'github-light', label: 'GitHub Light' },
+  { key: 'dracula', label: 'Dracula' },
+  { key: 'nord', label: 'Nord' },
+  { key: 'material', label: 'Material Theme UI' },
+  { key: 'monokai-pro', label: 'Monokai Pro' },
+  { key: 'monocai', label: 'Monocai' },
+  { key: 'deep-ocean', label: 'Deep Ocean' },
+  { key: 'solarized-dark', label: 'Solarized Dark' },
+  { key: 'solarized-light', label: 'Solarized Light' },
+
+  // разделитель перед OS темами
+  { type: 'divider' },
+
+  // ===============================
+  // OS THEMES (НОВЫЕ)
+  // ===============================
+  // Mac
+  { key: 'mac', label: 'Mac' },
+
+  // Windows LIGHT
+  { key: 'windows', label: 'Windows' },
+
+  // Windows DARK (ОТДЕЛЬНАЯ ТЕМА)
+  { key: 'windows-dark', label: 'Windows Dark' },
+
+  // Linux
+  { key: 'linux', label: 'Linux' },
+
+  // разделитель перед experimental
+  { type: 'divider' },
+
+  // ===============================
+  // EXPERIMENTAL
+  // ===============================
+  { key: 'coffee', label: 'Coffee' },
+  { key: 'kitty', label: 'Kitty' },
+  { key: 'rainbow', label: 'Rainbow' }
+];
+
 import '../App.css';
 import '../styles/settings.css';
 
@@ -61,9 +120,7 @@ export default function Settings() {
 
                 <span className="dropdown-selected-name">
 
-                  {theme === 'dark' && 'Dark'}
-                  {theme === 'light' && 'Light'}
-                  {theme === 'kitty' && 'Kitty'}
+                  {THEMES.find(t => t.key === theme)?.label || theme}
 
                 </span>
 
@@ -82,36 +139,34 @@ export default function Settings() {
             </button>
 
             {isThemeOpen && (
-
               <div className="dropdown-menu">
 
-                <div
-                  className="dropdown-item"
-                  onClick={() => {
-                    setTheme('dark');
-                    setIsThemeOpen(false);
-                  }}
-                >
-                  Dark
-                </div>
-                <div
-                  className="dropdown-item"
-                  onClick={() => {
-                    setTheme('light');
-                    setIsThemeOpen(false);
-                  }}
-                >
-                  Light
-                </div>
-                <div
-                  className="dropdown-item"
-                  onClick={() => {
-                    setTheme('kitty');
-                    setIsThemeOpen(false);
-                  }}
-                >
-                  Kitty
-                </div>
+                {THEMES.map((t, index) => {
+
+                  // 🔹 разделитель
+                  if (t.type === 'divider') {
+                    return (
+                      <div
+                        key={`divider-${index}`}
+                        className="dropdown-divider"
+                      />
+                    );
+                  }
+
+                  // 🔹 обычная тема
+                  return (
+                    <div
+                      key={t.key}
+                      className="dropdown-item"
+                      onClick={() => {
+                        setTheme(t.key);
+                        setIsThemeOpen(false);
+                      }}
+                    >
+                      {t.label}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
