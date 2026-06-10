@@ -253,6 +253,12 @@ export default function Dashboard() {
   /* Период отображения */
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
 
+  /* Отображаемые линии графика.Позволяет временно скрывать отдельные метрики */
+  const [showIncoming, setShowIncoming] =
+    useState(true);
+  const [showOutgoing, setShowOutgoing] =
+    useState(true);
+
   /*
   ==================================================
   Данные графика текущего периода
@@ -686,6 +692,37 @@ export default function Dashboard() {
                   Исходящие: {latestPoint?.outgoing ?? 0} msg/s
                 </span>
 
+              {/* переключатели */}
+              <div className="throughput-toggles">
+
+                <button
+                  className={
+                    showIncoming
+                      ? 'toggle-button active'
+                      : 'toggle-button'
+                  }
+                  onClick={() =>
+                    setShowIncoming(!showIncoming)
+                  }
+                >
+                  Входящие
+                </button>
+
+                <button
+                  className={
+                    showOutgoing
+                      ? 'toggle-button active'
+                      : 'toggle-button'
+                  }
+                  onClick={() =>
+                    setShowOutgoing(!showOutgoing)
+                  }
+                >
+                  Исходящие
+                </button>
+
+              </div>
+
               </div>
 
             </div>
@@ -757,23 +794,35 @@ export default function Dashboard() {
                   }}
                 />
                 {/* Линия входящего трафика */}
-                <Line
-                  type="natural"
-                  dataKey="incoming"
-                  name="Входящие сообщения"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  dot={false}
-                />
+                {
+                  showIncoming && (
+
+                    <Line
+                      type="natural"
+                      dataKey="incoming"
+                      name="Входящие сообщения"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+
+                  )
+                }
                 {/* Линия исходящего трафика */}
-                <Line
-                  type="natural"
-                  dataKey="outgoing"
-                  name="Исходящие сообщения"
-                  stroke="#8b5cf6"
-                  strokeWidth={2}
-                  dot={false}
-                />
+                {
+                  showOutgoing && (
+
+                    <Line
+                      type="natural"
+                      dataKey="outgoing"
+                      name="Исходящие сообщения"
+                      stroke="#8b5cf6"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+
+                  )
+                }
 
               </LineChart>
 

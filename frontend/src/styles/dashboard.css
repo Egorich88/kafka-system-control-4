@@ -525,7 +525,6 @@
     В дальнейшем позволит
     скрывать и отображать линии.
 ========================================================== */}
-
 /*
 ==================================================
 Текущие значения графика
@@ -545,4 +544,26 @@
 }
 .outgoing-value {
     color: #8b5cf6;
+}
+/*
+==================================================
+Переключатели отображения линий графика
+==================================================
+*/
+.throughput-toggles {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+.toggle-button {
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.toggle-button.active {
+    color: var(--text-primary);
+    border-color: var(--accent-color);
 }
