@@ -263,6 +263,18 @@ export default function Dashboard() {
   */
   const chartData = THROUGHPUT_DATA[timeRange.id] || [];
 
+  /*
+  ==================================================
+  Последняя точка графика
+
+  Используется для отображения
+  актуальных значений метрик
+  в заголовке панели.
+  ==================================================
+  */
+  const latestPoint =
+    chartData[chartData.length - 1];
+
   /* Загрузка данных мониторинга */
   useEffect(() => {
 
@@ -658,9 +670,25 @@ export default function Dashboard() {
 
           <div className="panel-header">
 
-            <span>
-              Пропускная способность кластера
-            </span>
+            <div>
+
+              <div>
+                Пропускная способность кластера
+              </div>
+
+              <div className="throughput-current-values">
+
+                <span className="incoming-value">
+                  Входящие: {latestPoint?.incoming ?? 0} msg/s
+                </span>
+
+                <span className="outgoing-value">
+                  Исходящие: {latestPoint?.outgoing ?? 0} msg/s
+                </span>
+
+              </div>
+
+            </div>
 
             <div className="throughput-legend">
 

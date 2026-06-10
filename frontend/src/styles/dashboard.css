@@ -551,3 +551,23 @@
  .throughput-legend-dot.outgoing {
      background: #8b5cf6;
 }
+/*
+==================================================
+Текущие значения графика
+
+Отображаются под названием панели.
+==================================================
+*/
+.throughput-current-values {
+    display: flex;
+    gap: 16px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.incoming-value {
+    color: #3b82f6;
+}
+.outgoing-value {
+    color: #8b5cf6;
+}
