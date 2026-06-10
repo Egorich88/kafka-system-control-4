@@ -182,7 +182,7 @@ Tooltip библиотеки Recharts.
 function ThroughputTooltip({
   active, /* Показывает наведен ли курсор.*/
   payload, /* Значения точки графика.*/
-  label /* Значение времени:*/
+  label /* Метка временной оси */
 }) {
 
   if (
@@ -708,13 +708,14 @@ export default function Dashboard() {
 
               ========================================================== */}
               <LineChart data={chartData}>
-                /* Сетка */
+
+                {/* Сетка графика */}
                 <CartesianGrid
                   stroke="var(--border-color)"
                   strokeDasharray="4 4"
                 />
 
-                /* Цвет текста времени */
+                {/* Цвет текста временной шкалы */}
                 <XAxis
                   dataKey="time"
                   tick={{
@@ -725,7 +726,7 @@ export default function Dashboard() {
                   axisLine={false}
                 />
 
-                /* Левая шкала: */
+                {/* Левая шкала значений */}
                 <YAxis
                   tick={{
                     fill: 'var(--text-secondary)',
@@ -751,7 +752,7 @@ export default function Dashboard() {
                     strokeDasharray: '4 4'
                   }}
                 />
-                /* первая линиия */
+                {/* Линия входящего трафика */}
                 <Line
                   type="natural"
                   dataKey="incoming"
@@ -760,7 +761,7 @@ export default function Dashboard() {
                   strokeWidth={2}
                   dot={false}
                 />
-                /* вторая линиия */
+                {/* Линия исходящего трафика */}
                 <Line
                   type="natural"
                   dataKey="outgoing"
