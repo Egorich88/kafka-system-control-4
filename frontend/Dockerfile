@@ -17,7 +17,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Переключаемся на непривилегированного пользователя nginx
 USER nginx
 
-EXPOSE 8080   # больше не 80
+# Слушаем порт 8080 (не root)
+EXPOSE 8080
 
 LABEL org.opencontainers.image.licenses="Apache-2.0"
 LABEL org.opencontainers.image.source="https://github.com/Egorich88/kafka-system-control-4"
