@@ -670,9 +670,9 @@ export default function Dashboard() {
 
           <div className="panel-header">
 
-            <div>
+            <div className="throughput-header-info">
 
-              <div>
+              <div className="throughput-title">
                 Пропускная способность кластера
               </div>
 
@@ -685,30 +685,6 @@ export default function Dashboard() {
                 <span className="outgoing-value">
                   Исходящие: {latestPoint?.outgoing ?? 0} msg/s
                 </span>
-
-              </div>
-
-            </div>
-
-            <div className="throughput-legend">
-
-              <div className="throughput-legend-item">
-
-                <span
-                  className="throughput-legend-dot incoming"
-                />
-
-                Входящие сообщения
-
-              </div>
-
-              <div className="throughput-legend-item">
-
-                <span
-                  className="throughput-legend-dot outgoing"
-                />
-
-                Исходящие сообщения
 
               </div>
 

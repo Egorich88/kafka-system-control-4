@@ -525,32 +525,7 @@
     В дальнейшем позволит
     скрывать и отображать линии.
 ========================================================== */}
-/* ========================================================== Легенда графика пропускной способности ========================================================== */
- .throughput-legend {
-     display: flex;
-     align-items: center;
-     gap: 18px;
-}
- .throughput-legend-item {
-     display: flex;
-     align-items: center;
-     gap: 8px;
-     font-size: 13px;
-     font-weight: 500;
-     color: var(--text-secondary);
-}
- .throughput-legend-dot {
-     width: 10px;
-     height: 10px;
-     border-radius: 50%;
-     flex-shrink: 0;
-}
- .throughput-legend-dot.incoming {
-     background: #3b82f6;
-}
- .throughput-legend-dot.outgoing {
-     background: #8b5cf6;
-}
+
 /*
 ==================================================
 Текущие значения графика
