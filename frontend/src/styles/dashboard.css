@@ -161,6 +161,9 @@
 }
 /* ===================================================================== Заголовок панели ===================================================================== */
  .panel-header {
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
      padding: 18px 22px; /* Отступы заголовка панели сверху/снизу и слева/справа.*/
      font-size: 1rem; /* Размер текста заголовка.*/
      font-weight: 600; /* Полужирный шрифт как в Grafana. */
@@ -512,4 +515,39 @@
 
 .throughput-tooltip-row strong {
     color: var(--text-primary);
+}
+{/* ==========================================================
+    Легенда графика
+
+    Показывает соответствие цветов
+    линий отображаемым метрикам.
+
+    В дальнейшем позволит
+    скрывать и отображать линии.
+========================================================== */}
+/* ========================================================== Легенда графика пропускной способности ========================================================== */
+ .throughput-legend {
+     display: flex;
+     align-items: center;
+     gap: 18px;
+}
+ .throughput-legend-item {
+     display: flex;
+     align-items: center;
+     gap: 8px;
+     font-size: 13px;
+     font-weight: 500;
+     color: var(--text-secondary);
+}
+ .throughput-legend-dot {
+     width: 10px;
+     height: 10px;
+     border-radius: 50%;
+     flex-shrink: 0;
+}
+ .throughput-legend-dot.incoming {
+     background: #3b82f6;
+}
+ .throughput-legend-dot.outgoing {
+     background: #8b5cf6;
 }

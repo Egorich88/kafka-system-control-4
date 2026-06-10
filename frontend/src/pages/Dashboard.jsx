@@ -657,7 +657,35 @@ export default function Dashboard() {
         <div className="dashboard-panel">
 
           <div className="panel-header">
-            Пропускная способность кластера
+
+            <span>
+              Пропускная способность кластера
+            </span>
+
+            <div className="throughput-legend">
+
+              <div className="throughput-legend-item">
+
+                <span
+                  className="throughput-legend-dot incoming"
+                />
+
+                Входящие сообщения
+
+              </div>
+
+              <div className="throughput-legend-item">
+
+                <span
+                  className="throughput-legend-dot outgoing"
+                />
+
+                Исходящие сообщения
+
+              </div>
+
+            </div>
+
           </div>
 
           <div className="panel-body throughput-chart">
@@ -685,19 +713,11 @@ export default function Dashboard() {
                 ========================================================== */}
                 <Tooltip
                   content={<ThroughputTooltip />}
-                  contentStyle={{
-                      background: 'var(--panel-bg)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '12px'
-                    }}
-                    labelStyle={{
-                      color: 'var(--text-secondary)'
-                    }}
-                    cursor={{
-                      stroke: '#3b82f6',
-                      strokeWidth: 1,
-                      strokeDasharray: '4 4'
-                    }}
+                  cursor={{
+                    stroke: '#3b82f6',
+                    strokeWidth: 1,
+                    strokeDasharray: '4 4'
+                  }}
                 />
 
                 <Line
