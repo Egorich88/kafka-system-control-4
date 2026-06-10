@@ -70,7 +70,7 @@ jobs:
             type=sha,prefix=sha-
 
       - name: Build and push Backend
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./backend
           push: true
@@ -82,7 +82,7 @@ jobs:
       # ---- FRONTEND ----
       - name: Extract metadata for frontend
         id: meta-frontend
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.DOCKER_IMAGE_FRONTEND }}
           tags: |
@@ -92,7 +92,7 @@ jobs:
             type=sha,prefix=sha-
 
       - name: Build and push Frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./frontend
           push: true
