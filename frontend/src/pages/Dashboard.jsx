@@ -694,14 +694,46 @@ export default function Dashboard() {
               width="100%"
               height={260}
             >
+              {/* ==========================================================
+                  Настройка осей графика
 
+                  XAxis
+                  - временная шкала
+
+                  YAxis
+                  - количество сообщений
+
+                  Стилизация выполнена
+                  в стиле Grafana.
+
+              ========================================================== */}
               <LineChart data={chartData}>
+                /* Сетка */
+                <CartesianGrid
+                  stroke="var(--border-color)"
+                  strokeDasharray="4 4"
+                />
 
-                <CartesianGrid strokeDasharray="3 3" />
+                /* Цвет текста времени */
+                <XAxis
+                  dataKey="time"
+                  tick={{
+                    fill: 'var(--text-secondary)',
+                    fontSize: 12
+                  }}
+                  tickLine={false}
+                  axisLine={false}
+                />
 
-                <XAxis dataKey="time" />
-
-                <YAxis />
+                /* Левая шкала: */
+                <YAxis
+                  tick={{
+                    fill: 'var(--text-secondary)',
+                    fontSize: 12
+                  }}
+                  tickLine={false}
+                  axisLine={false}
+                />
                 {/* ==========================================================
                     Подсказка графика
 
@@ -719,18 +751,18 @@ export default function Dashboard() {
                     strokeDasharray: '4 4'
                   }}
                 />
-
+                /* первая линиия */
                 <Line
-                  type="monotone"
+                  type="natural"
                   dataKey="incoming"
                   name="Входящие сообщения"
                   stroke="#3b82f6"
                   strokeWidth={2}
                   dot={false}
                 />
-
+                /* вторая линиия */
                 <Line
-                  type="monotone"
+                  type="natural"
                   dataKey="outgoing"
                   name="Исходящие сообщения"
                   stroke="#8b5cf6"
