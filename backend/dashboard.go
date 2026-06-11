@@ -14,32 +14,8 @@
  * limitations under the License.
  */
 
-/*
-   ============================================================
-
-   dashboard.go
-
-   Назначение:
-   Файл содержит обработчики мониторинга Kafka-кластера.
-
-   Используется страницей:
-   Dashboard (Обзор кластера)
-
-   Предоставляет:
-
-   - количество брокеров
-   - количество топиков
-   - количество партиций
-   - количество consumer groups
-   - идентификатор контроллера кластера
-   - количество Under Replicated Partitions
-
-   Данный файл является основой мониторинга Kafka API
-   без использования JMX Exporter и Prometheus.
-
-   ============================================================
-*/
-
+// Package main предоставляет HTTP-обработчики для мониторинга Kafka-кластера.
+// Эти эндпоинты используются страницей Dashboard (Обзор кластера).
 package main
 
 import (
@@ -49,134 +25,76 @@ import (
 	"github.com/IBM/sarama"
 )
 
-/* DashboardOverviewResponse
-Сводная информация по кластеру Kafka */
+// =============================================================================
+// Модели ответов API
+// =============================================================================
+
+// DashboardOverviewResponse содержит сводную информацию о состоянии кластера.
 type DashboardOverviewResponse struct {
-
-	/* Количество брокеров */
-	Brokers int `json:"brokers"`
-
-	/* Количество топиков */
-	Topics int `json:"topics"`
-
-	/* Количество партиций */
-	Partitions int `json:"partitions"`
-
-	/* Количество групп консьюмеров */
-	ConsumerGroups int `json:"consumerGroups"`
-
-	/* ID текущего контроллера */
-	ControllerID int32 `json:"controllerId"`
-
-	/* Количество Under Replicated Partitions */
-	UnderReplicated int `json:"underReplicated"`
+	Brokers         int `json:"brokers"`         // количество брокеров
+	Topics          int `json:"topics"`          // количество топиков
+	Partitions      int `json:"partitions"`      // общее количество партиций
+	ConsumerGroups  int `json:"consumerGroups"`  // количество групп потребителей
+	ControllerID    int32 `json:"controllerId"`  // ID текущего брокера-контроллера
+	UnderReplicated int `json:"underReplicated"` // количество недореплицированных партиций
 }
 
-/* DashboardBroker
-Информация о брокере Kafka */
+// DashboardBroker описывает один брокер Kafka.
 type DashboardBroker struct {
-
-	/* ID брокера */
-	ID int32 `json:"id"`
-
-	/* Адрес брокера */
-	Address string `json:"address"`
-
-	/* Является ли контроллером */
-	Controller bool `json:"controller"`
+	ID         int32  `json:"id"`         // идентификатор брокера
+	Address    string `json:"address"`    // сетевой адрес (host:port)
+	Controller bool   `json:"controller"` // является ли контроллером кластера
 }
 
-/* DashboardBrokersResponse
-Список брокеров кластера */
+// DashboardBrokersResponse возвращает список брокеров.
 type DashboardBrokersResponse struct {
 	Brokers []DashboardBroker `json:"brokers"`
 }
 
-/* DashboardConsumerGroup
-Информация о группе потребителей */
+// DashboardConsumerGroup описывает группу потребителей.
 type DashboardConsumerGroup struct {
-
-	/* Название группы */
-	Name string `json:"name"`
-
-	/* Состояние группы */
-	State string `json:"state"`
+	Name  string `json:"name"`  // название группы
+	State string `json:"state"` // состояние (например, "Stable")
 }
 
-/* DashboardConsumerGroupsResponse
-Список групп потребителей Kafka */
-type DashboardConsumerGroupsResponse struct { Groups []DashboardConsumerGroup `json:"groups"` }
+// DashboardConsumerGroupsResponse возвращает список групп потребителей.
+type DashboardConsumerGroupsResponse struct {
+	Groups []DashboardConsumerGroup `json:"groups"`
+}
 
-/* DashboardPartitionsResponse
-Статистика партиций Kafka-кластера */
-type DashboardPartitionsResponse struct { Total int `json:"total"` }
+// DashboardPartitionsResponse содержит общее количество партиций.
+type DashboardPartitionsResponse struct {
+	Total int `json:"total"`
+}
 
-/* DashboardMessagesTotalResponse
+// DashboardMessagesTotalResponse содержит общее количество сообщений во всём кластере.
+type DashboardMessagesTotalResponse struct {
+	Total int64 `json:"total"`
+}
 
-   Ответ API, содержащий общее количество сообщений
-   во всём Kafka-кластере.
-
-   Используется на дашборде для отображения
-   суммарного количества сообщений (входящих событий).
-*/
-/* Общее количество сообщений во всех топиках */
-type DashboardMessagesTotalResponse struct { Total int64 `json:"total"` }
-
-/*
-   DashboardThroughputPoint
-
-   Точка графика пропускной способности.
-
-   Используется Dashboard для отображения
-   входящего и исходящего потока сообщений.
-*/
+// DashboardThroughputPoint представляет одну точку графика пропускной способности.
 type DashboardThroughputPoint struct {
-
-	/* Время точки */
-	Time string `json:"time"`
-
-	/* Входящий поток */
-	Incoming int64 `json:"incoming"`
-
-	/* Исходящий поток */
-	Outgoing int64 `json:"outgoing"`
+	Time     string `json:"time"`     // временная метка (метка оси X)
+	Incoming int64  `json:"incoming"` // входящие сообщения в секунду
+	Outgoing int64  `json:"outgoing"` // исходящие сообщения в секунду
 }
 
-/*
-   DashboardThroughputResponse
-
-   Ответ API для графика
-   пропускной способности кластера.
-*/
+// DashboardThroughputResponse возвращает массив точек для графика пропускной способности.
 type DashboardThroughputResponse struct {
-
-	/* Набор точек графика */
 	Points []DashboardThroughputPoint `json:"points"`
 }
 
-/* getDashboardMessagesTotalHandler
+// =============================================================================
+// HTTP-обработчики
+// =============================================================================
 
-   HTTP-обработчик, возвращающий общее количество сообщений
-   во всех топиках Kafka-кластера.
-
-   Логика:
-   - получает список всех топиков
-   - проходит по всем партициям
-   - суммирует latest offset (как приближение общего числа сообщений)
-
-   Используется на Dashboard в карточке:
-   "Сообщений в кластере"
-*/
-func getDashboardMessagesTotalHandler(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-
+// getDashboardMessagesTotalHandler возвращает общее количество сообщений во всех топиках.
+// Оно вычисляется как сумма максимальных смещений (latest offset) по всем партициям.
+func getDashboardMessagesTotalHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_8_0_0
 
@@ -193,14 +111,12 @@ func getDashboardMessagesTotalHandler(
 		return
 	}
 
-	var total int64 = 0
-
+	var total int64
 	for _, topic := range topics {
 		partitions, err := client.Partitions(topic)
 		if err != nil {
 			continue
 		}
-
 		for _, p := range partitions {
 			latest, err := client.GetOffset(topic, p, sarama.OffsetNewest)
 			if err != nil {
@@ -210,535 +126,229 @@ func getDashboardMessagesTotalHandler(
 		}
 	}
 
-	json.NewEncoder(w).Encode(
-		DashboardMessagesTotalResponse{
-			Total: total,
-		},
-	)
+	_ = json.NewEncoder(w).Encode(DashboardMessagesTotalResponse{Total: total})
 }
 
-/*
-   getDashboardOverviewHandler
-
-   Возвращает агрегированную информацию
-   о состоянии Kafka-кластера.
-*/
-func getDashboardOverviewHandler(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-
-	w.Header().Set(
-		"Access-Control-Allow-Origin",
-		"*",
-	)
-
-	w.Header().Set(
-		"Content-Type",
-		"application/json",
-	)
+// getDashboardOverviewHandler возвращает агрегированную информацию о кластере:
+// количество брокеров, топиков, партиций, consumer-групп, ID контроллера,
+// а также число недореплицированных партиций.
+func getDashboardOverviewHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	config := sarama.NewConfig()
-
 	config.Version = sarama.V2_8_0_0
 
-	client, err := sarama.NewClient(
-		[]string{bootstrap},
-		config,
-	)
-
+	client, err := sarama.NewClient([]string{bootstrap}, config)
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Ошибка подключения к Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Ошибка подключения к Kafka: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer client.Close()
 
-	/*
-	   =========================
-	   Брокеры
-	   =========================
-	*/
-
+	// Брокеры
 	brokers := client.Brokers()
 
-	/*
-	   =========================
-	   Контроллер
-	   =========================
-	*/
-
+	// Контроллер
 	controller, err := client.Controller()
-
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Не удалось получить контроллер кластера",
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Не удалось получить контроллер кластера", http.StatusInternalServerError)
 		return
 	}
 
-	/*
-	   =========================
-	   Топики
-	   =========================
-	*/
-
+	// Топики и партиции
 	topics, err := client.Topics()
-
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Не удалось получить список топиков",
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Не удалось получить список топиков", http.StatusInternalServerError)
 		return
 	}
 
 	totalPartitions := 0
-
 	underReplicated := 0
 
 	for _, topic := range topics {
-
 		partitions, err := client.Partitions(topic)
-
 		if err != nil {
 			continue
 		}
-
 		totalPartitions += len(partitions)
 
 		for _, partitionID := range partitions {
-
-			replicas, err := client.Replicas(
-				topic,
-				partitionID,
-			)
-
+			replicas, err := client.Replicas(topic, partitionID)
 			if err != nil {
 				continue
 			}
-
-			isr, err := client.InSyncReplicas(
-				topic,
-				partitionID,
-			)
-
+			isr, err := client.InSyncReplicas(topic, partitionID)
 			if err != nil {
 				continue
 			}
-
-			/*
-			   Если ISR меньше Replicas,
-			   значит партиция отстает.
-			*/
+			// Если размер ISR меньше количества реплик, партиция недореплицирована
 			if len(isr) < len(replicas) {
-
 				underReplicated++
 			}
 		}
 	}
 
-	/*
-	   =========================
-	   Consumer Groups
-	   =========================
-	*/
-
-	admin, err := createAdminClient(
-		bootstrap,
-	)
-
+	// Consumer-группы
+	admin, err := createAdminClient(bootstrap)
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Не удалось создать Admin Client",
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Не удалось создать Admin Client", http.StatusInternalServerError)
 		return
 	}
-
 	defer admin.Close()
 
 	groups, err := admin.ListConsumerGroups()
-
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Не удалось получить Consumer Groups",
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Не удалось получить Consumer Groups", http.StatusInternalServerError)
 		return
 	}
 
 	response := DashboardOverviewResponse{
-
-		Brokers: len(brokers),
-
-		Topics: len(topics),
-
-		Partitions: totalPartitions,
-
-		ConsumerGroups: len(groups),
-
-		ControllerID: controller.ID(),
-
+		Brokers:         len(brokers),
+		Topics:          len(topics),
+		Partitions:      totalPartitions,
+		ConsumerGroups:  len(groups),
+		ControllerID:    controller.ID(),
 		UnderReplicated: underReplicated,
 	}
 
-	json.NewEncoder(w).Encode(
-		response,
-	)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
-/*
-   getDashboardBrokersHandler
-
-   Возвращает список брокеров Kafka-кластера.
-*/
-func getDashboardBrokersHandler(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-
-	w.Header().Set(
-		"Access-Control-Allow-Origin",
-		"*",
-	)
-
-	w.Header().Set(
-		"Content-Type",
-		"application/json",
-	)
+// getDashboardBrokersHandler возвращает список всех брокеров кластера с указанием,
+// является ли брокер контроллером.
+func getDashboardBrokersHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	config := sarama.NewConfig()
-
 	config.Version = sarama.V2_8_0_0
 
-	client, err := sarama.NewClient(
-		[]string{bootstrap},
-		config,
-	)
-
+	client, err := sarama.NewClient([]string{bootstrap}, config)
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Ошибка подключения к Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Ошибка подключения к Kafka: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer client.Close()
 
 	controller, err := client.Controller()
-
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Не удалось определить контроллер кластера",
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Не удалось определить контроллер кластера", http.StatusInternalServerError)
 		return
 	}
 
-	result := make(
-		[]DashboardBroker,
-		0,
-	)
-
+	result := make([]DashboardBroker, 0, len(client.Brokers()))
 	for _, broker := range client.Brokers() {
-
-		result = append(
-			result,
-			DashboardBroker{
-
-				ID: broker.ID(),
-
-				Address: broker.Addr(),
-
-				Controller: broker.ID() == controller.ID(),
-			},
-		)
+		result = append(result, DashboardBroker{
+			ID:         broker.ID(),
+			Address:    broker.Addr(),
+			Controller: broker.ID() == controller.ID(),
+		})
 	}
 
-	json.NewEncoder(w).Encode(
-		DashboardBrokersResponse{
-			Brokers: result,
-		},
-	)
+	_ = json.NewEncoder(w).Encode(DashboardBrokersResponse{Brokers: result})
 }
 
-/*
-   getDashboardConsumerGroupsHandler
-
-   Возвращает список consumer groups Kafka-кластера.
-*/
-func getDashboardConsumerGroupsHandler(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-
-	w.Header().Set(
-		"Access-Control-Allow-Origin",
-		"*",
-	)
-
-	w.Header().Set(
-		"Content-Type",
-		"application/json",
-	)
+// getDashboardConsumerGroupsHandler возвращает список всех consumer-групп
+// с их текущим состоянием.
+func getDashboardConsumerGroupsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	bootstrap := getBootstrapFromRequest(r)
-
-	admin, err := createAdminClient(
-		bootstrap,
-	)
-
+	admin, err := createAdminClient(bootstrap)
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Ошибка подключения к Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Ошибка подключения к Kafka: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer admin.Close()
 
 	groupsMap, err := admin.ListConsumerGroups()
-
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Ошибка получения consumer groups: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Ошибка получения consumer groups: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	groupNames := make(
-		[]string,
-		0,
-		len(groupsMap),
-	)
-
-	for groupName := range groupsMap {
-
-		groupNames = append(
-			groupNames,
-			groupName,
-		)
+	// Собираем названия групп для детального описания
+	groupNames := make([]string, 0, len(groupsMap))
+	for name := range groupsMap {
+		groupNames = append(groupNames, name)
 	}
 
-	descriptions, err := admin.DescribeConsumerGroups(
-		groupNames,
-	)
-
+	descriptions, err := admin.DescribeConsumerGroups(groupNames)
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Ошибка описания consumer groups: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Ошибка описания consumer groups: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	result := make(
-		[]DashboardConsumerGroup,
-		0,
-		len(descriptions),
-	)
-
+	result := make([]DashboardConsumerGroup, 0, len(descriptions))
 	for _, group := range descriptions {
-
-		result = append(
-			result,
-			DashboardConsumerGroup{
-
-				Name: group.GroupId,
-
-				State: group.State,
-			},
-		)
+		result = append(result, DashboardConsumerGroup{
+			Name:  group.GroupId,
+			State: group.State,
+		})
 	}
 
-	json.NewEncoder(w).Encode(
-		DashboardConsumerGroupsResponse{
-			Groups: result,
-		},
-	)
+	_ = json.NewEncoder(w).Encode(DashboardConsumerGroupsResponse{Groups: result})
 }
 
-/*
-   getDashboardPartitionsHandler
-
-   Возвращает общее количество партиций
-   во всех топиках Kafka-кластера.
-*/
-func getDashboardPartitionsHandler(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-
-	w.Header().Set(
-		"Access-Control-Allow-Origin",
-		"*",
-	)
-
-	w.Header().Set(
-		"Content-Type",
-		"application/json",
-	)
+// getDashboardPartitionsHandler возвращает общее количество партиций во всех топиках.
+func getDashboardPartitionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	config := sarama.NewConfig()
-
 	config.Version = sarama.V2_8_0_0
 
-	client, err := sarama.NewClient(
-		[]string{bootstrap},
-		config,
-	)
-
+	client, err := sarama.NewClient([]string{bootstrap}, config)
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Ошибка подключения к Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Ошибка подключения к Kafka: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer client.Close()
 
 	topics, err := client.Topics()
-
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Не удалось получить список топиков",
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Не удалось получить список топиков", http.StatusInternalServerError)
 		return
 	}
 
 	totalPartitions := 0
-
 	for _, topic := range topics {
-
-		partitions, err := client.Partitions(
-			topic,
-		)
-
+		partitions, err := client.Partitions(topic)
 		if err != nil {
 			continue
 		}
-
-		totalPartitions += len(
-			partitions,
-		)
+		totalPartitions += len(partitions)
 	}
 
-	json.NewEncoder(w).Encode(
-		DashboardPartitionsResponse{
-			Total: totalPartitions,
-		},
-	)
+	_ = json.NewEncoder(w).Encode(DashboardPartitionsResponse{Total: totalPartitions})
 }
-/*
-   getDashboardThroughputHandler
 
-   Возвращает данные графика
-   пропускной способности кластера.
-
-   В текущей версии используются
-   временные тестовые данные.
-
-   В дальнейшем будут заменены
-   реальными метриками Kafka.
-*/
-func getDashboardThroughputHandler(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-
-	w.Header().Set(
-		"Access-Control-Allow-Origin",
-		"*",
-	)
-
-	w.Header().Set(
-		"Content-Type",
-		"application/json",
-	)
+// getDashboardThroughputHandler возвращает данные для графика пропускной способности.
+// В текущей версии используются моковые данные.
+// TODO: Заменить реальными метриками из Kafka Monitoring API.
+func getDashboardThroughputHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	response := DashboardThroughputResponse{
-
 		Points: []DashboardThroughputPoint{
-
-			{
-				Time: "00",
-				Incoming: 120,
-				Outgoing: 100,
-			},
-
-			{
-				Time: "05",
-				Incoming: 240,
-				Outgoing: 180,
-			},
-
-			{
-				Time: "10",
-				Incoming: 430,
-				Outgoing: 390,
-			},
-
-			{
-				Time: "15",
-				Incoming: 610,
-				Outgoing: 570,
-			},
+			{Time: "00", Incoming: 120, Outgoing: 100},
+			{Time: "05", Incoming: 240, Outgoing: 180},
+			{Time: "10", Incoming: 430, Outgoing: 390},
+			{Time: "15", Incoming: 610, Outgoing: 570},
 		},
 	}
 
-	json.NewEncoder(w).Encode(
-		response,
-	)
+	_ = json.NewEncoder(w).Encode(response)
 }
+
+// Примечание: в данном файле используются вспомогательные функции:
+// - getBootstrapFromRequest(r *http.Request) string
+// - createAdminClient(bootstrap string) (sarama.ClusterAdmin, error)
+// - sendJSONError(w http.ResponseWriter, message string, code int)
+// Они должны быть определены в другом месте пакета main.

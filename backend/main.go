@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Package main — точка входа бэкенда для Kafka System Control.
+// Предоставляет REST API для управления топиками, сообщениями,
+// а также метриками для дашборда.
 package main
 
 import (
@@ -26,6 +30,10 @@ import (
 
 	"github.com/IBM/sarama"
 )
+
+// =============================================================================
+// Модели данных (DTO) для API
+// =============================================================================
 
 type TopicMetadata struct {
 	Name              string `json:"name"`
@@ -59,8 +67,8 @@ type Message struct {
 }
 
 type MessagesResponse struct {
-    Messages []Message `json:"messages"`
-    Total    int       `json:"total"`
+	Messages []Message `json:"messages"`
+	Total    int       `json:"total"`
 }
 
 type PartitionInfo struct {
@@ -71,7 +79,7 @@ type PartitionInfo struct {
 }
 
 type PartitionsResponse struct {
-    Partitions []int32 `json:"partitions"`
+	Partitions []int32 `json:"partitions"`
 }
 
 type TopicDetailResponse struct {
@@ -80,307 +88,206 @@ type TopicDetailResponse struct {
 	ReplicationFactor int16             `json:"replicationFactor"`
 	Configs           map[string]string `json:"configs"`
 }
+
 type UpdateTopicConfigRequest struct {
 	Configs map[string]string `json:"configs"`
 }
 
-func getBootstrapFromRequest(r *http.Request) string {
+// =============================================================================
+// Вспомогательные функции
+// =============================================================================
 
+// getBootstrapFromRequest возвращает адрес Kafka-брокера из заголовка или переменной окружения.
+func getBootstrapFromRequest(r *http.Request) string {
 	if bootstrap := r.Header.Get("X-Kafka-Bootstrap"); bootstrap != "" {
 		return bootstrap
 	}
-
 	if env := os.Getenv("KAFKA_BOOTSTRAP_SERVERS"); env != "" {
 		return env
 	}
-
 	return "localhost:9092"
 }
 
+// createAdminClient создаёт административный клиент Sarama для управления кластером.
 func createAdminClient(bootstrap string) (sarama.ClusterAdmin, error) {
-
 	config := sarama.NewConfig()
-
 	config.Version = sarama.V2_8_0_0
-
 	return sarama.NewClusterAdmin([]string{bootstrap}, config)
 }
 
-func getTopicsHandler(w http.ResponseWriter, r *http.Request) {
+// sendJSONError отправляет JSON-ответ с сообщением об ошибке и HTTP-статусом.
+func sendJSONError(w http.ResponseWriter, msg string, status int) {
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
+}
 
+// =============================================================================
+// HTTP-обработчики для управления топиками
+// =============================================================================
+
+// getTopicsHandler возвращает список всех топиков с базовой информацией.
+func getTopicsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	admin, err := createAdminClient(bootstrap)
-
 	if err != nil {
-
 		log.Printf("AdminClient error: %v", err)
-
-		sendJSONError(
-			w,
-			"Failed to connect to Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer admin.Close()
 
 	topicsMap, err := admin.ListTopics()
-
 	if err != nil {
-
 		log.Printf("ListTopics error: %v", err)
-
-		sendJSONError(
-			w,
-			"Failed to list topics: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Failed to list topics: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	result := make([]TopicMetadata, 0, len(topicsMap))
-
 	for name, metadata := range topicsMap {
-
 		result = append(result, TopicMetadata{
 			Name:              name,
 			Partitions:        metadata.NumPartitions,
 			ReplicationFactor: metadata.ReplicationFactor,
 		})
 	}
-
-	json.NewEncoder(w).Encode(TopicsResponse{
-		Topics: result,
-	})
+	_ = json.NewEncoder(w).Encode(TopicsResponse{Topics: result})
 }
 
+// createTopicHandler создаёт новый топик.
 func createTopicHandler(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method == http.MethodOptions {
-
 		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Kafka-Bootstrap")
-
 		w.WriteHeader(http.StatusNoContent)
-
 		return
 	}
 
 	var req CreateTopicRequest
-
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-
 		log.Printf("JSON decode error: %v", err)
-
 		sendJSONError(w, "Invalid JSON", http.StatusBadRequest)
-
 		return
 	}
-
 	if req.Topic == "" {
-
 		sendJSONError(w, "Topic name required", http.StatusBadRequest)
-
 		return
 	}
 
 	partitions := req.Partitions
-
 	if partitions <= 0 {
 		partitions = 1
 	}
-
 	replication := req.Replication
-
 	if replication <= 0 {
 		replication = 1
 	}
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	admin, err := createAdminClient(bootstrap)
-
 	if err != nil {
-
 		log.Printf("AdminClient error: %v", err)
-
-		sendJSONError(
-			w,
-			"Failed to connect to Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer admin.Close()
 
 	topicDetail := &sarama.TopicDetail{
 		NumPartitions:     partitions,
 		ReplicationFactor: replication,
 	}
-
 	if len(req.Configs) > 0 {
-
 		configMap := make(map[string]*string)
-
 		for key, value := range req.Configs {
-
 			v := value
-
 			configMap[key] = &v
 		}
-
 		topicDetail.ConfigEntries = configMap
 	}
 
 	if err := admin.CreateTopic(req.Topic, topicDetail, false); err != nil {
-
 		log.Printf("CreateTopic error: %v", err)
-
-		sendJSONError(
-			w,
-			"Failed to create topic: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Failed to create topic: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	json.NewEncoder(w).Encode(CreateTopicResponse{
-		Success: true,
-	})
+	_ = json.NewEncoder(w).Encode(CreateTopicResponse{Success: true})
 }
 
+// deleteTopicHandler удаляет топик по имени.
 func deleteTopicHandler(w http.ResponseWriter, r *http.Request) {
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-
-	path := strings.TrimPrefix(r.URL.Path, "/api/topics/")
-	topic := strings.TrimSuffix(path, "/")
-
-	if topic == "" {
-
-		sendJSONError(w, "Topic name required", http.StatusBadRequest)
-
-		return
-	}
-
-	bootstrap := getBootstrapFromRequest(r)
-
-	log.Printf("Deleting topic: %s, bootstrap: %s", topic, bootstrap)
-
-	admin, err := createAdminClient(bootstrap)
-
-	if err != nil {
-
-		log.Printf("AdminClient error: %v", err)
-
-		sendJSONError(
-			w,
-			"Failed to connect to Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
-		return
-	}
-
-	defer admin.Close()
-
-	err = admin.DeleteTopic(topic)
-
-	if err != nil {
-
-		log.Printf("DeleteTopic error: %v", err)
-
-		sendJSONError(
-			w,
-			"Failed to delete topic: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
 	topic := strings.TrimPrefix(r.URL.Path, "/api/topics/")
 	topic = strings.TrimSuffix(topic, "/")
-
 	if topic == "" {
-
 		sendJSONError(w, "Topic name required", http.StatusBadRequest)
-
 		return
 	}
 
 	bootstrap := getBootstrapFromRequest(r)
+	log.Printf("Deleting topic: %s, bootstrap: %s", topic, bootstrap)
 
 	admin, err := createAdminClient(bootstrap)
-
 	if err != nil {
+		log.Printf("AdminClient error: %v", err)
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer admin.Close()
 
-		sendJSONError(
-			w,
-			"Failed to connect to Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
+	if err = admin.DeleteTopic(topic); err != nil {
+		log.Printf("DeleteTopic error: %v", err)
+		sendJSONError(w, "Failed to delete topic: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
 
+// getTopicDetailHandler возвращает детальную информацию о топике (партиции, конфиги).
+func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
+	topic := strings.TrimPrefix(r.URL.Path, "/api/topics/")
+	topic = strings.TrimSuffix(topic, "/")
+	if topic == "" {
+		sendJSONError(w, "Topic name required", http.StatusBadRequest)
 		return
 	}
 
+	bootstrap := getBootstrapFromRequest(r)
+	admin, err := createAdminClient(bootstrap)
+	if err != nil {
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 	defer admin.Close()
 
 	metadata, err := admin.DescribeTopics([]string{topic})
-
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Failed to describe topic: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Failed to describe topic: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	if len(metadata) == 0 {
-
 		sendJSONError(w, "Topic not found", http.StatusNotFound)
-
 		return
 	}
 
 	topicMeta := metadata[0]
-
 	if topicMeta.Err != sarama.ErrNoError {
-
 		sendJSONError(w, topicMeta.Err.Error(), http.StatusInternalServerError)
-
 		return
 	}
 
 	partitions := make([]PartitionInfo, 0, len(topicMeta.Partitions))
-
 	for _, p := range topicMeta.Partitions {
-
 		partitions = append(partitions, PartitionInfo{
 			ID:       p.ID,
 			Leader:   p.Leader,
@@ -390,30 +297,19 @@ func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	replicationFactor := int16(1)
-
 	if len(topicMeta.Partitions) > 0 {
 		replicationFactor = int16(len(topicMeta.Partitions[0].Replicas))
 	}
 
 	configs := make(map[string]string)
-
-	cfgResource := sarama.ConfigResource{
-		Type: sarama.TopicResource,
-		Name: topic,
-	}
-
+	cfgResource := sarama.ConfigResource{Type: sarama.TopicResource, Name: topic}
 	resp, err := admin.DescribeConfig(cfgResource)
-
 	if err != nil {
-
 		log.Printf("DescribeConfig error for topic %s: %v", topic, err)
-
 	} else {
-
 		for _, entry := range resp {
 			configs[entry.Name] = entry.Value
 		}
-
 		log.Printf("Loaded %d config entries for topic %s", len(configs), topic)
 	}
 
@@ -423,588 +319,305 @@ func getTopicDetailHandler(w http.ResponseWriter, r *http.Request) {
 		ReplicationFactor: replicationFactor,
 		Configs:           configs,
 	}
-
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
+// updateTopicConfigHandler обновляет конфигурацию топика.
 func updateTopicConfigHandler(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method == http.MethodOptions {
-
 		w.Header().Set("Access-Control-Allow-Methods", "PATCH, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Kafka-Bootstrap")
-
 		w.WriteHeader(http.StatusNoContent)
-
 		return
 	}
 
 	path := strings.TrimPrefix(r.URL.Path, "/api/topics/")
 	path = strings.TrimSuffix(path, "/config")
-
 	topic := strings.TrimSuffix(path, "/")
-
 	if topic == "" {
-
 		sendJSONError(w, "Topic name required", http.StatusBadRequest)
-
 		return
 	}
 
 	var req UpdateTopicConfigRequest
-
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-
 		sendJSONError(w, "Invalid JSON", http.StatusBadRequest)
-
 		return
 	}
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	admin, err := createAdminClient(bootstrap)
-
 	if err != nil {
-
-		sendJSONError(
-			w,
-			"Failed to connect to Kafka: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+		sendJSONError(w, "Failed to connect to Kafka: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer admin.Close()
 
 	configs := make(map[string]*string)
-
 	for key, value := range req.Configs {
-
 		v := value
-
 		configs[key] = &v
 	}
-
-	err = admin.AlterConfig(
-    	sarama.TopicResource,
-    	topic,
-    	configs,
-    	false,
-    )
-
-	if err != nil {
-
-		sendJSONError(
-			w,
-			"Failed to update config: "+err.Error(),
-			http.StatusInternalServerError,
-		)
-
+	if err = admin.AlterConfig(sarama.TopicResource, topic, configs, false); err != nil {
+		sendJSONError(w, "Failed to update config: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	json.NewEncoder(w).Encode(map[string]bool{
-		"success": true,
-	})
+	_ = json.NewEncoder(w).Encode(map[string]bool{"success": true})
 }
 
+// getMessagesHandler возвращает сообщения из топика с возможностью фильтрации по партиции и оффсету.
 func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
 	pathParts := strings.Split(r.URL.Path, "/")
-
 	if len(pathParts) < 4 {
-
 		sendJSONError(w, "Invalid topic path", http.StatusBadRequest)
-
 		return
 	}
-
 	topic := pathParts[3]
-
 	if topic == "" {
-
 		sendJSONError(w, "Topic name required", http.StatusBadRequest)
-
 		return
 	}
 
 	offsetStr := r.URL.Query().Get("offset")
 	limitStr := r.URL.Query().Get("limit")
-
 	partitionStr := r.URL.Query().Get("partition")
-	log.Printf(
-        "partitionStr='%s'",
-        partitionStr,
-    )
+	log.Printf("partitionStr='%s'", partitionStr)
 
-    var partition int32 = -1
-
-    if partitionStr != "" && partitionStr != "all" {
-
-        if p, err := strconv.Atoi(partitionStr); err == nil {
-            partition = int32(p)
-        }
-    }
+	var partition int32 = -1
+	if partitionStr != "" && partitionStr != "all" {
+		if p, err := strconv.Atoi(partitionStr); err == nil {
+			partition = int32(p)
+		}
+	}
 
 	offset := int64(0)
-
 	if offsetStr != "" {
-
 		if o, err := strconv.ParseInt(offsetStr, 10, 64); err == nil && o >= 0 {
 			offset = o
 		}
 	}
 
 	limit := int32(10)
-
 	if limitStr != "" {
-
 		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 1000 {
 			limit = int32(l)
 		}
 	}
 
 	bootstrap := getBootstrapFromRequest(r)
-
 	config := sarama.NewConfig()
-
 	config.Version = sarama.V2_8_0_0
 	config.Consumer.Return.Errors = true
 
 	client, err := sarama.NewClient([]string{bootstrap}, config)
+	if err != nil {
+		log.Printf("Client error: %v", err)
+		sendJSONError(w, "Failed to create client: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer client.Close()
 
-    if err != nil {
+	consumer, err := sarama.NewConsumerFromClient(client)
+	if err != nil {
+		log.Printf("Consumer error: %v", err)
+		sendJSONError(w, "Failed to create consumer: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer consumer.Close()
 
-    	log.Printf("Client error: %v", err)
+	var earliestOffset, latestOffset int64
+	if partition != -1 {
+		earliestOffset, err = client.GetOffset(topic, partition, sarama.OffsetOldest)
+		if err != nil {
+			sendJSONError(w, "Failed to get earliest offset: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		latestOffset, err = client.GetOffset(topic, partition, sarama.OffsetNewest)
+		if err != nil {
+			sendJSONError(w, "Failed to get latest offset: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	if offset < earliestOffset {
+		offset = earliestOffset
+	}
 
-    	sendJSONError(
-    		w,
-    		"Failed to create client: "+err.Error(),
-    		http.StatusInternalServerError,
-    	)
+	messages := make([]Message, 0)
 
-    	return
-    }
+	if partition != -1 && offset >= latestOffset {
+		total := 0
+		if partition != -1 {
+			total = int(latestOffset - earliestOffset)
+		}
+		_ = json.NewEncoder(w).Encode(MessagesResponse{Messages: messages, Total: total})
+		return
+	}
 
-    defer client.Close()
+	partitions, err := client.Partitions(topic)
+	log.Printf("TOPIC %s PARTITIONS: %+v", topic, partitions)
+	if err != nil {
+		sendJSONError(w, "Failed to get partitions: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-    consumer, err := sarama.NewConsumerFromClient(client)
+	if partition == -1 {
+		// Чтение из всех партиций
+		for _, p := range partitions {
+			log.Printf("READ topic=%s partition=%d offset=%d earliest=%d latest=%d", topic, partition, offset, earliestOffset, latestOffset)
+			pc, err := consumer.ConsumePartition(topic, p, sarama.OffsetOldest)
+			if err != nil {
+				log.Printf("Partition %d error: %v", p, err)
+				continue
+			}
+			timeout := time.After(1 * time.Second)
+			done := false
+			for !done {
+				select {
+				case msg := <-pc.Messages():
+					log.Printf("MSG partition=%d offset=%d", p, msg.Offset)
+					messages = append(messages, Message{
+						Offset:    msg.Offset,
+						Key:       string(msg.Key),
+						Value:     string(msg.Value),
+						Timestamp: msg.Timestamp.Format(time.RFC3339),
+						Partition: p,
+					})
+					if len(messages) >= int(limit) {
+						done = true
+					}
+				case <-timeout:
+					done = true
+				}
+			}
+			pc.Close()
+		}
+	} else {
+		// Чтение из одной партиции, начиная с заданного оффсета
+		pc, err := consumer.ConsumePartition(topic, partition, offset)
+		if err != nil {
+			sendJSONError(w, "Failed to consume partition: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer pc.Close()
+		timeout := time.After(3 * time.Second)
+		done := false
+		for i := int32(0); i < limit && !done; i++ {
+			select {
+			case msg := <-pc.Messages():
+				log.Printf("MSG partition=%d offset=%d", partition, msg.Offset)
+				messages = append(messages, Message{
+					Offset:    msg.Offset,
+					Key:       string(msg.Key),
+					Value:     string(msg.Value),
+					Timestamp: msg.Timestamp.Format(time.RFC3339),
+					Partition: partition,
+				})
+			case <-timeout:
+				done = true
+			}
+		}
+	}
 
-    if err != nil {
-
-    	log.Printf("Consumer error: %v", err)
-
-    	sendJSONError(
-    		w,
-    		"Failed to create consumer: "+err.Error(),
-    		http.StatusInternalServerError,
-    	)
-
-    	return
-    }
-
-    defer consumer.Close()
-
-    var earliestOffset int64
-    var latestOffset int64
-
-    if partition != -1 {
-
-        earliestOffset, err = client.GetOffset(
-            topic,
-            partition,
-            sarama.OffsetOldest,
-        )
-
-        if err != nil {
-
-            sendJSONError(
-                w,
-                "Failed to get earliest offset: "+err.Error(),
-                http.StatusInternalServerError,
-            )
-
-            return
-        }
-
-        latestOffset, err = client.GetOffset(
-            topic,
-            partition,
-            sarama.OffsetNewest,
-        )
-
-        if err != nil {
-
-            sendJSONError(
-                w,
-                "Failed to get latest offset: "+err.Error(),
-                http.StatusInternalServerError,
-            )
-
-            return
-        }
-    }
-
-    if offset < earliestOffset {
-    	offset = earliestOffset
-    }
-    messages := make([]Message, 0)
-    if partition != -1 && offset >= latestOffset {
-
-        total := len(messages)
-
-        if partition != -1 {
-            total = int(latestOffset - earliestOffset)
-        }
-
-        json.NewEncoder(w).Encode(MessagesResponse{
-            Messages: messages,
-            Total: total,
-        })
-
-        return
-    }
-
-
-    partitions, err := client.Partitions(topic)
-    log.Printf(
-        "TOPIC %s PARTITIONS: %+v",
-        topic,
-        partitions,
-    )
-
-    if err != nil {
-
-        sendJSONError(
-            w,
-            "Failed to get partitions: "+err.Error(),
-            http.StatusInternalServerError,
-        )
-
-        return
-    }
-    if partition == -1 {
-
-        for _, p := range partitions {
-            log.Printf(
-                "READ topic=%s partition=%d offset=%d earliest=%d latest=%d",
-                topic,
-                partition,
-                offset,
-                earliestOffset,
-                latestOffset,
-            )
-            pc, err := consumer.ConsumePartition(
-                topic,
-                p,
-                sarama.OffsetOldest,
-            )
-
-            if err != nil {
-
-                log.Printf(
-                    "Partition %d error: %v",
-                    p,
-                    err,
-                )
-
-                continue
-            }
-
-            timeout := time.After(
-                1 * time.Second,
-            )
-
-            done := false
-
-            for !done {
-
-                select {
-
-                case msg := <-pc.Messages():
-                    //ЛОГ: проверяем, из какой партиции реально пришло сообщение
-                    log.Printf("MSG partition=%d offset=%d", p, msg.Offset)
-
-                    messages = append(messages, Message{
-                        Offset: msg.Offset,
-                        Key: string(msg.Key),
-                        Value: string(msg.Value),
-                        Timestamp: msg.Timestamp.Format(time.RFC3339,),
-                        Partition: int32(p),
-                    })
-
-                    if len(messages) >= int(limit) {
-
-                        done = true
-                    }
-
-                case <-timeout:
-
-                    done = true
-                }
-            }
-
-            pc.Close()
-        }
-
-    } else {
-
-        pc, err := consumer.ConsumePartition(
-            topic,
-            partition,
-            offset,
-        )
-
-        if err != nil {
-
-            sendJSONError(
-                w,
-                "Failed to consume partition: "+
-                    err.Error(),
-                http.StatusInternalServerError,
-            )
-
-            return
-        }
-
-        defer pc.Close()
-
-        timeout := time.After(
-            3 * time.Second,
-        )
-
-        done := false
-
-        for i := int32(0); i < limit && !done; i++ {
-
-            select {
-
-            case msg := <-pc.Messages():
-                // ЛОГ: проверяем сообщение из конкретной выбранной партиции
-                log.Printf("MSG partition=%d offset=%d", partition, msg.Offset)
-
-                messages = append(messages, Message{
-                    Offset: msg.Offset,
-                    Key: string(msg.Key),
-                    Value: string(msg.Value),
-                    Timestamp: msg.Timestamp.Format(time.RFC3339,),
-                    Partition: partition,
-                })
-
-            case <-timeout:
-
-                done = true
-            }
-        }
-    }
-    total := len(messages)
-
-    if partition != -1 {
-        total = int(latestOffset - earliestOffset)
-    }
-
-    json.NewEncoder(w).Encode(MessagesResponse{
-        Messages: messages,
-        Total: total,
-    })
+	total := len(messages)
+	if partition != -1 {
+		total = int(latestOffset - earliestOffset)
+	}
+	_ = json.NewEncoder(w).Encode(MessagesResponse{Messages: messages, Total: total})
 }
 
-func sendJSONError(w http.ResponseWriter, msg string, status int) {
-
-	w.WriteHeader(status)
-
-	json.NewEncoder(w).Encode(map[string]string{
-		"error": msg,
-	})
-}
-
+// getPartitionsHandler возвращает список ID партиций для указанного топика.
 func getPartitionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Content-Type", "application/json")
+	path := strings.TrimPrefix(r.URL.Path, "/api/topics/")
+	path = strings.TrimSuffix(path, "/partitions")
+	topic := strings.TrimSuffix(path, "/")
+	if topic == "" {
+		sendJSONError(w, "Topic name required", http.StatusBadRequest)
+		return
+	}
 
-    path := strings.TrimPrefix(
-        r.URL.Path,
-        "/api/topics/",
-    )
+	bootstrap := getBootstrapFromRequest(r)
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_8_0_0
 
-    path = strings.TrimSuffix(
-        path,
-        "/partitions",
-    )
+	client, err := sarama.NewClient([]string{bootstrap}, config)
+	if err != nil {
+		sendJSONError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer client.Close()
 
-    topic := strings.TrimSuffix(
-        path,
-        "/",
-    )
-
-    bootstrap := getBootstrapFromRequest(r)
-
-    config := sarama.NewConfig()
-    config.Version = sarama.V2_8_0_0
-
-    client, err := sarama.NewClient(
-        []string{bootstrap},
-        config,
-    )
-
-    if err != nil {
-
-        sendJSONError(
-            w,
-            err.Error(),
-            http.StatusInternalServerError,
-        )
-
-        return
-    }
-
-    defer client.Close()
-
-    partitions, err := client.Partitions(topic)
-    log.Printf(
-        "GET PARTITIONS %s -> %+v",
-        topic,
-        partitions,
-    )
-
-    if err != nil {
-
-        sendJSONError(
-            w,
-            err.Error(),
-            http.StatusInternalServerError,
-        )
-
-        return
-    }
-
-    json.NewEncoder(w).Encode(
-        PartitionsResponse{
-            Partitions: partitions,
-        },
-    )
+	partitions, err := client.Partitions(topic)
+	log.Printf("GET PARTITIONS %s -> %+v", topic, partitions)
+	if err != nil {
+		sendJSONError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(PartitionsResponse{Partitions: partitions})
 }
+
+// =============================================================================
+// Основная функция — настройка маршрутов и запуск сервера
+// =============================================================================
 
 func main() {
-
+	// ----- Группа маршрутов для управления топиками -----
 	http.HandleFunc("/api/topics", func(w http.ResponseWriter, r *http.Request) {
-
 		switch r.Method {
-
 		case http.MethodGet:
 			getTopicsHandler(w, r)
-
 		case http.MethodPost:
 			createTopicHandler(w, r)
-
 		default:
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		}
 	})
 
 	http.HandleFunc("/api/topics/", func(w http.ResponseWriter, r *http.Request) {
-
 		if r.URL.Path == "/api/topics/" {
-
 			getTopicsHandler(w, r)
-
 			return
 		}
-
 		switch r.Method {
-
-        case http.MethodDelete:
-        	deleteTopicHandler(w, r)
-
-        case http.MethodPatch:
-
-        	if strings.Contains(r.URL.Path, "/config") {
-        		updateTopicConfigHandler(w, r)
-        	} else {
-        		w.WriteHeader(http.StatusNotFound)
-        	}
-
-        case http.MethodGet:
-
-        	if strings.Contains(r.URL.Path, "/messages") {
-
-                getMessagesHandler(w, r)
-
-            } else if strings.Contains(
-                r.URL.Path,
-                "/partitions",
-            ) {
-
-                getPartitionsHandler(w, r)
-
-            } else {
-
-                getTopicDetailHandler(w, r)
-
-            }
-
-        default:
-        	w.WriteHeader(http.StatusNotFound)
-        }
+		case http.MethodDelete:
+			deleteTopicHandler(w, r)
+		case http.MethodPatch:
+			if strings.Contains(r.URL.Path, "/config") {
+				updateTopicConfigHandler(w, r)
+			} else {
+				w.WriteHeader(http.StatusNotFound)
+			}
+		case http.MethodGet:
+			if strings.Contains(r.URL.Path, "/messages") {
+				getMessagesHandler(w, r)
+			} else if strings.Contains(r.URL.Path, "/partitions") {
+				getPartitionsHandler(w, r)
+			} else {
+				getTopicDetailHandler(w, r)
+			}
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
 	})
 
+	// ----- Маршруты для Dashboard (метрики кластера) -----
+	http.HandleFunc("/api/dashboard/overview", getDashboardOverviewHandler)
+	http.HandleFunc("/api/dashboard/brokers", getDashboardBrokersHandler)
+	http.HandleFunc("/api/dashboard/consumer-groups", getDashboardConsumerGroupsHandler)
+	http.HandleFunc("/api/dashboard/partitions", getDashboardPartitionsHandler)
+	http.HandleFunc("/api/dashboard/throughput", getDashboardThroughputHandler)
+	// Общее количество сообщений в кластере (приблизительное)
+	http.HandleFunc("/api/dashboard/messages-total", getDashboardMessagesTotalHandler)
+
 	port := ":8080"
-
-    /*
-       Dashboard API
-    */
-
-    /* Обзор */
-    http.HandleFunc(
-    	"/api/dashboard/overview",
-    	getDashboardOverviewHandler,
-    )
-
-    /* Брокеры */
-    http.HandleFunc(
-    	"/api/dashboard/brokers",
-    	getDashboardBrokersHandler,
-    )
-
-    /* Консюмер группы */
-    http.HandleFunc(
-    	"/api/dashboard/consumer-groups",
-    	getDashboardConsumerGroupsHandler,
-    )
-
-    /* Партиции */
-    http.HandleFunc(
-    	"/api/dashboard/partitions",
-    	getDashboardPartitionsHandler,
-    )
-
-    /* Пропускная способность кластера */
-    http.HandleFunc(
-    	"/api/dashboard/throughput",
-    	getDashboardThroughputHandler,
-    )
-
-    /* Endpoint: /api/dashboard/messages-total
-
-    Назначение:
-    Возвращает агрегированное количество сообщений
-    во всём Kafka-кластере.
-
-    Используется фронтендом Dashboard для карточки:
-    "Сообщений в кластере" */
-    http.HandleFunc(
-    	"/api/dashboard/messages-total",
-    	getDashboardMessagesTotalHandler,
-    )
 	log.Printf("Server running on %s", port)
-
 	log.Fatal(http.ListenAndServe(port, nil))
 }
