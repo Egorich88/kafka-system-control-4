@@ -18,18 +18,10 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/dashboard.css';
 import Dropdown from '../components/common/Dropdown';
-import {
-  FiInfo,
-  FiCode,
-  FiPlus,
-  FiStar,
-
-  /* Панель управления */
-  FiClock,
-  FiRotateCw
-} from 'react-icons/fi';
-
+import { FiInfo, FiCode, FiPlus, FiStar, FiClock, FiRotateCw } from 'react-icons/fi';
 import { useCluster } from '../contexts/ClusterContext';
+
+// Импорты вынесенных панелей
 import ThroughputPanel from './monitoring/ThroughputPanel';
 import KpiCards from './monitoring/KpiCards';
 import BrokersPanel from './monitoring/BrokersPanel';
@@ -37,42 +29,22 @@ import TopicsPanel from './monitoring/TopicsPanel';
 import ConsumerLagPanel from './monitoring/ConsumerLagPanel';
 import EventsPanel from './monitoring/EventsPanel';
 
-/* Периоды отображения Dashboard. Используются для выбора диапазона отображения метрик и графиков. */
+// Доступные интервалы времени для графика
 const TIME_RANGES = [
-
-  {
-    id: '15m',
-    name: 'Последние 15 минут'
-  },
-
-  {
-    id: '1h',
-    name: 'Последний час'
-  },
-
-  {
-    id: '6h',
-    name: 'Последние 6 часов'
-  },
-
-  {
-    id: '24h',
-    name: 'Последние 24 часа'
-  }
+  { id: '15m', name: 'Последние 15 минут' },
+  { id: '1h', name: 'Последний час' },
+  { id: '6h', name: 'Последние 6 часов' },
+  { id: '24h', name: 'Последние 24 часа' }
 ];
 
-
-/* Временные данные графика. Используются до подключения реальных метрик Kafka.
-После реализации Monitoring API будут заменены ответом backend. */
+// Временные данные для графика пропускной способности (заглушка)
 const THROUGHPUT_DATA = {
-
   '15m': [
     { time: '00', incoming: 120, outgoing: 100 },
     { time: '05', incoming: 240, outgoing: 180 },
     { time: '10', incoming: 430, outgoing: 390 },
     { time: '15', incoming: 610, outgoing: 570 }
   ],
-
   '1h': [
     { time: '00', incoming: 120, outgoing: 100 },
     { time: '15', incoming: 260, outgoing: 240 },
@@ -80,7 +52,6 @@ const THROUGHPUT_DATA = {
     { time: '45', incoming: 700, outgoing: 640 },
     { time: '60', incoming: 620, outgoing: 590 }
   ],
-
   '6h': [
     { time: '01h', incoming: 200, outgoing: 180 },
     { time: '02h', incoming: 320, outgoing: 280 },
@@ -89,7 +60,6 @@ const THROUGHPUT_DATA = {
     { time: '05h', incoming: 640, outgoing: 600 },
     { time: '06h', incoming: 800, outgoing: 760 }
   ],
-
   '24h': [
     { time: '04', incoming: 250, outgoing: 200 },
     { time: '08', incoming: 420, outgoing: 390 },
@@ -98,330 +68,152 @@ const THROUGHPUT_DATA = {
     { time: '20', incoming: 530, outgoing: 500 },
     { time: '24', incoming: 910, outgoing: 870 }
   ]
-
 };
 
 export default function Dashboard() {
-
   const { currentCluster } = useCluster();
 
-  /* Отладка текущего кластера */
-  console.log( "CURRENT CLUSTER:", currentCluster );
+  // Состояния с данными от API
+  const [overview, setOverview] = useState(null);      // общая информация о кластере
+  const [brokers, setBrokers] = useState([]);          // список брокеров
+  const [consumerGroups, setConsumerGroups] = useState([]); // группы потребителей
 
-  /* Данные мониторинга кластера */
-  const [overview, setOverview] = useState(null);
-  const [brokers, setBrokers] = useState([]);
-  const [consumerGroups, setConsumerGroups] = useState([]);
-
-  /* Входящие сообщения в секунду */
+  // Заглушки для будущих метрик
   const [messagesIn] = useState(0);
-
-  /* Исходящие сообщения в секунду */
   const [messagesOut] = useState(0);
-
-  /* Недореплицированные партиции */
   const [underReplicated] = useState(0);
 
-  /* Период отображения */
+  // Выбранный временной диапазон для графика
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
 
-  /* Отображаемые линии графика.Позволяет временно скрывать отдельные метрики */
-  const [showIncoming, setShowIncoming] =
-    useState(true);
-  const [showOutgoing, setShowOutgoing] =
-    useState(true);
+  // Управление отображением линий на графике
+  const [showIncoming, setShowIncoming] = useState(true);
+  const [showOutgoing, setShowOutgoing] = useState(true);
 
-  /* Данные графика текущего периода
-  Автоматически изменяются при выборе периода Dashboard. */
+  // Данные графика для выбранного периода
   const chartData = THROUGHPUT_DATA[timeRange.id] || [];
 
-  /* Загрузка данных мониторинга */
+  // Загрузка данных при смене кластера
   useEffect(() => {
-
-    if (!currentCluster) {
-      return;
-    }
-
+    if (!currentCluster) return;
     loadDashboard();
   }, [currentCluster]);
 
-  /* Загружает данные Dashboard */
+  // Функция загрузки данных с бэкенда
   async function loadDashboard() {
-
     try {
-
-      const headers = {
-        'X-Kafka-Bootstrap':
-          currentCluster.bootstrapServers
-      };
-
-      const [
-        overviewResponse,
-        brokersResponse,
-        groupsResponse
-      ] = await Promise.all([
-
-        axios.get(
-          '/api/dashboard/overview',
-          { headers }
-        ),
-
-        axios.get(
-          '/api/dashboard/brokers',
-          { headers }
-        ),
-
-        axios.get(
-          '/api/dashboard/consumer-groups',
-          { headers }
-        )
+      const headers = { 'X-Kafka-Bootstrap': currentCluster.bootstrapServers };
+      const [overviewResponse, brokersResponse, groupsResponse] = await Promise.all([
+        axios.get('/api/dashboard/overview', { headers }),
+        axios.get('/api/dashboard/brokers', { headers }),
+        axios.get('/api/dashboard/consumer-groups', { headers })
       ]);
-
-      setOverview(
-        overviewResponse.data
-      );
-
-      setBrokers(
-        brokersResponse.data.brokers || []
-      );
-
-      setConsumerGroups(
-        groupsResponse.data.groups || []
-      );
-
-
+      setOverview(overviewResponse.data);
+      setBrokers(brokersResponse.data.brokers || []);
+      setConsumerGroups(groupsResponse.data.groups || []);
     } catch (error) {
-
-      /* Полная информация об ошибке Dashboard */
-      console.error( 'Dashboard load error:', error );
-
-      console.error( 'Dashboard response:', error.response?.data );
-
-      console.error( 'Dashboard status:', error.response?.status );
+      console.error('Dashboard load error:', error);
     }
   }
 
+  // Рендер основной панели, если кластер выбран
   if (currentCluster) {
-
     return (
-
-    <div className="dashboard-container">
-
-       {/* ======================================================
-           Заголовок страницы Dashboard
-       ====================================================== */}
-       <div className="page-header">
-
-         {/* Левая часть */}
-         <div className="page-header-text">
-
-           <h1 className="page-title">
-             Обзор кластера
-           </h1>
-
-           <div className="page-cluster-name">
-             Кластер: {currentCluster.name}
-           </div>
-
-         </div>
-
-         {/* Правая часть */}
-         <div className="dashboard-toolbar">
-
-           {/* Выбор периода */}
-           <div className="dashboard-time-selector">
-
-             <FiClock />
-
-             <Dropdown
-               selectedItem={timeRange}
-               items={
-                 TIME_RANGES.filter(
-                   item => item.id !== timeRange.id
-                 )
-               }
-               onSelect={setTimeRange}
-             />
-
-           </div>
-
-           {/* Обновление Dashboard */}
-           <button
-             className="dashboard-refresh-button"
-             onClick={loadDashboard}
-           >
-             <FiRotateCw className="dashboard-refresh-icon" />
-           </button>
-
-         </div>
-
-       </div>
-
-      {/* KPI карточки */}
-      <KpiCards
-        brokers={brokers}
-        overview={overview}
-        consumerGroups={consumerGroups}
-        messagesIn={messagesIn}
-        messagesOut={messagesOut}
-        underReplicated={underReplicated}
-      />
-
-      {/* ОСНОВНАЯ ОБЛАСТЬ DASHBOARD
-
-         Левая панель:
-         график нагрузки кластера.
-
-         Правая панель:
-         таблица брокеров. */}
-      <div className="dashboard-main-grid">
-        <ThroughputPanel
-          data={chartData}
-          showIncoming={showIncoming}
-          showOutgoing={showOutgoing}
-          onToggleIncoming={() => setShowIncoming(!showIncoming)}
-          onToggleOutgoing={() => setShowOutgoing(!showOutgoing)}
-        />
-        <BrokersPanel brokers={brokers} />
-      </div>
-
-      {/* НИЖНЯЯ ОБЛАСТЬ DASHBOARD
-
-         Содержит дополнительные панели мониторинга.
-         Будут реализованы позднее. */}
-
-      <div className="dashboard-bottom-grid">
-        <TopicsPanel />
-        <ConsumerLagPanel />
-        <EventsPanel />
-      </div>
-    </div>
-  );
-}
-
-  return (
-
-    <div className="welcome-page">
-
-      <div className="welcome-card">
-
-        <div className="welcome-logo-wrap">
-
-          <img
-            src="/kafka-system-logo.png"
-            alt="Kafka System Control"
-            className="welcome-logo"
-          />
-
+      <div className="dashboard-container">
+        {/* Верхняя панель: заголовок, выбор периода, кнопка обновления */}
+        <div className="page-header">
+          <div className="page-header-text">
+            <h1 className="page-title">Обзор кластера</h1>
+            <div className="page-cluster-name">Кластер: {currentCluster.name}</div>
+          </div>
+          <div className="dashboard-toolbar">
+            <div className="dashboard-time-selector">
+              <FiClock />
+              <Dropdown
+                selectedItem={timeRange}
+                items={TIME_RANGES.filter(item => item.id !== timeRange.id)}
+                onSelect={setTimeRange}
+              />
+            </div>
+            <button className="dashboard-refresh-button" onClick={loadDashboard}>
+              <FiRotateCw className="dashboard-refresh-icon" />
+            </button>
+          </div>
         </div>
 
-        <h1 className="welcome-title">
-          Kafka System Control
-        </h1>
+        {/* Блок KPI-карточек */}
+        <KpiCards
+          brokers={brokers}
+          overview={overview}
+          consumerGroups={consumerGroups}
+          messagesIn={messagesIn}
+          messagesOut={messagesOut}
+          underReplicated={underReplicated}
+        />
 
-        <p className="welcome-subtitle">
+        {/* Основная сетка: график пропускной способности + таблица брокеров */}
+        <div className="dashboard-main-grid">
+          <ThroughputPanel
+            data={chartData}
+            showIncoming={showIncoming}
+            showOutgoing={showOutgoing}
+            onToggleIncoming={() => setShowIncoming(!showIncoming)}
+            onToggleOutgoing={() => setShowOutgoing(!showOutgoing)}
+          />
+          <BrokersPanel brokers={brokers} />
+        </div>
 
-          Open-source платформа
+        {/* Нижняя сетка: дополнительные панели (топики, lag, события) */}
+        <div className="dashboard-bottom-grid">
+          <TopicsPanel />
+          <ConsumerLagPanel />
+          <EventsPanel />
+        </div>
+      </div>
+    );
+  }
 
-        </p>
-
+  // Приветственный экран, когда кластер не выбран
+  return (
+    <div className="welcome-page">
+      <div className="welcome-card">
+        <div className="welcome-logo-wrap">
+          <img src="/kafka-system-logo.png" alt="Kafka System Control" className="welcome-logo" />
+        </div>
+        <h1 className="welcome-title">Kafka System Control</h1>
+        <p className="welcome-subtitle">Open-source платформа</p>
         <div className="welcome-divider-small" />
 
-        {/* INFO */}
-
         <div className="welcome-feature">
-
-          <div className="welcome-icon-box">
-
-            <FiInfo />
-
-          </div>
-
+          <div className="welcome-icon-box"><FiInfo /></div>
           <div className="welcome-feature-text">
-
             Современный интерфейс для работы с{' '}
-
-            <a
-              href="https://kafka.apache.org/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Apache Kafka
-            </a>
-
+            <a href="https://kafka.apache.org/" target="_blank" rel="noreferrer">Apache Kafka</a>
           </div>
-
         </div>
 
-        {/* ADD */}
-
         <div className="welcome-feature">
-
-          <div className="welcome-icon-box">
-
-            <FiPlus />
-
-          </div>
-
+          <div className="welcome-icon-box"><FiPlus /></div>
           <div className="welcome-feature-text">
-
             Чтобы начать работу — нажмите кнопку{' '}
-
-            <span className="welcome-highlight">
-              + Добавить кластер
-            </span>
-
-            {' '}в боковом меню
-
+            <span className="welcome-highlight">+ Добавить кластер</span> в боковом меню
           </div>
-
         </div>
 
-        {/* LICENSE */}
-
         <div className="welcome-feature">
-
-          <div className="welcome-icon-box">
-
-            <FiCode />
-
-          </div>
-
+          <div className="welcome-icon-box"><FiCode /></div>
           <div className="welcome-feature-text">
-
             Проект распространяется по лицензии{' '}
-
-            <a
-              href="https://www.apache.org/licenses/LICENSE-2.0"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Apache License 2.0
-            </a>
-
+            <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer">Apache License 2.0</a>
           </div>
-
         </div>
 
         <div className="welcome-divider large" />
-
-        <a
-          href="https://github.com/Egorich88/kafka-system-control-4"
-          target="_blank"
-          rel="noreferrer"
-          className="welcome-github"
-        >
-
+        <a href="https://github.com/Egorich88/kafka-system-control-4" target="_blank" rel="noreferrer" className="welcome-github">
           <FiStar className="welcome-github-icon" />
-
-          <span>
-            Поддержите проект на GitHub
-          </span>
-
+          <span>Поддержите проект на GitHub</span>
         </a>
-
       </div>
-
     </div>
   );
 }
