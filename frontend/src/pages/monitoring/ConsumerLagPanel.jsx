@@ -18,16 +18,11 @@
         ТОП CONSUMER GROUPS ПО ВЕЛИЧИНЕ LAG.
 ======================================================= */
 
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
-            Отставание групп потребителей
-          </div>
-
-          <div className="panel-body">
-
-            Таблица будет реализована позже
-
-          </div>
-
-        </div>
+export default function ConsumerLagPanel() {
+  return (
+    <div className="dashboard-panel">
+      <div className="panel-header">Отставание групп потребителей</div>
+      <div className="panel-body">Таблица будет реализована позже</div>
+    </div>
+  );
+}

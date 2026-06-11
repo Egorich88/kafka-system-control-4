@@ -34,6 +34,7 @@ import ThroughputPanel from './monitoring/ThroughputPanel';
 import KpiCards from './monitoring/KpiCards';
 import BrokersPanel from './monitoring/BrokersPanel';
 import TopicsPanel from './monitoring/TopicsPanel';
+import ConsumerLagPanel from './monitoring/ConsumerLagPanel';
 
 /* Периоды отображения Dashboard. Используются для выбора диапазона отображения метрик и графиков. */
 const TIME_RANGES = [
@@ -290,23 +291,7 @@ export default function Dashboard() {
 
       <div className="dashboard-bottom-grid">
         <TopicsPanel />
-
-        {/*
-           Топ Consumer Groups по величине Lag.
-        */}
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
-            Отставание групп потребителей
-          </div>
-
-          <div className="panel-body">
-
-            Таблица будет реализована позже
-
-          </div>
-
-        </div>
+        <ConsumerLagPanel />
 
         {/* Последние события Kafka-кластера.
 
