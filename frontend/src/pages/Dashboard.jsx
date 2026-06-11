@@ -18,47 +18,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/dashboard.css';
 import Dropdown from '../components/common/Dropdown';
-/*
-==================================================
-Компоненты библиотеки Recharts
-
-Используются для построения графиков
-мониторинга Kafka-кластера.
-
-ResponsiveContainer
-- автоматически растягивает график
-  по размеру панели
-
-LineChart
-- основной контейнер графика
-
-Line
-- отдельная линия метрики
-
-XAxis
-- ось времени
-
-YAxis
-- ось значений
-
-Tooltip
-- всплывающая подсказка
-  при наведении мыши
-
-CartesianGrid
-- сетка графика в стиле Grafana
-==================================================
-*/
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid
-} from 'recharts';
-
 import {
   FiInfo,
   FiCode,
@@ -70,7 +29,6 @@ import {
   FiLayers,
   FiGrid,
   FiUsers,
-
 
   /* Входящий поток */
   FiArrowDown,
@@ -87,15 +45,9 @@ import {
 } from 'react-icons/fi';
 
 import { useCluster } from '../contexts/ClusterContext';
+import ThroughputPanel from './monitoring/ThroughputPanel';
 
-/*
-==================================================
-Периоды отображения Dashboard
-
-Используются для выбора диапазона
-отображения метрик и графиков.
-==================================================
-*/
+/* Периоды отображения Dashboard. Используются для выбора диапазона отображения метрик и графиков. */
 const TIME_RANGES = [
 
   {
@@ -120,17 +72,8 @@ const TIME_RANGES = [
 ];
 
 
-/*
-==================================================
-Временные данные графика
-
-Используются до подключения
-реальных метрик Kafka.
-
-После реализации Monitoring API
-будут заменены ответом backend.
-==================================================
-*/
+/* Временные данные графика. Используются до подключения реальных метрик Kafka.
+После реализации Monitoring API будут заменены ответом backend. */
 const THROUGHPUT_DATA = {
 
   '15m': [
@@ -168,66 +111,6 @@ const THROUGHPUT_DATA = {
 
 };
 
-/*
-==================================================
-Пользовательский Tooltip графика
-
-Отображает подробную информацию
-о точке графика при наведении.
-
-Используется вместо стандартного
-Tooltip библиотеки Recharts.
-==================================================
-*/
-function ThroughputTooltip({
-  active, /* Показывает наведен ли курсор.*/
-  payload, /* Значения точки графика.*/
-  label /* Метка временной оси */
-}) {
-
-  if (
-    !active ||
-    !payload ||
-    !payload.length
-  ) {
-    return null;
-  }
-
-  return (
-
-    <div className="throughput-tooltip">
-
-      <div className="throughput-tooltip-title">
-
-        Время: {label}
-
-      </div>
-
-      <div className="throughput-tooltip-row">
-
-        Входящие сообщения:
-
-        <strong>
-          {payload[0].value} msg/s
-        </strong>
-
-      </div>
-
-      <div className="throughput-tooltip-row">
-
-        Исходящие сообщения:
-
-        <strong>
-          {payload[1].value} msg/s
-        </strong>
-
-      </div>
-
-    </div>
-
-  );
-}
-
 export default function Dashboard() {
 
   const { currentCluster } = useCluster();
@@ -239,7 +122,6 @@ export default function Dashboard() {
   const [overview, setOverview] = useState(null);
   const [brokers, setBrokers] = useState([]);
   const [consumerGroups, setConsumerGroups] = useState([]);
-
 
   /* Входящие сообщения в секунду */
   const [messagesIn] = useState(0);
@@ -259,27 +141,9 @@ export default function Dashboard() {
   const [showOutgoing, setShowOutgoing] =
     useState(true);
 
-  /*
-  ==================================================
-  Данные графика текущего периода
-
-  Автоматически изменяются
-  при выборе периода Dashboard.
-  ==================================================
-  */
+  /* Данные графика текущего периода
+  Автоматически изменяются при выборе периода Dashboard. */
   const chartData = THROUGHPUT_DATA[timeRange.id] || [];
-
-  /*
-  ==================================================
-  Последняя точка графика
-
-  Используется для отображения
-  актуальных значений метрик
-  в заголовке панели.
-  ==================================================
-  */
-  const latestPoint =
-    chartData[chartData.length - 1];
 
   /* Загрузка данных мониторинга */
   useEffect(() => {
@@ -351,49 +215,7 @@ export default function Dashboard() {
 
     return (
 
-    /*
-       ============================================================
-       Dashboard мониторинга Kafka-кластера
-
-       Структура страницы:
-
-       1. Верхний ряд KPI-карточек
-          - Брокеры
-          - Топики
-          - Партиции
-          - Группы потребителей
-          - Сообщения
-
-       2. Основная область мониторинга
-          - График пропускной способности кластера
-          - Таблица брокеров
-
-       3. Нижняя область
-          - Топ топиков
-          - Consumer Lag
-          - Последние события
-
-       Все блоки являются контейнерами для будущего
-       наполнения реальными метриками Kafka.
-       ============================================================
-    */
-
     <div className="dashboard-container">
-
-       {/* ==========================================================
-           Панель управления Dashboard
-
-           Содержит:
-
-           - выбор периода отображения
-           - ручное обновление данных
-
-           В дальнейшем:
-           15 минут
-           1 час
-           6 часов
-           24 часа
-       ========================================================== */}
 
        {/* ======================================================
            Заголовок страницы Dashboard
@@ -445,15 +267,9 @@ export default function Dashboard() {
 
        </div>
 
-      {/*
-         ============================================================
-         KPI-КАРТОЧКИ
-
+      {/* KPI-КАРТОЧКИ
          Основные показатели состояния Kafka-кластера.
-
-         Отображаются всегда сверху страницы.
-         ============================================================
-      */}
+         Отображаются всегда сверху страницы. */}
       <div className="dashboard-kpi-grid">
 
         {/*
@@ -556,8 +372,6 @@ export default function Dashboard() {
 
         </div>
 
-
-
         <div className="kpi-card">
 
           <div className="kpi-header">
@@ -644,197 +458,24 @@ export default function Dashboard() {
 
 
       </div>
-      {/*
-         ============================================================
-         ОСНОВНАЯ ОБЛАСТЬ DASHBOARD
+      {/* ОСНОВНАЯ ОБЛАСТЬ DASHBOARD
 
          Левая панель:
          график нагрузки кластера.
 
          Правая панель:
-         таблица брокеров.
-         ============================================================
-      */}
+         таблица брокеров. */}
       <div className="dashboard-main-grid">
 
-        {/* ==========================================================
-            График пропускной способности Kafka-кластера
+        <ThroughputPanel
+          data={chartData}
+          showIncoming={showIncoming}
+          showOutgoing={showOutgoing}
+          onToggleIncoming={() => setShowIncoming(!showIncoming)}
+          onToggleOutgoing={() => setShowOutgoing(!showOutgoing)}
+        />
 
-            Отображает:
-
-            - входящие сообщения в секунду
-            - исходящие сообщения в секунду
-
-            Временной диапазон выбирается
-            через панель управления Dashboard.
-
-            В дальнейшем данные будут
-            поступать из Kafka Monitoring API.
-
-        ========================================================== */}
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
-
-            <div className="throughput-header-info">
-
-              <div className="throughput-title">
-                Пропускная способность кластера
-              </div>
-
-              <div className="throughput-current-values">
-
-                <span className="incoming-value">
-                  Входящие: {latestPoint?.incoming ?? 0} msg/s
-                </span>
-
-                <span className="outgoing-value">
-                  Исходящие: {latestPoint?.outgoing ?? 0} msg/s
-                </span>
-
-              {/* переключатели */}
-              <div className="throughput-toggles">
-
-                <button
-                  className={
-                    showIncoming
-                      ? 'toggle-button active'
-                      : 'toggle-button'
-                  }
-                  onClick={() =>
-                    setShowIncoming(!showIncoming)
-                  }
-                >
-                  Входящие
-                </button>
-
-                <button
-                  className={
-                    showOutgoing
-                      ? 'toggle-button active'
-                      : 'toggle-button'
-                  }
-                  onClick={() =>
-                    setShowOutgoing(!showOutgoing)
-                  }
-                >
-                  Исходящие
-                </button>
-
-              </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          <div className="panel-body throughput-chart">
-
-            <ResponsiveContainer
-              width="100%"
-              height={260}
-            >
-              {/* ==========================================================
-                  Настройка осей графика
-
-                  XAxis
-                  - временная шкала
-
-                  YAxis
-                  - количество сообщений
-
-                  Стилизация выполнена
-                  в стиле Grafana.
-
-              ========================================================== */}
-              <LineChart data={chartData}>
-
-                {/* Сетка графика */}
-                <CartesianGrid
-                  stroke="var(--border-color)"
-                  strokeDasharray="4 4"
-                />
-
-                {/* Цвет текста временной шкалы */}
-                <XAxis
-                  dataKey="time"
-                  tick={{
-                    fill: 'var(--text-secondary)',
-                    fontSize: 12
-                  }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-
-                {/* Левая шкала значений */}
-                <YAxis
-                  tick={{
-                    fill: 'var(--text-secondary)',
-                    fontSize: 12
-                  }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                {/* ==========================================================
-                    Подсказка графика
-
-                    Отображает значения метрик
-                    при наведении курсора мыши.
-
-                    Стилизована под общий интерфейс
-                    Kafka System Control и Grafana.
-                ========================================================== */}
-                <Tooltip
-                  content={<ThroughputTooltip />}
-                  cursor={{
-                    stroke: '#3b82f6',
-                    strokeWidth: 1,
-                    strokeDasharray: '4 4'
-                  }}
-                />
-                {/* Линия входящего трафика */}
-                {
-                  showIncoming && (
-
-                    <Line
-                      type="natural"
-                      dataKey="incoming"
-                      name="Входящие сообщения"
-                      stroke="#3b82f6"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-
-                  )
-                }
-                {/* Линия исходящего трафика */}
-                {
-                  showOutgoing && (
-
-                    <Line
-                      type="natural"
-                      dataKey="outgoing"
-                      name="Исходящие сообщения"
-                      stroke="#8b5cf6"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-
-                  )
-                }
-
-              </LineChart>
-
-            </ResponsiveContainer>
-
-          </div>
-
-        </div>
-
-        {/*
-           Таблица брокеров Kafka-кластера.
-        */}
+        {/* Таблица брокеров Kafka-кластера. */}
         <div className="dashboard-panel">
 
           <div className="panel-header">
@@ -923,15 +564,10 @@ export default function Dashboard() {
 
       </div>
 
-      {/*
-         ============================================================
-         НИЖНЯЯ ОБЛАСТЬ DASHBOARD
+      {/* НИЖНЯЯ ОБЛАСТЬ DASHBOARD
 
          Содержит дополнительные панели мониторинга.
-
-         Будут реализованы позднее.
-         ============================================================
-      */}
+         Будут реализованы позднее. */}
       <div className="dashboard-bottom-grid">
 
         {/*
@@ -968,17 +604,14 @@ export default function Dashboard() {
 
         </div>
 
-        {/*
-           Последние события Kafka-кластера.
+        {/* Последние события Kafka-кластера.
 
            В будущем здесь будут отображаться:
-
            - создание топиков
            - удаление топиков
            - подключение брокеров
            - смена контроллера
-           - ошибки кластера
-        */}
+           - ошибки кластера */}
         <div className="dashboard-panel">
 
           <div className="panel-header">
