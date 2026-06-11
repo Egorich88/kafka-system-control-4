@@ -122,6 +122,38 @@ type DashboardPartitionsResponse struct { Total int `json:"total"` }
 /* Общее количество сообщений во всех топиках */
 type DashboardMessagesTotalResponse struct { Total int64 `json:"total"` }
 
+/*
+   DashboardThroughputPoint
+
+   Точка графика пропускной способности.
+
+   Используется Dashboard для отображения
+   входящего и исходящего потока сообщений.
+*/
+type DashboardThroughputPoint struct {
+
+	/* Время точки */
+	Time string `json:"time"`
+
+	/* Входящий поток */
+	Incoming int64 `json:"incoming"`
+
+	/* Исходящий поток */
+	Outgoing int64 `json:"outgoing"`
+}
+
+/*
+   DashboardThroughputResponse
+
+   Ответ API для графика
+   пропускной способности кластера.
+*/
+type DashboardThroughputResponse struct {
+
+	/* Набор точек графика */
+	Points []DashboardThroughputPoint `json:"points"`
+}
+
 /* getDashboardMessagesTotalHandler
 
    HTTP-обработчик, возвращающий общее количество сообщений
@@ -647,5 +679,66 @@ func getDashboardPartitionsHandler(
 		DashboardPartitionsResponse{
 			Total: totalPartitions,
 		},
+	)
+}
+/*
+   getDashboardThroughputHandler
+
+   Возвращает данные графика
+   пропускной способности кластера.
+
+   В текущей версии используются
+   временные тестовые данные.
+
+   В дальнейшем будут заменены
+   реальными метриками Kafka.
+*/
+func getDashboardThroughputHandler(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+
+	w.Header().Set(
+		"Access-Control-Allow-Origin",
+		"*",
+	)
+
+	w.Header().Set(
+		"Content-Type",
+		"application/json",
+	)
+
+	response := DashboardThroughputResponse{
+
+		Points: []DashboardThroughputPoint{
+
+			{
+				Time: "00",
+				Incoming: 120,
+				Outgoing: 100,
+			},
+
+			{
+				Time: "05",
+				Incoming: 240,
+				Outgoing: 180,
+			},
+
+			{
+				Time: "10",
+				Incoming: 430,
+				Outgoing: 390,
+			},
+
+			{
+				Time: "15",
+				Incoming: 610,
+				Outgoing: 570,
+			},
+		},
+	}
+
+	json.NewEncoder(w).Encode(
+		response,
 	)
 }

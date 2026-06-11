@@ -986,6 +986,12 @@ func main() {
     	getDashboardPartitionsHandler,
     )
 
+    /* Пропускная способность кластера */
+    http.HandleFunc(
+    	"/api/dashboard/throughput",
+    	getDashboardThroughputHandler,
+    )
+
     /* Endpoint: /api/dashboard/messages-total
 
     Назначение:

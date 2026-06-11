@@ -37,39 +37,6 @@ const TIME_RANGES = [
   { id: '24h', name: 'Последние 24 часа' }
 ];
 
-// Временные данные для графика пропускной способности (заглушка)
-const THROUGHPUT_DATA = {
-  '15m': [
-    { time: '00', incoming: 120, outgoing: 100 },
-    { time: '05', incoming: 240, outgoing: 180 },
-    { time: '10', incoming: 430, outgoing: 390 },
-    { time: '15', incoming: 610, outgoing: 570 }
-  ],
-  '1h': [
-    { time: '00', incoming: 120, outgoing: 100 },
-    { time: '15', incoming: 260, outgoing: 240 },
-    { time: '30', incoming: 430, outgoing: 390 },
-    { time: '45', incoming: 700, outgoing: 640 },
-    { time: '60', incoming: 620, outgoing: 590 }
-  ],
-  '6h': [
-    { time: '01h', incoming: 200, outgoing: 180 },
-    { time: '02h', incoming: 320, outgoing: 280 },
-    { time: '03h', incoming: 580, outgoing: 520 },
-    { time: '04h', incoming: 720, outgoing: 690 },
-    { time: '05h', incoming: 640, outgoing: 600 },
-    { time: '06h', incoming: 800, outgoing: 760 }
-  ],
-  '24h': [
-    { time: '04', incoming: 250, outgoing: 200 },
-    { time: '08', incoming: 420, outgoing: 390 },
-    { time: '12', incoming: 800, outgoing: 760 },
-    { time: '16', incoming: 680, outgoing: 630 },
-    { time: '20', incoming: 530, outgoing: 500 },
-    { time: '24', incoming: 910, outgoing: 870 }
-  ]
-};
-
 export default function Dashboard() {
   const { currentCluster } = useCluster();
 
@@ -77,6 +44,7 @@ export default function Dashboard() {
   const [overview, setOverview] = useState(null);      // общая информация о кластере
   const [brokers, setBrokers] = useState([]);          // список брокеров
   const [consumerGroups, setConsumerGroups] = useState([]); // группы потребителей
+  const [throughputData, setThroughputData] = useState([]); // данные графика пропускной способности
 
   // Заглушки для будущих метрик
   const [messagesIn] = useState(0);
@@ -85,9 +53,6 @@ export default function Dashboard() {
 
   // Выбранный временной диапазон для графика
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
-
-  // Данные графика для выбранного периода
-  const chartData = THROUGHPUT_DATA[timeRange.id] || [];
 
   // Загрузка данных при смене кластера
   useEffect(() => {
@@ -99,14 +64,16 @@ export default function Dashboard() {
   async function loadDashboard() {
     try {
       const headers = { 'X-Kafka-Bootstrap': currentCluster.bootstrapServers };
-      const [overviewResponse, brokersResponse, groupsResponse] = await Promise.all([
+      const [overviewResponse, brokersResponse, groupsResponse, throughputResponse] = await Promise.all([
         axios.get('/api/dashboard/overview', { headers }),
         axios.get('/api/dashboard/brokers', { headers }),
-        axios.get('/api/dashboard/consumer-groups', { headers })
+        axios.get('/api/dashboard/consumer-groups', { headers }),
+        axios.get('/api/dashboard/throughput', { headers })
       ]);
       setOverview(overviewResponse.data);
       setBrokers(brokersResponse.data.brokers || []);
       setConsumerGroups(groupsResponse.data.groups || []);
+      setThroughputData(throughputResponse.data.points || []);
     } catch (error) {
       console.error('Dashboard load error:', error);
     }
@@ -149,7 +116,7 @@ export default function Dashboard() {
 
         {/* Основная сетка: график пропускной способности + таблица брокеров */}
         <div className="dashboard-main-grid">
-          <ThroughputPanel data={chartData} />
+          <ThroughputPanel data={throughputData} />
           <BrokersPanel brokers={brokers} />
         </div>
 

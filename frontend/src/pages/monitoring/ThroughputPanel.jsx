@@ -77,7 +77,7 @@ export default function ThroughputPanel({ data }) {
   const [showOutgoing, setShowOutgoing] = useState(true);
 
   // Последняя точка для отображения текущих значений в заголовке
-  const latestPoint = data?.[data.length - 1];
+  const latestPoint = data?.length ? data[data.length - 1] : null;
 
   /**
    * Обработчик клика по линии входящих сообщений.
