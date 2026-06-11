@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Панель пропускной способности Kafka-кластера.
+ * Отображает график входящих и исходящих сообщений.
+ * Управление линиями: клик по линии – оставить только её,
+ * клик по фону графика – показать обе линии.
+ */
+
 import { useState } from 'react';
 import {
   ResponsiveContainer,
@@ -25,7 +32,16 @@ import {
   CartesianGrid
 } from 'recharts';
 
-// Устойчивый тултип – показывает только те линии, данные о которых есть в payload
+/**
+ * Кастомный тултип для графика.
+ * Отображает данные только для тех линий, которые присутствуют в payload.
+ * Это позволяет корректно работать при скрытых линиях.
+ *
+ * @param {Object} props - Свойства тултипа от Recharts.
+ * @param {boolean} props.active - Активен ли тултип.
+ * @param {Array} props.payload - Массив данных точек, на которые наведён курсор.
+ * @param {string} props.label - Метка оси X (время).
+ */
 function ThroughputTooltip({ active, payload, label }) {
   if (!active || !payload || !payload.length) return null;
 
@@ -49,27 +65,44 @@ function ThroughputTooltip({ active, payload, label }) {
   );
 }
 
+/**
+ * Панель пропускной способности кластера.
+ *
+ * @param {Object} props
+ * @param {Array} props.data - Массив точек графика: { time, incoming, outgoing }
+ */
 export default function ThroughputPanel({ data }) {
+  // Состояния видимости линий (управляются кликами, без кнопок)
   const [showIncoming, setShowIncoming] = useState(true);
   const [showOutgoing, setShowOutgoing] = useState(true);
 
+  // Последняя точка для отображения текущих значений в заголовке
   const latestPoint = data?.[data.length - 1];
 
-  // Клик по линии входящих – оставляем только входящие
+  /**
+   * Обработчик клика по линии входящих сообщений.
+   * Оставляет видимой только линию входящих.
+   */
   const handleIncomingClick = () => {
     if (showIncoming && !showOutgoing) return; // уже только входящие
     setShowIncoming(true);
     setShowOutgoing(false);
   };
 
-  // Клик по линии исходящих – оставляем только исходящие
+  /**
+   * Обработчик клика по линии исходящих сообщений.
+   * Оставляет видимой только линию исходящих.
+   */
   const handleOutgoingClick = () => {
     if (!showIncoming && showOutgoing) return; // уже только исходящие
     setShowIncoming(false);
     setShowOutgoing(true);
   };
 
-  // Клик по фону графика – показываем обе линии
+  /**
+   * Обработчик клика по фону графика.
+   * Показывает обе линии.
+   */
   const handleChartClick = () => {
     if (showIncoming && showOutgoing) return; // уже обе
     setShowIncoming(true);
@@ -91,25 +124,34 @@ export default function ThroughputPanel({ data }) {
           </div>
         </div>
       </div>
+
       <div className="panel-body throughput-chart">
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={data} onClick={handleChartClick}>
             <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
+
+            {/* Ось времени */}
             <XAxis
               dataKey="time"
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
             />
+
+            {/* Ось значений (сообщения/сек) */}
             <YAxis
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
             />
+
+            {/* Тултип с кастомным содержимым */}
             <Tooltip
               content={<ThroughputTooltip />}
               cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
             />
+
+            {/* Линия входящих сообщений */}
             {showIncoming && (
               <Line
                 type="natural"
@@ -118,11 +160,13 @@ export default function ThroughputPanel({ data }) {
                 stroke="#3b82f6"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2, fill: '#3b82f6' }}
+                activeDot={{ r: 5, stroke: '#ffffff', strokeWidth: 2, fill: '#3b82f6' }}
                 onClick={handleIncomingClick}
                 style={{ cursor: 'pointer' }}
               />
             )}
+
+            {/* Линия исходящих сообщений */}
             {showOutgoing && (
               <Line
                 type="natural"
@@ -131,7 +175,7 @@ export default function ThroughputPanel({ data }) {
                 stroke="#8b5cf6"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2, fill: '#8b5cf6' }}
+                activeDot={{ r: 5, stroke: '#ffffff', strokeWidth: 2, fill: '#8b5cf6' }}
                 onClick={handleOutgoingClick}
                 style={{ cursor: 'pointer' }}
               />

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Боковое меню (Sidebar) приложения Kafka System Control.
+ * Содержит логотип, информацию о версии, выбор/добавление кластера,
+ * основную навигацию по разделам, настройки и футер с лицензией.
+ */
+
+import { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import {
   FiHome,
   FiLayers,
@@ -27,323 +35,187 @@ import {
   FiSettings,
   FiGithub
 } from 'react-icons/fi';
-
-import { NavLink } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
 import packageJson from '../../../package.json';
 import Dropdown from '../common/Dropdown';
-
-/* Импорт версии обновления */
 import { getLatestVersion } from '../../services/versionService';
-
 import { useCluster } from '../../contexts/ClusterContext';
 
-/* Нормализация версии */
-function normalizeVersion(version) { return version.replace(/^v/, ''); }
+// =============================================================================
+// Вспомогательные функции для работы с версиями
+// =============================================================================
+
+/**
+ * Нормализует строку версии: удаляет ведущий символ 'v', если он есть.
+ * @param {string} version - Сырая строка версии (например, "v1.2.3" или "1.2.3").
+ * @returns {string} Нормализованная версия без префикса 'v'.
+ */
+function normalizeVersion(version) {
+  return version.replace(/^v/, '');
+}
+
+/**
+ * Сравнивает локальную и удалённую версии.
+ * @param {string} local  - Локальная версия (из package.json).
+ * @param {string} remote - Удалённая версия (с GitHub).
+ * @returns {number} 1, если удалённая новее; -1, если локальная новее; 0, если равны.
+ */
 function compareVersions(local, remote) {
-
   const l = local.split('.').map(Number);
-  const r = remote.replace(/^v/, '')
-                  .split('.')
-                  .map(Number);
-
+  const r = remote.replace(/^v/, '').split('.').map(Number);
   for (let i = 0; i < 3; i++) {
-
     if (r[i] > l[i]) return 1;
     if (r[i] < l[i]) return -1;
-
   }
-
   return 0;
-
 }
-export default function Sidebar({
-  onAddCluster,
-  onEditCluster
-}) {
 
-  const {
-    clusters,
-    currentCluster,
-    changeCluster
-  } = useCluster();
+// =============================================================================
+// Основной компонент Sidebar
+// =============================================================================
 
-  {/* Проверка версии */}
+/**
+ * Боковая панель навигации.
+ * @param {Object} props
+ * @param {Function} props.onAddCluster   - Колбэк для добавления нового кластера.
+ * @param {Function} props.onEditCluster  - Колбэк для редактирования текущего кластера.
+ */
+export default function Sidebar({ onAddCluster, onEditCluster }) {
+  const { clusters, currentCluster, changeCluster } = useCluster();
+  const version = packageJson.version;
+  const [latestVersion, setLatestVersion] = useState(null);
+
+  // ----- Проверка наличия обновлений (не чаще раза в час) -----
   useEffect(() => {
     const lastCheck = localStorage.getItem('lastVersionCheck');
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
-    if ( !lastCheck || now - Number(lastCheck) > oneHour ) { getLatestVersion().then(version => { setLatestVersion(version); localStorage.setItem( 'lastVersionCheck', now.toString() ); });
+    if (!lastCheck || now - Number(lastCheck) > oneHour) {
+      getLatestVersion().then(remoteVersion => {
+        setLatestVersion(remoteVersion);
+        localStorage.setItem('lastVersionCheck', now.toString());
+      });
     }
   }, []);
 
-  {/* объявляем переменную версии */}
-  const version = packageJson.version;
+  // Результат сравнения версий
+  const versionState = latestVersion ? compareVersions(version, latestVersion) : 0;
+  const hasUpdate = versionState === 1;      // доступна новая версия
+  const localIsNewer = versionState === -1; // локальная версия новее (может быть dev-сборка)
+  const hasCluster = clusters.length > 0 && Boolean(currentCluster);
 
-  {/* обновление версии */}
-  const [latestVersion, setLatestVersion] = useState(null);
-
-  {/* сравнение/нормализация версии */}
-  const versionState =
-    latestVersion
-      ? compareVersions(version, latestVersion)
-      : 0;
-
-  const hasUpdate =
-    versionState === 1;
-
-  const localIsNewer =
-    versionState === -1;
-
-  const hasCluster =
-    clusters.length > 0 &&
-    Boolean(currentCluster);
-
+  // =========================================================================
+  // Рендер
+  // =========================================================================
   return (
-
     <aside className="sidebar">
-
-      {/* ========================= ВЕРХНЯЯ ОБЛАСТЬ (TOP) ========================= */}
-
+      {/* -------------------- Верхняя область (логотип + кластер) -------------------- */}
       <div className="sidebar-top">
-
-        {/* LOGO */}
-
+        {/* Логотип и название проекта */}
         <div className="sidebar-logo">
-
-          <img
-            src="/logo.svg"
-            alt="Kafka System Control"
-          />
-
+          <img src="/logo.svg" alt="Kafka System Control" />
           <div>
-
-            <h2>
-              Kafka System Control
-            </h2>
-            {/* Отображение версии */}
+            <h2>Kafka System Control</h2>
+            {/* Ссылка на релизы с индикатором обновления */}
             <a
               href="https://github.com/Egorich88/kafka-system-control-4/releases"
               target="_blank"
               rel="noopener noreferrer"
-              className={`sidebar-version ${
-                hasUpdate ? 'update-available' : ''
-              }`}
+              className={`sidebar-version ${hasUpdate ? 'update-available' : ''}`}
               title={
                 hasUpdate
                   ? `Доступна версия ${latestVersion}`
                   : localIsNewer
-                    ? `Локальная версия новее GitHub`
-                    : `Актуальная версия`
+                  ? `Локальная версия новее GitHub`
+                  : `Актуальная версия`
               }
             >
-              {/* Светодиод с версией */}
               <span className="version-label">
                 Version {version}
-                {hasUpdate && (
-                  <span className="version-update-dot" />
-                )}
+                {hasUpdate && <span className="version-update-dot" />}
               </span>
             </a>
-
           </div>
-
         </div>
 
-        {/* CLUSTER */}
-
+        {/* Блок выбора / добавления кластера */}
         <div className="sidebar-cluster">
-
           <div className="cluster-top">
-
-            <span>
-              КЛАСТЕР
-            </span>
-
+            <span>КЛАСТЕР</span>
           </div>
-
           {hasCluster ? (
-
             <div className="cluster-row">
-
               <Dropdown
                 selectedItem={currentCluster}
-                items={clusters.filter(
-                  cluster =>
-                    cluster.id !== currentCluster.id
-                )}
+                items={clusters.filter(cluster => cluster.id !== currentCluster.id)}
                 onSelect={changeCluster}
                 addLabel="+ Добавить кластер"
                 onAdd={onAddCluster}
-                statusResolver={(cluster) =>
-                  cluster?.connectionStatus || 'unknown'
-                }
+                statusResolver={cluster => cluster?.connectionStatus || 'unknown'}
               />
-
               <FiSliders
                 className="cluster-settings-icon"
                 title="Настройки кластера"
                 onClick={onEditCluster}
               />
-
             </div>
-
           ) : (
-
-            <div
-                className="cluster-add-link"
-                onClick={onAddCluster}
-              >
-                + Добавить кластер
-              </div>
-            )}
-
+            <div className="cluster-add-link" onClick={onAddCluster}>
+              + Добавить кластер
+            </div>
+          )}
         </div>
 
-        {/* ========================= НАВИГАЦИЯ (NAVIGATION) ========================= */}
-
+        {/* -------------------- Основная навигация (отображается только при выбранном кластере) -------------------- */}
         {hasCluster && (
-
           <nav className="sidebar-nav">
-
-            <NavLink
-              to="/"
-              end
-              className="sidebar-link"
-            >
-
+            <NavLink to="/" end className="sidebar-link">
               <FiHome />
-
-              <span>
-                Обзор
-              </span>
-
+              <span>Обзор</span>
             </NavLink>
-
-            <NavLink
-              to="/topics"
-              className="sidebar-link"
-            >
-
+            <NavLink to="/topics" className="sidebar-link">
               <FiLayers />
-
-              <span>
-                Топики
-              </span>
-
+              <span>Топики</span>
             </NavLink>
-
-            <NavLink
-              to="/groups"
-              className="sidebar-link"
-            >
-
+            <NavLink to="/groups" className="sidebar-link">
               <FiUsers />
-
-              <span>
-                Консьюмеры
-              </span>
-
+              <span>Консьюмеры</span>
             </NavLink>
-
-            <NavLink
-              to="/offset-reset"
-              className="sidebar-link"
-            >
-
+            <NavLink to="/offset-reset" className="sidebar-link">
               <FiRotateCcw />
-
-              <span>
-                Сброс оффсетов
-              </span>
-
+              <span>Сброс оффсетов</span>
             </NavLink>
-
-            <NavLink
-              to="/search"
-              className="sidebar-link"
-            >
-
+            <NavLink to="/search" className="sidebar-link">
               <FiSearch />
-
-              <span>
-                Поиск сообщений
-              </span>
-
+              <span>Поиск сообщений</span>
             </NavLink>
-
-            <NavLink
-              to="/acls"
-              className="sidebar-link"
-            >
-
+            <NavLink to="/acls" className="sidebar-link">
               <FiShield />
-
-              <span>
-                ACL
-              </span>
-
+              <span>ACL</span>
             </NavLink>
-
-            <NavLink
-              to="/alerts"
-              className="sidebar-link"
-            >
-
+            <NavLink to="/alerts" className="sidebar-link">
               <FiAlertTriangle />
-
-              <span>
-                Оповещения
-              </span>
-
+              <span>Оповещения</span>
             </NavLink>
-
-            <NavLink
-              to="/logs"
-              className="sidebar-link"
-            >
-
+            <NavLink to="/logs" className="sidebar-link">
               <FiFileText />
-
-              <span>
-                Логи
-              </span>
-
+              <span>Логи</span>
             </NavLink>
-
           </nav>
-
         )}
-
       </div>
 
-      {/* ========================= НИЖНИЙ КОЛОНТИТУЛ (BOTTOM) ========================= */}
-
+      {/* -------------------- Нижняя область (настройки + футер) -------------------- */}
       <div className="sidebar-bottom">
-
-        {/* НАСТРОЙКИ */}
-
+        {/* Настройки */}
         <nav className="sidebar-nav sidebar-settings-nav">
-
-          <NavLink
-            to="/settings"
-            className="sidebar-link"
-          >
-
+          <NavLink to="/settings" className="sidebar-link">
             <FiSettings />
-
-            <span>
-              Настройки
-            </span>
-
+            <span>Настройки</span>
           </NavLink>
-
         </nav>
 
-        {/* НИЖНИЙ КОЛОНТИТУЛ (FOOTER) */}
-
+        {/* Футер: ссылка на GitHub и лицензия */}
         <div className="sidebar-footer">
-
           <a
             href="https://github.com/Egorich88/kafka-system-control-4"
             target="_blank"
@@ -351,30 +223,19 @@ export default function Sidebar({
             className="footer-project-link"
             title="Автор продукта"
           >
-
             <FiGithub className="footer-github-icon" />
-
-            <span>
-              Egorich88
-            </span>
-
+            <span>Egorich88</span>
           </a>
-
           <a
             href="https://www.apache.org/licenses/LICENSE-2.0"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-license"
           >
-
             Apache License 2.0
-
           </a>
-
         </div>
-
       </div>
-
     </aside>
   );
 }
