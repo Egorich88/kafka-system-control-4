@@ -24,21 +24,6 @@ import {
   FiPlus,
   FiStar,
 
-  /* KPI карточки */
-  FiServer,
-  FiLayers,
-  FiGrid,
-  FiUsers,
-
-  /* Входящий поток */
-  FiArrowDown,
-
-  /* Исходящий поток */
-  FiArrowUp,
-
-  /* Under Replicated */
-  FiAlertTriangle,
-
   /* Панель управления */
   FiClock,
   FiRotateCw
@@ -46,6 +31,7 @@ import {
 
 import { useCluster } from '../contexts/ClusterContext';
 import ThroughputPanel from './monitoring/ThroughputPanel';
+import KpiCards from './monitoring/KpiCards';
 
 /* Периоды отображения Dashboard. Используются для выбора диапазона отображения метрик и графиков. */
 const TIME_RANGES = [
@@ -267,197 +253,16 @@ export default function Dashboard() {
 
        </div>
 
-      {/* KPI-КАРТОЧКИ
-         Основные показатели состояния Kafka-кластера.
-         Отображаются всегда сверху страницы. */}
-      <div className="dashboard-kpi-grid">
+      {/* KPI карточки */}
+      <KpiCards
+        brokers={brokers}
+        overview={overview}
+        consumerGroups={consumerGroups}
+        messagesIn={messagesIn}
+        messagesOut={messagesOut}
+        underReplicated={underReplicated}
+      />
 
-        {/*
-           Количество брокеров в кластере.
-        */}
-        <div className="kpi-card">
-
-          <div className="kpi-header">
-
-            <FiServer className="kpi-icon kpi-icon-blue" />
-
-            <div className="kpi-title">
-              Брокеры
-            </div>
-
-          </div>
-
-          <div className="kpi-value">
-            {brokers.length}
-          </div>
-
-          <div className="kpi-sub">
-            Онлайн: {brokers.length}
-          </div>
-
-        </div>
-
-        {/*
-           Количество топиков Kafka.
-        */}
-        <div className="kpi-card">
-
-          <div className="kpi-header">
-
-            <FiLayers className="kpi-icon kpi-icon-purple" />
-
-            <div className="kpi-title">
-              Топики
-            </div>
-
-          </div>
-
-          <div className="kpi-value">
-            {overview?.topics ?? 0}
-          </div>
-
-          <div className="kpi-sub">
-            Активных: {overview?.topics ?? 0}
-          </div>
-
-        </div>
-
-        {/*
-           Общее количество партиций.
-        */}
-        <div className="kpi-card">
-
-          <div className="kpi-header">
-
-            <FiGrid className="kpi-icon kpi-icon-orange" />
-
-            <div className="kpi-title">
-              Партиции
-            </div>
-
-          </div>
-
-          <div className="kpi-value">
-            {overview?.partitions ?? 0}
-          </div>
-
-          <div className="kpi-sub">
-            Всего партиций
-          </div>
-
-        </div>
-
-        {/*
-           Количество Consumer Groups.
-        */}
-        <div className="kpi-card">
-
-          <div className="kpi-header">
-
-            <FiUsers className="kpi-icon kpi-icon-green" />
-
-            <div className="kpi-title">
-              Группы потребителей
-            </div>
-
-          </div>
-
-          <div className="kpi-value">
-            {consumerGroups.length}
-          </div>
-
-          <div className="kpi-sub">
-            Активных групп
-          </div>
-
-        </div>
-
-        <div className="kpi-card">
-
-          <div className="kpi-header">
-
-            <FiArrowDown
-              className="kpi-icon kpi-icon-blue"
-            />
-
-            <div className="kpi-title">
-              Входящие сообщения
-            </div>
-
-          </div>
-
-          <div className="kpi-value">
-
-            {messagesIn}
-
-          </div>
-
-          <div className="kpi-sub">
-
-            сообщений/сек
-
-          </div>
-
-        </div>
-
-        <div className="kpi-card">
-
-          <div className="kpi-header">
-
-            <FiArrowUp
-              className="kpi-icon kpi-icon-purple"
-            />
-
-            <div className="kpi-title">
-              Исходящие сообщения
-            </div>
-
-          </div>
-
-          <div className="kpi-value">
-
-            {messagesOut}
-
-          </div>
-
-          <div className="kpi-sub">
-
-            сообщений/сек
-
-          </div>
-
-        </div>
-
-        <div className="kpi-card">
-
-          <div className="kpi-header">
-
-            <FiAlertTriangle
-              className="kpi-icon kpi-icon-red"
-            />
-
-            <div className="kpi-title">
-              Недореплицированные
-            </div>
-
-          </div>
-
-          <div className="kpi-value">
-
-            {underReplicated}
-
-          </div>
-
-          <div className="kpi-sub">
-
-            проблемных партиций
-
-          </div>
-
-        </div>
-
-
-      </div>
       {/* ОСНОВНАЯ ОБЛАСТЬ DASHBOARD
 
          Левая панель:
