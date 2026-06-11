@@ -33,6 +33,7 @@ import { useCluster } from '../contexts/ClusterContext';
 import ThroughputPanel from './monitoring/ThroughputPanel';
 import KpiCards from './monitoring/KpiCards';
 import BrokersPanel from './monitoring/BrokersPanel';
+import TopicsPanel from './monitoring/TopicsPanel';
 
 /* Периоды отображения Dashboard. Используются для выбора диапазона отображения метрик и графиков. */
 const TIME_RANGES = [
@@ -286,24 +287,9 @@ export default function Dashboard() {
 
          Содержит дополнительные панели мониторинга.
          Будут реализованы позднее. */}
+
       <div className="dashboard-bottom-grid">
-
-        {/*
-           Топ топиков по активности.
-        */}
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
-            Самые активные топики
-          </div>
-
-          <div className="panel-body">
-
-            Таблица будет реализована позже
-
-          </div>
-
-        </div>
+        <TopicsPanel />
 
         {/*
            Топ Consumer Groups по величине Lag.

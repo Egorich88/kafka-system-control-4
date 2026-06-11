@@ -18,16 +18,11 @@
             ТОП ТОПИКОВ ПО АКТИВНОСТИ.
 ===================================================== */
 
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
-            Самые активные топики
-          </div>
-
-          <div className="panel-body">
-
-            Таблица будет реализована позже
-
-          </div>
-
-        </div>
+export default function TopicsPanel() {
+  return (
+    <div className="dashboard-panel">
+      <div className="panel-header">Самые активные топики</div>
+      <div className="panel-body">Таблица будет реализована позже</div>
+    </div>
+  );
+}
