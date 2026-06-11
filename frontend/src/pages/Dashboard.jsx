@@ -32,6 +32,7 @@ import {
 import { useCluster } from '../contexts/ClusterContext';
 import ThroughputPanel from './monitoring/ThroughputPanel';
 import KpiCards from './monitoring/KpiCards';
+import BrokersPanel from './monitoring/BrokersPanel';
 
 /* Периоды отображения Dashboard. Используются для выбора диапазона отображения метрик и графиков. */
 const TIME_RANGES = [
@@ -271,7 +272,6 @@ export default function Dashboard() {
          Правая панель:
          таблица брокеров. */}
       <div className="dashboard-main-grid">
-
         <ThroughputPanel
           data={chartData}
           showIncoming={showIncoming}
@@ -279,94 +279,7 @@ export default function Dashboard() {
           onToggleIncoming={() => setShowIncoming(!showIncoming)}
           onToggleOutgoing={() => setShowOutgoing(!showOutgoing)}
         />
-
-        {/* Таблица брокеров Kafka-кластера. */}
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
-            Брокеры
-          </div>
-
-          <div className="panel-body">
-
-            {/* Таблица брокеров Kafka */}
-            <div className="broker-table">
-
-              {/* Заголовок таблицы */}
-              <div className="broker-table-header">
-
-                {/* Идентификатор брокера */}
-                <div>ID</div>
-
-                {/* Адрес подключения */}
-                <div>Адрес</div>
-
-                {/* Состояние брокера */}
-                <div>Статус</div>
-
-                {/* Является ли брокер контроллером */}
-                <div>Контроллер</div>
-
-              </div>
-
-              {/* Список брокеров */}
-              {
-                brokers.map((broker, index) => (
-
-                  <div
-                    key={index}
-                    className="broker-table-row"
-                  >
-
-                    {/* Идентификатор брокера */}
-                    <div>
-                      {broker.id}
-                    </div>
-
-                    {/* Адрес подключения */}
-                    <div>
-                      {broker.address}
-                    </div>
-
-                    {/* Статус брокера */}
-                    <div className="broker-status">
-
-                      <span className="broker-status-dot" />
-
-                      Онлайн
-
-                    </div>
-
-                    {/* Признак контроллера Kafka */}
-                    <div>
-
-                      {
-                        broker.controller
-                          ? (
-                              <span className="broker-controller-badge">
-                                Да
-                              </span>
-                            )
-                          : (
-                              <span className="broker-no-controller">
-                                Нет
-                              </span>
-                            )
-                      }
-
-                    </div>
-
-                  </div>
-
-                ))
-              }
-
-            </div>
-
-          </div>
-
-        </div>
-
+        <BrokersPanel brokers={brokers} />
       </div>
 
       {/* НИЖНЯЯ ОБЛАСТЬ DASHBOARD
