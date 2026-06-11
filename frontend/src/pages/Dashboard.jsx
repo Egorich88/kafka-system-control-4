@@ -86,10 +86,6 @@ export default function Dashboard() {
   // Выбранный временной диапазон для графика
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
 
-  // Управление отображением линий на графике
-  const [showIncoming, setShowIncoming] = useState(true);
-  const [showOutgoing, setShowOutgoing] = useState(true);
-
   // Данные графика для выбранного периода
   const chartData = THROUGHPUT_DATA[timeRange.id] || [];
 
@@ -153,13 +149,7 @@ export default function Dashboard() {
 
         {/* Основная сетка: график пропускной способности + таблица брокеров */}
         <div className="dashboard-main-grid">
-          <ThroughputPanel
-            data={chartData}
-            showIncoming={showIncoming}
-            showOutgoing={showOutgoing}
-            onToggleIncoming={() => setShowIncoming(!showIncoming)}
-            onToggleOutgoing={() => setShowOutgoing(!showOutgoing)}
-          />
+          <ThroughputPanel data={chartData} />
           <BrokersPanel brokers={brokers} />
         </div>
 

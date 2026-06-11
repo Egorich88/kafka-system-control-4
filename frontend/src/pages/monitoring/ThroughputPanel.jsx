@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-/*=========================================================================
-            ПАНЕЛЬ ПРОПУСКНОЙ СПОСОБНОСТИ KAFKA-КЛАСТЕРА
-
-    Отображает:
-        * входящий поток сообщений
-        * исходящий поток сообщений
-        * график нагрузки
-
-    Временной диапазон выбирается через панель управления Dashboard.
-    В дальнейшем данные будут поступать из Kafka Monitoring API
-============================================================================ */
+import { useState } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -35,31 +25,56 @@ import {
   CartesianGrid
 } from 'recharts';
 
-/* Tooltip остаётся без изменений */
+// Устойчивый тултип – показывает только те линии, данные о которых есть в payload
 function ThroughputTooltip({ active, payload, label }) {
   if (!active || !payload || !payload.length) return null;
+
+  const incomingItem = payload.find(p => p.dataKey === 'incoming');
+  const outgoingItem = payload.find(p => p.dataKey === 'outgoing');
+
   return (
     <div className="throughput-tooltip">
       <div className="throughput-tooltip-title">Время: {label}</div>
-      <div className="throughput-tooltip-row">
-        Входящие сообщения: <strong>{payload[0].value} msg/s</strong>
-      </div>
-      <div className="throughput-tooltip-row">
-        Исходящие сообщения: <strong>{payload[1].value} msg/s</strong>
-      </div>
+      {incomingItem && (
+        <div className="throughput-tooltip-row">
+          Входящие сообщения: <strong>{incomingItem.value} msg/s</strong>
+        </div>
+      )}
+      {outgoingItem && (
+        <div className="throughput-tooltip-row">
+          Исходящие сообщения: <strong>{outgoingItem.value} msg/s</strong>
+        </div>
+      )}
     </div>
   );
 }
 
-export default function ThroughputPanel({
-  data,                // массив точек { time, incoming, outgoing }
-  showIncoming,
-  showOutgoing,
-  onToggleIncoming,
-  onToggleOutgoing
-}) {
-  // последняя точка для отображения текущих значений
+export default function ThroughputPanel({ data }) {
+  const [showIncoming, setShowIncoming] = useState(true);
+  const [showOutgoing, setShowOutgoing] = useState(true);
+
   const latestPoint = data?.[data.length - 1];
+
+  // Клик по линии входящих – оставляем только входящие
+  const handleIncomingClick = () => {
+    if (showIncoming && !showOutgoing) return; // уже только входящие
+    setShowIncoming(true);
+    setShowOutgoing(false);
+  };
+
+  // Клик по линии исходящих – оставляем только исходящие
+  const handleOutgoingClick = () => {
+    if (!showIncoming && showOutgoing) return; // уже только исходящие
+    setShowIncoming(false);
+    setShowOutgoing(true);
+  };
+
+  // Клик по фону графика – показываем обе линии
+  const handleChartClick = () => {
+    if (showIncoming && showOutgoing) return; // уже обе
+    setShowIncoming(true);
+    setShowOutgoing(true);
+  };
 
   return (
     <div className="dashboard-panel">
@@ -73,36 +88,51 @@ export default function ThroughputPanel({
             <span className="outgoing-value">
               Исходящие: {latestPoint?.outgoing ?? 0} msg/s
             </span>
-            {/* Переключатели линий */}
-            <div className="throughput-toggles">
-              <button
-                className={showIncoming ? 'toggle-button active' : 'toggle-button'}
-                onClick={onToggleIncoming}
-              >
-                Входящие
-              </button>
-              <button
-                className={showOutgoing ? 'toggle-button active' : 'toggle-button'}
-                onClick={onToggleOutgoing}
-              >
-                Исходящие
-              </button>
-            </div>
           </div>
         </div>
       </div>
       <div className="panel-body throughput-chart">
         <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={data}>
+          <LineChart data={data} onClick={handleChartClick}>
             <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
-            <XAxis dataKey="time" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickLine={false} axisLine={false} />
-            <Tooltip content={<ThroughputTooltip />} cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }} />
+            <XAxis
+              dataKey="time"
+              tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip
+              content={<ThroughputTooltip />}
+              cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
+            />
             {showIncoming && (
-              <Line type="natural" dataKey="incoming" name="Входящие сообщения" stroke="#3b82f6" strokeWidth={2} dot={false} />
+              <Line
+                type="natural"
+                dataKey="incoming"
+                name="Входящие сообщения"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={false}
+                onClick={handleIncomingClick}
+                style={{ cursor: 'pointer' }}
+              />
             )}
             {showOutgoing && (
-              <Line type="natural" dataKey="outgoing" name="Исходящие сообщения" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+              <Line
+                type="natural"
+                dataKey="outgoing"
+                name="Исходящие сообщения"
+                stroke="#8b5cf6"
+                strokeWidth={2}
+                dot={false}
+                onClick={handleOutgoingClick}
+                style={{ cursor: 'pointer' }}
+              />
             )}
           </LineChart>
         </ResponsiveContainer>

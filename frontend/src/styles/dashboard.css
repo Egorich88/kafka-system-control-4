@@ -567,3 +567,23 @@
     color: var(--text-primary);
     border-color: var(--accent-color);
 }
+/* Убираем белый контур при клике на любую область графика,
+   включая сами линии (кривые) */
+.throughput-chart svg,
+.throughput-chart svg *,
+.throughput-chart path,
+.throughput-chart line,
+.throughput-chart polyline,
+.throughput-chart polygon,
+.throughput-chart rect {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Также на случай фокуса через клавиатуру */
+.throughput-chart svg:focus,
+.throughput-chart svg:focus-visible,
+.throughput-chart *:focus,
+.throughput-chart *:focus-visible {
+  outline: none !important;
+}
