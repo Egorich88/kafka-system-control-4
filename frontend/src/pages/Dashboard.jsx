@@ -35,6 +35,7 @@ import KpiCards from './monitoring/KpiCards';
 import BrokersPanel from './monitoring/BrokersPanel';
 import TopicsPanel from './monitoring/TopicsPanel';
 import ConsumerLagPanel from './monitoring/ConsumerLagPanel';
+import EventsPanel from './monitoring/EventsPanel';
 
 /* Периоды отображения Dashboard. Используются для выбора диапазона отображения метрик и графиков. */
 const TIME_RANGES = [
@@ -292,33 +293,9 @@ export default function Dashboard() {
       <div className="dashboard-bottom-grid">
         <TopicsPanel />
         <ConsumerLagPanel />
-
-        {/* Последние события Kafka-кластера.
-
-           В будущем здесь будут отображаться:
-           - создание топиков
-           - удаление топиков
-           - подключение брокеров
-           - смена контроллера
-           - ошибки кластера */}
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
-            Последние события
-          </div>
-
-          <div className="panel-body">
-
-            Список событий будет реализован позже
-
-          </div>
-
-        </div>
-
+        <EventsPanel />
       </div>
-
     </div>
-
   );
 }
 

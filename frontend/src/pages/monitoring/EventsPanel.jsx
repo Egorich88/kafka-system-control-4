@@ -24,16 +24,12 @@
       - смена контроллера
       - ошибки кластера
 ======================================================== */
-        <div className="dashboard-panel">
 
-          <div className="panel-header">
-            Последние события
-          </div>
-
-          <div className="panel-body">
-
-            Список событий будет реализован позже
-
-          </div>
-
-        </div>
+export default function EventsPanel() {
+  return (
+    <div className="dashboard-panel">
+      <div className="panel-header">Последние события</div>
+      <div className="panel-body">Список событий будет реализован позже</div>
+    </div>
+  );
+}
