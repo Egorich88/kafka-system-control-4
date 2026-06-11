@@ -118,6 +118,7 @@ export default function ThroughputPanel({ data }) {
                 stroke="#3b82f6"
                 strokeWidth={2}
                 dot={false}
+                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2, fill: '#3b82f6' }}
                 onClick={handleIncomingClick}
                 style={{ cursor: 'pointer' }}
               />
@@ -130,6 +131,7 @@ export default function ThroughputPanel({ data }) {
                 stroke="#8b5cf6"
                 strokeWidth={2}
                 dot={false}
+                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2, fill: '#8b5cf6' }}
                 onClick={handleOutgoingClick}
                 style={{ cursor: 'pointer' }}
               />
