@@ -14,146 +14,88 @@
  * limitations under the License.
  */
 
-// ===============================
-// ПЛОСКИЙ СПИСОК ТЕМ (НОВАЯ СТРУКТУРА UI)
-// ===============================
-// ===============================
-// FLAT THEMES (FINAL CLEAN STRUCTURE)
-// ===============================
-const THEMES = [
-  // ===============================
-  // BASE (самые важные)
-  // ===============================
-  { key: 'dark', label: 'Dark' },
-  { key: 'light', label: 'Light' },
-
-  // разделитель после базовых
-  { type: 'divider' },
-
-  // ===============================
-  // DEVELOPER THEMES
-  // ===============================
-  { key: 'github-dark', label: 'GitHub Dark' },
-  { key: 'github-light', label: 'GitHub Light' },
-  { key: 'dracula', label: 'Dracula' },
-  { key: 'nord', label: 'Nord' },
-  { key: 'material', label: 'Material Theme UI' },
-  { key: 'monokai-pro', label: 'Monokai Pro' },
-  { key: 'monocai', label: 'Monocai' },
-  { key: 'deep-ocean', label: 'Deep Ocean' },
-  { key: 'solarized-dark', label: 'Solarized Dark' },
-  { key: 'solarized-light', label: 'Solarized Light' },
-
-  // разделитель перед OS темами
-  { type: 'divider' },
-
-  // ===============================
-  // OS THEMES (НОВЫЕ)
-  // ===============================
-  // Mac
-  { key: 'mac', label: 'Mac' },
-
-  // Windows LIGHT
-  { key: 'windows', label: 'Windows' },
-
-  // Windows DARK (ОТДЕЛЬНАЯ ТЕМА)
-  { key: 'windows-dark', label: 'Windows Dark' },
-
-  // Linux
-  { key: 'linux', label: 'Linux' },
-
-  // разделитель перед experimental
-  { type: 'divider' },
-
-  // ===============================
-  // EXPERIMENTAL
-  // ===============================
-  { key: 'coffee', label: 'Coffee' },
-  { key: 'kitty', label: 'Kitty' },
-  { key: 'rainbow', label: 'Rainbow' }
-];
-
-import '../App.css';
-import '../styles/settings.css';
+/**
+ * @fileoverview Страница настроек приложения.
+ * Позволяет выбрать тему оформления из выпадающего списка.
+ * Названия тем – цветовые, без привязки к оригинальным именам.
+ */
 
 import { useState } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
-
 import { useTheme } from '../contexts/ThemeContext';
+import '../App.css';
+import '../styles/settings.css';
+
+/** Список тем: ключ (для кода) и отображаемая метка (цветовое название) */
+const THEMES = [
+  // Базовые темы
+  { key: 'dark', label: 'Dark' },
+  { key: 'light', label: 'Light' },
+  { type: 'divider' },
+
+  // Цветовые темы (названия отражают цветовую гамму)
+  { key: 'linux', label: 'Forest' },
+  { key: 'kitty', label: 'Lavender' },
+  { key: 'dracula', label: 'Purple' },
+  { key: 'nord', label: 'Ice Blue' },
+  { key: 'solarized-light', label: 'Amber Light' },
+  { key: 'solarized-dark', label: 'Amber Dark' },
+  { key: 'coffee', label: 'Brown' },
+  { key: 'material', label: 'Indigo' },
+  { key: 'monocai', label: 'Violet' },
+  { key: 'monokai-pro', label: 'Golden' },
+  { key: 'deep-ocean', label: 'Navy' },
+  { key: 'github-light', label: 'Graphite Light' },
+  { key: 'github-dark', label: 'Graphite Dark' },
+  { key: 'mac', label: 'Silver' },
+  { key: 'windows-dark', label: 'Charcoal' },
+  { type: 'divider' },
+
+  // Экспериментальная
+  { key: 'rainbow', label: 'Rainbow' }
+];
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   const [isThemeOpen, setIsThemeOpen] = useState(false);
+
+  // Текущая выбранная тема для отображения в заголовке дропдауна
+  const currentThemeLabel = THEMES.find(t => t.key === theme)?.label || theme;
+
   return (
     <div className="settings-page">
       <div className="settings-page-header">
-        <h1>
-          Настройки
-        </h1>
-        <p>
-          Персонализация интерфейса Kafka System Control
-        </p>
+        <h1>Settings</h1>
+        <p>Customize the interface appearance of Kafka System Control</p>
       </div>
+
       <div className="settings-card">
         <div className="settings-block">
           <div className="settings-block-info">
-            <h3>
-              Темы
-            </h3>
-            <p>
-              Настройка внешнего вида интерфейса
-            </p>
+            <h3>Themes</h3>
+            <p>Choose a color scheme for the interface</p>
           </div>
-          <div className="dropdown-wrapper">
 
+          <div className="dropdown-wrapper">
             <button
               type="button"
-              className={`dropdown-selected ${
-                isThemeOpen ? 'open' : ''
-              }`}
-              onClick={() =>
-                setIsThemeOpen(!isThemeOpen)
-              }
+              className={`dropdown-selected ${isThemeOpen ? 'open' : ''}`}
+              onClick={() => setIsThemeOpen(!isThemeOpen)}
             >
-
               <div className="dropdown-selected-left">
-
-                <span className="dropdown-selected-name">
-
-                  {THEMES.find(t => t.key === theme)?.label || theme}
-
-                </span>
-
+                <span className="dropdown-selected-name">{currentThemeLabel}</span>
               </div>
-
               <div className="dropdown-chevron">
-
-                {isThemeOpen ? (
-                  <FiChevronUp />
-                ) : (
-                  <FiChevronDown />
-                )}
-
+                {isThemeOpen ? <FiChevronUp /> : <FiChevronDown />}
               </div>
-
             </button>
 
             {isThemeOpen && (
               <div className="dropdown-menu">
-
-                {THEMES.map((t, index) => {
-
-                  // 🔹 разделитель
+                {THEMES.map((t, idx) => {
                   if (t.type === 'divider') {
-                    return (
-                      <div
-                        key={`divider-${index}`}
-                        className="dropdown-divider"
-                      />
-                    );
+                    return <div key={`divider-${idx}`} className="dropdown-divider" />;
                   }
-
-                  // 🔹 обычная тема
                   return (
                     <div
                       key={t.key}

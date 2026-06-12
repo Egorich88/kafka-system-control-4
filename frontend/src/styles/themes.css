@@ -13,71 +13,103 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* ========================= DARK ========================= */
- :root[data-theme='dark'] {
-     --bg-primary: #0b1220;
-     --bg-secondary: #0f172a;
-     --panel-bg: #111827;
-     --card-bg: #1b1f2a;
-     --dropdown-bg: #182133;
-     --sidebar-bg: linear-gradient( 180deg, #071226 0%, #08101d 100% );
-     --sidebar-hover: rgba(255,255,255,0.06);
-     --border-color: rgba(255,255,255,0.08);
-     --text-primary: #f8fafc;
-     --text-secondary: rgba(255,255,255,0.65);
-     --accent-color: #3b82f6;
-     --accent-hover: #60a5fa;
-     --input-bg: #1b1f2a;
-     --input-focus: rgba(59,130,246,0.15);
-     --success-color: #22c55e;
-     --danger-color: #ef4444;
-     --shadow-primary: 0 20px 60px rgba(0,0,0,0.45);
-     --table-row-hover: rgba(255,255,255,0.03);
+
+/* ============================================================
+   ТЕМЫ ОФОРМЛЕНИЯ KAFKA SYSTEM CONTROL
+   Цветовые названия отображаются в интерфейсе,
+   ключи (data-theme) используются в коде.
+============================================================ */
+
+/* Базовые темы */
+:root[data-theme='dark'] {
+    --bg-primary: #0b1220;
+    --bg-secondary: #0f172a;
+    --panel-bg: #111827;
+    --card-bg: #1b1f2a;
+    --dropdown-bg: #182133;
+    --sidebar-bg: linear-gradient(180deg, #071226 0%, #08101d 100%);
+    --sidebar-hover: rgba(255,255,255,0.06);
+    --border-color: rgba(255,255,255,0.08);
+    --text-primary: #f8fafc;
+    --text-secondary: rgba(255,255,255,0.65);
+    --accent-color: #3b82f6;
+    --accent-hover: #60a5fa;
+    --input-bg: #1b1f2a;
+    --input-focus: rgba(59,130,246,0.15);
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,0.45);
+    --table-row-hover: rgba(255,255,255,0.03);
 }
-/* ========================= LIGHT ========================= */
- :root[data-theme='light'] {
-     --bg-primary: #f3f6fb;
-     --bg-secondary: #ffffff;
-     --panel-bg: #ffffff;
-     --card-bg: #ffffff;
-     --dropdown-bg: #ffffff;
-     --sidebar-bg: linear-gradient( 180deg, #ffffff 0%, #f5f7fb 100% );
-     --sidebar-hover: rgba(15,23,42,0.05);
-     --border-color: rgba(15,23,42,0.08);
-     --text-primary: #0f172a;
-     --text-secondary: rgba(15,23,42,0.65);
-     --accent-color: #2563eb;
-     --accent-hover: #3b82f6;
-     --input-bg: #ffffff;
-     --input-focus: rgba(37,99,235,0.12);
-     --success-color: #16a34a;
-     --danger-color: #dc2626;
-     --shadow-primary: 0 10px 40px rgba(15,23,42,0.08);
-     --table-row-hover: rgba(15,23,42,0.03);
+
+:root[data-theme='light'] {
+    --bg-primary: #f3f6fb;
+    --bg-secondary: #ffffff;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #ffffff;
+    --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
+    --sidebar-hover: rgba(15,23,42,0.05);
+    --border-color: rgba(15,23,42,0.08);
+    --text-primary: #0f172a;
+    --text-secondary: rgba(15,23,42,0.65);
+    --accent-color: #2563eb;
+    --accent-hover: #3b82f6;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,0.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 40px rgba(15,23,42,0.08);
+    --table-row-hover: rgba(15,23,42,0.03);
 }
-/* ========================= KITTY ========================= */
- :root[data-theme='kitty'] {
-     --bg-primary: #09111f;
-     --bg-secondary: #111827;
-     --panel-bg: #1e293b;
-     --card-bg: rgba(255,255,255,0.04);
-     --dropdown-bg: #1b2438;
-     --sidebar-bg: linear-gradient( 180deg, #0b1220 0%, #111827 100% );
-     --sidebar-hover: rgba(255,255,255,0.05);
-     --border-color: #334155;
-     --text-primary: #f8fafc;
-     --text-secondary: #94a3b8;
-     --accent-color: #8b5cf6;
-     --accent-hover: #a78bfa;
-     --input-bg: rgba(255,255,255,0.04);
-     --input-focus: rgba(139,92,246,0.18);
-     --success-color: #22c55e;
-     --danger-color: #ef4444;
-     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-     --table-row-hover: rgba(255,255,255,0.03);
+
+/* Цветовые темы (ключи используются в коде) */
+:root[data-theme='linux'] {
+    /* Forest — тёмно-зелёный, в стиле терминала */
+    --bg-primary: #0a0f0d;
+    --bg-secondary: #0f1a14;
+    --panel-bg: #111f18;
+    --card-bg: #13261d;
+    --dropdown-bg: #0f1a14;
+    --sidebar-bg: linear-gradient(180deg, #0a0f0d 0%, #0f1a14 100%);
+    --sidebar-hover: rgba(34,197,94,0.08);
+    --border-color: rgba(34,197,94,0.15);
+    --text-primary: #d1fae5;
+    --text-secondary: rgba(209,250,229,0.65);
+    --accent-color: #22c55e;
+    --accent-hover: #4ade80;
+    --input-bg: #111f18;
+    --input-focus: rgba(34,197,94,0.15);
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,0.6);
+    --table-row-hover: rgba(34,197,94,0.05);
 }
-/* ========================= DRACULA ========================= */
+
+:root[data-theme='kitty'] {
+    /* Lavender — лавандовый, мягкий фиолетовый оттенок */
+    --bg-primary: #09111f;
+    --bg-secondary: #111827;
+    --panel-bg: #1e293b;
+    --card-bg: rgba(255,255,255,0.04);
+    --dropdown-bg: #1b2438;
+    --sidebar-bg: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+    --sidebar-hover: rgba(255,255,255,0.05);
+    --border-color: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-color: #8b5cf6;
+    --accent-hover: #a78bfa;
+    --input-bg: rgba(255,255,255,0.04);
+    --input-focus: rgba(139,92,246,0.18);
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
+    --table-row-hover: rgba(255,255,255,0.03);
+}
+
 :root[data-theme='dracula'] {
+    /* Purple — насыщенный пурпурный, как в теме Dracula */
     --bg-primary: #282a36;
     --bg-secondary: #21222c;
     --panel-bg: #343746;
@@ -97,8 +129,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.04);
 }
-/* ========================= NORD ========================= */
+
 :root[data-theme='nord'] {
+    /* Ice Blue — ледяной голубой, холодная гамма Nord */
     --bg-primary: #2e3440;
     --bg-secondary: #3b4252;
     --panel-bg: #434c5e;
@@ -118,8 +151,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.04);
 }
-/* ========================= SOLARIZED LIGHT ========================= */
+
 :root[data-theme='solarized-light'] {
+    /* Amber Light — светло-янтарный, тёплая светлая гамма */
     --bg-primary: #fdf6e3;
     --bg-secondary: #eee8d5;
     --panel-bg: #fdf6e3;
@@ -139,8 +173,9 @@
     --shadow-primary: 0 10px 40px rgba(0,0,0,0.08);
     --table-row-hover: rgba(0,0,0,0.03);
 }
-/* ========================= SOLARIZED DARK ========================= */
+
 :root[data-theme='solarized-dark'] {
+    /* Amber Dark — тёмно-янтарный, тёплая тёмная гамма */
     --bg-primary: #002b36;
     --bg-secondary: #073642;
     --panel-bg: #073642;
@@ -160,8 +195,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.03);
 }
-/* ========================= COFFEE ========================= */
+
 :root[data-theme='coffee'] {
+    /* Brown — коричневый, оттенки кофе */
     --bg-primary: #1c1612;
     --bg-secondary: #2a211c;
     --panel-bg: #2f241e;
@@ -181,8 +217,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.03);
 }
-/* ========================= MATERIAL THEME UI ========================= */
+
 :root[data-theme='material'] {
+    /* Indigo — глубокий индиго, Material Theme UI */
     --bg-primary: #0f111a;
     --bg-secondary: #1a1f2e;
     --panel-bg: #1f2633;
@@ -202,8 +239,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.04);
 }
-/* ========================= MONOCAI ========================= */
+
 :root[data-theme='monocai'] {
+    /* Violet — фиолетовый, тёплый оттенок */
     --bg-primary: #1a1b26;
     --bg-secondary: #24283b;
     --panel-bg: #1f2335;
@@ -223,8 +261,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.03);
 }
-/* ========================= MONOKAI PRO ========================= */
+
 :root[data-theme='monokai-pro'] {
+    /* Golden — золотистый, тёплый жёлто-оранжевый */
     --bg-primary: #2d2a2e;
     --bg-secondary: #221f22;
     --panel-bg: #2d2a2e;
@@ -244,8 +283,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.04);
 }
-/* ========================= DEEP OCEAN ========================= */
+
 :root[data-theme='deep-ocean'] {
+    /* Navy — тёмно-синий, как глубокий океан */
     --bg-primary: #050b18;
     --bg-secondary: #0b1a2f;
     --panel-bg: #0f2340;
@@ -265,8 +305,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.03);
 }
-/* ========================= GITHUB LIGHT ========================= */
+
 :root[data-theme='github-light'] {
+    /* Graphite Light — светло-серый, как GitHub светлая */
     --bg-primary: #f6f8fa;
     --bg-secondary: #ffffff;
     --panel-bg: #ffffff;
@@ -286,8 +327,9 @@
     --shadow-primary: 0 10px 40px rgba(0,0,0,0.08);
     --table-row-hover: rgba(0,0,0,0.03);
 }
-/* ========================= GITHUB DARK ========================= */
+
 :root[data-theme='github-dark'] {
+    /* Graphite Dark — тёмно-серый, как GitHub тёмная */
     --bg-primary: #0d1117;
     --bg-secondary: #161b22;
     --panel-bg: #161b22;
@@ -307,18 +349,9 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.04);
 }
-/* ========================= Rainbow ========================= */
-:root[data-theme='rainbow'] {
-    --bg-primary: #0a0a0a;
-    --bg-secondary: #111;
-    --panel-bg: #181818;
-    --card-bg: #1f1f1f;
-    --text-primary: #ffffff;
-    --accent-color: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
-}
-/* ========================= MAC ========================= */
-/* Стиль: минимализм macOS, мягкие тени, светло-серая база */
+
 :root[data-theme='mac'] {
+    /* Silver — серебристый, стиль macOS */
     --bg-primary: #f5f5f7;
     --bg-secondary: #ffffff;
     --panel-bg: #ffffff;
@@ -338,73 +371,35 @@
     --shadow-primary: 0 10px 30px rgba(0,0,0,0.08);
     --table-row-hover: rgba(0,0,0,0.03);
 }
-/* ========================= WINDOWS LIGHT ========================= */
-/* Fluent UI / Windows 11 стиль (светлый) */
- :root[data-theme='windows'] {
-     --bg-primary: #f3f6fb;
-     --bg-secondary: #ffffff;
-     --panel-bg: #ffffff;
-     --card-bg: #ffffff;
-     --dropdown-bg: #ffffff;
-     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
-     --sidebar-hover: rgba(0,0,0,0.05);
-     --border-color: rgba(0,0,0,0.08);
-     --text-primary: #1f2937;
-     --text-secondary: rgba(31,41,55,0.65);
-     --accent-color: #0078d4;
-    /* Windows blue */
-     --accent-hover: #339af0;
-     --input-bg: #ffffff;
-     --input-focus: rgba(0,120,212,0.15);
-     --success-color: #16a34a;
-     --danger-color: #dc2626;
-     --shadow-primary: 0 10px 30px rgba(0,0,0,0.08);
-     --table-row-hover: rgba(0,0,0,0.03);
-}
-/* ========================= WINDOWS DARK ========================= */
-/* Dev / admin / backend стиль (то что у тебя было раньше) */
- :root[data-theme='windows-dark'] {
-     --bg-primary: #0f172a;
-     --bg-secondary: #111827;
-     --panel-bg: #1e293b;
-     --card-bg: #1e293b;
-     --dropdown-bg: #111827;
-     --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #111827 100%);
-     --sidebar-hover: rgba(255,255,255,0.06);
-     --border-color: rgba(255,255,255,0.08);
-     --text-primary: #f8fafc;
-     --text-secondary: rgba(248,250,252,0.65);
-     --accent-color: #4cc2ff;
-     --accent-hover: #7dd3fc;
-     --input-bg: #1e293b;
-     --input-focus: rgba(76,194,255,0.15);
-     --success-color: #22c55e;
-     --danger-color: #ef4444;
-     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-     --table-row-hover: rgba(255,255,255,0.03);
+
+:root[data-theme='windows-dark'] {
+    /* Charcoal — угольно-серый, стиль Windows тёмная */
+    --bg-primary: #0f172a;
+    --bg-secondary: #111827;
+    --panel-bg: #1e293b;
+    --card-bg: #1e293b;
+    --dropdown-bg: #111827;
+    --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    --sidebar-hover: rgba(255,255,255,0.06);
+    --border-color: rgba(255,255,255,0.08);
+    --text-primary: #f8fafc;
+    --text-secondary: rgba(248,250,252,0.65);
+    --accent-color: #4cc2ff;
+    --accent-hover: #7dd3fc;
+    --input-bg: #1e293b;
+    --input-focus: rgba(76,194,255,0.15);
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
+    --table-row-hover: rgba(255,255,255,0.03);
 }
 
-/* ========================= LINUX ========================= */
-/* Стиль: терминальный, тёмный, зелёный акцент как в консоли */
- :root[data-theme='linux'] {
-     --bg-primary: #0a0f0d;
-     --bg-secondary: #0f1a14;
-     --panel-bg: #111f18;
-     --card-bg: #13261d;
-     --dropdown-bg: #0f1a14;
-     --sidebar-bg: linear-gradient(180deg, #0a0f0d 0%, #0f1a14 100%);
-     --sidebar-hover: rgba(34,197,94,0.08);
-     --border-color: rgba(34,197,94,0.15);
-     --text-primary: #d1fae5;
-     --text-secondary: rgba(209,250,229,0.65);
-     --accent-color: #22c55e;
-    /* Linux green */
-     --accent-hover: #4ade80;
-     --input-bg: #111f18;
-     --input-focus: rgba(34,197,94,0.15);
-     --success-color: #22c55e;
-     --danger-color: #ef4444;
-     --shadow-primary: 0 20px 60px rgba(0,0,0,0.6);
-     --table-row-hover: rgba(34,197,94,0.05);
-
+:root[data-theme='rainbow'] {
+    /* Rainbow — радужный, градиентный акцент */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #111;
+    --panel-bg: #181818;
+    --card-bg: #1f1f1f;
+    --text-primary: #ffffff;
+    --accent-color: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
 }
