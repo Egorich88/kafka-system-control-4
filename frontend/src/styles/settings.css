@@ -54,3 +54,8 @@
     color: var(--text-secondary);
     font-size: 14px;
 }
+.settings-block .dropdown-wrapper {
+    flex: 0 0 auto;      /* не растягивается */
+    width: auto;         /* по содержимому */
+    min-width: 220px;    /* но не меньше комфортной ширины */
+}

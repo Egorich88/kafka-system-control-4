@@ -17,50 +17,45 @@
 /**
  * @fileoverview Страница настроек приложения.
  * Позволяет выбрать тему оформления из выпадающего списка.
- * Названия тем – цветовые, без привязки к оригинальным именам.
+ * Использует универсальный компонент Dropdown.
  */
 
-import { useState } from 'react';
-import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useTheme } from '../contexts/ThemeContext';
+import Dropdown from '../components/common/Dropdown';
 import '../App.css';
 import '../styles/settings.css';
 
-/** Список тем: ключ (для кода) и отображаемая метка (цветовое название) */
-const THEMES = [
-  // Базовые темы
-  { key: 'dark', label: 'Dark' },
-  { key: 'light', label: 'Light' },
-  { type: 'divider' },
-
-  // Цветовые темы (названия отражают цветовую гамму)
-  { key: 'linux', label: 'Forest' },
-  { key: 'kitty', label: 'Lavender' },
-  { key: 'dracula', label: 'Purple' },
-  { key: 'nord', label: 'Ice Blue' },
-  { key: 'solarized-light', label: 'Amber Light' },
-  { key: 'solarized-dark', label: 'Amber Dark' },
-  { key: 'coffee', label: 'Brown' },
-  { key: 'material', label: 'Indigo' },
-  { key: 'monocai', label: 'Violet' },
-  { key: 'monokai-pro', label: 'Golden' },
-  { key: 'deep-ocean', label: 'Navy' },
-  { key: 'github-light', label: 'Graphite Light' },
-  { key: 'github-dark', label: 'Graphite Dark' },
-  { key: 'mac', label: 'Silver' },
-  { key: 'windows-dark', label: 'Charcoal' },
-  { type: 'divider' },
-
-  // Экспериментальная
-  { key: 'rainbow', label: 'Rainbow' }
+/** Список тем: ключ и отображаемая метка */
+const THEMES_LIST = [
+  { id: 'dark', name: 'Dark' },
+  { id: 'light', name: 'Light' },
+  { id: 'linux', name: 'Forest' },
+  { id: 'kitty', name: 'Lavender' },
+  { id: 'dracula', name: 'Purple' },
+  { id: 'nord', name: 'Ice Blue' },
+  { id: 'solarized-light', name: 'Amber Light' },
+  { id: 'solarized-dark', name: 'Amber Dark' },
+  { id: 'coffee', name: 'Brown' },
+  { id: 'material', name: 'Indigo' },
+  { id: 'monocai', name: 'Violet' },
+  { id: 'monokai-pro', name: 'Golden' },
+  { id: 'deep-ocean', name: 'Navy' },
+  { id: 'github-light', name: 'Graphite Light' },
+  { id: 'github-dark', name: 'Graphite Dark' },
+  { id: 'mac', name: 'Silver' },
+  { id: 'windows-dark', name: 'Charcoal' },
+  { id: 'rainbow', name: 'Rainbow' }
 ];
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
-  const [isThemeOpen, setIsThemeOpen] = useState(false);
 
-  // Текущая выбранная тема для отображения в заголовке дропдауна
-  const currentThemeLabel = THEMES.find(t => t.key === theme)?.label || theme;
+  // Текущий выбранный объект для Dropdown
+  const currentThemeObj = THEMES_LIST.find(t => t.id === theme) || THEMES_LIST[0];
+
+  const handleThemeSelect = (selected) => {
+    setTheme(selected.id);
+  };
 
   return (
     <div className="settings-page">
@@ -76,42 +71,12 @@ export default function Settings() {
             <p>Choose a color scheme for the interface</p>
           </div>
 
-          <div className="dropdown-wrapper">
-            <button
-              type="button"
-              className={`dropdown-selected ${isThemeOpen ? 'open' : ''}`}
-              onClick={() => setIsThemeOpen(!isThemeOpen)}
-            >
-              <div className="dropdown-selected-left">
-                <span className="dropdown-selected-name">{currentThemeLabel}</span>
-              </div>
-              <div className="dropdown-chevron">
-                {isThemeOpen ? <FiChevronUp /> : <FiChevronDown />}
-              </div>
-            </button>
-
-            {isThemeOpen && (
-              <div className="dropdown-menu">
-                {THEMES.map((t, idx) => {
-                  if (t.type === 'divider') {
-                    return <div key={`divider-${idx}`} className="dropdown-divider" />;
-                  }
-                  return (
-                    <div
-                      key={t.key}
-                      className="dropdown-item"
-                      onClick={() => {
-                        setTheme(t.key);
-                        setIsThemeOpen(false);
-                      }}
-                    >
-                      {t.label}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          {/* Используем универсальный Dropdown */}
+          <Dropdown
+            selectedItem={currentThemeObj}
+            items={THEMES_LIST.filter(item => item.id !== theme)}
+            onSelect={handleThemeSelect}
+          />
         </div>
       </div>
     </div>
