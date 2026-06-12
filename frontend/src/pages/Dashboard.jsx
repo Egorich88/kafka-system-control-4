@@ -58,7 +58,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!currentCluster) return;
     loadDashboard();
-  }, [currentCluster]);
+  }, [currentCluster, timeRange]);
 
   // Функция загрузки данных с бэкенда
   async function loadDashboard() {
@@ -68,7 +68,7 @@ export default function Dashboard() {
         axios.get('/api/dashboard/overview', { headers }),
         axios.get('/api/dashboard/brokers', { headers }),
         axios.get('/api/dashboard/consumer-groups', { headers }),
-        axios.get('/api/dashboard/throughput', { headers })
+        axios.get(`/api/dashboard/throughput?range=${timeRange.id}`, { headers })
       ]);
       setOverview(overviewResponse.data);
       setBrokers(brokersResponse.data.brokers || []);

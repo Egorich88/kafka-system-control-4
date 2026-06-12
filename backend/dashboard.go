@@ -331,20 +331,96 @@ func getDashboardPartitionsHandler(w http.ResponseWriter, r *http.Request) {
 // getDashboardThroughputHandler возвращает данные для графика пропускной способности.
 // В текущей версии используются моковые данные.
 // TODO: Заменить реальными метриками из Kafka Monitoring API.
-func getDashboardThroughputHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
+// getDashboardThroughputHandler возвращает данные для графика пропускной способности.
+//
+// В текущей версии используются тестовые данные.
+// В дальнейшем будут использоваться реальные метрики Kafka.
+func getDashboardThroughputHandler(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 
-	response := DashboardThroughputResponse{
-		Points: []DashboardThroughputPoint{
+	/*
+	   Выбранный диапазон времени.
+
+	   Возможные значения:
+
+	   - 15m
+	   - 1h
+	   - 6h
+	   - 24h
+	*/
+	timeRange := r.URL.Query().Get(
+		"range",
+	)
+
+	w.Header().Set(
+		"Access-Control-Allow-Origin",
+		"*",
+	)
+
+	w.Header().Set(
+		"Content-Type",
+		"application/json",
+	)
+
+	var points []DashboardThroughputPoint
+
+	switch timeRange {
+
+	case "15m":
+
+		points = []DashboardThroughputPoint{
+
 			{Time: "00", Incoming: 120, Outgoing: 100},
 			{Time: "05", Incoming: 240, Outgoing: 180},
 			{Time: "10", Incoming: 430, Outgoing: 390},
 			{Time: "15", Incoming: 610, Outgoing: 570},
-		},
+		}
+
+	case "1h":
+
+		points = []DashboardThroughputPoint{
+
+			{Time: "00", Incoming: 120, Outgoing: 100},
+			{Time: "15", Incoming: 260, Outgoing: 240},
+			{Time: "30", Incoming: 430, Outgoing: 390},
+			{Time: "45", Incoming: 700, Outgoing: 640},
+			{Time: "60", Incoming: 620, Outgoing: 590},
+		}
+
+	case "6h":
+
+		points = []DashboardThroughputPoint{
+
+			{Time: "01h", Incoming: 200, Outgoing: 180},
+			{Time: "02h", Incoming: 320, Outgoing: 280},
+			{Time: "03h", Incoming: 580, Outgoing: 520},
+			{Time: "04h", Incoming: 720, Outgoing: 690},
+			{Time: "05h", Incoming: 640, Outgoing: 600},
+			{Time: "06h", Incoming: 800, Outgoing: 760},
+		}
+
+	default:
+
+		points = []DashboardThroughputPoint{
+
+			{Time: "04", Incoming: 250, Outgoing: 200},
+			{Time: "08", Incoming: 420, Outgoing: 390},
+			{Time: "12", Incoming: 800, Outgoing: 760},
+			{Time: "16", Incoming: 680, Outgoing: 630},
+			{Time: "20", Incoming: 530, Outgoing: 500},
+			{Time: "24", Incoming: 910, Outgoing: 870},
+		}
 	}
 
-	_ = json.NewEncoder(w).Encode(response)
+	response := DashboardThroughputResponse{
+		Points: points,
+	}
+
+	_ = json.NewEncoder(w).Encode(
+		response,
+	)
 }
 
 // Примечание: в данном файле используются вспомогательные функции:
