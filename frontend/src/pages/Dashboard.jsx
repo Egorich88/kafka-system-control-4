@@ -46,10 +46,9 @@ export default function Dashboard() {
   const [consumerGroups, setConsumerGroups] = useState([]); // группы потребителей
   const [throughputData, setThroughputData] = useState([]); // данные графика пропускной способности
 
-  // Заглушки для будущих метрик
-  const [messagesIn] = useState(0);
-  const [messagesOut] = useState(0);
-  const [underReplicated] = useState(0);
+  // Состояние метрик
+  const [messagesIn, setMessagesIn] = useState(0);
+  const [messagesOut, setMessagesOut] = useState(0);
 
   // Выбранный временной диапазон для графика
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
@@ -74,6 +73,11 @@ export default function Dashboard() {
       setBrokers(brokersResponse.data.brokers || []);
       setConsumerGroups(groupsResponse.data.groups || []);
       setThroughputData(throughputResponse.data.points || []);
+      const points = throughputResponse.data.points || [];
+      setThroughputData(points);
+      const latestPoint = points[points.length - 1];
+      setMessagesIn(latestPoint?.incoming || 0);
+      setMessagesOut(latestPoint?.outgoing || 0);
     } catch (error) {
       console.error('Dashboard load error:', error);
     }
@@ -111,7 +115,7 @@ export default function Dashboard() {
           consumerGroups={consumerGroups}
           messagesIn={messagesIn}
           messagesOut={messagesOut}
-          underReplicated={underReplicated}
+          underReplicated={overview?.underReplicated ?? 0}
         />
 
         {/* Основная сетка: график пропускной способности + таблица брокеров */}
