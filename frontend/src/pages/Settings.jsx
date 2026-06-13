@@ -60,15 +60,15 @@ export default function Settings() {
   return (
     <div className="settings-page">
       <div className="settings-page-header">
-        <h1>Settings</h1>
-        <p>Customize the interface appearance of Kafka System Control</p>
+        <h1>Настройки</h1>
+        <p>Персонализация интерфейса</p>
       </div>
 
       <div className="settings-card">
         <div className="settings-block">
           <div className="settings-block-info">
-            <h3>Themes</h3>
-            <p>Choose a color scheme for the interface</p>
+            <h3>Темы</h3>
+            <p>Настройка внешнего вида интерфейса</p>
           </div>
 
           {/* Используем универсальный Dropdown */}
