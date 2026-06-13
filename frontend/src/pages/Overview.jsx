@@ -16,18 +16,18 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../styles/dashboard.css';
+import '../styles/overview.css';
 import Dropdown from '../components/common/Dropdown';
 import { FiInfo, FiCode, FiPlus, FiStar, FiClock, FiRotateCw } from 'react-icons/fi';
 import { useCluster } from '../contexts/ClusterContext';
 
 // Импорты вынесенных панелей
-import ThroughputPanel from './monitoring/ThroughputPanel';
-import KpiCards from './monitoring/KpiCards';
-import BrokersPanel from './monitoring/BrokersPanel';
-import TopicsPanel from './monitoring/TopicsPanel';
-import ConsumerLagPanel from './monitoring/ConsumerLagPanel';
-import EventsPanel from './monitoring/EventsPanel';
+import ThroughputPanel from './overview/ThroughputPanel';
+import KpiCards from './overview/KpiCards';
+import BrokersPanel from './overview/BrokersPanel';
+import TopicsPanel from './overview/TopicsPanel';
+import ConsumerLagPanel from './overview/ConsumerLagPanel';
+import EventsPanel from './overview/EventsPanel';
 
 // Доступные интервалы времени для графика
 const TIME_RANGES = [
@@ -37,7 +37,7 @@ const TIME_RANGES = [
   { id: '24h', name: 'Последние 24 часа' }
 ];
 
-export default function Dashboard() {
+export default function Overview() {
   const { currentCluster } = useCluster();
 
   // Состояния с данными от API
@@ -64,10 +64,10 @@ export default function Dashboard() {
     try {
       const headers = { 'X-Kafka-Bootstrap': currentCluster.bootstrapServers };
       const [overviewResponse, brokersResponse, groupsResponse, throughputResponse] = await Promise.all([
-        axios.get('/api/dashboard/overview', { headers }),
-        axios.get('/api/dashboard/brokers', { headers }),
-        axios.get('/api/dashboard/consumer-groups', { headers }),
-        axios.get(`/api/dashboard/throughput?range=${timeRange.id}`, { headers })
+        axios.get('/api/overview', { headers }),
+        axios.get('/api/overview/brokers', { headers }),
+        axios.get('/api/overview/consumer-groups', { headers }),
+        axios.get(`/api/overview/throughput?range=${timeRange.id}`, { headers })
       ]);
       setOverview(overviewResponse.data);
       setBrokers(brokersResponse.data.brokers || []);
@@ -79,7 +79,7 @@ export default function Dashboard() {
       setMessagesIn(latestPoint?.incoming || 0);
       setMessagesOut(latestPoint?.outgoing || 0);
     } catch (error) {
-      console.error('Dashboard load error:', error);
+      console.error('Overview load error:', error);
     }
   }
 

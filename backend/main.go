@@ -609,13 +609,13 @@ func main() {
 	})
 
 	// ----- Маршруты для Dashboard (метрики кластера) -----
-	http.HandleFunc("/api/dashboard/overview", getDashboardOverviewHandler)
-	http.HandleFunc("/api/dashboard/brokers", getDashboardBrokersHandler)
-	http.HandleFunc("/api/dashboard/consumer-groups", getDashboardConsumerGroupsHandler)
-	http.HandleFunc("/api/dashboard/partitions", getDashboardPartitionsHandler)
-	http.HandleFunc("/api/dashboard/throughput", getDashboardThroughputHandler)
+	http.HandleFunc("/api/overview", getDashboardOverviewHandler)
+	http.HandleFunc("/api/overview/brokers", getDashboardBrokersHandler)
+	http.HandleFunc("/api/overview/consumer-groups", getDashboardConsumerGroupsHandler)
+	http.HandleFunc("/api/overview/partitions", getDashboardPartitionsHandler)
+	http.HandleFunc("/api/overview/throughput", getDashboardThroughputHandler)
 	// Общее количество сообщений в кластере (приблизительное)
-	http.HandleFunc("/api/dashboard/messages-total", getDashboardMessagesTotalHandler)
+	http.HandleFunc("/api/overview/messages-total", getDashboardMessagesTotalHandler)
 
 	port := ":8080"
 	log.Printf("Server running on %s", port)

@@ -15,7 +15,7 @@
  */
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
+import Overview from './pages/Overview';
 import Topics from './pages/Topics';
 import Groups from './pages/Groups';
 import Acl from './pages/Acl';
@@ -30,8 +30,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route index element={<Overview />} />
+            <Route path="overview" element={<Overview />} />
             <Route path="topics" element={<Topics />} />
             <Route path="groups" element={<Groups />} />
             <Route path="acls" element={<Acl />} />
