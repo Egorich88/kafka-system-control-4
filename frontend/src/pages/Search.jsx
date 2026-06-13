@@ -3,11 +3,11 @@
  *
  * Licensed under the Apache License, Version 2.0
  */
-import SearchToolbar from '../components/search/SearchToolbar'
-import MessagesTable from '../components/search/MessagesTable'
-import Pagination from '../components/search/Pagination'
-import ExportDropdown from '../components/search/ExportDropdown'
-import MessageViewer from '../components/search/MessageViewer'
+import SearchToolbar from '../pages/search/SearchToolbar'
+import MessagesTable from '../pages/search/MessagesTable'
+import Pagination from '../pages/search/Pagination'
+import ExportDropdown from '../pages/search/ExportDropdown'
+import MessageViewer from '../pages/search/MessageViewer'
 import '../styles/search.css';
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
