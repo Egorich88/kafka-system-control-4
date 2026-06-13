@@ -116,10 +116,10 @@ export default function ThroughputPanel({ data }) {
           <div className="throughput-title">Пропускная способность кластера</div>
           <div className="throughput-current-values">
             <span className="incoming-value">
-              Входящие: {latestPoint?.incoming ?? 0} msg/s
+              Входящие: {latestPoint?.incoming?.toFixed(1) ?? 0} msg/s
             </span>
             <span className="outgoing-value">
-              Исходящие: {latestPoint?.outgoing ?? 0} msg/s
+              Исходящие: {latestPoint?.outgoing?.toFixed(1) ?? 0} msg/s
             </span>
           </div>
         </div>
