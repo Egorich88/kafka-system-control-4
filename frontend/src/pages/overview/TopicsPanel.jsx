@@ -47,8 +47,8 @@
 import { useState } from 'react';
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   CartesianGrid,
   Tooltip,
   XAxis,
@@ -64,11 +64,10 @@ export default function TopicsPanel() {
   /* Выбранный топик. Позже список будет загружаться из Kafka. Сейчас используется временный набор данных. */
   const [selectedTopic, setSelectedTopic] = useState('orders');
 
-  /* Топик, выбранный кликом по легенде.Если null — отображаются все топики. */
-  const [activeTopic, setActiveTopic] = useState(null);
-
   /* Временные данные. */
   const mockTopics = [ 'orders', 'payments', 'notifications', 'audit' ];
+
+  const [visibleTopics, setVisibleTopics] = useState(mockTopics);
 
   /* Временные данные графика. Будут заменены данными Kafka API. */
     const mockData = [
@@ -118,6 +117,33 @@ export default function TopicsPanel() {
             [selectedTopic]: item[selectedTopic]
           }))
         : mockData;
+
+    /* Показывает только выбранный топик. */
+    const handleTopicClick = (topic) => {
+
+      if (
+        visibleTopics.length === 1 &&
+        visibleTopics[0] === topic
+      ) {
+        return;
+      }
+
+      setVisibleTopics([topic]);
+
+    };
+
+    /* Показывает все топики. */
+    const handleChartClick = () => {
+
+      if (
+        visibleTopics.length === mockTopics.length
+      ) {
+        return;
+      }
+
+      setVisibleTopics(mockTopics);
+
+    };
 
   return (
     <div className="dashboard-panel">
@@ -188,13 +214,9 @@ export default function TopicsPanel() {
 
             <ResponsiveContainer width="100%" height={320}>
 
-              <AreaChart
+              <LineChart
                 data={chartData}
-                onClick={(event) => {
-                  if (!event?.activePayload) {
-                    setActiveTopic(null);
-                  }
-                }}
+                onClick={handleChartClick}
               >
 
                 <CartesianGrid
@@ -223,24 +245,28 @@ export default function TopicsPanel() {
                      : mockTopics
                  )
                  .filter(
-                   topic =>
-                     activeTopic === null ||
-                     activeTopic === topic
+                   topic => visibleTopics.includes(topic)
                  )
                  .map(topic => (
-                   <Area
+                   <Line
                      key={topic}
-                     type="monotone"
+                     type="natural"
                      dataKey={topic}
-                     stackId="1"
                      stroke={topicColors[topic]}
-                     fill={topicColors[topic]}
-                     fillOpacity={0.35}
-                     onClick={() => setActiveTopic(topic)}
+                     strokeWidth={2}
+                     dot={false}
+                     activeDot={{
+                       r: 5,
+                       stroke: '#ffffff',
+                       strokeWidth: 2,
+                       fill: topicColors[topic]
+                     }}
+                     onClick={() => handleTopicClick(topic)}
+                     style={{ cursor: 'pointer' }}
                    />
                  ))}
 
-              </AreaChart>
+              </LineChart>
 
             </ResponsiveContainer>
 
@@ -256,20 +282,23 @@ export default function TopicsPanel() {
 
             </div>
 
-            {mockTopics.map(topic => (
+            {[...mockTopics]
+              .sort(
+                (a, b) =>
+                  mockData[mockData.length - 1][b] -
+                  mockData[mockData.length - 1][a]
+              )
+              .map(topic => (
 
               <div
                 key={topic}
                 className={`topics-legend-row ${
-                  activeTopic === topic ? 'active' : ''
+                  visibleTopics.length === 1 &&
+                  visibleTopics[0] === topic
+                    ? 'active'
+                    : ''
                 }`}
-                onClick={() =>
-                  setActiveTopic(
-                    activeTopic === topic
-                      ? null
-                      : topic
-                  )
-                }
+                onClick={() => handleTopicClick(topic)}
               >
 
                 <div className="topics-legend-left">
