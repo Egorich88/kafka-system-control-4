@@ -653,3 +653,20 @@
     color: var(--text-secondary);
     border-bottom: 1px solid var(--border-color);
 }
+/* Отступ заголовка значения сообщения */
+.message-detail-value-title {
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Точки-заполнители в пагинации */
+.pagination-dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}

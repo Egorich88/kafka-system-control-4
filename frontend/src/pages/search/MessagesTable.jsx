@@ -13,118 +13,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @fileoverview Таблица сообщений с возможностью выбора строк.
+ */
+
 export default function MessagesTable({
-
-    messages,
-    selectedRows,
-    toggleAllRows,
-    toggleRowSelection,
-    selectedMessage,
-    setSelectedMessage,
-    selectedTopic
-
+  messages,
+  selectedRows,
+  toggleAllRows,
+  toggleRowSelection,
+  selectedMessage,
+  setSelectedMessage,
+  selectedTopic,
+  allCurrentSelected,   // флаг: выбраны ли все сообщения на текущей странице
+  getRowKey            // функция получения уникального ключа сообщения
 }) {
-
-    return (
-
-        <table className="messages-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-
-                        <input
-                            type="checkbox"
-                            checked={
-                                messages.length > 0 &&
-                                selectedRows.length === messages.length
-                            }
-                            onChange={toggleAllRows}
-                        />
-
-                    </th>
-
-                    <th>Offset</th>
-                    <th>Партиция</th>
-                    <th>Ключ</th>
-                    <th>Время</th>
-                    <th>Размер</th>
-                    <th>Предпросмотр значения</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {messages.map((msg) => {
-                    const rowKey = `${selectedTopic}-${msg.partition}-${msg.offset}`
-                    const isSelected =
-                        selectedMessage?.offset === msg.offset &&
-                        selectedMessage?.partition === msg.partition
-
-                    return (
-
-                        <tr
-                            key={`${selectedTopic}-${msg.partition}-${msg.offset}`}
-                            className={isSelected ? "active-row" : ""}
-                            onClick={() => setSelectedMessage(msg)}
-                        >
-
-                            <td>
-
-                                <input
-                                    type="checkbox"
-                                    checked={selectedRows.includes(rowKey)}
-                                    onChange={(e) => {
-
-                                        e.stopPropagation()
-
-                                        toggleRowSelection(rowKey)
-                                    }}
-                                />
-
-                            </td>
-
-                            <td>{msg.offset}</td>
-
-                            <td>
-                              {/*
-                                Партиция ВСЕГДА берётся из сообщения.
-                                Если backend не прислал partition — это проблема API, не UI.
-                              */}
-                              {typeof msg.partition === "number"
-                                ? msg.partition
-                                : "—"
-                              }
-                            </td>
-
-                            <td className="message-key-cell">
-                                {msg.key || "-"}
-                            </td>
-
-                            <td>
-                                {msg.timestamp}
-                            </td>
-
-                            <td>
-                                {new Blob([msg.value]).size} B
-                            </td>
-
-                            <td className="preview-cell">
-
-                                {msg.value?.slice(0, 90)}
-
-                            </td>
-
-                        </tr>
-                    )
-                })}
-
-            </tbody>
-
-        </table>
-    )
+  return (
+    <table className="messages-table">
+      <thead>
+        <tr>
+          <th>
+            <input
+              type="checkbox"
+              checked={allCurrentSelected}
+              onChange={toggleAllRows}
+            />
+          </th>
+          <th>Offset</th>
+          <th>Партиция</th>
+          <th>Ключ</th>
+          <th>Время</th>
+          <th>Размер</th>
+          <th>Предпросмотр значения</th>
+        </tr>
+      </thead>
+      <tbody>
+        {messages.map((msg) => {
+          const rowKey = getRowKey(msg)
+          const isSelected = selectedMessage?.offset === msg.offset && selectedMessage?.partition === msg.partition
+          return (
+            <tr
+              key={rowKey}
+              className={isSelected ? "active-row" : ""}
+              onClick={() => setSelectedMessage(msg)}
+            >
+              <td>
+                <input
+                  type="checkbox"
+                  checked={selectedRows.includes(rowKey)}
+                  onChange={(e) => {
+                    e.stopPropagation()
+                    toggleRowSelection(rowKey)
+                  }}
+                />
+              </td>
+              <td>{msg.offset}</td>
+              <td>{typeof msg.partition === "number" ? msg.partition : "—"}</td>
+              <td className="message-key-cell">{msg.key || "-"}</td>
+              <td>{msg.timestamp}</td>
+              <td>{new Blob([msg.value]).size} B</td>
+              <td className="preview-cell">{msg.value?.slice(0, 90)}</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
+  )
 }

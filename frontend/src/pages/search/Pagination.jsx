@@ -14,77 +14,58 @@
  * limitations under the License.
  */
 
-export default function Pagination({
-    currentPage,
-    setCurrentPage,
-    totalPages,
-    total
-}) {
+/**
+ * @fileoverview Компонент пагинации для таблицы сообщений.
+ * Отображает номера страниц с пропусками, если их много.
+ */
 
-if (totalPages <= 7) {
-    return null
-}
-    return (
+export default function Pagination({ currentPage, setCurrentPage, totalPages }) {
+  if (totalPages <= 1) return null;  // если одна страница – не показываем
 
-        <div className="table-footer-right">
+  // Формирует массив отображаемых страниц (с учётом компактности)
+  const getVisiblePages = () => {
+    const delta = 2;               // сколько страниц слева и справа от текущей
+    const range = [];
+    const left = Math.max(1, currentPage - delta);
+    const right = Math.min(totalPages, currentPage + delta);
 
-            {currentPage > 1 && (
+    for (let i = left; i <= right; i++) range.push(i);
 
-                <button
-                    className="pagination-btn"
-                    onClick={() =>
-                        setCurrentPage(currentPage - 1)
-                    }
-                >
-                    &lt;
-                </button>
+    if (left > 2) range.unshift('...');
+    if (left > 1) range.unshift(1);
+    if (right < totalPages - 1) range.push('...');
+    if (right < totalPages) range.push(totalPages);
 
-            )}
+    return range;
+  };
 
-            {Array.from(
-                { length: totalPages },
-                (_, i) => i + 1
-            )
-            .filter((page) => {
+  const pages = getVisiblePages();
 
-                return (
-                    page === 1 ||
-                    page === totalPages ||
-                    Math.abs(page - currentPage) <= 1
-                )
-
-            })
-            .map((page) => (
-
-                <button
-                    key={page}
-                    className={`pagination-page ${
-                        currentPage === page
-                            ? "active"
-                            : ""
-                    }`}
-                    onClick={() =>
-                        setCurrentPage(page)
-                    }
-                >
-                    {page}
-                </button>
-
-            ))}
-
-            {currentPage < totalPages && (
-
-                <button
-                    className="pagination-btn"
-                    onClick={() =>
-                        setCurrentPage(currentPage + 1)
-                    }
-                >
-                    &gt;
-                </button>
-
-            )}
-
-        </div>
-    )
+  return (
+    <div className="table-footer-right">
+      {currentPage > 1 && (
+        <button className="pagination-btn" onClick={() => setCurrentPage(currentPage - 1)}>
+          &lt;
+        </button>
+      )}
+      {pages.map((page, idx) =>
+        page === '...' ? (
+          <span key={`dots-${idx}`} className="pagination-dots">...</span>
+        ) : (
+          <button
+            key={page}
+            className={`pagination-page ${currentPage === page ? 'active' : ''}`}
+            onClick={() => setCurrentPage(page)}
+          >
+            {page}
+          </button>
+        )
+      )}
+      {currentPage < totalPages && (
+        <button className="pagination-btn" onClick={() => setCurrentPage(currentPage + 1)}>
+          &gt;
+        </button>
+      )}
+    </div>
+  )
 }

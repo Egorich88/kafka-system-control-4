@@ -14,101 +14,44 @@
  * limitations under the License.
  */
 
-export default function MessageViewer({
+/**
+ * @fileoverview Панель детального просмотра выбранного сообщения.
+ * Позволяет переключать формат отображения (JSON / RAW).
+ */
 
-    selectedMessage,
-    viewFormat,
-    setViewFormat
+export default function MessageViewer({ selectedMessage, viewFormat, setViewFormat }) {
+  if (!selectedMessage) return null;
 
-}) {
+  return (
+    <div className="message-detail-panel">
+      <div className="message-detail-header">
+        <h3>Детали сообщения</h3>
+        <select value={viewFormat} onChange={(e) => setViewFormat(e.target.value)}>
+          <option value="json">JSON</option>
+          <option value="raw">RAW</option>
+        </select>
+      </div>
 
-    if (!selectedMessage) {
-        return null
-    }
+      <div className="message-detail-meta">
+        <span>Offset: {selectedMessage.offset}</span>
+        <span>Партиция: {selectedMessage.partition ?? "—"}</span>
+        <span>Ключ: {selectedMessage.key || "-"}</span>
+      </div>
 
-    return (
-
-        <div className="message-detail-panel">
-
-            <div className="message-detail-header">
-
-                <h3>
-                    Детали сообщения
-                </h3>
-
-                <select
-                    value={viewFormat}
-                    onChange={(e) =>
-                        setViewFormat(e.target.value)
-                    }
-                >
-
-                    <option value="json">
-                        JSON
-                    </option>
-
-                    <option value="raw">
-                        RAW
-                    </option>
-
-                </select>
-
-            </div>
-
-            <div className="message-detail-meta">
-
-                <span>
-                    Offset: {selectedMessage.offset}
-                </span>
-
-                {/*
-                    Партиция сообщения:
-                    показывает, из какой партиции Kafka пришло сообщение
-                */}
-                <span>
-                    Партиция: {selectedMessage.partition ?? "—"}
-                </span>
-
-                <span>
-                    Ключ: {selectedMessage.key || "-"}
-                </span>
-
-            </div>
-
-            {/*
-                Заголовок секции значения сообщения:
-                показывает в каком формате сейчас отображается payload (JSON или RAW)
-            */}
-            <div className="message-detail-value-title">
-                Значение ({viewFormat.toUpperCase()})
-            </div>
-            <pre className="message-detail-content">
-
-                {
-                    (() => {
-
-                        if (viewFormat === "raw") {
-                            return selectedMessage.value
-                        }
-
-                        try {
-
-                            return JSON.stringify(
-                                JSON.parse(selectedMessage.value),
-                                null,
-                                2
-                            )
-
-                        } catch {
-
-                            return selectedMessage.value
-                        }
-
-                    })()
-                }
-
-            </pre>
-
-        </div>
-    )
+      {/* Заголовок со значением формата и отступом */}
+      <div className="message-detail-value-title">
+        Значение ({viewFormat.toUpperCase()})
+      </div>
+      <pre className="message-detail-content">
+        {(() => {
+          if (viewFormat === "raw") return selectedMessage.value;
+          try {
+            return JSON.stringify(JSON.parse(selectedMessage.value), null, 2);
+          } catch {
+            return selectedMessage.value;
+          }
+        })()}
+      </pre>
+    </div>
+  );
 }
