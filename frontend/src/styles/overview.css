@@ -158,6 +158,7 @@
      border-radius: 18px;
      box-shadow: var(--shadow-primary);
      overflow: hidden;
+     height: 100%;
 }
 /* ===================================================================== Заголовок панели ===================================================================== */
  .panel-header {
@@ -586,4 +587,34 @@
 .throughput-chart *:focus,
 .throughput-chart *:focus-visible {
   outline: none !important;
+}
+/* =====================================================
+   БАЗОВЫЙ РЯД ПАНЕЛЕЙ
+===================================================== */
+
+.dashboard-row {
+  display: grid;
+  gap: 20px;
+  margin-top: 20px;
+}
+/* =====================================================
+   THROUGHPUT + TOPICS
+===================================================== */
+
+.dashboard-row-top {
+  grid-template-columns: 2fr 3fr;
+}
+/* =====================================================
+   CONSUMER LAG + EVENTS
+===================================================== */
+
+.dashboard-row-middle {
+  grid-template-columns: 3fr 2fr;
+}
+/* =====================================================
+   BROKERS
+===================================================== */
+
+.dashboard-row-bottom {
+  grid-template-columns: 1fr;
 }

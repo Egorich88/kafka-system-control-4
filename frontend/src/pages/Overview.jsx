@@ -118,17 +118,43 @@ export default function Overview() {
           underReplicated={overview?.underReplicated ?? 0}
         />
 
-        {/* Основная сетка: график пропускной способности + таблица брокеров */}
-        <div className="dashboard-main-grid">
+        {/* =======================================================
+            РЯД 2
+            Пропускная способность кластера
+            Пропускная способность топиков
+        ======================================================= */}
+
+        <div className="dashboard-row dashboard-row-top">
+
           <ThroughputPanel data={throughputData} />
-          <BrokersPanel brokers={brokers} />
+
+          <TopicsPanel />
+
         </div>
 
-        {/* Нижняя сетка: дополнительные панели (топики, lag, события) */}
-        <div className="dashboard-bottom-grid">
-          <TopicsPanel />
+        {/* =======================================================
+            РЯД 3
+            Отставание групп
+            Последние события
+        ======================================================= */}
+
+        <div className="dashboard-row dashboard-row-middle">
+
           <ConsumerLagPanel />
+
           <EventsPanel />
+
+        </div>
+
+        {/* =======================================================
+            РЯД 4
+            Брокеры
+        ======================================================= */}
+
+        <div className="dashboard-row dashboard-row-bottom">
+
+          <BrokersPanel brokers={brokers} />
+
         </div>
       </div>
     );

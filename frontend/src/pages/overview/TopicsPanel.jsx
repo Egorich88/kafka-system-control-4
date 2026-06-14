@@ -21,8 +21,8 @@
 export default function TopicsPanel() {
   return (
     <div className="dashboard-panel">
-      <div className="panel-header">Самые активные топики</div>
-      <div className="panel-body">Таблица будет реализована позже</div>
+      <div className="panel-header">Пропускная способность по топикам (партициям)</div>
+      <div className="panel-body">График будет реализован позже</div>
     </div>
   );
 }

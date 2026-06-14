@@ -22,7 +22,7 @@ export default function ConsumerLagPanel() {
   return (
     <div className="dashboard-panel">
       <div className="panel-header">Отставание групп потребителей</div>
-      <div className="panel-body">Таблица будет реализована позже</div>
+      <div className="panel-body">График будет реализован позже</div>
     </div>
   );
 }
