@@ -171,10 +171,6 @@ export default function TopicsPanel() {
               </select>
             )}
 
-            <div className="topics-panel-subtitle">
-              Сообщения/сек
-            </div>
-
           </div>
 
         </div>

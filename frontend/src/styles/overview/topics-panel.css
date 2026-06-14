@@ -89,11 +89,6 @@ Topics Throughput Panel
   outline: none !important;
 }
 
-.topics-panel-subtitle {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
 .topics-legend-header {
   display: flex;
   justify-content: space-between;
