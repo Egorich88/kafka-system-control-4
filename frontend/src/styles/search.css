@@ -670,3 +670,112 @@
     color: var(--text-secondary);
     pointer-events: none;
 }
+/* Уменьшение ширины поля выбора топика */
+.search-toolbar .topic-field {
+    width: 220px;   /* или используйте grid-template-columns, но проще задать фикс */
+}
+
+/* Настройка сетки тулбара (7 полей + кнопка) */
+.search-toolbar {
+    display: grid;
+    grid-template-columns: 220px 160px 220px 140px 140px 140px auto;
+    gap: 14px;
+    align-items: end;
+}
+
+/* Стили для дропдауна выбора формата в MessageViewer */
+.message-format-dropdown {
+    position: relative;
+}
+
+.format-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    height: 38px;
+    padding: 0 14px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.15s ease;
+}
+
+.format-dropdown-trigger.open {
+    border-color: var(--accent-color);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: var(--dropdown-bg);
+}
+
+.format-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 100%;
+    background: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+    z-index: 100;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.format-dropdown-item {
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-primary);
+    transition: 0.1s ease;
+}
+
+.format-dropdown-item:hover {
+    background: rgba(59,130,246,0.12);
+}
+
+.format-dropdown-item.active {
+    background: rgba(59,130,246,0.18);
+    color: #93c5fd;
+}
+
+/* Строка заголовка значения с кнопкой скачивания */
+.message-value-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    margin-top: 8px;
+}
+
+.download-message-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.download-message-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(59,130,246,0.05);
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 1200px) {
+    .search-toolbar {
+        grid-template-columns: 1fr 1fr;
+    }
+    .search-toolbar .topic-field {
+        width: auto;
+    }
+}

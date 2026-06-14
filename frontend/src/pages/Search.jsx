@@ -16,8 +16,8 @@
 
 /**
  * @fileoverview Страница поиска сообщений в Kafka.
- * Позволяет выбрать топик, партицию, диапазон оффсетов,
- * просматривать сообщения, экспортировать их в JSON/CSV/TXT.
+ * Позволяет выбирать топик, партицию, оффсеты, искать по ключу/значению.
+ * Реализована пагинация (25 сообщений на страницу) и экспорт выделенных записей.
  */
 
 import SearchToolbar from '../pages/search/SearchToolbar'
@@ -26,7 +26,7 @@ import Pagination from '../pages/search/Pagination'
 import ExportDropdown from '../pages/search/ExportDropdown'
 import MessageViewer from '../pages/search/MessageViewer'
 import '../styles/search.css';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
@@ -42,13 +42,14 @@ export default function Search() {
   const [topics, setTopics] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(searchParams.get('topic') || '');
   const [partition, setPartition] = useState(searchParams.get('partition') || 'all');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [messages, setMessages] = useState([])
   const [maxMessages, setMaxMessages] = useState(100)
   const [partitions, setPartitions] = useState([])
   const [selectedMessage, setSelectedMessage] = useState(null)
-  const [selectedRows, setSelectedRows] = useState([])        // хранит уникальные ключи сообщений: "topic-partition-offset"
+  const [selectedRows, setSelectedRows] = useState([])
   const [viewFormat, setViewFormat] = useState("json")
-  const [exportMenu, setExportMenu] = useState(null)          // какой тип экспорта открыт: 'selected' или 'all'
+  const [exportMenu, setExportMenu] = useState(null)
   const [searching, setSearching] = useState(false);
   const [isTopicDropdownOpen, setIsTopicDropdownOpen] = useState(false);
   const [isPartitionDropdownOpen, setIsPartitionDropdownOpen] = useState(false)
@@ -56,45 +57,37 @@ export default function Search() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalMessages, setTotalMessages] = useState(0)
 
-  const pageSize = 25
+  const pageSize = 25                      // количество сообщений на страницу
   const totalPages = Math.max(1, Math.ceil(totalMessages / pageSize))
 
-  // --- Работа с выделением строк (чекбоксами) ---
-  // Уникальный ключ для сообщения: `${selectedTopic}-${partition}-${offset}`
-  const getRowKey = (msg) => `${selectedTopic}-${msg.partition}-${msg.offset}`
+  // Уникальный ключ сообщения для выделения
+  const getRowKey = useCallback((msg) => `${selectedTopic}-${msg.partition}-${msg.offset}`, [selectedTopic]);
 
-  // Переключение состояния одного чекбокса
+  // Переключение выбора строки
   const toggleRowSelection = (rowKey) => {
-    setSelectedRows((prev) => {
-      if (prev.includes(rowKey)) {
-        return prev.filter((v) => v !== rowKey)
-      }
-      return [...prev, rowKey]
-    })
+    setSelectedRows((prev) =>
+      prev.includes(rowKey) ? prev.filter((v) => v !== rowKey) : [...prev, rowKey]
+    )
   }
 
-  // Выбрать / отменить выбор всех сообщений на текущей странице
+  // Выбрать / снять все на текущей странице
   const toggleAllRows = () => {
     const currentPageKeys = messages.map(getRowKey)
     const allSelected = currentPageKeys.every(key => selectedRows.includes(key))
     if (allSelected) {
-      // убираем только те, которые на текущей странице
       setSelectedRows(prev => prev.filter(key => !currentPageKeys.includes(key)))
     } else {
-      // добавляем все с текущей страницы
       const newKeys = currentPageKeys.filter(key => !selectedRows.includes(key))
       setSelectedRows(prev => [...prev, ...newKeys])
     }
   }
 
-  // Проверка: выбраны ли все сообщения на текущей странице
   const allCurrentSelected = messages.length > 0 && messages.every(msg => selectedRows.includes(getRowKey(msg)))
 
-  // Ссылки для закрытия выпадающих списков при клике вне
   const topicDropdownRef = useRef(null);
   const partitionDropdownRef = useRef(null);
 
-  // --- Загрузка списка топиков при смене кластера ---
+  // Загрузка списка топиков при смене кластера
   useEffect(() => {
     if (!currentCluster) return;
     const loadTopics = async () => {
@@ -114,18 +107,17 @@ export default function Search() {
     loadTopics();
   }, [currentCluster]);
 
-  // --- Загрузка списка партиций при выборе топика ---
+  // Загрузка партиций при выборе топика
   useEffect(() => {
     if (!selectedTopic || !currentCluster) return;
     axios.get(`/api/topics/${selectedTopic}/partitions`, {
       headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
     }).then((res) => {
-      console.log("PARTITIONS RESPONSE:", res.data)
       setPartitions(res.data.partitions || [])
     }).catch(() => setPartitions([]))
   }, [selectedTopic, currentCluster])
 
-  // --- Синхронизация URL параметров с состоянием ---
+  // Синхронизация параметров URL
   useEffect(() => {
     if (selectedTopic) {
       setSearchParams({ topic: selectedTopic, partition });
@@ -134,12 +126,12 @@ export default function Search() {
     }
   }, [selectedTopic, partition, setSearchParams]);
 
-  // Сброс страницы при смене топика или партиции
+  // Сброс страницы при смене топика, партиции, поискового ключа
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedTopic, partition]);
+  }, [selectedTopic, partition, searchKeyword]);
 
-  // Сброс состояния при смене топика (очистка сообщений, выделения, просмотр)
+  // Сброс состояния при смене топика
   useEffect(() => {
     if (!selectedTopic) return;
     setPartition("all");
@@ -149,42 +141,53 @@ export default function Search() {
     setCurrentPage(1);
   }, [selectedTopic]);
 
-  // --- Поиск сообщений ---
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    console.log("SEARCH:", { topic: selectedTopic, partition, currentPage })
+  // Функция загрузки сообщений с пагинацией
+  const fetchMessages = useCallback(async () => {
     if (!selectedTopic || !topics.includes(selectedTopic)) {
-      toast.error('Выберите топик');
       return;
     }
-    if (!currentCluster) {
-      toast.error('Нет активного кластера');
-      return;
-    }
+    if (!currentCluster) return;
     setSearching(true);
     try {
+      // Вычисляем смещение (offset) на основе страницы
       const baseOffset = startOffset !== '' ? Number(startOffset) : 0
       const calculatedOffset = baseOffset + ((currentPage - 1) * pageSize)
       const partitionParam = partition === "all" ? "" : partition;
 
-      const url = `/api/topics/${encodeURIComponent(selectedTopic)}/messages?partition=${partitionParam}&offset=${calculatedOffset}&limit=${maxMessages}&endOffset=${endOffset || ''}`;
+      let url = `/api/topics/${encodeURIComponent(selectedTopic)}/messages?partition=${partitionParam}&offset=${calculatedOffset}&limit=${maxMessages}`;
+      if (endOffset) url += `&endOffset=${endOffset}`;
+      if (searchKeyword) url += `&search=${encodeURIComponent(searchKeyword)}`;
+
       const response = await axios.get(url, {
         headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
       });
-      console.log("FIRST MSG:", response.data.messages?.[0]);
       setMessages(response.data.messages || [])
-      console.log("API RESPONSE:", response.data)
-      setTotalMessages(response.data.total || response.data.count || response.data.totalMessages || response.data.messages?.length || 0)
-      toast.success(`Получено ${response.data.messages?.length || 0} сообщений`);
+      setTotalMessages(response.data.total || 0)
+      toast.success(`Получено ${response.data.messages?.length || 0} сообщений из ${response.data.total || 0}`);
     } catch (err) {
       toast.error('Ошибка чтения сообщений: ' + (err.response?.data?.error || err.message));
       setMessages([]);
+      setTotalMessages(0);
     } finally {
       setSearching(false);
     }
+  }, [selectedTopic, topics, currentCluster, startOffset, currentPage, pageSize, partition, maxMessages, endOffset, searchKeyword]);
+
+  // Загрузка при изменении страницы или параметров поиска
+  useEffect(() => {
+    if (selectedTopic && currentCluster) {
+      fetchMessages();
+    }
+  }, [selectedTopic, partition, currentPage, searchKeyword, fetchMessages]);
+
+  // Обработчик отправки формы (сброс на первую страницу)
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchMessages();
   };
 
-  // --- Закрытие выпадающих меню при клике вне ---
+  // Закрытие выпадающих меню при клике вне
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (topicDropdownRef.current && !topicDropdownRef.current.contains(event.target)) {
@@ -199,9 +202,8 @@ export default function Search() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // --- Экспорт сообщений в JSON / CSV / TXT ---
+  // Экспорт сообщений
   const exportMessages = (format, onlySelected = false) => {
-    // Фильтруем сообщения: если onlySelected, оставляем только те, чей ключ есть в selectedRows
     const rows = onlySelected
       ? messages.filter((m) => selectedRows.includes(getRowKey(m)))
       : messages
@@ -288,6 +290,8 @@ export default function Search() {
           setCurrentPage={setCurrentPage}
           searching={searching}
           currentCluster={currentCluster}
+          searchKeyword={searchKeyword}
+          setSearchKeyword={setSearchKeyword}
         />
       </div>
 
@@ -325,7 +329,7 @@ export default function Search() {
               selectedMessage={selectedMessage}
               setSelectedMessage={setSelectedMessage}
               selectedTopic={selectedTopic}
-              allCurrentSelected={allCurrentSelected}        // <-- передаём признак, что все на странице выбраны
+              allCurrentSelected={allCurrentSelected}
               getRowKey={getRowKey}
             />
           </div>

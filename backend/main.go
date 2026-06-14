@@ -24,9 +24,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/IBM/sarama"
 )
@@ -58,28 +56,11 @@ type CreateTopicResponse struct {
 	Error   string `json:"error,omitempty"`
 }
 
-type Message struct {
-	Offset    int64  `json:"offset"`
-	Key       string `json:"key"`
-	Value     string `json:"value"`
-	Timestamp string `json:"timestamp"`
-	Partition int32  `json:"partition"`
-}
-
-type MessagesResponse struct {
-	Messages []Message `json:"messages"`
-	Total    int       `json:"total"`
-}
-
 type PartitionInfo struct {
 	ID       int32   `json:"id"`
 	Leader   int32   `json:"leader"`
 	Replicas []int32 `json:"replicas"`
 	Isr      []int32 `json:"isr"`
-}
-
-type PartitionsResponse struct {
-	Partitions []int32 `json:"partitions"`
 }
 
 type TopicDetailResponse struct {
@@ -368,202 +349,6 @@ func updateTopicConfigHandler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(map[string]bool{"success": true})
 }
 
-// getMessagesHandler возвращает сообщения из топика с возможностью фильтрации по партиции и оффсету.
-func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-
-	pathParts := strings.Split(r.URL.Path, "/")
-	if len(pathParts) < 4 {
-		sendJSONError(w, "Invalid topic path", http.StatusBadRequest)
-		return
-	}
-	topic := pathParts[3]
-	if topic == "" {
-		sendJSONError(w, "Topic name required", http.StatusBadRequest)
-		return
-	}
-
-	offsetStr := r.URL.Query().Get("offset")
-	limitStr := r.URL.Query().Get("limit")
-	partitionStr := r.URL.Query().Get("partition")
-	log.Printf("partitionStr='%s'", partitionStr)
-
-	var partition int32 = -1
-	if partitionStr != "" && partitionStr != "all" {
-		if p, err := strconv.Atoi(partitionStr); err == nil {
-			partition = int32(p)
-		}
-	}
-
-	offset := int64(0)
-	if offsetStr != "" {
-		if o, err := strconv.ParseInt(offsetStr, 10, 64); err == nil && o >= 0 {
-			offset = o
-		}
-	}
-
-	limit := int32(10)
-	if limitStr != "" {
-		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 1000 {
-			limit = int32(l)
-		}
-	}
-
-	bootstrap := getBootstrapFromRequest(r)
-	config := sarama.NewConfig()
-	config.Version = sarama.V2_8_0_0
-	config.Consumer.Return.Errors = true
-
-	client, err := sarama.NewClient([]string{bootstrap}, config)
-	if err != nil {
-		log.Printf("Client error: %v", err)
-		sendJSONError(w, "Failed to create client: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer client.Close()
-
-	consumer, err := sarama.NewConsumerFromClient(client)
-	if err != nil {
-		log.Printf("Consumer error: %v", err)
-		sendJSONError(w, "Failed to create consumer: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer consumer.Close()
-
-	var earliestOffset, latestOffset int64
-	if partition != -1 {
-		earliestOffset, err = client.GetOffset(topic, partition, sarama.OffsetOldest)
-		if err != nil {
-			sendJSONError(w, "Failed to get earliest offset: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		latestOffset, err = client.GetOffset(topic, partition, sarama.OffsetNewest)
-		if err != nil {
-			sendJSONError(w, "Failed to get latest offset: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-	if offset < earliestOffset {
-		offset = earliestOffset
-	}
-
-	messages := make([]Message, 0)
-
-	if partition != -1 && offset >= latestOffset {
-		total := 0
-		if partition != -1 {
-			total = int(latestOffset - earliestOffset)
-		}
-		_ = json.NewEncoder(w).Encode(MessagesResponse{Messages: messages, Total: total})
-		return
-	}
-
-	partitions, err := client.Partitions(topic)
-	log.Printf("TOPIC %s PARTITIONS: %+v", topic, partitions)
-	if err != nil {
-		sendJSONError(w, "Failed to get partitions: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if partition == -1 {
-		// Чтение из всех партиций
-		for _, p := range partitions {
-			log.Printf("READ topic=%s partition=%d offset=%d earliest=%d latest=%d", topic, partition, offset, earliestOffset, latestOffset)
-			pc, err := consumer.ConsumePartition(topic, p, sarama.OffsetOldest)
-			if err != nil {
-				log.Printf("Partition %d error: %v", p, err)
-				continue
-			}
-			timeout := time.After(1 * time.Second)
-			done := false
-			for !done {
-				select {
-				case msg := <-pc.Messages():
-					log.Printf("MSG partition=%d offset=%d", p, msg.Offset)
-					messages = append(messages, Message{
-						Offset:    msg.Offset,
-						Key:       string(msg.Key),
-						Value:     string(msg.Value),
-						Timestamp: msg.Timestamp.Format(time.RFC3339),
-						Partition: p,
-					})
-					if len(messages) >= int(limit) {
-						done = true
-					}
-				case <-timeout:
-					done = true
-				}
-			}
-			pc.Close()
-		}
-	} else {
-		// Чтение из одной партиции, начиная с заданного оффсета
-		pc, err := consumer.ConsumePartition(topic, partition, offset)
-		if err != nil {
-			sendJSONError(w, "Failed to consume partition: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer pc.Close()
-		timeout := time.After(3 * time.Second)
-		done := false
-		for i := int32(0); i < limit && !done; i++ {
-			select {
-			case msg := <-pc.Messages():
-				log.Printf("MSG partition=%d offset=%d", partition, msg.Offset)
-				messages = append(messages, Message{
-					Offset:    msg.Offset,
-					Key:       string(msg.Key),
-					Value:     string(msg.Value),
-					Timestamp: msg.Timestamp.Format(time.RFC3339),
-					Partition: partition,
-				})
-			case <-timeout:
-				done = true
-			}
-		}
-	}
-
-	total := len(messages)
-	if partition != -1 {
-		total = int(latestOffset - earliestOffset)
-	}
-	_ = json.NewEncoder(w).Encode(MessagesResponse{Messages: messages, Total: total})
-}
-
-// getPartitionsHandler возвращает список ID партиций для указанного топика.
-func getPartitionsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-
-	path := strings.TrimPrefix(r.URL.Path, "/api/topics/")
-	path = strings.TrimSuffix(path, "/partitions")
-	topic := strings.TrimSuffix(path, "/")
-	if topic == "" {
-		sendJSONError(w, "Topic name required", http.StatusBadRequest)
-		return
-	}
-
-	bootstrap := getBootstrapFromRequest(r)
-	config := sarama.NewConfig()
-	config.Version = sarama.V2_8_0_0
-
-	client, err := sarama.NewClient([]string{bootstrap}, config)
-	if err != nil {
-		sendJSONError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer client.Close()
-
-	partitions, err := client.Partitions(topic)
-	log.Printf("GET PARTITIONS %s -> %+v", topic, partitions)
-	if err != nil {
-		sendJSONError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	_ = json.NewEncoder(w).Encode(PartitionsResponse{Partitions: partitions})
-}
-
 // =============================================================================
 // Основная функция — настройка маршрутов и запуск сервера
 // =============================================================================
@@ -597,9 +382,9 @@ func main() {
 			}
 		case http.MethodGet:
 			if strings.Contains(r.URL.Path, "/messages") {
-				getMessagesHandler(w, r)
+				getMessagesHandler(w, r) // обработчик из search.go
 			} else if strings.Contains(r.URL.Path, "/partitions") {
-				getPartitionsHandler(w, r)
+				getPartitionsHandler(w, r) // обработчик из search.go
 			} else {
 				getTopicDetailHandler(w, r)
 			}
@@ -608,13 +393,12 @@ func main() {
 		}
 	})
 
-	// ----- Маршруты для Dashboard (метрики кластера) -----
+	// ----- Маршруты для Overview (метрики кластера) -----
 	http.HandleFunc("/api/overview", getDashboardOverviewHandler)
 	http.HandleFunc("/api/overview/brokers", getDashboardBrokersHandler)
 	http.HandleFunc("/api/overview/consumer-groups", getDashboardConsumerGroupsHandler)
 	http.HandleFunc("/api/overview/partitions", getDashboardPartitionsHandler)
 	http.HandleFunc("/api/overview/throughput", getDashboardThroughputHandler)
-	// Общее количество сообщений в кластере (приблизительное)
 	http.HandleFunc("/api/overview/messages-total", getDashboardMessagesTotalHandler)
 
 	port := ":8080"
