@@ -13,36 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * ============================================================================
- * TopicsPanel
- * ============================================================================
- *
- * Панель отображения пропускной способности топиков Kafka.
- *
- * Текущая версия:
- *
- * - реализует каркас панели
- * - реализует режимы отображения
- * - реализует выбор метрики
- *
- * Реальные данные будут подключены позже.
- *
- * Поддерживаемые режимы:
- *
- * 1. Top Topics
- *    Показывает самые активные топики кластера.
- *
- * 2. Single Topic
- *    Показывает один выбранный топик.
- *
- * Поддерживаемые метрики:
- *
- * - Сообщения/сек
- * - Байты/сек
- *
- * ============================================================================
- */
 
 import { useState } from 'react';
 import {
@@ -56,278 +26,173 @@ import {
 } from 'recharts';
 import '../../styles/overview/topics-panel.css';
 
+const MOCK_TOPICS = ['orders', 'payments', 'notifications', 'audit'];
+
+const TOPIC_COLORS = {
+  orders: '#3b82f6',
+  payments: '#8b5cf6',
+  notifications: '#22c55e',
+  audit: '#f59e0b'
+};
+
+const MOCK_CHART_DATA = [
+  { time: '12:00', orders: 1200, payments: 850, notifications: 600, audit: 300 },
+  { time: '12:05', orders: 1500, payments: 900, notifications: 700, audit: 350 },
+  { time: '12:10', orders: 1800, payments: 1100, notifications: 900, audit: 500 },
+  { time: '12:15', orders: 1600, payments: 1200, notifications: 850, audit: 400 }
+];
+
 export default function TopicsPanel() {
-
-  /* Режим отображения панели.  top-topics single-topic */
   const [viewMode, setViewMode] = useState('top-topics');
-
-  /* Выбранный топик. Позже список будет загружаться из Kafka. Сейчас используется временный набор данных. */
   const [selectedTopic, setSelectedTopic] = useState('orders');
+  const [visibleTopics, setVisibleTopics] = useState(MOCK_TOPICS);
 
-  /* Временные данные. */
-  const mockTopics = [ 'orders', 'payments', 'notifications', 'audit' ];
+  // -------------------------------------------------------------------------
+  // Универсальный обработчик для выбора топика (линия / легенда)
+  // -------------------------------------------------------------------------
+  const handleTopicSelect = (topic, event) => {
+    // Останавливаем всплытие, чтобы клик не ушёл на фон
+    if (event && event.stopPropagation) event.stopPropagation();
 
-  const [visibleTopics, setVisibleTopics] = useState(mockTopics);
+    // Мультивыбор через Ctrl
+    if (event && event.ctrlKey) {
+      setVisibleTopics(prev =>
+        prev.includes(topic)
+          ? prev.filter(t => t !== topic)
+          : [...prev, topic]
+      );
+      return;
+    }
 
-  /* Временные данные графика. Будут заменены данными Kafka API. */
-    const mockData = [
-      {
-        time: '12:00',
-        orders: 1200,
-        payments: 850,
-        notifications: 600,
-        audit: 300
-      },
-      {
-        time: '12:05',
-        orders: 1500,
-        payments: 900,
-        notifications: 700,
-        audit: 350
-      },
-      {
-        time: '12:10',
-        orders: 1800,
-        payments: 1100,
-        notifications: 900,
-        audit: 500
-      },
-      {
-        time: '12:15',
-        orders: 1600,
-        payments: 1200,
-        notifications: 850,
-        audit: 400
-      }
-    ];
-
-    /* Цвет топиков */
-    const topicColors = {
-      orders: '#3b82f6',
-      payments: '#8b5cf6',
-      notifications: '#22c55e',
-      audit: '#f59e0b'
-    };
-
-    /* Создаем данные для графика */
-    const chartData =
-      viewMode === 'single-topic'
-        ? mockData.map(item => ({
-            time: item.time,
-            [selectedTopic]: item[selectedTopic]
-          }))
-        : mockData;
-
-    /* Показывает только выбранный топик. */
-    const handleTopicClick = (topic) => {
-
-      if (
-        visibleTopics.length === 1 &&
-        visibleTopics[0] === topic
-      ) {
-        return;
-      }
-
+    // Обычный клик: если уже отображается только этот топик – вернуть все
+    if (visibleTopics.length === 1 && visibleTopics[0] === topic) {
+      setVisibleTopics(MOCK_TOPICS);
+    } else {
       setVisibleTopics([topic]);
+    }
+  };
 
-    };
+  // -------------------------------------------------------------------------
+  // Клик по пустому месту графика – возвращаем все топики
+  // -------------------------------------------------------------------------
+  const handleChartClick = () => {
+    setVisibleTopics(MOCK_TOPICS);
+  };
 
-    /* Показывает все топики. */
-    const handleChartClick = () => {
+  const chartData =
+    viewMode === 'single-topic'
+      ? MOCK_CHART_DATA.map(item => ({
+          time: item.time,
+          [selectedTopic]: item[selectedTopic]
+        }))
+      : MOCK_CHART_DATA;
 
-      if (
-        visibleTopics.length === mockTopics.length
-      ) {
-        return;
-      }
-
-      setVisibleTopics(mockTopics);
-
-    };
+  const sortedTopics = [...MOCK_TOPICS].sort(
+    (a, b) =>
+      MOCK_CHART_DATA[MOCK_CHART_DATA.length - 1][b] -
+      MOCK_CHART_DATA[MOCK_CHART_DATA.length - 1][a]
+  );
 
   return (
     <div className="dashboard-panel">
-
-      {/* Заголовок панели */}
       <div className="panel-header">
-
         <div className="topics-panel-header">
-
-          <div className="topics-panel-title">
-            Пропускная способность по топикам
-          </div>
-
+          <div className="topics-panel-title">Пропускная способность по топикам</div>
           <div className="topics-panel-controls">
-
-            {/* ==========================================
-                Выбор режима отображения
-            ========================================== */}
             <select
               className="topics-select"
               value={viewMode}
-              onChange={(event) => setViewMode(event.target.value)}
+              onChange={(e) => {
+                const mode = e.target.value;
+                setViewMode(mode);
+                setVisibleTopics(mode === 'top-topics' ? MOCK_TOPICS : [selectedTopic]);
+              }}
             >
-              <option value="top-topics">
-                Топ топиков
-              </option>
-
-              <option value="single-topic">
-                Выбрать топик
-              </option>
+              <option value="top-topics">Топ топиков</option>
+              <option value="single-topic">Выбрать топик</option>
             </select>
 
-            {/* ==========================================
-                Выбор конкретного топика.
-                Показывается только в режиме Выбрать топик.
-            ========================================== */}
             {viewMode === 'single-topic' && (
               <select
                 className="topics-select"
                 value={selectedTopic}
-                onChange={(event) => setSelectedTopic(event.target.value)}
+                onChange={(e) => {
+                  const topic = e.target.value;
+                  setSelectedTopic(topic);
+                  setVisibleTopics([topic]);
+                }}
               >
-                {mockTopics.map(topic => (
-                  <option
-                    key={topic}
-                    value={topic}
-                  >
+                {MOCK_TOPICS.map(topic => (
+                  <option key={topic} value={topic}>
                     {topic}
                   </option>
                 ))}
               </select>
             )}
-
           </div>
-
         </div>
-
       </div>
 
-      {/* ==========================================================
-          Тело панели
-      ========================================================== */}
       <div className="panel-body">
-
         <div className="topics-layout">
-
+          {/* График */}
           <div className="topics-chart">
-
             <ResponsiveContainer width="100%" height={320}>
-
-              <LineChart
-                data={chartData}
-                onClick={handleChartClick}
-              >
-
-                <CartesianGrid
-                  stroke="var(--border-color)"
-                  strokeDasharray="4 4"
-                />
-
-                <XAxis
-                  dataKey="time"
-                  tick={{ fill: 'var(--text-secondary)' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-
-                <YAxis
-                  tick={{ fill: 'var(--text-secondary)' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-
+              <LineChart data={chartData} onClick={handleChartClick}>
+                <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
+                <XAxis dataKey="time" tick={{ fill: 'var(--text-secondary)' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fill: 'var(--text-secondary)' }} tickLine={false} axisLine={false} />
                 <Tooltip />
 
                 {(
-                   viewMode === 'single-topic'
-                     ? [selectedTopic]
-                     : mockTopics
-                 )
-                 .filter(
-                   topic => visibleTopics.includes(topic)
-                 )
-                 .map(topic => (
-                   <Line
-                     key={topic}
-                     type="natural"
-                     dataKey={topic}
-                     stroke={topicColors[topic]}
-                     strokeWidth={2}
-                     dot={false}
-                     activeDot={{
-                       r: 5,
-                       stroke: '#ffffff',
-                       strokeWidth: 2,
-                       fill: topicColors[topic]
-                     }}
-                     onClick={() => handleTopicClick(topic)}
-                     style={{ cursor: 'pointer' }}
-                   />
-                 ))}
-
+                  viewMode === 'single-topic'
+                    ? [selectedTopic]
+                    : MOCK_TOPICS
+                )
+                  .filter(topic => visibleTopics.includes(topic))
+                  .map(topic => (
+                    <Line
+                      key={topic}
+                      type="natural"
+                      dataKey={topic}
+                      stroke={TOPIC_COLORS[topic]}
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: TOPIC_COLORS[topic] }}
+                      onMouseDown={(e) => handleTopicSelect(topic, e)}   // ← onMouseDown вместо onClick
+                      style={{ cursor: 'pointer' }}
+                    />
+                  ))}
               </LineChart>
-
             </ResponsiveContainer>
-
           </div>
 
+          {/* Легенда */}
           <div className="topics-legend">
-
             <div className="topics-legend-header">
-
               <span>Топик</span>
-
               <span>Сообщения/сек</span>
-
             </div>
-
-            {[...mockTopics]
-              .sort(
-                (a, b) =>
-                  mockData[mockData.length - 1][b] -
-                  mockData[mockData.length - 1][a]
-              )
-              .map(topic => (
-
+            {sortedTopics.map(topic => (
               <div
                 key={topic}
                 className={`topics-legend-row ${
-                  visibleTopics.length === 1 &&
-                  visibleTopics[0] === topic
-                    ? 'active'
-                    : ''
+                  visibleTopics.length === 1 && visibleTopics[0] === topic ? 'active' : ''
                 }`}
-                onClick={() => handleTopicClick(topic)}
+                onClick={(e) => handleTopicSelect(topic, e)}
               >
-
                 <div className="topics-legend-left">
-
-                  <span
-                    className="topics-legend-color"
-                    style={{
-                      background: topicColors[topic]
-                    }}
-                  />
-
+                  <span className="topics-legend-color" style={{ background: TOPIC_COLORS[topic] }} />
                   <span>{topic}</span>
-
                 </div>
-
                 <span className="topics-legend-value">
-                  {mockData[mockData.length - 1][topic]} msg/s
+                  {MOCK_CHART_DATA[MOCK_CHART_DATA.length - 1][topic]} msg/s
                 </span>
-
               </div>
-
             ))}
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }
