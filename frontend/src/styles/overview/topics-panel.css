@@ -23,6 +23,11 @@ Topics Throughput Panel
     align-items: center;
     gap: 12px;
 }
+/* Стили для универсального Dropdown внутри панели топиков */
+.topics-panel-controls .dropdown-wrapper {
+    min-width: 170px;      /* фиксированная ширина, как было у select */
+    flex: 0 0 auto;       /* не растягивается */
+}
 
 .topics-select {
     min-width: 170px;

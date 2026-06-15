@@ -27,11 +27,8 @@
  *   - Клик по пустому месту графика → вернуть все топики.
  *   - Ctrl + клик (мышь) → добавить/удалить топик к текущему набору (мультивыбор).
  *
- * Всплывающая подсказка (тултип) стилизована аналогично ThroughputPanel:
- *   - Отображает время и значения всех видимых топиков.
- *   - При наведении на график появляется вертикальная пунктирная синяя линия.
- *
- * Данные сейчас моковые, в будущем заменяются реальными метриками Kafka API.
+ * Всплывающая подсказка (тултип) стилизована аналогично ThroughputPanel.
+ * Выпадающие меню используют универсальный компонент Dropdown (единый стиль).
  */
 
 import { useState } from 'react';
@@ -44,6 +41,7 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
+import Dropdown from '../../components/common/Dropdown';
 import '../../styles/overview/topics-panel.css';
 
 const MOCK_TOPICS = ['orders', 'payments', 'notifications', 'audit'];
@@ -88,6 +86,33 @@ export default function TopicsPanel() {
   const [viewMode, setViewMode] = useState('top-topics');
   const [selectedTopic, setSelectedTopic] = useState('orders');
   const [visibleTopics, setVisibleTopics] = useState(MOCK_TOPICS);
+
+  // -------------------------------------------------------------------------
+  // Данные для выпадающих меню (универсальный Dropdown)
+  // -------------------------------------------------------------------------
+  const modeItems = [
+    { id: 'top-topics', name: 'Топ топиков' },
+    { id: 'single-topic', name: 'Выбрать топик' }
+  ];
+  const currentMode = modeItems.find(m => m.id === viewMode);
+
+  const topicItems = MOCK_TOPICS.map(t => ({ id: t, name: t }));
+  const currentTopic = topicItems.find(t => t.id === selectedTopic);
+
+  // -------------------------------------------------------------------------
+  // Обработчики выбора из дропдаунов
+  // -------------------------------------------------------------------------
+  const handleModeChange = (item) => {
+    const mode = item.id;
+    setViewMode(mode);
+    setVisibleTopics(mode === 'top-topics' ? MOCK_TOPICS : [selectedTopic]);
+  };
+
+  const handleTopicChange = (item) => {
+    const topic = item.id;
+    setSelectedTopic(topic);
+    setVisibleTopics([topic]);
+  };
 
   // -------------------------------------------------------------------------
   // Универсальный обработчик для выбора топика (линия / легенда)
@@ -138,35 +163,20 @@ export default function TopicsPanel() {
         <div className="topics-panel-header">
           <div className="topics-panel-title">Пропускная способность по топикам</div>
           <div className="topics-panel-controls">
-            <select
-              className="topics-select"
-              value={viewMode}
-              onChange={(e) => {
-                const mode = e.target.value;
-                setViewMode(mode);
-                setVisibleTopics(mode === 'top-topics' ? MOCK_TOPICS : [selectedTopic]);
-              }}
-            >
-              <option value="top-topics">Топ топиков</option>
-              <option value="single-topic">Выбрать топик</option>
-            </select>
+            {/* Выпадающее меню выбора режима (Dropdown) */}
+            <Dropdown
+              selectedItem={currentMode}
+              items={modeItems.filter(item => item.id !== viewMode)}
+              onSelect={handleModeChange}
+            />
 
+            {/* Выбор конкретного топика – показывается только в режиме single-topic */}
             {viewMode === 'single-topic' && (
-              <select
-                className="topics-select"
-                value={selectedTopic}
-                onChange={(e) => {
-                  const topic = e.target.value;
-                  setSelectedTopic(topic);
-                  setVisibleTopics([topic]);
-                }}
-              >
-                {MOCK_TOPICS.map(topic => (
-                  <option key={topic} value={topic}>
-                    {topic}
-                  </option>
-                ))}
-              </select>
+              <Dropdown
+                selectedItem={currentTopic}
+                items={topicItems.filter(item => item.id !== selectedTopic)}
+                onSelect={handleTopicChange}
+              />
             )}
           </div>
         </div>

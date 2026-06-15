@@ -42,16 +42,15 @@
 .dropdown-menu {
     position: absolute;
     top: calc(100% - 1px);
-    /* ✔ ширина по контенту */
-    width: max-content;
-    min-width: 220px;   /* чтобы не было слишком узко */
-    max-width: 360px;   /* защита от слишком длинных тем */
+    width: 100%;               /* ← ширина равна ширине кнопки */
+    min-width: 0;
+    max-height: 280px;         /* ← ограничение высоты, скролл при превышении */
+    overflow-y: auto;          /* ← вертикальная прокрутка */
     background: var(--dropdown-bg);
     border: 1px solid var(--border-color);
     border-top: none;
     border-bottom-left-radius: 14px;
     border-bottom-right-radius: 14px;
-    overflow: hidden;
     z-index: 1000;
     box-shadow: 0 12px 32px rgba(0,0,0,0.35);
     backdrop-filter: blur(10px);
