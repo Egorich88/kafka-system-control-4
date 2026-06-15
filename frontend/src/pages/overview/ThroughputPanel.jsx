@@ -52,12 +52,12 @@ function ThroughputTooltip({ active, payload, label }) {
     <div className="throughput-tooltip">
       <div className="throughput-tooltip-title">Время: {label}</div>
       {incomingItem && (
-        <div className="throughput-tooltip-row">
+        <div className="throughput-tooltip-row" style={{ color: '#3b82f6' }}>
           Входящие сообщения: <strong>{incomingItem.value} msg/s</strong>
         </div>
       )}
       {outgoingItem && (
-        <div className="throughput-tooltip-row">
+        <div className="throughput-tooltip-row" style={{ color: '#8b5cf6' }}>
           Исходящие сообщения: <strong>{outgoingItem.value} msg/s</strong>
         </div>
       )}

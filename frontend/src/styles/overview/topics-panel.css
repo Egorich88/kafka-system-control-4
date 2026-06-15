@@ -113,3 +113,47 @@ svg:focus,
 path:focus {
   outline: none !important;
 }
+/*
+==========================================================
+Tooltip графика пропускной способности по топикам
+(единый стиль с ThroughputPanel)
+==========================================================
+*/
+
+/* Контейнер тултипа */
+.topics-tooltip {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+/* Заголовок тултипа (время) */
+.topics-tooltip-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+/* Строка тултипа (топик: значение) */
+.topics-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.topics-tooltip-row strong {
+    color: var(--text-primary);
+}
+
+/* ==========================================================
+   Курсор (вертикальная пунктирная линия) – как в ThroughputPanel
+   ========================================================== */
+.recharts-cursor {
+    stroke: #3b82f6 !important;
+    stroke-width: 1px !important;
+    stroke-dasharray: 4 4 !important;
+}

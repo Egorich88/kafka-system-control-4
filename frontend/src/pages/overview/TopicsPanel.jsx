@@ -14,6 +14,26 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Панель пропускной способности по топикам Kafka.
+ *
+ * Режимы:
+ *   - "Топ топиков" – отображает несколько топиков (можно выбирать через клики и Ctrl).
+ *   - "Выбрать топик" – показывает график только одного выбранного топика.
+ *
+ * Управление отображением линий:
+ *   - Обычный клик по линии или строке → оставить только этот топик.
+ *   - Если топик уже единственный → вернуть все топики.
+ *   - Клик по пустому месту графика → вернуть все топики.
+ *   - Ctrl + клик (мышь) → добавить/удалить топик к текущему набору (мультивыбор).
+ *
+ * Всплывающая подсказка (тултип) стилизована аналогично ThroughputPanel:
+ *   - Отображает время и значения всех видимых топиков.
+ *   - При наведении на график появляется вертикальная пунктирная синяя линия.
+ *
+ * Данные сейчас моковые, в будущем заменяются реальными метриками Kafka API.
+ */
+
 import { useState } from 'react';
 import {
   ResponsiveContainer,
@@ -42,6 +62,28 @@ const MOCK_CHART_DATA = [
   { time: '12:15', orders: 1600, payments: 1200, notifications: 850, audit: 400 }
 ];
 
+// =========================================================================
+// Кастомный тултип (как в ThroughputPanel)
+// =========================================================================
+const TopicsTooltip = ({ active, payload, label }) => {
+  if (!active || !payload || !payload.length) return null;
+
+  return (
+    <div className="topics-tooltip">
+      <div className="topics-tooltip-title">Время: {label}</div>
+      {payload.map((entry) => (
+        <div
+          key={entry.dataKey}
+          className="topics-tooltip-row"
+          style={{ color: entry.color || 'var(--text-primary)' }}
+        >
+          {entry.name}: <strong>{entry.value} msg/s</strong>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export default function TopicsPanel() {
   const [viewMode, setViewMode] = useState('top-topics');
   const [selectedTopic, setSelectedTopic] = useState('orders');
@@ -51,10 +93,8 @@ export default function TopicsPanel() {
   // Универсальный обработчик для выбора топика (линия / легенда)
   // -------------------------------------------------------------------------
   const handleTopicSelect = (topic, event) => {
-    // Останавливаем всплытие, чтобы клик не ушёл на фон
     if (event && event.stopPropagation) event.stopPropagation();
 
-    // Мультивыбор через Ctrl
     if (event && event.ctrlKey) {
       setVisibleTopics(prev =>
         prev.includes(topic)
@@ -64,7 +104,6 @@ export default function TopicsPanel() {
       return;
     }
 
-    // Обычный клик: если уже отображается только этот топик – вернуть все
     if (visibleTopics.length === 1 && visibleTopics[0] === topic) {
       setVisibleTopics(MOCK_TOPICS);
     } else {
@@ -135,14 +174,17 @@ export default function TopicsPanel() {
 
       <div className="panel-body">
         <div className="topics-layout">
-          {/* График */}
           <div className="topics-chart">
             <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={chartData} onClick={handleChartClick}>
+              <LineChart
+                data={chartData}
+                onClick={handleChartClick}
+                cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
+              >
                 <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
                 <XAxis dataKey="time" tick={{ fill: 'var(--text-secondary)' }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fill: 'var(--text-secondary)' }} tickLine={false} axisLine={false} />
-                <Tooltip />
+                <Tooltip content={<TopicsTooltip />} />
 
                 {(
                   viewMode === 'single-topic'
@@ -159,7 +201,7 @@ export default function TopicsPanel() {
                       strokeWidth={2}
                       dot={false}
                       activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: TOPIC_COLORS[topic] }}
-                      onMouseDown={(e) => handleTopicSelect(topic, e)}   // ← onMouseDown вместо onClick
+                      onMouseDown={(e) => handleTopicSelect(topic, e)}
                       style={{ cursor: 'pointer' }}
                     />
                   ))}
@@ -167,7 +209,6 @@ export default function TopicsPanel() {
             </ResponsiveContainer>
           </div>
 
-          {/* Легенда */}
           <div className="topics-legend">
             <div className="topics-legend-header">
               <span>Топик</span>
