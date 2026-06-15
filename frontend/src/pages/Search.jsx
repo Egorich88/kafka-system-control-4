@@ -18,6 +18,7 @@
  * @fileoverview Страница поиска сообщений в Kafka.
  * Позволяет выбирать топик, партицию, оффсеты, искать по ключу/значению.
  * Реализована пагинация (25 сообщений на страницу) и экспорт выделенных записей.
+ * При смене кластера все данные и параметры поиска полностью сбрасываются.
  */
 
 import SearchToolbar from '../pages/search/SearchToolbar'
@@ -57,7 +58,7 @@ export default function Search() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalMessages, setTotalMessages] = useState(0)
 
-  const pageSize = 25                      // количество сообщений на страницу
+  const pageSize = 25
   const totalPages = Math.max(1, Math.ceil(totalMessages / pageSize))
 
   // Уникальный ключ сообщения для выделения
@@ -87,13 +88,13 @@ export default function Search() {
   const topicDropdownRef = useRef(null);
   const partitionDropdownRef = useRef(null);
 
-  // Загрузка списка топиков при смене кластера
+  // --- Загрузка списка топиков при смене кластера ---
   useEffect(() => {
     if (!currentCluster) return;
     const loadTopics = async () => {
       try {
         const response = await axios.get('/api/topics', {
-          headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
+          headers: { 'X-Kafka-Bootstrap': currentCluster.brokers || currentCluster.bootstrapServers }
         });
         let topicsList = response.data.topics || [];
         if (topicsList.length > 0 && typeof topicsList[0] === 'object') {
@@ -107,17 +108,17 @@ export default function Search() {
     loadTopics();
   }, [currentCluster]);
 
-  // Загрузка партиций при выборе топика
+  // --- Загрузка партиций при выборе топика ---
   useEffect(() => {
     if (!selectedTopic || !currentCluster) return;
     axios.get(`/api/topics/${selectedTopic}/partitions`, {
-      headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
+      headers: { 'X-Kafka-Bootstrap': currentCluster.brokers || currentCluster.bootstrapServers }
     }).then((res) => {
       setPartitions(res.data.partitions || [])
     }).catch(() => setPartitions([]))
   }, [selectedTopic, currentCluster])
 
-  // Синхронизация параметров URL
+  // --- Синхронизация параметров URL ---
   useEffect(() => {
     if (selectedTopic) {
       setSearchParams({ topic: selectedTopic, partition });
@@ -126,30 +127,53 @@ export default function Search() {
     }
   }, [selectedTopic, partition, setSearchParams]);
 
-  // Сброс страницы при смене топика, партиции, поискового ключа
+  // --- Сброс страницы при смене топика, партиции, поискового ключа ---
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedTopic, partition, searchKeyword]);
 
-  // Сброс состояния при смене топика
+  // --- Сброс состояния при смене топика (если топик очищен) ---
   useEffect(() => {
-    if (!selectedTopic) return;
-    setPartition("all");
+    if (!selectedTopic) {
+      setPartition("all");
+      setMessages([]);
+      setSelectedRows([]);
+      setSelectedMessage(null);
+      setCurrentPage(1);
+      setTotalMessages(0);
+      setPartitions([]);
+    }
+  }, [selectedTopic]);
+
+  // --- ПОЛНАЯ ОЧИСТКА ПРИ СМЕНЕ КЛАСТЕРА (ВАЖНО) ---
+  useEffect(() => {
+    // Сбрасываем все данные, связанные с предыдущим кластером
     setMessages([]);
     setSelectedRows([]);
     setSelectedMessage(null);
+    setTotalMessages(0);
     setCurrentPage(1);
-  }, [selectedTopic]);
+    setPartitions([]);
+    // Сбрасываем параметры формы (опционально — чтобы пользователь начал с чистого листа)
+    setSelectedTopic('');
+    setPartition('all');
+    setSearchKeyword('');
+    setStartOffset('');
+    setEndOffset('');
+    setMaxMessages(100);
+    setTopicSearch('');
+    setIsTopicDropdownOpen(false);
+    setIsPartitionDropdownOpen(false);
+    // Очищаем URL-параметры
+    setSearchParams({});
+  }, [currentCluster]);
 
-  // Функция загрузки сообщений с пагинацией
+  // --- Функция загрузки сообщений (пагинация) ---
   const fetchMessages = useCallback(async () => {
-    if (!selectedTopic || !topics.includes(selectedTopic)) {
-      return;
-    }
+    if (!selectedTopic || !topics.includes(selectedTopic)) return;
     if (!currentCluster) return;
     setSearching(true);
     try {
-      // Вычисляем смещение (offset) на основе страницы
       const baseOffset = startOffset !== '' ? Number(startOffset) : 0
       const calculatedOffset = baseOffset + ((currentPage - 1) * pageSize)
       const partitionParam = partition === "all" ? "" : partition;
@@ -159,7 +183,7 @@ export default function Search() {
       if (searchKeyword) url += `&search=${encodeURIComponent(searchKeyword)}`;
 
       const response = await axios.get(url, {
-        headers: { 'X-Kafka-Bootstrap': currentCluster.brokers }
+        headers: { 'X-Kafka-Bootstrap': currentCluster.brokers || currentCluster.bootstrapServers }
       });
       setMessages(response.data.messages || [])
       setTotalMessages(response.data.total || 0)
@@ -173,7 +197,7 @@ export default function Search() {
     }
   }, [selectedTopic, topics, currentCluster, startOffset, currentPage, pageSize, partition, maxMessages, endOffset, searchKeyword]);
 
-  // Загрузка при изменении страницы или параметров поиска
+  // Загрузка при изменении параметров
   useEffect(() => {
     if (selectedTopic && currentCluster) {
       fetchMessages();

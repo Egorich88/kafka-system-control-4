@@ -401,6 +401,12 @@ func main() {
 	http.HandleFunc("/api/overview/throughput", getDashboardThroughputHandler)
 	http.HandleFunc("/api/overview/messages-total", getDashboardMessagesTotalHandler)
 
+    // ----- Health check для кластера -----
+    // Эндпоинт проверяет доступность Kafka-брокера.
+    // Фронтенд вызывает его, чтобы отобразить цветной индикатор (зелёный/красный/серый)
+    // в выпадающем списке кластеров.
+    http.HandleFunc("/api/clusters/health", getClusterHealthHandler)
+
 	port := ":8080"
 	log.Printf("Server running on %s", port)
 	log.Fatal(http.ListenAndServe(port, nil))

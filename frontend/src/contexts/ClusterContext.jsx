@@ -14,207 +14,140 @@
  * limitations under the License.
  */
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect
-} from 'react';
+/**
+ * @fileoverview Контекст для управления кластерами Kafka.
+ * Хранит список кластеров, текущий кластер, статусы подключения.
+ * Предоставляет функции для добавления, редактирования, удаления и переключения кластеров.
+ * Автоматически проверяет доступность кластера при добавлении, переключении и загрузке страницы.
+ */
+
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 
 const ClusterContext = createContext();
 
 export function ClusterProvider({ children }) {
-
   const [clusters, setClusters] = useState([]);
+  const [currentCluster, setCurrentCluster] = useState(null);
 
-  const [currentCluster, setCurrentCluster] =
-    useState(null);
-
+  // --- Загрузка сохранённых кластеров из localStorage при старте ---
   useEffect(() => {
-
-    const stored =
-      localStorage.getItem('kafka_clusters');
-
+    const stored = localStorage.getItem('kafka_clusters');
     if (stored) {
-
       try {
-
         const parsed = JSON.parse(stored);
-
-        setClusters(parsed);
-
         if (parsed.length > 0) {
-
-          setCurrentCluster(parsed[0]);
+          setClusters(parsed);
+          setCurrentCluster(parsed[0]); // выбираем первый кластер по умолчанию
+          // 👇 Принудительно запускаем проверку для первого кластера
+          const first = parsed[0];
+          if (first.brokers) {
+            checkClusterStatus(first.id, first.brokers);
+          }
         }
-
       } catch (e) {
-
         console.error(e);
       }
     }
+  }, []); // только один раз при монтировании
 
+  /**
+   * Проверка доступности кластера (health check)
+   * @param {string} clusterId - ID кластера
+   * @param {string} bootstrap - адрес брокера (localhost:9092)
+   */
+  const checkClusterStatus = useCallback(async (clusterId, bootstrap) => {
+    if (!bootstrap) return;
+    try {
+      const response = await axios.get('/api/clusters/health', {
+        headers: { 'X-Kafka-Bootstrap': bootstrap },
+        timeout: 5000
+      });
+      const status = response.data.status; // "connected" или "disconnected"
+      updateClusterStatus(clusterId, status);
+    } catch (error) {
+      updateClusterStatus(clusterId, 'error');
+    }
   }, []);
 
+  /**
+   * Обновляет статус подключения конкретного кластера
+   * @param {string} clusterId - ID кластера
+   * @param {string} status - connected, disconnected, checking, unknown, error
+   */
+  const updateClusterStatus = useCallback((clusterId, status) => {
+    setClusters(prev => prev.map(cluster => {
+      if (cluster.id === clusterId) {
+        const updated = { ...cluster, connectionStatus: status };
+        // Если обновляем статус текущего выбранного кластера – синхронизируем currentCluster
+        if (currentCluster?.id === clusterId) {
+          setCurrentCluster(updated);
+        }
+        return updated;
+      }
+      return cluster;
+    }));
+  }, [currentCluster]);
+
+  // --- Автоматическая проверка статуса при смене текущего кластера ---
+  useEffect(() => {
+    if (currentCluster && currentCluster.brokers) {
+      checkClusterStatus(currentCluster.id, currentCluster.brokers);
+    }
+  }, [currentCluster, checkClusterStatus]);
+
+  // --- Проверка статуса всех кластеров при загрузке (один раз) ---
+  useEffect(() => {
+    clusters.forEach(cluster => {
+      if (cluster.brokers) {
+        checkClusterStatus(cluster.id, cluster.brokers);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // только один раз при монтировании
+
   const addCluster = (cluster) => {
-
     const newCluster = {
-
       ...cluster,
-
       id: Date.now().toString(),
-
-      // unknown | checking | connected | error
-      connectionStatus: 'unknown'
+      connectionStatus: 'checking'
     };
-
-    const newClusters = [
-      ...clusters,
-      newCluster
-    ];
-
-    setClusters(newClusters);
-
-    localStorage.setItem(
-      'kafka_clusters',
-      JSON.stringify(newClusters)
-    );
-
+    setClusters(prev => [...prev, newCluster]);
+    localStorage.setItem('kafka_clusters', JSON.stringify([...clusters, newCluster]));
     setCurrentCluster(newCluster);
+    checkClusterStatus(newCluster.id, newCluster.brokers);
   };
 
   const updateCluster = (updatedCluster) => {
-
-    const newClusters = clusters.map(cluster => {
-
-      if (cluster.id === updatedCluster.id) {
-
-        return updatedCluster;
-      }
-
-      return cluster;
-    });
-
-    setClusters(newClusters);
-
-    localStorage.setItem(
-      'kafka_clusters',
-      JSON.stringify(newClusters)
-    );
-
-    if (currentCluster?.id === updatedCluster.id) {
-
-      setCurrentCluster(updatedCluster);
-    }
+    setClusters(prev => prev.map(c => c.id === updatedCluster.id ? updatedCluster : c));
+    localStorage.setItem('kafka_clusters', JSON.stringify(clusters.map(c => c.id === updatedCluster.id ? updatedCluster : c)));
+    if (currentCluster?.id === updatedCluster.id) setCurrentCluster(updatedCluster);
   };
 
   const removeCluster = (clusterId) => {
-
-    const newClusters = clusters.filter(
-      cluster => cluster.id !== clusterId
-    );
-
+    const newClusters = clusters.filter(c => c.id !== clusterId);
     setClusters(newClusters);
-
-    localStorage.setItem(
-      'kafka_clusters',
-      JSON.stringify(newClusters)
-    );
-
-    if (currentCluster?.id === clusterId) {
-
-      setCurrentCluster(
-        newClusters[0] || null
-      );
-    }
+    localStorage.setItem('kafka_clusters', JSON.stringify(newClusters));
+    if (currentCluster?.id === clusterId) setCurrentCluster(newClusters[0] || null);
   };
 
   const changeCluster = (cluster) => {
-
-    const updatedCluster = {
-      ...cluster,
-      connectionStatus: 'connected'
-    };
-
-    const updatedClusters = clusters.map(c =>
-      c.id === cluster.id
-        ? updatedCluster
-        : c
-    );
-
-    setClusters(updatedClusters);
-
-    localStorage.setItem(
-      'kafka_clusters',
-      JSON.stringify(updatedClusters)
-    );
-
-    setCurrentCluster(updatedCluster);
-  };
-
-  const updateClusterStatus = (
-    clusterId,
-    status
-  ) => {
-
-    const newClusters = clusters.map(cluster => {
-
-      if (cluster.id === clusterId) {
-
-        return {
-
-          ...cluster,
-
-          connectionStatus: status
-        };
-      }
-
-      return cluster;
-    });
-
-    setClusters(newClusters);
-
-    localStorage.setItem(
-      'kafka_clusters',
-      JSON.stringify(newClusters)
-    );
-
-    if (currentCluster?.id === clusterId) {
-
-      const updated = newClusters.find(
-        cluster => cluster.id === clusterId
-      );
-
-      setCurrentCluster(updated);
-    }
+    setCurrentCluster(cluster);
   };
 
   return (
-
-    <ClusterContext.Provider
-      value={{
-
-        clusters,
-
-        currentCluster,
-
-        addCluster,
-
-        updateCluster,
-
-        removeCluster,
-
-        changeCluster,
-
-        updateClusterStatus
-      }}
-    >
-
+    <ClusterContext.Provider value={{
+      clusters,
+      currentCluster,
+      addCluster,
+      updateCluster,
+      removeCluster,
+      changeCluster,
+      updateClusterStatus
+    }}>
       {children}
-
     </ClusterContext.Provider>
   );
 }
 
-export const useCluster = () =>
-  useContext(ClusterContext);
+export const useCluster = () => useContext(ClusterContext);
