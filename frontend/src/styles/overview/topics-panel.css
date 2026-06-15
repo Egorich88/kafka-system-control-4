@@ -1,8 +1,22 @@
 /*
-==========================================================
-Topics Throughput Panel
-==========================================================
-*/
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ============================================================
+   Topics Throughput Panel – общие стили
+   ============================================================ */
 
 .topics-panel-header {
     width: 100%;
@@ -23,10 +37,11 @@ Topics Throughput Panel
     align-items: center;
     gap: 12px;
 }
+
 /* Стили для универсального Dropdown внутри панели топиков */
 .topics-panel-controls .dropdown-wrapper {
-    min-width: 170px;      /* фиксированная ширина, как было у select */
-    flex: 0 0 auto;       /* не растягивается */
+    min-width: 170px;
+    flex: 0 0 auto;
 }
 
 .topics-select {
@@ -52,80 +67,94 @@ Topics Throughput Panel
     color: var(--text-secondary);
     font-size: 14px;
 }
+
+/* ============================================================
+   График и легенда
+   ============================================================ */
 .topics-layout {
-  display: flex;
-  gap: 16px;
-  height: 100%;
+    display: flex;
+    gap: 16px;
+    height: 100%;
 }
+
 .topics-chart {
-  flex: 1;
-  min-width: 0;
+    flex: 1;
+    min-width: 0;
 }
+
+/* Легенда – список топиков */
 .topics-legend {
-  width: 240px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;           /* уменьшенный отступ между строками */
+    overflow-y: auto;
 }
+
+/* Строка легенды (топик) */
 .topics-legend-row {
-  outline: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  padding: 8px 10px;
-  border-radius: 8px;
+    outline: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;    /* увеличен шрифт топиков */
+    padding: 4px 12px;  /* компактный вертикальный отступ */
+    border-radius: 8px;
 }
+
 .topics-legend-row.active {
-  background: var(--hover-color);
+    background: var(--hover-color);
 }
 
-.topics-legend-row:focus {
-  outline: none;
-}
-
+.topics-legend-row:focus,
 .topics-legend-row:focus-visible {
-  outline: none;
+    outline: none;
 }
+
+/* Значение msg/s */
+.topics-legend-value {
+    font-size: 14px;
+}
+
+/* Заголовок легенды: Топик и Сообщения/сек */
+.topics-legend-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+/* ============================================================
+   Сброс обводки и фокуса у графиков Recharts
+   ============================================================ */
 .recharts-wrapper:focus,
 .recharts-surface:focus,
 .recharts-responsive-container:focus {
-  outline: none !important;
+    outline: none !important;
 }
 
-.topics-legend-header {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
 .recharts-wrapper *,
 .recharts-surface *,
 .recharts-layer * {
-  outline: none !important;
+    outline: none !important;
 }
 
 .recharts-wrapper:focus,
 .recharts-surface:focus,
-.recharts-layer:focus {
-  outline: none !important;
-}
-
+.recharts-layer:focus,
 svg:focus,
 path:focus {
-  outline: none !important;
+    outline: none !important;
 }
-/*
-==========================================================
-Tooltip графика пропускной способности по топикам
-(единый стиль с ThroughputPanel)
-==========================================================
-*/
 
-/* Контейнер тултипа */
+/* ============================================================
+   Тултип (всплывающая подсказка)
+   ============================================================ */
 .topics-tooltip {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -134,14 +163,12 @@ Tooltip графика пропускной способности по топи
     box-shadow: 0 8px 20px rgba(0,0,0,0.35);
 }
 
-/* Заголовок тултипа (время) */
 .topics-tooltip-title {
     font-weight: 600;
     margin-bottom: 8px;
     color: var(--text-primary);
 }
 
-/* Строка тултипа (топик: значение) */
 .topics-tooltip-row {
     display: flex;
     justify-content: space-between;
@@ -154,10 +181,33 @@ Tooltip графика пропускной способности по топи
     color: var(--text-primary);
 }
 
-/* ==========================================================
+/* ============================================================
    Курсор (вертикальная пунктирная линия) – как в ThroughputPanel
-   ========================================================== */
+   ============================================================ */
 .recharts-cursor {
+    stroke: #3b82f6 !important;
+    stroke-width: 1px !important;
+    stroke-dasharray: 4 4 !important;
+}
+
+/* ============================================================
+   Шрифт на осях графика (X и Y) – как в ThroughputPanel
+   ============================================================ */
+.recharts-cartesian-axis-tick text,
+.recharts-xAxis .recharts-cartesian-axis-tick text,
+.recharts-yAxis .recharts-cartesian-axis-tick text,
+.recharts-cartesian-axis-tick tspan {
+    font-size: 12px !important;
+    fill: var(--text-secondary) !important;
+}
+.recharts-cursor {
+    stroke: #3b82f6 !important;
+    stroke-width: 1px !important;
+    stroke-dasharray: 4 4 !important;
+    opacity: 1 !important;
+}
+/* Также для элемента, который может создаваться внутри речартс */
+.recharts-tooltip-cursor {
     stroke: #3b82f6 !important;
     stroke-width: 1px !important;
     stroke-dasharray: 4 4 !important;

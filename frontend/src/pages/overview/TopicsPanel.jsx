@@ -192,8 +192,8 @@ export default function TopicsPanel() {
                 cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
               >
                 <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
-                <XAxis dataKey="time" tick={{ fill: 'var(--text-secondary)' }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fill: 'var(--text-secondary)' }} tickLine={false} axisLine={false} />
+                <XAxis dataKey="time" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickLine={false} axisLine={false} />
                 <Tooltip content={<TopicsTooltip />} />
 
                 {(
