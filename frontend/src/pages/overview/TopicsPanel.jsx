@@ -83,26 +83,29 @@ const TopicSearchDropdown = ({
     setSearchTerm('');
   };
 
-  // Текст, отображаемый в поле (выбранный топик или пусто)
-  const displayValue = selectedTopic || '';
+  // При открытии дропдауна очищаем поле поиска
+  const handleOpen = () => {
+    setSearchTerm('');
+    setIsOpen(true);
+  };
 
   return (
     <div ref={wrapperRef} className="topic-dropdown-wrapper">
       <div
         className={`topic-dropdown-trigger ${isOpen ? 'open' : ''}`}
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
       >
         <FiSearch className="topic-dropdown-search-icon" />
         <input
           type="text"
           className="topic-dropdown-input"
           placeholder="Поиск топика..."
-          value={isOpen ? searchTerm : displayValue}
+          value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
             setIsOpen(true);
           }}
-          onFocus={() => setIsOpen(true)}
+          onFocus={handleOpen}
         />
         <div className="topic-dropdown-chevron">
           {isOpen ? <FiChevronUp /> : <FiChevronDown />}
@@ -115,7 +118,7 @@ const TopicSearchDropdown = ({
               filteredTopics.map(topic => (
                 <div
                   key={topic}
-                  className={`topic-dropdown-item ${selectedTopic === topic ? 'active' : ''}`}
+                  className="topic-dropdown-item"
                   onClick={() => handleSelect(topic)}
                 >
                   {topic}
