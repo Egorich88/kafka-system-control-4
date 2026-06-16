@@ -152,7 +152,7 @@ const TopicsTooltip = ({ active, payload, label }) => {
           className="topics-tooltip-row"
           style={{ color: entry.color || 'var(--text-primary)' }}
         >
-          {entry.name}: <strong>{entry.value} msg/s</strong>
+          {entry.name}: <strong>{entry.value.toFixed(1)} сообщений/сек</strong>
         </div>
       ))}
     </div>
@@ -400,7 +400,7 @@ export default function TopicsPanel() {
           <div className="topics-legend">
             <div className="topics-legend-header">
               <span>Топик</span>
-              <span>Сообщения/сек</span>
+              <span>Сообщений/сек</span>
             </div>
             {legendTopics.length === 0 ? (
               <div className="topics-legend-placeholder">Нет активных топиков за выбранный период</div>
@@ -421,7 +421,7 @@ export default function TopicsPanel() {
                     <span>{topic}</span>
                   </div>
                   <span className="topics-legend-value">
-                    {lastPoint[topic] || 0} msg/s
+                    {(lastPoint[topic] || 0).toFixed(1)}
                   </span>
                 </div>
               ))
