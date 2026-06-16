@@ -17,21 +17,19 @@
 /**
  * @fileoverview Панель пропускной способности по топикам Kafka.
  *
- * Режимы:
- *   - "Топ топиков" – отображает несколько топиков (можно выбирать через клики и Ctrl).
- *   - "Выбрать топик" – показывает график только одного выбранного топика.
+ * Отображает графики только активных топиков (с положительной скоростью)
+ * за выбранный временной период (передаётся через prop timeRange).
  *
- * Управление отображением линий:
- *   - Обычный клик по линии или строке → оставить только этот топик.
- *   - Если топик уже единственный → вернуть все топики.
- *   - Клик по пустому месту графика → вернуть все топики.
- *   - Ctrl + клик (мышь) → добавить/удалить топик к текущему набору (мультивыбор).
+ * Управление видимостью линий:
+ *   - Клик по строке легенды → оставить только этот топик.
+ *   - Повторный клик на уже единственном топике → вернуть все активные топики.
+ *   - Клик по пустому месту графика → вернуть все активные топики.
+ *   - Ctrl + клик → добавить/удалить топик из текущего набора (мультивыбор).
  *
- * Данные защищены от отрицательных значений – все отрицательные числа обрезаются до нуля,
- * чтобы график не уходил в минус.
+ * Данные защищены от отрицательных значений (обрезаются до нуля на всех этапах).
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -41,94 +39,9 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
-import Dropdown from '../../components/common/Dropdown';
-import { FiSearch, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import axios from 'axios';
 import '../../styles/overview/topics-panel.css';
 import { useCluster } from '../../contexts/ClusterContext';
-
-// =========================================================================
-// Компонент выбора топика с поиском
-// =========================================================================
-const TopicSearchDropdown = ({
-  topics,
-  selectedTopic,
-  onSelect
-}) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const wrapperRef = useRef(null);
-
-  const filteredTopics = topics.filter(topic =>
-    topic.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setIsOpen(false);
-        setSearchTerm('');
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSelect = (topic) => {
-    onSelect(topic);
-    setIsOpen(false);
-    setSearchTerm('');
-  };
-
-  const handleOpen = () => {
-    setSearchTerm('');
-    setIsOpen(true);
-  };
-
-  return (
-    <div ref={wrapperRef} className="topic-dropdown-wrapper">
-      <div
-        className={`topic-dropdown-trigger ${isOpen ? 'open' : ''}`}
-        onClick={handleOpen}
-      >
-        <FiSearch className="topic-dropdown-search-icon" />
-        <input
-          type="text"
-          className="topic-dropdown-input"
-          placeholder="Поиск топика..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setIsOpen(true);
-          }}
-          onFocus={handleOpen}
-        />
-        <div className="topic-dropdown-chevron">
-          {isOpen ? <FiChevronUp /> : <FiChevronDown />}
-        </div>
-      </div>
-      {isOpen && (
-        <div className="topic-dropdown-menu">
-          <div className="topic-dropdown-list">
-            {filteredTopics.length > 0 ? (
-              filteredTopics.map(topic => (
-                <div
-                  key={topic}
-                  className="topic-dropdown-item"
-                  onClick={() => handleSelect(topic)}
-                >
-                  {topic}
-                </div>
-              ))
-            ) : (
-              <div className="topic-dropdown-item disabled">Ничего не найдено</div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
 // =========================================================================
 // Кастомный тултип – показывает только положительные значения
@@ -136,6 +49,7 @@ const TopicSearchDropdown = ({
 const TopicsTooltip = ({ active, payload, label }) => {
   if (!active || !payload || !payload.length) return null;
 
+  // Отфильтровываем нулевые и отрицательные
   const filtered = payload.filter(entry => entry.value > 0);
   if (filtered.length === 0) return null;
 
@@ -155,7 +69,7 @@ const TopicsTooltip = ({ active, payload, label }) => {
   );
 };
 
-// Генерация цвета для топика
+// Генерация цвета для топика (циклически по 10 предустановленным)
 const getTopicColor = (topic, index) => {
   const colors = [
     '#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444',
@@ -164,54 +78,64 @@ const getTopicColor = (topic, index) => {
   return colors[index % colors.length];
 };
 
-export default function TopicsPanel() {
+export default function TopicsPanel({ timeRange = '15m' }) {
   const { currentCluster } = useCluster();
-  const [viewMode, setViewMode] = useState('top-topics');
-  const [selectedTopic, setSelectedTopic] = useState('');
-  const [visibleTopics, setVisibleTopics] = useState([]);
-  const [topicsList, setTopicsList] = useState([]);
+
+  const [visibleTopics, setVisibleTopics] = useState([]);   // топики, отображаемые на графике и в легенде
+  const [allTopics, setAllTopics] = useState([]);          // все топики из данных (для расчёта активных)
   const [rawData, setRawData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // -------------------------------------------------------------------------
-  // Загрузка данных с бэкенда
+  // Загрузка данных с бэкенда с учётом периода
   // -------------------------------------------------------------------------
   const loadTopicsData = async () => {
     if (!currentCluster) return;
     setLoading(true);
     try {
       const headers = { 'X-Kafka-Bootstrap': currentCluster.brokers || currentCluster.bootstrapServers };
-      const response = await axios.get('/api/overview/topics-throughput', { headers });
+      const response = await axios.get(`/api/overview/topics-throughput?range=${timeRange}`, { headers });
       const points = response.data.points || [];
+
+      // Защита от отрицательных значений (обрезаем до нуля)
       const safePoints = points.map(p => ({
         ...p,
         value: Math.max(0, p.value || 0)
       }));
       setRawData(safePoints);
-      const unique = [...new Set(points.map(p => p.topic))];
-      setTopicsList(unique);
-      if (unique.length > 0 && !selectedTopic) {
-        setSelectedTopic(unique[0]);
-        setVisibleTopics(unique);
-      } else if (unique.length === 0) {
-        setTopicsList([]);
-        setVisibleTopics([]);
+
+      // Все уникальные топики из полученных точек
+      const unique = [...new Set(safePoints.map(p => p.topic))];
+      setAllTopics(unique);
+
+      // Определяем активные топики (значение > 0 хотя бы в одной точке)
+      const activeSet = new Set();
+      for (const point of safePoints) {
+        if (point.value > 0) {
+          activeSet.add(point.topic);
+        }
       }
+      const activeTopics = unique.filter(t => activeSet.has(t));
+
+      // Если активные есть – показываем их, иначе – все топики (но легенда будет пуста)
+      setVisibleTopics(activeTopics.length > 0 ? activeTopics : []);
     } catch (err) {
       console.error('Ошибка загрузки данных топиков:', err);
       setRawData([]);
-      setTopicsList([]);
+      setAllTopics([]);
+      setVisibleTopics([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Перезагружаем при смене кластера или периода
   useEffect(() => {
     loadTopicsData();
-  }, [currentCluster]);
+  }, [currentCluster, timeRange]);
 
   // -------------------------------------------------------------------------
-  // Преобразование данных для графика с защитой от отрицательных значений
+  // Преобразование данных для Recharts
   // -------------------------------------------------------------------------
   const prepareChartData = () => {
     const timeMap = new Map();
@@ -220,7 +144,7 @@ export default function TopicsPanel() {
         timeMap.set(point.time, { time: point.time });
       }
       const entry = timeMap.get(point.time);
-      // Обрезаем отрицательные значения до нуля при формировании данных
+      // Второй уровень защиты: обрезаем отрицательные (на случай, если в rawData просочились)
       entry[point.topic] = Math.max(0, point.value || 0);
     }
     return Array.from(timeMap.values()).sort((a, b) => a.time.localeCompare(b.time));
@@ -229,53 +153,13 @@ export default function TopicsPanel() {
   const aggregatedData = prepareChartData();
   const lastPoint = aggregatedData.length > 0 ? aggregatedData[aggregatedData.length - 1] : {};
 
-  // Активные топики (хотя бы одна точка > 0) – используем положительные значения
-  const activeTopicsSet = new Set();
-  for (const point of rawData) {
-    if (point.value > 0) {
-      activeTopicsSet.add(point.topic);
-    }
-  }
-  const activeTopics = topicsList.filter(topic => activeTopicsSet.has(topic));
-  const legendTopics = [...activeTopics].sort((a, b) =>
-    (lastPoint[b] || 0) - (lastPoint[a] || 0)
-  );
-
-  // Данные для графика – теперь все значения уже обрезаны в aggregatedData
-  const graphData =
-    viewMode === 'single-topic'
-      ? aggregatedData.map(item => ({
-          time: item.time,
-          [selectedTopic]: Math.max(0, item[selectedTopic] || 0)
-        }))
-      : aggregatedData;
-
   // -------------------------------------------------------------------------
-  // Выпадающие меню
-  // -------------------------------------------------------------------------
-  const modeItems = [
-    { id: 'top-topics', name: 'Топ топиков' },
-    { id: 'single-topic', name: 'Выбрать топик' }
-  ];
-  const currentMode = modeItems.find(m => m.id === viewMode);
-
-  const handleModeChange = (item) => {
-    const mode = item.id;
-    setViewMode(mode);
-    setVisibleTopics(mode === 'top-topics' ? topicsList : [selectedTopic]);
-  };
-
-  const handleTopicSelectFromDropdown = (topic) => {
-    setSelectedTopic(topic);
-    setVisibleTopics([topic]);
-  };
-
-  // -------------------------------------------------------------------------
-  // Обработчики выбора линий
+  // Обработчики кликов по легенде и фону графика
   // -------------------------------------------------------------------------
   const handleTopicSelect = (topic, event) => {
     if (event && event.stopPropagation) event.stopPropagation();
     if (event && event.ctrlKey) {
+      // Мультивыбор: добавляем или удаляем топик
       setVisibleTopics(prev =>
         prev.includes(topic)
           ? prev.filter(t => t !== topic)
@@ -284,18 +168,31 @@ export default function TopicsPanel() {
       return;
     }
     if (visibleTopics.length === 1 && visibleTopics[0] === topic) {
-      setVisibleTopics(topicsList);
+      // Если уже только этот топик – возвращаем все активные
+      const activeSet = new Set();
+      for (const point of rawData) {
+        if (point.value > 0) activeSet.add(point.topic);
+      }
+      const active = allTopics.filter(t => activeSet.has(t));
+      setVisibleTopics(active.length > 0 ? active : allTopics);
     } else {
+      // Оставляем только этот топик
       setVisibleTopics([topic]);
     }
   };
 
   const handleChartClick = () => {
-    setVisibleTopics(topicsList);
+    // Возвращаем все активные топики
+    const activeSet = new Set();
+    for (const point of rawData) {
+      if (point.value > 0) activeSet.add(point.topic);
+    }
+    const active = allTopics.filter(t => activeSet.has(t));
+    setVisibleTopics(active.length > 0 ? active : allTopics);
   };
 
   // -------------------------------------------------------------------------
-  // Состояния загрузки и пустых данных
+  // Состояния загрузки и отсутствия данных
   // -------------------------------------------------------------------------
   if (!currentCluster) return null;
 
@@ -310,13 +207,13 @@ export default function TopicsPanel() {
     );
   }
 
-  if (topicsList.length === 0 && !loading) {
+  if (allTopics.length === 0 && !loading) {
     return (
       <div className="dashboard-panel">
         <div className="panel-header">
           <div className="topics-panel-title">Пропускная способность по топикам</div>
         </div>
-        <div className="panel-body topics-placeholder">Нет данных о топиках</div>
+        <div className="panel-body topics-placeholder">Нет данных о топиках за выбранный период</div>
       </div>
     );
   }
@@ -327,31 +224,16 @@ export default function TopicsPanel() {
   return (
     <div className="dashboard-panel">
       <div className="panel-header">
-        <div className="topics-panel-header">
-          <div className="topics-panel-title">Пропускная способность по топикам</div>
-          <div className="topics-panel-controls">
-            <Dropdown
-              selectedItem={currentMode}
-              items={modeItems.filter(item => item.id !== viewMode)}
-              onSelect={handleModeChange}
-            />
-            {viewMode === 'single-topic' && (
-              <TopicSearchDropdown
-                topics={topicsList}
-                selectedTopic={selectedTopic}
-                onSelect={handleTopicSelectFromDropdown}
-              />
-            )}
-          </div>
-        </div>
+        <div className="topics-panel-title">Пропускная способность по топикам</div>
       </div>
 
       <div className="panel-body">
         <div className="topics-layout">
+          {/* График */}
           <div className="topics-chart">
             <ResponsiveContainer width="100%" height={320}>
               <LineChart
-                data={graphData}
+                data={aggregatedData}
                 onClick={handleChartClick}
                 cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
               >
@@ -370,11 +252,7 @@ export default function TopicsPanel() {
                 />
                 <Tooltip content={<TopicsTooltip />} />
 
-                {(
-                  viewMode === 'single-topic'
-                    ? [selectedTopic]
-                    : topicsList
-                )
+                {allTopics
                   .filter(topic => visibleTopics.includes(topic))
                   .map((topic, idx) => (
                     <Line
@@ -398,15 +276,16 @@ export default function TopicsPanel() {
             </ResponsiveContainer>
           </div>
 
+          {/* Легенда – показывает только активные топики */}
           <div className="topics-legend">
             <div className="topics-legend-header">
               <span>Топик</span>
               <span>Сообщений/сек</span>
             </div>
-            {legendTopics.length === 0 ? (
+            {visibleTopics.length === 0 ? (
               <div className="topics-legend-placeholder">Нет активных топиков за выбранный период</div>
             ) : (
-              legendTopics.map(topic => (
+              visibleTopics.map(topic => (
                 <div
                   key={topic}
                   className={`topics-legend-row ${
@@ -417,7 +296,7 @@ export default function TopicsPanel() {
                   <div className="topics-legend-left">
                     <span
                       className="topics-legend-color"
-                      style={{ background: getTopicColor(topic, topicsList.indexOf(topic)) }}
+                      style={{ background: getTopicColor(topic, allTopics.indexOf(topic)) }}
                     />
                     <span>{topic}</span>
                   </div>

@@ -249,7 +249,7 @@ export default function Overview() {
       {/* Ряд 2: графики пропускной способности */}
       <div className="dashboard-row dashboard-row-top">
         <ThroughputPanel data={throughputData} />
-        <TopicsPanel />
+        <TopicsPanel timeRange={timeRange.id} />
       </div>
 
       {/* Ряд 3: отставание групп и события */}
