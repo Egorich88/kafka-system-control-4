@@ -27,13 +27,11 @@
  *   - Клик по пустому месту графика → вернуть все топики.
  *   - Ctrl + клик (мышь) → добавить/удалить топик к текущему набору (мультивыбор).
  *
- * Данные загружаются с бэкенда через API /api/overview/topics-throughput.
- * В легенде отображаются только те топики, у которых хотя бы в одной точке графика
- * значение > 0 за выбранный временной период. Выпадающий список для выбора топика
- * содержит все топики, когда-либо появлявшиеся в данных (включая неактивные).
+ * Выбор топика в режиме "single-topic" осуществляется через поле поиска с лупой,
+ * аналогично полю «Поиск топика» в панели поиска сообщений.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -44,9 +42,94 @@ import {
   YAxis
 } from 'recharts';
 import Dropdown from '../../components/common/Dropdown';
+import { FiSearch, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import axios from 'axios';
 import '../../styles/overview/topics-panel.css';
 import { useCluster } from '../../contexts/ClusterContext';
+
+// =========================================================================
+// Компонент выбора топика с поиском (как в SearchToolbar)
+// =========================================================================
+const TopicSearchDropdown = ({
+  topics,           // полный список топиков (массив строк)
+  selectedTopic,    // текущий выбранный топик (строка)
+  onSelect          // колбэк при выборе топика (принимает строку)
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  // Фильтрация топиков по поисковому запросу
+  const filteredTopics = topics.filter(topic =>
+    topic.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Закрытие при клике вне
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+        setSearchTerm(''); // очищаем поиск при закрытии
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // При выборе топика
+  const handleSelect = (topic) => {
+    onSelect(topic);
+    setIsOpen(false);
+    setSearchTerm('');
+  };
+
+  // Текст, отображаемый в поле (выбранный топик или пусто)
+  const displayValue = selectedTopic || '';
+
+  return (
+    <div ref={wrapperRef} className="topic-dropdown-wrapper">
+      <div
+        className={`topic-dropdown-trigger ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(true)}
+      >
+        <FiSearch className="topic-dropdown-search-icon" />
+        <input
+          type="text"
+          className="topic-dropdown-input"
+          placeholder="Поиск топика..."
+          value={isOpen ? searchTerm : displayValue}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+        />
+        <div className="topic-dropdown-chevron">
+          {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+        </div>
+      </div>
+      {isOpen && (
+        <div className="topic-dropdown-menu">
+          <div className="topic-dropdown-list">
+            {filteredTopics.length > 0 ? (
+              filteredTopics.map(topic => (
+                <div
+                  key={topic}
+                  className={`topic-dropdown-item ${selectedTopic === topic ? 'active' : ''}`}
+                  onClick={() => handleSelect(topic)}
+                >
+                  {topic}
+                </div>
+              ))
+            ) : (
+              <div className="topic-dropdown-item disabled">Ничего не найдено</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // =========================================================================
 // Кастомный тултип – показывает только положительные значения
@@ -73,7 +156,7 @@ const TopicsTooltip = ({ active, payload, label }) => {
   );
 };
 
-// Генерация цвета для топика (если не в предустановленном списке)
+// Генерация цвета для топика
 const getTopicColor = (topic, index) => {
   const colors = [
     '#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444',
@@ -87,8 +170,8 @@ export default function TopicsPanel() {
   const [viewMode, setViewMode] = useState('top-topics');
   const [selectedTopic, setSelectedTopic] = useState('');
   const [visibleTopics, setVisibleTopics] = useState([]);
-  const [topicsList, setTopicsList] = useState([]);       // все топики из данных
-  const [rawData, setRawData] = useState([]);            // [{ time, topic, value }]
+  const [topicsList, setTopicsList] = useState([]);
+  const [rawData, setRawData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // -------------------------------------------------------------------------
@@ -102,7 +185,6 @@ export default function TopicsPanel() {
       const response = await axios.get('/api/overview/topics-throughput', { headers });
       const points = response.data.points || [];
       setRawData(points);
-      // Уникальные топики из всех точек (включая нулевые)
       const unique = [...new Set(points.map(p => p.topic))];
       setTopicsList(unique);
       if (unique.length > 0 && !selectedTopic) {
@@ -126,8 +208,7 @@ export default function TopicsPanel() {
   }, [currentCluster]);
 
   // -------------------------------------------------------------------------
-  // Преобразование сырых данных в формат для Recharts
-  // { time: '12:00', topic1: value1, topic2: value2, ... }
+  // Преобразование данных для графика
   // -------------------------------------------------------------------------
   const prepareChartData = () => {
     const timeMap = new Map();
@@ -144,9 +225,7 @@ export default function TopicsPanel() {
   const aggregatedData = prepareChartData();
   const lastPoint = aggregatedData.length > 0 ? aggregatedData[aggregatedData.length - 1] : {};
 
-  // -------------------------------------------------------------------------
-  // Определяем активные топики – те, у которых хотя бы в одной точке значение > 0
-  // -------------------------------------------------------------------------
+  // Активные топики (хотя бы одна точка > 0)
   const activeTopicsSet = new Set();
   for (const point of rawData) {
     if (point.value > 0) {
@@ -154,15 +233,10 @@ export default function TopicsPanel() {
     }
   }
   const activeTopics = topicsList.filter(topic => activeTopicsSet.has(topic));
-
-  // Сортируем активные топики для легенды по последнему значению (по убыванию)
   const legendTopics = [...activeTopics].sort((a, b) =>
     (lastPoint[b] || 0) - (lastPoint[a] || 0)
   );
 
-  // -------------------------------------------------------------------------
-  // Данные для графика в зависимости от режима
-  // -------------------------------------------------------------------------
   const graphData =
     viewMode === 'single-topic'
       ? aggregatedData.map(item => ({
@@ -179,8 +253,6 @@ export default function TopicsPanel() {
     { id: 'single-topic', name: 'Выбрать топик' }
   ];
   const currentMode = modeItems.find(m => m.id === viewMode);
-  const topicItems = topicsList.map(t => ({ id: t, name: t }));
-  const currentTopic = topicItems.find(t => t.id === selectedTopic);
 
   const handleModeChange = (item) => {
     const mode = item.id;
@@ -188,8 +260,8 @@ export default function TopicsPanel() {
     setVisibleTopics(mode === 'top-topics' ? topicsList : [selectedTopic]);
   };
 
-  const handleTopicChange = (item) => {
-    const topic = item.id;
+  // Обработчик выбора топика из кастомного компонента
+  const handleTopicSelectFromDropdown = (topic) => {
     setSelectedTopic(topic);
     setVisibleTopics([topic]);
   };
@@ -199,7 +271,6 @@ export default function TopicsPanel() {
   // -------------------------------------------------------------------------
   const handleTopicSelect = (topic, event) => {
     if (event && event.stopPropagation) event.stopPropagation();
-
     if (event && event.ctrlKey) {
       setVisibleTopics(prev =>
         prev.includes(topic)
@@ -208,7 +279,6 @@ export default function TopicsPanel() {
       );
       return;
     }
-
     if (visibleTopics.length === 1 && visibleTopics[0] === topic) {
       setVisibleTopics(topicsList);
     } else {
@@ -221,7 +291,7 @@ export default function TopicsPanel() {
   };
 
   // -------------------------------------------------------------------------
-  // Состояния загрузки и отсутствия данных
+  // Состояния загрузки и пустых данных
   // -------------------------------------------------------------------------
   if (!currentCluster) return null;
 
@@ -262,11 +332,10 @@ export default function TopicsPanel() {
               onSelect={handleModeChange}
             />
             {viewMode === 'single-topic' && (
-              <Dropdown
-                selectedItem={currentTopic}
-                items={topicItems.filter(item => item.id !== selectedTopic)}
-                onSelect={handleTopicChange}
-                searchable={true}
+              <TopicSearchDropdown
+                topics={topicsList}
+                selectedTopic={selectedTopic}
+                onSelect={handleTopicSelectFromDropdown}
               />
             )}
           </div>

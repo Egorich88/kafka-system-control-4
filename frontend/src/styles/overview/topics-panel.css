@@ -44,21 +44,6 @@
     flex: 0 0 auto;
 }
 
-.topics-select {
-    min-width: 170px;
-    height: 36px;
-    padding: 0 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    background: var(--panel-bg);
-    color: var(--text-primary);
-    cursor: pointer;
-}
-
-.topics-select:hover {
-    border-color: var(--accent-color);
-}
-
 .topics-placeholder {
     height: 260px;
     display: flex;
@@ -85,11 +70,11 @@
 /* Легенда – список топиков */
 .topics-legend {
     width: 240px;
-    max-height: 320px;          /* фиксированная максимальная высота */
+    max-height: 320px;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    overflow-y: auto;           /* скролл при превышении */
+    overflow-y: auto;
 }
 
 /* Строка легенды (топик) */
@@ -102,7 +87,7 @@
     font-size: 14px;
     padding: 6px 12px;
     border-radius: 8px;
-    flex-shrink: 0;             /* предотвращаем сжатие строк */
+    flex-shrink: 0;
 }
 
 .topics-legend-row.active {
@@ -129,6 +114,14 @@
     margin-bottom: 6px;
     padding-left: 12px;
     padding-right: 12px;
+}
+
+/* Текст-заглушка, когда нет активных топиков */
+.topics-legend-placeholder {
+    padding: 12px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
 }
 
 /* ============================================================
@@ -190,6 +183,14 @@ path:focus {
     stroke: #3b82f6 !important;
     stroke-width: 1px !important;
     stroke-dasharray: 4 4 !important;
+    opacity: 1 !important;
+}
+
+/* Также для элемента, который может создаваться внутри речартс */
+.recharts-tooltip-cursor {
+    stroke: #3b82f6 !important;
+    stroke-width: 1px !important;
+    stroke-dasharray: 4 4 !important;
 }
 
 /* ============================================================
@@ -202,15 +203,126 @@ path:focus {
     font-size: 12px !important;
     fill: var(--text-secondary) !important;
 }
-.recharts-cursor {
-    stroke: #3b82f6 !important;
-    stroke-width: 1px !important;
-    stroke-dasharray: 4 4 !important;
-    opacity: 1 !important;
+
+/* ============================================================
+   Стили для компонента выбора топика с поиском (TopicSearchDropdown)
+   Аналогичны полю «Поиск топика» из SearchToolbar
+   ============================================================ */
+.topic-dropdown-wrapper {
+    position: relative;
+    width: 100%;
+    min-width: 170px;
 }
-/* Также для элемента, который может создаваться внутри речартс */
-.recharts-tooltip-cursor {
-    stroke: #3b82f6 !important;
-    stroke-width: 1px !important;
-    stroke-dasharray: 4 4 !important;
+
+.topic-dropdown-trigger {
+    width: 100%;
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.18s ease;
+    cursor: pointer;
+}
+.topic-dropdown-trigger:hover {
+    background: rgba(255,255,255,0.055);
+}
+.topic-dropdown-trigger.open {
+    border-color: rgba(59,130,246,0.7);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.14);
+}
+
+.topic-dropdown-search-icon {
+    font-size: 16px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.topic-dropdown-input {
+    flex: 1;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: normal;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.topic-dropdown-chevron {
+    font-size: 18px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.topic-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid rgba(59,130,246,0.7);
+    border-top: none;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    overflow: hidden;
+    z-index: 9999;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+}
+
+.topic-dropdown-list {
+    max-height: 320px;
+    overflow-y: auto;
+}
+.topic-dropdown-list::-webkit-scrollbar {
+    width: 8px;
+}
+.topic-dropdown-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.topic-dropdown-list::-webkit-scrollbar-thumb {
+    background: rgba(148,163,184,0.35);
+    border-radius: 999px;
+}
+.topic-dropdown-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(148,163,184,0.55);
+}
+
+.topic-dropdown-item {
+    padding: 13px 16px;
+    cursor: pointer;
+    transition: 0.15s ease;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+.topic-dropdown-item:hover {
+    background: rgba(59,130,246,0.12);
+}
+.topic-dropdown-item.active {
+    background: rgba(59,130,246,0.18);
+    color: #93c5fd;
+}
+.topic-dropdown-item.disabled {
+    color: var(--text-secondary);
+    cursor: default;
+}
+.topic-dropdown-item.disabled:hover {
+    background: transparent;
 }
