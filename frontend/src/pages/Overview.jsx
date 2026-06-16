@@ -19,13 +19,14 @@
  * Отображает KPI-карточки, графики пропускной способности,
  * таблицу брокеров, отставание групп и события.
  * При смене кластера автоматически очищает все данные и загружает новые.
+ * Поддерживается автообновление с выбираемым интервалом (как в Grafana).
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import '../styles/overview.css';
 import Dropdown from '../components/common/Dropdown';
-import { FiInfo, FiCode, FiPlus, FiStar, FiClock, FiRotateCw } from 'react-icons/fi';
+import { FiInfo, FiCode, FiPlus, FiStar, FiClock, FiRefreshCcw } from 'react-icons/fi';
 import { useCluster } from '../contexts/ClusterContext';
 
 import ThroughputPanel from './overview/ThroughputPanel';
@@ -42,6 +43,20 @@ const TIME_RANGES = [
   { id: '24h', name: 'Последние 24 часа' }
 ];
 
+// Интервалы автообновления (в секундах) – только нужные
+const REFRESH_INTERVALS = [
+  { value: 0, label: 'Выкл' },
+  { value: 10, label: '10с' },
+  { value: 30, label: '30с' },
+  { value: 60, label: '1м' }
+];
+
+// Преобразуем в формат для Dropdown (id и name)
+const REFRESH_ITEMS = REFRESH_INTERVALS.map(item => ({
+  id: item.value,
+  name: item.label
+}));
+
 export default function Overview() {
   const { currentCluster } = useCluster();
 
@@ -54,9 +69,15 @@ export default function Overview() {
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
   const [loading, setLoading] = useState(false);
 
+  // Состояние автообновления — интервал в секундах (0 = выключено)
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState(10);
+  const intervalRef = useRef(null);
+
+  // Текущий выбранный элемент для Dropdown автообновления
+  const currentRefreshItem = REFRESH_ITEMS.find(item => item.id === autoRefreshInterval) || REFRESH_ITEMS[0];
+
   /**
    * Очищает все данные дашборда.
-   * Вызывается перед загрузкой нового кластера и при ошибках.
    */
   const clearDashboardData = () => {
     setOverview(null);
@@ -69,16 +90,14 @@ export default function Overview() {
 
   /**
    * Загружает данные для текущего кластера.
-   * Если кластер недоступен, очищает данные и показывает пустые панели.
    */
   const loadDashboard = async () => {
     if (!currentCluster) return;
 
     setLoading(true);
-    clearDashboardData(); // Удаляем остатки предыдущего кластера
+    clearDashboardData();
 
     try {
-      // Определяем адрес брокера (поле brokers используется в ClusterContext)
       const bootstrap = currentCluster.brokers || currentCluster.bootstrapServers;
       if (!bootstrap) {
         console.error('Не указаны брокеры для кластера', currentCluster);
@@ -106,7 +125,6 @@ export default function Overview() {
       setMessagesOut(latestPoint?.outgoing || 0);
     } catch (error) {
       console.error('Ошибка загрузки дашборда:', error);
-      // Данные уже очищены, ничего дополнительно не делаем
     } finally {
       setLoading(false);
     }
@@ -117,6 +135,28 @@ export default function Overview() {
     loadDashboard();
   }, [currentCluster, timeRange]);
 
+  // --- Автообновление ---
+  useEffect(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    if (autoRefreshInterval > 0 && currentCluster) {
+      intervalRef.current = setInterval(() => {
+        loadDashboard();
+      }, autoRefreshInterval * 1000);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [autoRefreshInterval, currentCluster]);
+
+  // Приветственный экран, если кластер не выбран
   if (!currentCluster) {
     return (
       <div className="welcome-page">
@@ -169,7 +209,9 @@ export default function Overview() {
           <h1 className="page-title">Обзор кластера</h1>
           <div className="page-cluster-name">Кластер: {currentCluster.name}</div>
         </div>
+
         <div className="dashboard-toolbar">
+          {/* Выбор временного периода */}
           <div className="dashboard-time-selector">
             <FiClock />
             <Dropdown
@@ -178,8 +220,19 @@ export default function Overview() {
               onSelect={setTimeRange}
             />
           </div>
+
+          {/* Автообновление с использованием Dropdown (единый стиль) */}
+          <div className="dashboard-auto-refresh">
+            <Dropdown
+              selectedItem={currentRefreshItem}
+              items={REFRESH_ITEMS.filter(item => item.id !== autoRefreshInterval)}
+              onSelect={(item) => setAutoRefreshInterval(item.id)}
+            />
+          </div>
+
+          {/* Ручное обновление — иконка FiRefreshCcw (две стрелки) */}
           <button className="dashboard-refresh-button" onClick={loadDashboard} disabled={loading}>
-            <FiRotateCw className={`dashboard-refresh-icon ${loading ? 'dashboard-refresh-loading' : ''}`} />
+            <FiRefreshCcw className={`dashboard-refresh-icon ${loading ? 'dashboard-refresh-loading' : ''}`} />
           </button>
         </div>
       </div>

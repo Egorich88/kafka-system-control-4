@@ -16,482 +16,216 @@
 
 /*
    =====================================================================
-
    overview.css
 
    Назначение:
    Стили страницы Overview мониторинга Kafka-кластера.
 
-   Данный файл отвечает исключительно за отображение
-   панели мониторинга.
-
-   Используемая структура страницы:
-
+   Структура:
    1. KPI-карточки
-      - Брокеры
-      - Топики
-      - Партиции
-      - Группы потребителей
-      - Сообщения
-
-   2. Основная область мониторинга
-      - График пропускной способности
-      - Список брокеров
-
+   2. Основная область мониторинга (графики, таблица брокеров)
    3. Дополнительная аналитика
-      - Активные топики
-      - Consumer Lag
-      - Последние события
+   4. Верхняя панель управления (выбор периода, автообновление, обновление)
 
-   ВАЖНО:
-
-   Файл НЕ содержит фиксированных цветов.
-
-   Все цвета берутся из themes.css через:
-
-   --panel-bg
-   --border-color
-   --text-primary
-   --text-secondary
-   --accent-color
-   --shadow-primary
-
-   Благодаря этому Overview автоматически поддерживает:
-
-   - Light Theme
-   - Dark Theme
-   - Kitty Theme
-
-   без каких-либо дополнительных изменений.
-
+   Все цвета берутся из themes.css через CSS-переменные,
+   что обеспечивает поддержку светлой, тёмной и других тем.
    =====================================================================
 */
 
-/*
-   =====================================================================
+/* =====================================================================
    Основной контейнер Overview
-   =====================================================================
-*/
- .dashboard-container {
-    /* Вертикальное расположение блоков */
-     display: flex;
-    /* Блоки идут друг под другом */
-     flex-direction: column;
-    /* Отступ между секциями */
-     gap: 24px;
-}
-/* ===================================================================== Верхний ряд KPI карточек ===================================================================== */
- .dashboard-kpi-grid {
-    /* Используем CSS Grid */
-     display: grid;
-    /* Автоматически переносим карточки. Минимум 220px. */
-     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    /* Расстояние между карточками */
-     gap: 20px;
-}
-/* ===================================================================== KPI карточка ===================================================================== */
- .kpi-card {
-    /* Цвет панели зависит от темы */
-     background: var(--panel-bg);
-    /* Граница панели */
-     border: 1px solid var(--border-color);
-    /* Скругление */
-     border-radius: 18px;
-    /* Внутренний отступ */
-     padding: 22px;
-     /* Выравнивание содержимого по центру карточки */
-     align-items: center;
-     /* Все элементы располагаются вертикально сверху вниз */
-     display: flex;
-     flex-direction: column;
-    /* Тень панели */
-     box-shadow: var(--shadow-primary);
-    /* Анимация наведения */
-     transition: all 0.2s ease;
-     /* Минимальная высота карточки. Все KPI становятся одинакового размера. */
-     min-height: 150px;
-}
-/* Эффект наведения мышью */
- .kpi-card:hover {
-     transform: translateY(-2px);
-     border-color: var(--accent-color);
-}
-/* Заголовок карточки */
- .kpi-title {
-     font-size: 0.9rem;
-     color: var(--text-secondary);
-     margin-bottom: 12px;
-}
-/* Большое число */
- .kpi-value {
-     font-size: 2rem;
-     font-weight: 700;
-     color: var(--text-primary);
-     line-height: 1;
-}
-/* Дополнительная информация */
- .kpi-sub {
-     margin-top: 10px;
-     font-size: 14px;
-     font-weight: 500;
-     color: var(--success-color);
-
-}
-/* ===================================================================== Средняя область Overview ===================================================================== */
- .dashboard-main-grid {
-     display: grid;
-    /* Левая панель больше правой. График важнее списка брокеров. */
-     grid-template-columns: 2fr 1fr;
-     gap: 20px;
-}
-/* ===================================================================== Нижняя область Overview ===================================================================== */
- .dashboard-bottom-grid {
-     display: grid;
-    /* Три одинаковые панели. */
-     grid-template-columns: repeat(3, 1fr);
-     gap: 20px;
-}
-/* ===================================================================== Универсальная панель Overview ===================================================================== */
- .dashboard-panel {
-     background: var(--panel-bg);
-     border: 1px solid var(--border-color);
-     border-radius: 18px;
-     box-shadow: var(--shadow-primary);
-     overflow: hidden;
-     height: 100%;
-}
-/* ===================================================================== Заголовок панели ===================================================================== */
- .panel-header {
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-     padding: 18px 22px; /* Отступы заголовка панели сверху/снизу и слева/справа.*/
-     font-size: 1rem; /* Размер текста заголовка.*/
-     font-weight: 600; /* Полужирный шрифт как в Grafana. */
-     color: var(--text-primary); /* Цвет из темы приложения. */
-     border-bottom: 1px solid var(--border-color); /* Разделитель между заголовком панели и содержимым. */
-}
-/* ===================================================================== Тело панели ===================================================================== */
- .panel-body {
-     padding: 22px;
-     color: var(--text-secondary);
-}
-/* ===================================================================== Строка брокера ===================================================================== */
- .broker-row {
-     padding: 12px 0;
-     color: var(--text-primary);
-     border-bottom: 1px solid var(--border-color);
-}
-/* Последняя строка без линии */
- .broker-row:last-child {
-     border-bottom: none;
-}
-/* ===================================================================== Адаптация под планшеты ===================================================================== */
- @media (max-width: 1200px) {
-     .dashboard-main-grid {
-         grid-template-columns: 1fr;
-    }
-     .dashboard-bottom-grid {
-         grid-template-columns: 1fr;
-    }
-}
-/* ===================================================================== Адаптация под мобильные устройства ===================================================================== */
- @media (max-width: 768px) {
-     .dashboard-kpi-grid {
-         grid-template-columns: 1fr;
-    }
-     .kpi-value {
-         font-size: 1.8rem;
-    }
-}
-/* ============================================================
-   Верхняя строка карточки
-
-   Содержит:
-   - иконку
-   - название метрики
-   ============================================================
-*/
-.kpi-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-
-/* Иконка карточки */
-.kpi-icon {
-  font-size: 22px;
-  color: var(--accent-color);
-  flex-shrink: 0;
-}
-
-/* ============================================================ ТАБЛИЦА БРОКЕРОВ KAFKA ============================================================ */
-/* Заголовок таблицы. */
- .broker-table-header {
-     display: grid;
-     grid-template-columns: 80px 1fr 180px 140px;
-     padding: 12px 16px;
-     font-size: 13px;
-     font-weight: 600;
-     color: var(--text-secondary);
-     border-bottom: 1px solid var(--border-color);
-}
-/* Строка таблицы. */
- .broker-table-row {
-     display: grid;
-     grid-template-columns: 80px 1fr 180px 140px;
-     align-items: center;
-     padding: 14px 16px;
-     border-bottom: 1px solid var(--border-color);
-}
-/* Последняя строка без нижней линии. */
- .broker-table-row:last-child {
-     border-bottom: none;
-}
-/* Подсветка строки при наведении. */
- .broker-table-row:hover {
-     background: var(--table-row-hover);
-}
-/* Статус брокера. */
- .broker-status {
-     display: flex;
-     align-items: center;
-     gap: 8px;
-     color: var(--success-color);
-     font-weight: 500;
-}
-/* Зелёная точка статуса. */
- .broker-status-dot {
-     width: 10px;
-     height: 10px;
-     border-radius: 50%;
-     background: var(--success-color);
-     box-shadow: 0 0 8px var(--success-color);
-}
-/* Бейдж контроллера Kafka. */
- .broker-controller-badge {
-     margin-left: 10px;
-     padding: 4px 10px;
-     border-radius: 999px;
-     background: rgba(59,130,246,0.15);
-     color: var(--accent-color);
-     font-size: 12px;
-     font-weight: 600;
-}
-/*
-============================================================
-Брокер не является контроллером.
-============================================================
-*/
-.broker-no-controller {
-  color: var(--text-secondary);
-  font-size: 13px;
-}
-
-/*
-==========================================================
-ЦВЕТА ИКОНОК KPI КАРТОЧЕК
-
-Используются для визуального разделения метрик.
-
-Пользователь моментально понимает,
-какой тип метрики отображается.
-==========================================================
-*/
-
-/* Голубой */
- .kpi-icon-blue {
-     color: #3b82f6;
-}
-/* Фиолетовый */
- .kpi-icon-purple {
-     color: #8b5cf6;
-}
-/* Оранжевый */
- .kpi-icon-orange {
-     color: #f59e0b;
-}
-/* Зеленый */
- .kpi-icon-green {
-     color: #22c55e;
-}
-/* Красный */
- .kpi-icon-red {
-     color: #ef4444;
-}
-
-
-/* ==========================================================
-   Верхняя панель управления Overview
-========================================================== */
- .dashboard-toolbar {
-     display: flex;
-     justify-content: flex-end;
-     gap: 12px;
-}
- .dashboard-time-selector {
-     display: flex;
-     align-items: center;
-     gap: 8px;
-     width: 260px;
-}
-.dashboard-time-selector
-.dropdown-wrapper {
-    width: 100%;
-}
- .dashboard-time-selector select {
-     background: transparent;
-     border: none;
-     color: white;
-     outline: none;
-}
- .dashboard-refresh-button {
-     width: 48px;
-     height: 48px;
-     border-radius: 12px;
-     border: 1px solid var(--border-color);
-     background: var(--panel-bg);
-     color: white;
-     cursor: pointer;
-}
- .dashboard-refresh-button:hover {
-     border-color: #3b82f6;
-}
-/*
-==========================================================
-Иконка ручного обновления Overview
-
-Используется для принудительной
-перезагрузки данных кластера.
-
-Сейчас отвечает только за размер.
-
-Позже здесь будут добавлены:
-
-- анимация вращения
-- индикация загрузки
-- блокировка повторного обновления
-==========================================================
-*/
-.dashboard-refresh-icon
-{
-  /*
-     Размер иконки обновления.
-
-     Немного больше стандартного
-     размера react-icons.
-  */
-  font-size: 18px;
-
-  /*
-     Плавная анимация.
-
-     Понадобится позже для вращения.
-  */
-  transition: transform 0.2s ease;
-}
-
-
-
-/*
-==========================================================
-Заголовок страницы Overview
-==========================================================
-*/
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
-}
-
-.page-header-text {
+   ===================================================================== */
+.dashboard-container {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 24px;
 }
 
-.page-title {
-    margin: 0;
-    font-size: 28px;
+/* =====================================================================
+   Верхний ряд KPI карточек
+   ===================================================================== */
+.dashboard-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+/* KPI карточка */
+.kpi-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 22px;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-primary);
+    transition: all 0.2s ease;
+    min-height: 150px;
+}
+.kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+}
+.kpi-title {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+.kpi-value {
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
+    line-height: 1;
+}
+.kpi-sub {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--success-color);
 }
 
-/* Имя выбранного кластера */
-.page-cluster-name {
-    font-size: 14px;
+/* Верхняя строка карточки (иконка + название) */
+.kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.kpi-icon {
+    font-size: 22px;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+/* Цвета иконок KPI карточек */
+.kpi-icon-blue {
+    color: #3b82f6;
+}
+.kpi-icon-purple {
+    color: #8b5cf6;
+}
+.kpi-icon-orange {
+    color: #f59e0b;
+}
+.kpi-icon-green {
+    color: #22c55e;
+}
+.kpi-icon-red {
+    color: #ef4444;
+}
+
+/* =====================================================================
+   Универсальная панель Overview
+   ===================================================================== */
+.dashboard-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    box-shadow: var(--shadow-primary);
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Заголовок панели */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Тело панели */
+.panel-body {
+    padding: 22px;
     color: var(--text-secondary);
 }
 
-/*
-==========================================================
-Анимация непрерывного вращения
-
-Будет использоваться во время
-реального обновления Overview.
-
-Пример:
-
-<FiRefreshCw
-  className="
-    dashboard-refresh-icon
-    dashboard-refresh-loading
-  "
-/>
-==========================================================
-*/
-@keyframes dashboardSpin
-{
-  from
-  {
-    transform: rotate(0deg);
-  }
-
-  to
-  {
-    transform: rotate(360deg);
-  }
+/* =====================================================================
+   Таблица брокеров
+   ===================================================================== */
+.broker-table-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 180px 140px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+.broker-table-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 180px 140px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+.broker-table-row:last-child {
+    border-bottom: none;
+}
+.broker-table-row:hover {
+    background: var(--table-row-hover);
+}
+.broker-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--success-color);
+    font-weight: 500;
+}
+.broker-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--success-color);
+    box-shadow: 0 0 8px var(--success-color);
+}
+.broker-controller-badge {
+    margin-left: 10px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(59,130,246,0.15);
+    color: var(--accent-color);
+    font-size: 12px;
+    font-weight: 600;
+}
+.broker-no-controller {
+    color: var(--text-secondary);
+    font-size: 13px;
 }
 
-/*
- Состояние загрузки данных.
-*/
-.dashboard-refresh-loading
-{
-  animation:
-    dashboardSpin 1s linear infinite;
+/* =====================================================================
+   Базовые ряды панелей (новая сетка)
+   ===================================================================== */
+.dashboard-row {
+    display: grid;
+    gap: 20px;
+    margin-top: 20px;
 }
-/*
-==========================================================
-Имя активного кластера
-
-Отображается под заголовком
-страницы Overview.
-==========================================================
-*/
-.dashboard-cluster-name
-{
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 4px;
+.dashboard-row-top {
+    grid-template-columns: 2fr 3fr;
+}
+.dashboard-row-middle {
+    grid-template-columns: 3fr 2fr;
+}
+.dashboard-row-bottom {
+    grid-template-columns: 1fr;
 }
 
-/* ==========================================================
+/* =====================================================================
    График пропускной способности кластера
-   ========================================================== */
-
+   ===================================================================== */
 .throughput-chart {
     height: 300px;
     padding-top: 10px;
 }
-/* ==========================================================
-   Tooltip графика пропускной способности
-   ========================================================== */
 
+/* Tooltip графика */
 .throughput-tooltip {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -499,13 +233,11 @@
     padding: 10px 12px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.35);
 }
-
 .throughput-tooltip-title {
     font-weight: 600;
     margin-bottom: 8px;
     color: var(--text-primary);
 }
-
 .throughput-tooltip-row {
     display: flex;
     justify-content: space-between;
@@ -513,26 +245,11 @@
     color: var(--text-secondary);
     margin-bottom: 4px;
 }
-
 .throughput-tooltip-row strong {
     color: var(--text-primary);
 }
-{/* ==========================================================
-    Легенда графика
 
-    Показывает соответствие цветов
-    линий отображаемым метрикам.
-
-    В дальнейшем позволит
-    скрывать и отображать линии.
-========================================================== */}
-/*
-==================================================
-Текущие значения графика
-
-Отображаются под названием панели.
-==================================================
-*/
+/* Текущие значения графика (заголовок панели) */
 .throughput-current-values {
     display: flex;
     gap: 16px;
@@ -546,11 +263,8 @@
 .outgoing-value {
     color: #8b5cf6;
 }
-/*
-==================================================
-Переключатели отображения линий графика
-==================================================
-*/
+
+/* Переключатели линий – устаревшие, оставлены для совместимости */
 .throughput-toggles {
     display: flex;
     gap: 8px;
@@ -568,8 +282,10 @@
     color: var(--text-primary);
     border-color: var(--accent-color);
 }
-/* Убираем белый контур при клике на любую область графика,
-   включая сами линии (кривые) */
+
+/* =====================================================================
+   Сброс обводки при клике на график
+   ===================================================================== */
 .throughput-chart svg,
 .throughput-chart svg *,
 .throughput-chart path,
@@ -577,44 +293,149 @@
 .throughput-chart polyline,
 .throughput-chart polygon,
 .throughput-chart rect {
-  outline: none !important;
-  -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
 }
-
-/* Также на случай фокуса через клавиатуру */
 .throughput-chart svg:focus,
 .throughput-chart svg:focus-visible,
 .throughput-chart *:focus,
 .throughput-chart *:focus-visible {
-  outline: none !important;
+    outline: none !important;
 }
-/* =====================================================
-   БАЗОВЫЙ РЯД ПАНЕЛЕЙ
-===================================================== */
 
-.dashboard-row {
-  display: grid;
-  gap: 20px;
-  margin-top: 20px;
+/* =====================================================================
+   Верхняя панель управления Overview
+   ===================================================================== */
+.dashboard-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    align-items: center;
 }
-/* =====================================================
-   THROUGHPUT + TOPICS
-===================================================== */
 
-.dashboard-row-top {
-  grid-template-columns: 2fr 3fr;
+/* Выбор временного периода */
+.dashboard-time-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 260px;
 }
-/* =====================================================
-   CONSUMER LAG + EVENTS
-===================================================== */
-
-.dashboard-row-middle {
-  grid-template-columns: 3fr 2fr;
+.dashboard-time-selector .dropdown-wrapper {
+    width: 100%;
 }
-/* =====================================================
-   BROKERS
-===================================================== */
+.dashboard-time-selector select {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    outline: none;
+}
 
-.dashboard-row-bottom {
-  grid-template-columns: 1fr;
+/* =====================================================================
+   Автообновление – контейнер для Dropdown (фиксированная ширина)
+   ===================================================================== */
+.dashboard-auto-refresh {
+    display: flex;
+    align-items: center;
+}
+
+/* Фиксируем ширину контейнера дропдауна для автообновления */
+.dashboard-auto-refresh .dropdown-wrapper {
+    width: 100px;
+    min-width: 100px;
+    flex: 0 0 auto;
+}
+
+/* Отключаем скролл в меню (показываем все пункты сразу) */
+.dashboard-auto-refresh .dropdown-menu {
+    max-height: none !important;
+    overflow-y: visible !important;
+}
+
+/* =====================================================================
+   Кнопка ручного обновления (только иконка, без обводки)
+   ===================================================================== */
+.dashboard-refresh-button {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: color 0.2s ease;
+}
+.dashboard-refresh-button:hover {
+    color: var(--accent-color);
+}
+.dashboard-refresh-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Иконка обновления (две стрелки) */
+.dashboard-refresh-icon {
+    font-size: 18px;
+    transition: transform 0.2s ease;
+}
+
+/* Анимация вращения при загрузке */
+@keyframes dashboardSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+.dashboard-refresh-loading {
+    animation: dashboardSpin 1s linear infinite;
+}
+
+/* =====================================================================
+   Заголовок страницы Overview
+   ===================================================================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+.page-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.page-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.page-cluster-name {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* =====================================================================
+   Адаптация под планшеты и мобильные устройства
+   ===================================================================== */
+@media (max-width: 1200px) {
+    .dashboard-row-top,
+    .dashboard-row-middle {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 768px) {
+    .dashboard-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+    .kpi-value {
+        font-size: 1.8rem;
+    }
+    .page-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .dashboard-toolbar {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
 }
