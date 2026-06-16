@@ -305,3 +305,45 @@
         transparent
     );
 }
+/* ============================================================
+   Поиск внутри выпадающего меню
+   ============================================================ */
+.dropdown-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--dropdown-bg);
+}
+
+.dropdown-search-icon {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.dropdown-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.dropdown-search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.dropdown-list {
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.dropdown-item.disabled {
+    color: var(--text-secondary);
+    cursor: default;
+}
+.dropdown-item.disabled:hover {
+    background: transparent;
+}

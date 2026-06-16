@@ -150,11 +150,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
                 onSelect={changeCluster}
                 addLabel="+ Добавить кластер"
                 onAdd={onAddCluster}
-                statusResolver={(cluster) => {
-                  const status = cluster?.connectionStatus || 'unknown';
-                  console.log(`[Sidebar] Cluster ${cluster?.name} (id=${cluster?.id}) status:`, status);
-                  return status;
-                }}
+                statusResolver={(cluster) => cluster?.connectionStatus || 'unknown'}
               />
               <FiSliders
                 className="cluster-settings-icon"

@@ -399,6 +399,7 @@ func main() {
 	http.HandleFunc("/api/overview/consumer-groups", getDashboardConsumerGroupsHandler)
 	http.HandleFunc("/api/overview/partitions", getDashboardPartitionsHandler)
 	http.HandleFunc("/api/overview/throughput", getDashboardThroughputHandler)
+	http.HandleFunc("/api/overview/topics-throughput", GetTopicsPanelHandler)
 	http.HandleFunc("/api/overview/messages-total", getDashboardMessagesTotalHandler)
 
     // ----- Health check для кластера -----

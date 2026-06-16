@@ -14,133 +14,124 @@
  * limitations under the License.
  */
 
+import { useState, useEffect, useRef } from 'react';
+import { FiChevronDown, FiChevronUp, FiSearch } from 'react-icons/fi';
+import '../../styles/dropdown.css';
 
- import { useState, useEffect, useRef } from 'react';
- import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
+/**
+ * Универсальный выпадающий список.
+ * @param {Object} props
+ * @param {Object} props.selectedItem - выбранный элемент (должен иметь поля id и name)
+ * @param {Array} props.items - массив элементов для отображения
+ * @param {Function} props.onSelect - колбэк при выборе
+ * @param {string} props.addLabel - текст кнопки «Добавить»
+ * @param {Function} props.onAdd - колбэк для добавления
+ * @param {Function} props.statusResolver - функция для получения статуса (цвет точки)
+ * @param {boolean} props.searchable - включить поиск по элементам
+ */
+export default function Dropdown({
+  selectedItem,
+  items,
+  onSelect,
+  addLabel,
+  onAdd,
+  statusResolver,
+  searchable = false
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef(null);
 
- import '../../styles/dropdown.css';
+  // Фильтрация элементов по поисковому запросу
+  const filteredItems = searchable && searchTerm
+    ? items.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    : items;
 
- export default function Dropdown({
-   selectedItem,
-   items,
-   onSelect,
-   addLabel,
-   onAdd,
-   statusResolver
- }) {
-   const [isOpen, setIsOpen] = useState(false);
+  // Закрытие при клике вне
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+        setSearchTerm('');
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-   const dropdownRef = useRef(null);
+  // Очистка поиска при закрытии
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchTerm('');
+    }
+  }, [isOpen]);
 
-   useEffect(() => {
-     function handleClickOutside(event) {
-       if (
-         dropdownRef.current &&
-         !dropdownRef.current.contains(event.target)
-       ) {
-         setIsOpen(false);
-       }
-     }
+  const handleSelect = (item) => {
+    onSelect(item);
+    setIsOpen(false);
+    setSearchTerm('');
+  };
 
-     document.addEventListener(
-       'mousedown',
-       handleClickOutside
-     );
+  return (
+    <div className="dropdown-wrapper" ref={dropdownRef}>
+      <button
+        type="button"
+        className={`dropdown-selected ${isOpen ? 'open' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="dropdown-selected-left">
+          {statusResolver && (
+            <div className={`dropdown-status-dot ${statusResolver(selectedItem)}`} />
+          )}
+          <span className="dropdown-selected-name">{selectedItem.name}</span>
+        </div>
+        <div className="dropdown-chevron">
+          {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+        </div>
+      </button>
 
-     return () => {
-       document.removeEventListener(
-         'mousedown',
-         handleClickOutside
-       );
-     };
-   }, []);
+      {isOpen && (
+        <div className="dropdown-menu">
+          {/* Поле поиска (если включено) */}
+          {searchable && (
+            <div className="dropdown-search">
+              <FiSearch className="dropdown-search-icon" />
+              <input
+                type="text"
+                className="dropdown-search-input"
+                placeholder="Поиск..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          )}
 
-   return (
-     <div
-       className="dropdown-wrapper"
-       ref={dropdownRef}
-     >
+          <div className="dropdown-list">
+            {filteredItems.map(item => (
+              <div
+                key={item.id}
+                className="dropdown-item"
+                onClick={() => handleSelect(item)}
+              >
+                {statusResolver && (
+                  <div className={`dropdown-status-dot ${statusResolver(item)}`} />
+                )}
+                <span>{item.name}</span>
+              </div>
+            ))}
+            {filteredItems.length === 0 && (
+              <div className="dropdown-item disabled">Ничего не найдено</div>
+            )}
+          </div>
 
-       <button
-         type="button"
-         className={`dropdown-selected ${
-           isOpen ? 'open' : ''
-         }`}
-         onClick={() => setIsOpen(!isOpen)}
-       >
-
-         <div className="dropdown-selected-left">
-
-           {
-             statusResolver && (
-               <div
-                 className={`dropdown-status-dot ${
-                   statusResolver(selectedItem)
-                 }`}
-               />
-             )
-           }
-
-           <span className="dropdown-selected-name">
-             {selectedItem.name}
-           </span>
-
-         </div>
-
-         <div className="dropdown-chevron">
-           {isOpen
-             ? <FiChevronUp />
-             : <FiChevronDown />
-           }
-         </div>
-
-       </button>
-
-       {isOpen && (
-         <div className="dropdown-menu">
-
-           {items.map(item => (
-             <div
-               key={item.id}
-               className="dropdown-item"
-               onClick={() => {
-                 onSelect(item);
-                 setIsOpen(false);
-               }}
-             >
-
-               {
-                 statusResolver && (
-                   <div
-                     className={`dropdown-status-dot ${
-                       statusResolver(item)
-                     }`}
-                   />
-                 )
-               }
-
-               <span>
-                 {item.name}
-               </span>
-
-             </div>
-           ))}
-
-           {onAdd && (
-             <div
-               className="dropdown-add"
-               onClick={() => {
-                 setIsOpen(false);
-                 onAdd();
-               }}
-             >
-               {addLabel}
-             </div>
-           )}
-
-         </div>
-       )}
-
-     </div>
-   );
- }
+          {onAdd && (
+            <div className="dropdown-add" onClick={() => { setIsOpen(false); onAdd(); }}>
+              {addLabel}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

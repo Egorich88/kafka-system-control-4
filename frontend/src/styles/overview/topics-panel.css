@@ -85,10 +85,11 @@
 /* Легенда – список топиков */
 .topics-legend {
     width: 240px;
+    max-height: 320px;          /* фиксированная максимальная высота */
     display: flex;
     flex-direction: column;
-    gap: 2px;           /* уменьшенный отступ между строками */
-    overflow-y: auto;
+    gap: 4px;
+    overflow-y: auto;           /* скролл при превышении */
 }
 
 /* Строка легенды (топик) */
@@ -98,9 +99,10 @@
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    font-size: 14px;    /* увеличен шрифт топиков */
-    padding: 4px 12px;  /* компактный вертикальный отступ */
+    font-size: 14px;
+    padding: 6px 12px;
     border-radius: 8px;
+    flex-shrink: 0;             /* предотвращаем сжатие строк */
 }
 
 .topics-legend-row.active {
