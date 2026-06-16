@@ -15,39 +15,13 @@
  */
 
 /* ============================================================
-   Topics Throughput Panel – общие стили
+   Topics Throughput Panel – стили
    ============================================================ */
-
-.topics-panel-header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
 
 .topics-panel-title {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
-}
-
-.topics-panel-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-/* Стили для универсального Dropdown внутри панели топиков */
-.topics-panel-controls .dropdown-wrapper {
-    min-width: 170px;
-    flex: 0 0 auto;
-}
-
-/* Убираем жирность у выбранного элемента и пунктов списка в первом Dropdown */
-.topics-panel-controls .dropdown-selected-name,
-.topics-panel-controls .dropdown-item {
-    font-weight: 400 !important;
 }
 
 .topics-placeholder {
@@ -91,7 +65,7 @@
     align-items: center;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 400;           /* обычный шрифт */
+    font-weight: 400;
     padding: 6px 12px;
     border-radius: 8px;
     flex-shrink: 0;
@@ -106,13 +80,13 @@
     outline: none;
 }
 
-/* Значение msg/s – без жирности */
+/* Значение – без жирности */
 .topics-legend-value {
     font-size: 14px;
     font-weight: 400;
 }
 
-/* Заголовок легенды: Топик и Сообщения/сек */
+/* Заголовок легенды */
 .topics-legend-header {
     display: flex;
     justify-content: space-between;
@@ -156,7 +130,7 @@ path:focus {
 }
 
 /* ============================================================
-   Тултип (всплывающая подсказка)
+   Тултип
    ============================================================ */
 .topics-tooltip {
     background: var(--card-bg);
@@ -185,7 +159,7 @@ path:focus {
 }
 
 /* ============================================================
-   Курсор (вертикальная пунктирная линия) – как в ThroughputPanel
+   Курсор (вертикальная пунктирная линия)
    ============================================================ */
 .recharts-cursor {
     stroke: #3b82f6 !important;
@@ -209,124 +183,4 @@ path:focus {
 .recharts-cartesian-axis-tick tspan {
     font-size: 12px !important;
     fill: var(--text-secondary) !important;
-}
-
-/* ============================================================
-   Стили для компонента выбора топика с поиском (TopicSearchDropdown)
-   ============================================================ */
-.topic-dropdown-wrapper {
-    position: relative;
-    width: 100%;
-    min-width: 170px;
-}
-
-.topic-dropdown-trigger {
-    width: 100%;
-    height: 46px;
-    border-radius: 14px;
-    border: 1px solid var(--border-color);
-    background: var(--input-bg);
-    color: var(--text-primary);
-    padding: 0 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: 0.18s ease;
-    cursor: pointer;
-}
-.topic-dropdown-trigger:hover {
-    background: rgba(255,255,255,0.055);
-}
-.topic-dropdown-trigger.open {
-    border-color: rgba(59,130,246,0.7);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom: none;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.14);
-}
-
-.topic-dropdown-search-icon {
-    font-size: 16px;
-    color: var(--text-secondary);
-    flex-shrink: 0;
-}
-
-.topic-dropdown-input {
-    flex: 1;
-    width: 100% !important;
-    height: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    outline: none;
-    color: var(--text-primary);
-    font-size: 14px;
-    line-height: normal;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    font-weight: 400 !important;   /* убираем жирность */
-}
-
-.topic-dropdown-chevron {
-    font-size: 18px;
-    color: var(--text-secondary);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-}
-
-.topic-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: var(--card-bg);
-    border: 1px solid rgba(59,130,246,0.7);
-    border-top: none;
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
-    overflow: hidden;
-    z-index: 9999;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.45);
-}
-
-.topic-dropdown-list {
-    max-height: 320px;
-    overflow-y: auto;
-}
-.topic-dropdown-list::-webkit-scrollbar {
-    width: 8px;
-}
-.topic-dropdown-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-.topic-dropdown-list::-webkit-scrollbar-thumb {
-    background: rgba(148,163,184,0.35);
-    border-radius: 999px;
-}
-.topic-dropdown-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(148,163,184,0.55);
-}
-
-.topic-dropdown-item {
-    padding: 13px 16px;
-    cursor: pointer;
-    transition: 0.15s ease;
-    font-size: 14px;
-    font-weight: 400 !important;   /* убираем жирность */
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
-}
-.topic-dropdown-item:hover {
-    background: rgba(59,130,246,0.12);
-}
-.topic-dropdown-item.disabled {
-    color: var(--text-secondary);
-    cursor: default;
-}
-.topic-dropdown-item.disabled:hover {
-    background: transparent;
 }
