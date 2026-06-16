@@ -24,12 +24,81 @@
       - смена контроллера
       - ошибки кластера
 ======================================================== */
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import '../../styles/overview/events-panel.css';
 
 export default function EventsPanel() {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get('/api/overview/events');
+      setEvents(res.data.events || []);
+    } catch (e) {
+      console.error('Failed to load events', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadEvents();
+
+    const interval = setInterval(() => {
+      loadEvents();
+    }, 10000); // автообновление 10 сек
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getLevelClass = (level) => {
+    switch (level) {
+      case 'INFO':
+        return 'event-level-info';
+      case 'WARN':
+        return 'event-level-warn';
+      case 'ERROR':
+        return 'event-level-error';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <div className="dashboard-panel">
-      <div className="panel-header">Последние события</div>
-      <div className="panel-body">Список событий будет реализован позже</div>
+    <div className="events-panel">
+      <div className="events-panel-header">
+        <div className="events-title">Последние события</div>
+      </div>
+
+      <div className="events-table">
+        <div className="events-table-header">
+          <div>Время</div>
+          <div>Уровень</div>
+          <div>Сообщение</div>
+          <div>Источник</div>
+        </div>
+
+        {events.map((e, idx) => (
+          <div className="events-row" key={idx}>
+            <div className="events-cell">{e.time}</div>
+
+            <div className={`events-cell level ${getLevelClass(e.level)}`}>
+              {e.level}
+            </div>
+
+            <div className="events-cell">{e.message}</div>
+
+            <div className="events-cell source">{e.source}</div>
+          </div>
+        ))}
+
+        {loading && (
+          <div className="events-loading">Загрузка...</div>
+        )}
+      </div>
     </div>
   );
 }
