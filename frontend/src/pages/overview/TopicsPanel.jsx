@@ -27,8 +27,8 @@
  *   - Клик по пустому месту графика → вернуть все топики.
  *   - Ctrl + клик (мышь) → добавить/удалить топик к текущему набору (мультивыбор).
  *
- * Выбор топика в режиме "single-topic" осуществляется через поле поиска с лупой,
- * аналогично полю «Поиск топика» в панели поиска сообщений.
+ * Данные защищены от отрицательных значений – все отрицательные числа обрезаются до нуля,
+ * чтобы график не уходил в минус.
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -48,42 +48,38 @@ import '../../styles/overview/topics-panel.css';
 import { useCluster } from '../../contexts/ClusterContext';
 
 // =========================================================================
-// Компонент выбора топика с поиском (как в SearchToolbar)
+// Компонент выбора топика с поиском
 // =========================================================================
 const TopicSearchDropdown = ({
-  topics,           // полный список топиков (массив строк)
-  selectedTopic,    // текущий выбранный топик (строка)
-  onSelect          // колбэк при выборе топика (принимает строку)
+  topics,
+  selectedTopic,
+  onSelect
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef(null);
 
-  // Фильтрация топиков по поисковому запросу
   const filteredTopics = topics.filter(topic =>
     topic.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Закрытие при клике вне
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setIsOpen(false);
-        setSearchTerm(''); // очищаем поиск при закрытии
+        setSearchTerm('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // При выборе топика
   const handleSelect = (topic) => {
     onSelect(topic);
     setIsOpen(false);
     setSearchTerm('');
   };
 
-  // При открытии дропдауна очищаем поле поиска
   const handleOpen = () => {
     setSearchTerm('');
     setIsOpen(true);
@@ -211,7 +207,7 @@ export default function TopicsPanel() {
   }, [currentCluster]);
 
   // -------------------------------------------------------------------------
-  // Преобразование данных для графика
+  // Преобразование данных для графика с защитой от отрицательных значений
   // -------------------------------------------------------------------------
   const prepareChartData = () => {
     const timeMap = new Map();
@@ -220,7 +216,8 @@ export default function TopicsPanel() {
         timeMap.set(point.time, { time: point.time });
       }
       const entry = timeMap.get(point.time);
-      entry[point.topic] = point.value;
+      // Обрезаем отрицательные значения до нуля при формировании данных
+      entry[point.topic] = Math.max(0, point.value || 0);
     }
     return Array.from(timeMap.values()).sort((a, b) => a.time.localeCompare(b.time));
   };
@@ -228,7 +225,7 @@ export default function TopicsPanel() {
   const aggregatedData = prepareChartData();
   const lastPoint = aggregatedData.length > 0 ? aggregatedData[aggregatedData.length - 1] : {};
 
-  // Активные топики (хотя бы одна точка > 0)
+  // Активные топики (хотя бы одна точка > 0) – используем положительные значения
   const activeTopicsSet = new Set();
   for (const point of rawData) {
     if (point.value > 0) {
@@ -240,11 +237,12 @@ export default function TopicsPanel() {
     (lastPoint[b] || 0) - (lastPoint[a] || 0)
   );
 
+  // Данные для графика – теперь все значения уже обрезаны в aggregatedData
   const graphData =
     viewMode === 'single-topic'
       ? aggregatedData.map(item => ({
           time: item.time,
-          [selectedTopic]: item[selectedTopic] || 0
+          [selectedTopic]: Math.max(0, item[selectedTopic] || 0)
         }))
       : aggregatedData;
 
@@ -263,14 +261,13 @@ export default function TopicsPanel() {
     setVisibleTopics(mode === 'top-topics' ? topicsList : [selectedTopic]);
   };
 
-  // Обработчик выбора топика из кастомного компонента
   const handleTopicSelectFromDropdown = (topic) => {
     setSelectedTopic(topic);
     setVisibleTopics([topic]);
   };
 
   // -------------------------------------------------------------------------
-  // Обработчики выбора линий (клик по линии/легенде/фону)
+  // Обработчики выбора линий
   // -------------------------------------------------------------------------
   const handleTopicSelect = (topic, event) => {
     if (event && event.stopPropagation) event.stopPropagation();
