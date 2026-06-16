@@ -78,7 +78,7 @@ const getTopicColor = (topic, index) => {
   return colors[index % colors.length];
 };
 
-export default function TopicsPanel({ timeRange = '15m' }) {
+export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
   const { currentCluster } = useCluster();
 
   const [visibleTopics, setVisibleTopics] = useState([]);   // топики, отображаемые на графике и в легенде
@@ -132,7 +132,7 @@ export default function TopicsPanel({ timeRange = '15m' }) {
   // Перезагружаем при смене кластера или периода
   useEffect(() => {
     loadTopicsData();
-  }, [currentCluster, timeRange]);
+  }, [currentCluster, timeRange, refreshKey]);
 
   // -------------------------------------------------------------------------
   // Преобразование данных для Recharts

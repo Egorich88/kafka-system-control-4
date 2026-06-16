@@ -72,7 +72,7 @@ const getGroupColor = (group, index) => {
   return colors[index % colors.length];
 };
 
-export default function ConsumerLagPanel({ timeRange = '15m' }) {
+export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
   const { currentCluster } = useCluster();
 
   const [visibleGroups, setVisibleGroups] = useState([]);
@@ -120,7 +120,7 @@ export default function ConsumerLagPanel({ timeRange = '15m' }) {
 
   useEffect(() => {
     loadConsumerLagData();
-  }, [currentCluster, timeRange]);
+  }, [currentCluster, timeRange, refreshKey]);
 
   // -------------------------------------------------------------------------
   // Преобразование данных для Recharts

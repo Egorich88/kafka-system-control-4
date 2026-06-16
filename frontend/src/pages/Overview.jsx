@@ -43,7 +43,6 @@ const TIME_RANGES = [
   { id: '24h', name: 'Последние 24 часа' }
 ];
 
-// Интервалы автообновления (в секундах) – только нужные
 const REFRESH_INTERVALS = [
   { value: 0, label: 'Выкл' },
   { value: 10, label: '10с' },
@@ -51,7 +50,6 @@ const REFRESH_INTERVALS = [
   { value: 60, label: '1м' }
 ];
 
-// Преобразуем в формат для Dropdown (id и name)
 const REFRESH_ITEMS = REFRESH_INTERVALS.map(item => ({
   id: item.value,
   name: item.label
@@ -69,16 +67,14 @@ export default function Overview() {
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
   const [loading, setLoading] = useState(false);
 
-  // Состояние автообновления — интервал в секундах (0 = выключено)
+  // Ключ для принудительного обновления дочерних панелей (TopicsPanel, ConsumerLagPanel)
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const [autoRefreshInterval, setAutoRefreshInterval] = useState(10);
   const intervalRef = useRef(null);
 
-  // Текущий выбранный элемент для Dropdown автообновления
   const currentRefreshItem = REFRESH_ITEMS.find(item => item.id === autoRefreshInterval) || REFRESH_ITEMS[0];
 
-  /**
-   * Очищает все данные дашборда.
-   */
   const clearDashboardData = () => {
     setOverview(null);
     setBrokers([]);
@@ -88,12 +84,8 @@ export default function Overview() {
     setMessagesOut(0);
   };
 
-  /**
-   * Загружает данные для текущего кластера.
-   */
   const loadDashboard = async () => {
     if (!currentCluster) return;
-
     setLoading(true);
     clearDashboardData();
 
@@ -123,6 +115,10 @@ export default function Overview() {
       const latestPoint = points[points.length - 1];
       setMessagesIn(latestPoint?.incoming || 0);
       setMessagesOut(latestPoint?.outgoing || 0);
+
+      // Увеличиваем refreshKey, чтобы триггернуть обновление TopicsPanel и ConsumerLagPanel
+      setRefreshKey(prev => prev + 1);
+
     } catch (error) {
       console.error('Ошибка загрузки дашборда:', error);
     } finally {
@@ -130,24 +126,21 @@ export default function Overview() {
     }
   };
 
-  // Загружаем данные при изменении кластера или временного диапазона
   useEffect(() => {
     loadDashboard();
   }, [currentCluster, timeRange]);
 
-  // --- Автообновление ---
+  // Автообновление
   useEffect(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-
     if (autoRefreshInterval > 0 && currentCluster) {
       intervalRef.current = setInterval(() => {
         loadDashboard();
       }, autoRefreshInterval * 1000);
     }
-
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -156,7 +149,6 @@ export default function Overview() {
     };
   }, [autoRefreshInterval, currentCluster]);
 
-  // Приветственный экран, если кластер не выбран
   if (!currentCluster) {
     return (
       <div className="welcome-page">
@@ -167,7 +159,6 @@ export default function Overview() {
           <h1 className="welcome-title">Kafka System Control</h1>
           <p className="welcome-subtitle">Open-source платформа</p>
           <div className="welcome-divider-small" />
-
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiInfo /></div>
             <div className="welcome-feature-text">
@@ -175,7 +166,6 @@ export default function Overview() {
               <a href="https://kafka.apache.org/" target="_blank" rel="noreferrer">Apache Kafka</a>
             </div>
           </div>
-
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiPlus /></div>
             <div className="welcome-feature-text">
@@ -183,7 +173,6 @@ export default function Overview() {
               <span className="welcome-highlight">+ Добавить кластер</span> в боковом меню
             </div>
           </div>
-
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiCode /></div>
             <div className="welcome-feature-text">
@@ -191,7 +180,6 @@ export default function Overview() {
               <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer">Apache License 2.0</a>
             </div>
           </div>
-
           <div className="welcome-divider large" />
           <a href="https://github.com/Egorich88/kafka-system-control-4" target="_blank" rel="noreferrer" className="welcome-github">
             <FiStar className="welcome-github-icon" />
@@ -209,9 +197,7 @@ export default function Overview() {
           <h1 className="page-title">Обзор кластера</h1>
           <div className="page-cluster-name">Кластер: {currentCluster.name}</div>
         </div>
-
         <div className="dashboard-toolbar">
-          {/* Выбор временного периода */}
           <div className="dashboard-time-selector">
             <FiClock />
             <Dropdown
@@ -220,8 +206,6 @@ export default function Overview() {
               onSelect={setTimeRange}
             />
           </div>
-
-          {/* Автообновление с использованием Dropdown (единый стиль) */}
           <div className="dashboard-auto-refresh">
             <Dropdown
               selectedItem={currentRefreshItem}
@@ -229,8 +213,6 @@ export default function Overview() {
               onSelect={(item) => setAutoRefreshInterval(item.id)}
             />
           </div>
-
-          {/* Ручное обновление — иконка FiRefreshCcw (две стрелки) */}
           <button className="dashboard-refresh-button" onClick={loadDashboard} disabled={loading}>
             <FiRefreshCcw className={`dashboard-refresh-icon ${loading ? 'dashboard-refresh-loading' : ''}`} />
           </button>
@@ -246,19 +228,16 @@ export default function Overview() {
         underReplicated={overview?.underReplicated ?? 0}
       />
 
-      {/* Ряд 2: графики пропускной способности */}
       <div className="dashboard-row dashboard-row-top">
         <ThroughputPanel data={throughputData} />
-        <TopicsPanel timeRange={timeRange.id} />
+        <TopicsPanel timeRange={timeRange.id} refreshKey={refreshKey} />
       </div>
 
-      {/* Ряд 3: отставание групп и события */}
       <div className="dashboard-row dashboard-row-middle">
-        <ConsumerLagPanel />
+        <ConsumerLagPanel timeRange={timeRange.id} refreshKey={refreshKey} />
         <EventsPanel />
       </div>
 
-      {/* Ряд 4: брокеры */}
       <div className="dashboard-row dashboard-row-bottom">
         <BrokersPanel brokers={brokers} />
       </div>
