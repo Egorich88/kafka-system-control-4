@@ -1,0 +1,177 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+/* ============================================================
+   Consumer Lag Panel – стили
+   ============================================================ */
+
+.consumer-lag-panel-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.consumer-lag-placeholder {
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* ============================================================
+   График и легенда
+   ============================================================ */
+
+.consumer-lag-layout {
+    display: flex;
+    gap: 16px;
+    height: 100%;
+}
+
+.consumer-lag-chart {
+    flex: 1;
+    min-width: 0;
+}
+
+.consumer-lag-legend {
+    width: 240px;
+    max-height: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+}
+
+.consumer-lag-legend-row {
+    outline: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 6px 12px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.consumer-lag-legend-row.active {
+    background: var(--hover-color);
+}
+
+.consumer-lag-legend-row:focus,
+.consumer-lag-legend-row:focus-visible {
+    outline: none;
+}
+
+.consumer-lag-legend-value {
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.consumer-lag-legend-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.consumer-lag-legend-placeholder {
+    padding: 12px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+/* ============================================================
+   Сброс фокуса Recharts
+   ============================================================ */
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-responsive-container:focus {
+    outline: none !important;
+}
+
+.recharts-wrapper *,
+.recharts-surface *,
+.recharts-layer * {
+    outline: none !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-layer:focus,
+svg:focus,
+path:focus {
+    outline: none !important;
+}
+
+/* ============================================================
+   Tooltip
+   ============================================================ */
+
+.consumer-lag-tooltip {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.consumer-lag-tooltip-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.consumer-lag-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.consumer-lag-tooltip-row strong {
+    color: var(--text-primary);
+}
+
+/* ============================================================
+   Вертикальный курсор
+   ============================================================ */
+
+.recharts-cursor {
+    stroke: #3b82f6 !important;
+    stroke-width: 1px !important;
+    stroke-dasharray: 4 4 !important;
+    opacity: 1 !important;
+}
+
+.recharts-tooltip-cursor {
+    stroke: #3b82f6 !important;
+    stroke-width: 1px !important;
+    stroke-dasharray: 4 4 !important;
+}
+
+/* ============================================================
+   Подписи осей
+   ============================================================ */
+
+.recharts-cartesian-axis-tick text,
+.recharts-xAxis .recharts-cartesian-axis-tick text,
+.recharts-yAxis .recharts-cartesian-axis-tick text,
+.recharts-cartesian-axis-tick tspan {
+    font-size: 12px !important;
+    fill: var(--text-secondary) !important;
+}
