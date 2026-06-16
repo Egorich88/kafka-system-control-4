@@ -245,7 +245,14 @@ func (tc *TopicsPanelCollector) fetchTopicOffsets() (map[string]int64, error) {
 }
 
 func (tc *TopicsPanelCollector) GetPoints() []TopicsPanelPoint {
-	return tc.storage.getAllPoints()
+	all := tc.storage.getAllPoints()
+	// Защита от отрицательных значений
+	for i := range all {
+		if all[i].Value < 0 {
+			all[i].Value = 0
+		}
+	}
+	return all
 }
 
 var (

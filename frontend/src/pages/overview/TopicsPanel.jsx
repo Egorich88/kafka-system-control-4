@@ -183,7 +183,11 @@ export default function TopicsPanel() {
       const headers = { 'X-Kafka-Bootstrap': currentCluster.brokers || currentCluster.bootstrapServers };
       const response = await axios.get('/api/overview/topics-throughput', { headers });
       const points = response.data.points || [];
-      setRawData(points);
+      const safePoints = points.map(p => ({
+        ...p,
+        value: Math.max(0, p.value || 0)
+      }));
+      setRawData(safePoints);
       const unique = [...new Set(points.map(p => p.topic))];
       setTopicsList(unique);
       if (unique.length > 0 && !selectedTopic) {
