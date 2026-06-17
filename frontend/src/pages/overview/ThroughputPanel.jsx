@@ -111,22 +111,23 @@ export default function ThroughputPanel({ data }) {
 
   return (
     <div className="dashboard-panel">
-      <div className="panel-header">
-        <div className="throughput-header-info">
-          <div className="throughput-title">Пропускная способность кластера</div>
-          <div className="throughput-current-values">
-            <span className="incoming-value">
-              Входящие: {latestPoint?.incoming?.toFixed(1) ?? 0} msg/s
-            </span>
-            <span className="outgoing-value">
-              Исходящие: {latestPoint?.outgoing?.toFixed(1) ?? 0} msg/s
-            </span>
-          </div>
+      <div className="panel-header throughput-header">
+        <div className="throughput-title">
+          Пропускная способность кластера
+        </div>
+
+        <div className="throughput-current-values">
+          <span className="incoming-value">
+            Входящие: {latestPoint?.incoming?.toFixed(1) ?? 0} msg/s
+          </span>
+          <span className="outgoing-value">
+            Исходящие: {latestPoint?.outgoing?.toFixed(1) ?? 0} msg/s
+          </span>
         </div>
       </div>
 
       <div className="panel-body throughput-chart">
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={320}>
           <LineChart data={data} onClick={handleChartClick}>
             <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
 
@@ -140,6 +141,7 @@ export default function ThroughputPanel({ data }) {
 
             {/* Ось значений (сообщения/сек) */}
             <YAxis
+              domain={[0, (dataMax) => Math.ceil(dataMax * 1.1)]}
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
