@@ -782,9 +782,9 @@
 
 /* ========================= ПЕРЕОПРЕДЕЛЕНИЯ ДЛЯ ТЕМ ========================= */
 :root[data-theme='light'] {
-    --json-key-color: #2563eb;
-    --json-value-color: #d97706;
-    --json-punctuation-color: #6b7280;
+    --json-key-color: #0550ae;
+    --json-value-color: #953800;
+    --json-punctuation-color: #24292f;
     --json-raw-color: #d97706;
 }
 
