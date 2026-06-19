@@ -1,6 +1,6 @@
 /* ФОН ПАНЕЛИ */
 .events-panel {
-  background: var(--panel-bg); /* ⬅ было #0f172a */
+  background: var(--panel-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px;
@@ -30,18 +30,22 @@
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+  /* Для Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--card-bg);
 }
 
 /* header */
 .events-table-header {
   display: grid;
   grid-template-columns: 100px 90px 1fr 120px;
-  font-size: 12.5px; /* ⬆ больше */
-  font-weight: 600;  /* ⬆ добавили вес */
-  color: var(--text-secondary); /* ⬅ теперь от темы */
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
   opacity: 0.9;
-  padding: 8px 10px; /* чуть просторнее */
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 /* row строки таблицы*/
@@ -50,8 +54,9 @@
   grid-template-columns: 100px 90px 1fr 120px;
   padding: 8px;
   border-radius: 8px;
-  background: var(--card-bg); /* ⬅ было #0b1220 */
+  background: var(--card-bg);
   transition: 0.15s;
+  flex-shrink: 0;
 }
 
 .events-row:hover {
@@ -103,4 +108,23 @@
   padding: 10px;
   font-size: 12px;
   color: #64748b;
+}
+
+/* ============================================================
+   Стили для скроллбара (поддержка WebKit и Firefox)
+   ============================================================ */
+.events-table::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.events-table::-webkit-scrollbar-track {
+  background: var(--card-bg);
+  border-radius: 3px;
+}
+.events-table::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+.events-table::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }

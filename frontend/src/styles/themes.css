@@ -88,7 +88,7 @@
 
 :root[data-theme='kitty'] {
     /* Lavender — лавандовый, мягкий фиолетовый оттенок */
-    --bg-primary: #e9e4f0;      /* очень светлый лавандовый фон */
+    --bg-primary: #e9e4f0;
     --bg-secondary: #f3eef9;
     --panel-bg: #ffffff;
     --card-bg: #faf7ff;
@@ -98,7 +98,7 @@
     --border-color: rgba(128, 90, 190, 0.2);
     --text-primary: #2c1f4a;
     --text-secondary: #5a4a7a;
-    --accent-color: #9b6bff;     /* яркий лавандовый */
+    --accent-color: #9b6bff;
     --accent-hover: #b48cff;
     --input-bg: #ffffff;
     --input-focus: rgba(155, 107, 255, 0.2);
@@ -400,6 +400,42 @@
     --bg-secondary: #111;
     --panel-bg: #181818;
     --card-bg: #1f1f1f;
+    --dropdown-bg: #111;
+    --sidebar-bg: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
+    --sidebar-hover: rgba(255,255,255,0.05);
+    --border-color: rgba(255,255,255,0.08);
     --text-primary: #ffffff;
+    --text-secondary: rgba(255,255,255,0.65);
     --accent-color: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+    --accent-hover: #ffffff;
+    --input-bg: #1f1f1f;
+    --input-focus: rgba(255,255,255,0.1);
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
+    --table-row-hover: rgba(255,255,255,0.03);
+}
+
+/* ============================================================
+   Стили для скроллбара в выпадающих меню (Dropdown)
+   ============================================================ */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.dropdown-menu::-webkit-scrollbar-track {
+  background: var(--dropdown-bg);
+  border-radius: 3px;
+}
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+/* Для Firefox */
+.dropdown-menu {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--dropdown-bg);
 }
