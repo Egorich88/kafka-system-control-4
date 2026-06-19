@@ -52,6 +52,9 @@ export default function SearchToolbar({
 }) {
   const [focusedField, setFocusedField] = useState(null);
 
+  // Флаг: выбран ли топик
+  const hasTopic = Boolean(selectedTopic);
+
   return (
     <form className="search-toolbar" onSubmit={handleSearch}>
       {/* Топик – уменьшенная ширина через CSS-класс */}
@@ -104,13 +107,17 @@ export default function SearchToolbar({
         </div>
       </div>
 
-      {/* Партиция */}
+      {/* Партиция – если топик не выбран, дропдаун заблокирован */}
       <div className="search-field">
         <label>Партиция</label>
         <div ref={partitionDropdownRef} className="topic-dropdown-wrapper">
           <div
-            className={`topic-dropdown-trigger ${isPartitionDropdownOpen ? 'open' : ''}`}
-            onClick={() => setIsPartitionDropdownOpen(!isPartitionDropdownOpen)}
+            className={`topic-dropdown-trigger ${isPartitionDropdownOpen ? 'open' : ''} ${!hasTopic ? 'disabled' : ''}`}
+            onClick={() => {
+              if (!hasTopic) return; // Не открываем, если нет топика
+              setIsPartitionDropdownOpen(!isPartitionDropdownOpen)
+            }}
+            style={{ opacity: hasTopic ? 1 : 0.5, cursor: hasTopic ? 'pointer' : 'not-allowed' }}
           >
             <span className="topic-dropdown-value">
               {partition === "all" ? "Все партиции" : `Партиция ${partition}`}
@@ -119,7 +126,7 @@ export default function SearchToolbar({
               {isPartitionDropdownOpen ? <FiChevronUp /> : <FiChevronDown />}
             </div>
           </div>
-          {isPartitionDropdownOpen && (
+          {hasTopic && isPartitionDropdownOpen && (
             <div className="topic-dropdown-menu">
               <div className="topic-dropdown-list">
                 <div
@@ -143,7 +150,7 @@ export default function SearchToolbar({
         </div>
       </div>
 
-      {/* Поиск по ключу или значению (новое поле) */}
+      {/* Поиск по ключу или значению */}
       <div className={`search-field ${focusedField === 'searchKeyword' ? 'focused' : ''}`}>
         <label>Поиск в сообщениях</label>
         <input
