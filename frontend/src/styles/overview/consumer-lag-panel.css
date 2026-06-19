@@ -28,6 +28,8 @@
    ============================================================ */
 
 .consumer-lag-layout {
+    flex: 1;
+    min-height: 0;
     display: flex;
     gap: 16px;
     height: 100%;
@@ -36,11 +38,12 @@
 .consumer-lag-chart {
     flex: 1;
     min-width: 0;
+    height: 100%;
 }
 
 .consumer-lag-legend {
     width: 240px;
-    max-height: 320px;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     gap: 4px;

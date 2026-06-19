@@ -121,10 +121,13 @@
    Универсальная панель Overview
    ===================================================================== */
 .dashboard-panel {
+    display: flex;
+    flex-direction: column;
     background: var(--panel-bg);
     border: 1px solid var(--border-color);
     border-radius: 18px;
     box-shadow: var(--shadow-primary);
+    min-height: 0;   /* 🔥 важно для overflow внутри grid */
     overflow: hidden;
     height: 100%;
 }
@@ -145,6 +148,9 @@
 .panel-body {
     padding: 16px;
     color: var(--text-secondary);
+    height: 360px;   /* 👈 ВАЖНО */
+    display: flex;
+    flex-direction: column;
 }
 
 /* =====================================================================
@@ -213,6 +219,8 @@
 }
 .dashboard-row-middle {
     grid-template-columns: 1fr 1fr;
+    height: 360px;      /* 🔥 ключ */
+    align-items: stretch;
 }
 .dashboard-row-bottom {
     grid-template-columns: 1fr;
