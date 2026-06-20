@@ -13,104 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-    FiDownload,
-    FiChevronDown
-} from 'react-icons/fi'
+
+/**
+ * @fileoverview Выпадающее меню экспорта сообщений (JSON, CSV, TXT).
+ * Закрывается при клике вне области меню.
+ */
+
+import { FiDownload, FiChevronDown } from 'react-icons/fi';
+import { useRef, useEffect } from 'react';
 
 export default function ExportDropdown({
-
-    type,
-    exportMenu,
-    setExportMenu,
-    exportMessages,
-    count
-
+  type,
+  exportMenu,
+  setExportMenu,
+  exportMessages,
+  count
 }) {
+  const dropdownRef = useRef(null);
 
-    return (
+  // Закрытие меню при клике вне его области
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        // Если открыто меню именно этого типа — закрываем
+        if (exportMenu === type) {
+          setExportMenu(null);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [exportMenu, type, setExportMenu]);
 
-        <div className="export-dropdown">
+  return (
+    <div className="export-dropdown" ref={dropdownRef}>
+      <button
+        type="button"
+        className={`export-btn ${
+          type === 'all' ? 'secondary' : ''
+        } ${exportMenu === type ? 'open' : ''}`}
+        onClick={() => setExportMenu(exportMenu === type ? null : type)}
+      >
+        <FiDownload className="export-icon" />
+        {type === 'selected'
+          ? `Экспорт выбранных (${count})`
+          : `Экспорт всех (${count})`}
+        <FiChevronDown className="export-chevron" />
+      </button>
 
-            <button
-                type="button"
-                className={`export-btn ${
-                    type === "all"
-                        ? "secondary"
-                        : ""
-                } ${
-                    exportMenu === type
-                        ? "open"
-                        : ""
-                }`}
-                onClick={() =>
-                    setExportMenu(
-                        exportMenu === type
-                            ? null
-                            : type
-                    )
-                }
-            >
-
-                <FiDownload className="export-icon" />
-
-                {
-                    type === "selected"
-                        ? `Экспорт выбранных (${count})`
-                        : `Экспорт всех (${count})`
-                }
-
-                <FiChevronDown className="export-chevron" />
-
-            </button>
-
-            {exportMenu === type && (
-
-                <>
-
-
-
-                    <div className="export-menu">
-
-                        <button
-                            onClick={() =>
-                                exportMessages(
-                                    "json",
-                                    type === "selected"
-                                )
-                            }
-                        >
-                            JSON
-                        </button>
-
-                        <button
-                            onClick={() =>
-                                exportMessages(
-                                    "csv",
-                                    type === "selected"
-                                )
-                            }
-                        >
-                            CSV
-                        </button>
-
-                        <button
-                            onClick={() =>
-                                exportMessages(
-                                    "txt",
-                                    type === "selected"
-                                )
-                            }
-                        >
-                            TXT
-                        </button>
-
-                    </div>
-
-                </>
-
-            )}
-
+      {exportMenu === type && (
+        <div className="export-menu">
+          <button onClick={() => exportMessages('json', type === 'selected')}>
+            JSON
+          </button>
+          <button onClick={() => exportMessages('csv', type === 'selected')}>
+            CSV
+          </button>
+          <button onClick={() => exportMessages('txt', type === 'selected')}>
+            TXT
+          </button>
         </div>
-    )
+      )}
+    </div>
+  );
 }
