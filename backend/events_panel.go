@@ -31,7 +31,6 @@ import (
 // Модель события
 // =============================================================================
 
-// EventLevel — уровень события (INFO, WARN, ERROR)
 type EventLevel string
 
 const (
@@ -40,24 +39,21 @@ const (
 	ERROR EventLevel = "ERROR"
 )
 
-// DashboardEvent представляет одно событие в панели "Последние события".
 type DashboardEvent struct {
-	Time    string     `json:"time"`    // время в формате HH:MM:SS
-	Level   EventLevel `json:"level"`   // уровень
-	Message string     `json:"message"` // сообщение на русском языке
-	Source  string     `json:"source"`  // источник (группа, топик, брокер)
+	Time    string     `json:"time"`
+	Level   EventLevel `json:"level"`
+	Message string     `json:"message"`
+	Source  string     `json:"source"`
 }
 
-// EventsResponse – ответ API с массивом событий.
 type EventsResponse struct {
 	Events []DashboardEvent `json:"events"`
 }
 
 // =============================================================================
-// Кольцевой буфер для событий
+// Кольцевой буфер
 // =============================================================================
 
-// eventRingBuffer хранит ограниченное количество последних событий.
 type eventRingBuffer struct {
 	events []DashboardEvent
 	idx    int
@@ -73,7 +69,6 @@ func newEventRingBuffer(size int) *eventRingBuffer {
 	}
 }
 
-// Add добавляет событие в буфер (потокобезопасно).
 func (b *eventRingBuffer) Add(e DashboardEvent) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -84,7 +79,7 @@ func (b *eventRingBuffer) Add(e DashboardEvent) {
 	}
 }
 
-// GetAll возвращает все хранящиеся события в хронологическом порядке (сначала старые).
+// GetAll возвращает все хранящиеся события в обратном хронологическом порядке (сначала новые).
 func (b *eventRingBuffer) GetAll() []DashboardEvent {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
@@ -95,7 +90,6 @@ func (b *eventRingBuffer) GetAll() []DashboardEvent {
 	if n == 0 {
 		return []DashboardEvent{}
 	}
-	// Начинаем с самого старого элемента
 	start := b.idx - n
 	if start < 0 {
 		start += len(b.events)
@@ -107,44 +101,56 @@ func (b *eventRingBuffer) GetAll() []DashboardEvent {
 			result = append(result, b.events[idx])
 		}
 	}
+
+	// Разворачиваем результат, чтобы новые события были сверху
+	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
+		result[i], result[j] = result[j], result[i]
+	}
+
 	return result
 }
 
 // =============================================================================
-// Сборщик событий (EventCollector)
+// Сборщик событий
 // =============================================================================
 
-// EventCollector периодически опрашивает кластер и генерирует события при изменениях.
 type EventCollector struct {
-	bootstrap string
-	buffer    *eventRingBuffer
-	stopChan  chan struct{}
-	interval  time.Duration
-	mu        sync.Mutex
+	bootstrap        string
+	buffer           *eventRingBuffer
+	stopChan         chan struct{}
+	interval         time.Duration
+	mu               sync.Mutex
+	prevLags         map[string]int64
+	prevTopicOffsets map[string]int64
+	prevTopics       map[string]int16
+	prevBrokers      map[int32]bool
+	prevTopicConfigs map[string]map[string]string
+	brokerAddresses  map[int32]string
 
-	// Состояния для отслеживания изменений
-	prevLags        map[string]int64                 // группа -> lag
-	prevTopicOffsets map[string]int64                // топик -> суммарный оффсет (для скорости)
-	prevTopics      map[string]int16                 // топик -> коэффициент репликации
-	prevBrokers     map[int32]bool                   // ID брокера -> доступен ли
-	prevTopicConfigs map[string]map[string]string    // топик -> конфиги (для выявления изменений)
+	zeroSpeedNotified map[string]bool
+	hadTraffic        map[string]bool
+
+	initialized bool
 }
 
 func NewEventCollector(bootstrap string, bufferSize int, interval time.Duration) *EventCollector {
 	return &EventCollector{
-		bootstrap:        bootstrap,
-		buffer:           newEventRingBuffer(bufferSize),
-		stopChan:         make(chan struct{}),
-		interval:         interval,
-		prevLags:         make(map[string]int64),
-		prevTopicOffsets: make(map[string]int64),
-		prevTopics:       make(map[string]int16),
-		prevBrokers:      make(map[int32]bool),
-		prevTopicConfigs: make(map[string]map[string]string),
+		bootstrap:         bootstrap,
+		buffer:            newEventRingBuffer(bufferSize),
+		stopChan:          make(chan struct{}),
+		interval:          interval,
+		prevLags:          make(map[string]int64),
+		prevTopicOffsets:  make(map[string]int64),
+		prevTopics:        make(map[string]int16),
+		prevBrokers:       make(map[int32]bool),
+		prevTopicConfigs:  make(map[string]map[string]string),
+		brokerAddresses:   make(map[int32]string),
+		zeroSpeedNotified: make(map[string]bool),
+		hadTraffic:        make(map[string]bool),
+		initialized:       false,
 	}
 }
 
-// Start запускает фоновую горутину сбора событий.
 func (ec *EventCollector) Start() {
 	go func() {
 		ticker := time.NewTicker(ec.interval)
@@ -161,146 +167,46 @@ func (ec *EventCollector) Start() {
 	}()
 }
 
-// Stop останавливает сборщик.
 func (ec *EventCollector) Stop() {
 	close(ec.stopChan)
 }
 
-// collect — основная логика сбора и генерации событий.
-func (ec *EventCollector) collect() {
-	ec.mu.Lock()
-	defer ec.mu.Unlock()
-
-	// Получаем текущие метрики
-	currentLags, err := ec.fetchConsumerLags()
+func (ec *EventCollector) getBrokerAddress(id int32) string {
+	if addr, ok := ec.brokerAddresses[id]; ok {
+		return addr
+	}
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_8_0_0
+	client, err := sarama.NewClient([]string{ec.bootstrap}, config)
 	if err != nil {
-		log.Printf("[EventCollector] ошибка получения lag: %v", err)
-		return
+		return fmt.Sprintf("broker-%d", id)
 	}
-
-	currentOffsets, err := ec.fetchTopicOffsets()
-	if err != nil {
-		log.Printf("[EventCollector] ошибка получения оффсетов: %v", err)
-		return
-	}
-
-	currentTopics, err := ec.fetchTopicMetadata()
-	if err != nil {
-		log.Printf("[EventCollector] ошибка получения метаданных топиков: %v", err)
-		return
-	}
-
-	currentBrokers, err := ec.fetchBrokerStatus()
-	if err != nil {
-		log.Printf("[EventCollector] ошибка получения статуса брокеров: %v", err)
-		return
-	}
-
-	currentConfigs, err := ec.fetchTopicConfigs()
-	if err != nil {
-		log.Printf("[EventCollector] ошибка получения конфигов топиков: %v", err)
-	}
-
-	now := time.Now()
-	timeStr := now.Format("15:04:05")
-
-	// ---- 1. Отслеживание изменений lag ----
-	for group, lag := range currentLags {
-		prev, exists := ec.prevLags[group]
-		if !exists {
-			// Новая группа — INFO
-			ec.addEvent(timeStr, INFO, "Обнаружена новая группа потребителей", group)
-		} else {
-			// Порог для ERROR — увеличение более чем на 500 за интервал
-			if lag-prev > 500 {
-				ec.addEvent(timeStr, ERROR, "Увеличилось отставание потребителя", group)
-			} else if prev-lag > 500 && lag < 100 {
-				// Значительное снижение до малых значений — восстановление
-				ec.addEvent(timeStr, INFO, "Отставание потребителя нормализовалось", group)
-			}
-		}
-		ec.prevLags[group] = lag
-	}
-
-	// ---- 2. Отслеживание скорости записи (оффсеты топиков) ----
-	for topic, current := range currentOffsets {
-		prev, exists := ec.prevTopicOffsets[topic]
-		if !exists {
-			ec.prevTopicOffsets[topic] = current
-			continue
-		}
-		delta := current - prev
-		if delta < 0 {
-			delta = 0
-		}
-		// Если скорость упала до нуля, а раньше была > 100 сообщений за интервал (10 сек) — WARN
-		if delta == 0 && prev > 0 {
-			ec.addEvent(timeStr, WARN, "Скорость записи в топик упала до нуля", topic)
-		}
-		// Если скорость резко выросла (в 5 раз больше среднего) — INFO
-		if prev > 0 && delta > 5*prev {
-			ec.addEvent(timeStr, INFO, "Резкий рост скорости записи в топик", topic)
-		}
-		ec.prevTopicOffsets[topic] = current
-	}
-
-	// ---- 3. Изменения в топиках (создание, удаление, репликация) ----
-	for topic, repl := range currentTopics {
-		prevRepl, exists := ec.prevTopics[topic]
-		if !exists {
-			// Новый топик
-			ec.addEvent(timeStr, INFO, "Топик создан", topic)
-		} else if repl != prevRepl {
-			// Изменился коэффициент репликации
-			ec.addEvent(timeStr, INFO, "Изменён коэффициент репликации", topic)
-		}
-		ec.prevTopics[topic] = repl
-	}
-
-	// Проверяем удалённые топики (были в prevTopics, но нет в current)
-	for topic := range ec.prevTopics {
-		if _, exists := currentTopics[topic]; !exists {
-			ec.addEvent(timeStr, WARN, "Топик удалён", topic)
+	defer client.Close()
+	for _, broker := range client.Brokers() {
+		if broker.ID() == id {
+			addr := broker.Addr()
+			ec.brokerAddresses[id] = addr
+			return addr
 		}
 	}
-
-	// ---- 4. Изменения в конфигурациях топиков ----
-	if len(currentConfigs) > 0 {
-		for topic, configs := range currentConfigs {
-			prevConfigs, exists := ec.prevTopicConfigs[topic]
-			if !exists {
-				ec.prevTopicConfigs[topic] = configs
-				continue
-			}
-			// Проверяем изменения в ключевых параметрах (например, retention.ms)
-			for key, value := range configs {
-				if prevVal, ok := prevConfigs[key]; ok && prevVal != value {
-					ec.addEvent(timeStr, WARN, "Изменена конфигурация топика: "+key+" = "+value, topic)
-				}
-			}
-			ec.prevTopicConfigs[topic] = configs
-		}
-	}
-
-	// ---- 5. Доступность брокеров (heartbeat) ----
-	for id, available := range currentBrokers {
-		prevAvailable, exists := ec.prevBrokers[id]
-		if !exists {
-			ec.prevBrokers[id] = available
-			continue
-		}
-		if !available && prevAvailable {
-			// Брокер стал недоступен
-			ec.addEvent(timeStr, ERROR, "Брокер недоступен", fmt.Sprintf("broker-%d", id))
-		} else if available && !prevAvailable {
-			// Брокер восстановился
-			ec.addEvent(timeStr, INFO, "Брокер восстановлен", fmt.Sprintf("broker-%d", id))
-		}
-		ec.prevBrokers[id] = available
-	}
+	return fmt.Sprintf("broker-%d", id)
 }
 
-// addEvent добавляет событие в буфер (внутренний метод).
+func (ec *EventCollector) getControllerAddress() string {
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_8_0_0
+	client, err := sarama.NewClient([]string{ec.bootstrap}, config)
+	if err != nil {
+		return "controller"
+	}
+	defer client.Close()
+	controller, err := client.Controller()
+	if err != nil {
+		return "controller"
+	}
+	return ec.getBrokerAddress(controller.ID())
+}
+
 func (ec *EventCollector) addEvent(timeStr string, level EventLevel, msg, source string) {
 	e := DashboardEvent{
 		Time:    timeStr,
@@ -309,13 +215,233 @@ func (ec *EventCollector) addEvent(timeStr string, level EventLevel, msg, source
 		Source:  source,
 	}
 	ec.buffer.Add(e)
-	log.Printf("[Event] %s %s %s %s", timeStr, level, msg, source)
+	log.Printf("[Event] %s %s %s (source: %s)", timeStr, level, msg, source)
 }
 
-// --- Вспомогательные методы для получения данных ---
+func (ec *EventCollector) initState() {
+	log.Printf("[EventCollector] инициализация состояния (без генерации событий)")
 
-// fetchConsumerLags возвращает текущий lag для всех групп.
-// Использует ту же логику, что и в LagCollector, но для краткости дублируем.
+	ec.hadTraffic = make(map[string]bool)
+	ec.zeroSpeedNotified = make(map[string]bool)
+
+	if topics, err := ec.fetchTopicMetadata(); err == nil {
+		for topic, repl := range topics {
+			ec.prevTopics[topic] = repl
+		}
+		log.Printf("[EventCollector] инициализировано %d топиков", len(topics))
+	}
+
+	if offsets, err := ec.fetchTopicOffsets(); err == nil {
+		for topic, offset := range offsets {
+			ec.prevTopicOffsets[topic] = offset
+			if offset > 0 {
+				ec.hadTraffic[topic] = true
+			}
+		}
+		log.Printf("[EventCollector] инициализировано %d топиков для оффсетов", len(offsets))
+	}
+
+	if configs, err := ec.fetchTopicConfigs(); err == nil {
+		for topic, cfg := range configs {
+			ec.prevTopicConfigs[topic] = cfg
+		}
+		log.Printf("[EventCollector] инициализировано %d топиков для конфигов", len(configs))
+	}
+
+	if brokers, err := ec.fetchBrokerStatus(); err == nil {
+		for id, status := range brokers {
+			ec.prevBrokers[id] = status
+		}
+		log.Printf("[EventCollector] инициализировано %d брокеров", len(brokers))
+	}
+
+	if lags, err := ec.fetchConsumerLags(); err == nil {
+		for group, lag := range lags {
+			ec.prevLags[group] = lag
+		}
+		log.Printf("[EventCollector] инициализировано %d групп потребителей", len(lags))
+	}
+
+	ec.initialized = true
+}
+
+func (ec *EventCollector) collect() {
+	ec.mu.Lock()
+	defer ec.mu.Unlock()
+
+	if !ec.initialized {
+		ec.initState()
+		return
+	}
+
+	now := time.Now()
+	timeStr := now.Format("15:04:05")
+	source := ec.getControllerAddress()
+
+	// ---- 1. Топики ----
+	currentTopics, err := ec.fetchTopicMetadata()
+	if err != nil {
+		log.Printf("[EventCollector] ошибка получения метаданных топиков: %v", err)
+	} else {
+		for topic, repl := range currentTopics {
+			prevRepl, exists := ec.prevTopics[topic]
+			if !exists {
+				ec.addEvent(timeStr, INFO, fmt.Sprintf("Топик создан: %s (репликация: %d, партиций: %d)", topic, repl, ec.getTopicPartitions(topic)), source)
+				delete(ec.zeroSpeedNotified, topic)
+				delete(ec.hadTraffic, topic)
+			} else if repl != prevRepl {
+				ec.addEvent(timeStr, WARN, fmt.Sprintf("Изменена репликация топика %s: %d -> %d", topic, prevRepl, repl), source)
+			}
+			ec.prevTopics[topic] = repl
+		}
+
+		for topic := range ec.prevTopics {
+			if _, exists := currentTopics[topic]; !exists {
+				ec.addEvent(timeStr, WARN, fmt.Sprintf("Топик удалён: %s", topic), source)
+				delete(ec.prevTopics, topic)
+				delete(ec.zeroSpeedNotified, topic)
+				delete(ec.hadTraffic, topic)
+			}
+		}
+	}
+
+	// ---- 2. Конфигурации топиков (теперь отслеживаем ВСЕ изменения) ----
+	currentConfigs, err := ec.fetchTopicConfigs()
+	if err != nil {
+		log.Printf("[EventCollector] ошибка получения конфигов топиков: %v", err)
+	} else {
+		for topic, configs := range currentConfigs {
+			prevConfigs, exists := ec.prevTopicConfigs[topic]
+			if !exists {
+				ec.prevTopicConfigs[topic] = configs
+				continue
+			}
+
+			// Проверяем все изменения конфигураций
+			for key, value := range configs {
+				if prevVal, ok := prevConfigs[key]; ok && prevVal != value {
+					ec.addEvent(timeStr, WARN, fmt.Sprintf("Изменена конфигурация топика %s: %s = %s (было %s)", topic, key, value, prevVal), source)
+				}
+			}
+
+			// Проверяем удалённые параметры (были в prev, нет в current)
+			for key, prevVal := range prevConfigs {
+				if _, ok := configs[key]; !ok {
+					ec.addEvent(timeStr, WARN, fmt.Sprintf("Удалён параметр конфигурации топика %s: %s (было %s)", topic, key, prevVal), source)
+				}
+			}
+
+			ec.prevTopicConfigs[topic] = configs
+		}
+	}
+
+	// ---- 3. Скорость записи ----
+	currentOffsets, err := ec.fetchTopicOffsets()
+	if err != nil {
+		log.Printf("[EventCollector] ошибка получения оффсетов: %v", err)
+	} else {
+		for topic, current := range currentOffsets {
+			prev, exists := ec.prevTopicOffsets[topic]
+			if !exists {
+				ec.prevTopicOffsets[topic] = current
+				if current > 0 {
+					ec.hadTraffic[topic] = true
+				}
+				continue
+			}
+			delta := current - prev
+			if delta < 0 {
+				delta = 0
+			}
+
+			if delta > 0 {
+				ec.hadTraffic[topic] = true
+			}
+
+			if delta == 0 && prev > 0 {
+				if ec.hadTraffic[topic] && !ec.zeroSpeedNotified[topic] {
+					ec.addEvent(timeStr, WARN, fmt.Sprintf("Скорость записи в топик %s упала до нуля", topic), source)
+					ec.zeroSpeedNotified[topic] = true
+				}
+			} else if delta > 0 && ec.zeroSpeedNotified[topic] {
+				ec.zeroSpeedNotified[topic] = false
+				ec.addEvent(timeStr, INFO, fmt.Sprintf("Скорость записи в топик %s восстановлена", topic), source)
+			}
+
+			ec.prevTopicOffsets[topic] = current
+		}
+	}
+
+	// ---- 4. Lag ----
+	currentLags, err := ec.fetchConsumerLags()
+	if err != nil {
+		log.Printf("[EventCollector] ошибка получения lag: %v", err)
+	} else {
+		for group, lag := range currentLags {
+			prev, exists := ec.prevLags[group]
+			if !exists {
+				ec.addEvent(timeStr, INFO, fmt.Sprintf("Обнаружена новая группа потребителей: %s (lag: %d)", group, lag), source)
+				ec.prevLags[group] = lag
+				continue
+			}
+
+			diff := lag - prev
+			if diff > 0 {
+				ec.addEvent(timeStr, ERROR, fmt.Sprintf("Увеличилось отставание потребителя %s: %d -> %d", group, prev, lag), source)
+			} else if diff < 0 && lag == 0 {
+				ec.addEvent(timeStr, INFO, fmt.Sprintf("Отставание потребителя %s полностью устранено (было %d)", group, prev), source)
+			} else if diff < 0 && lag > 0 && lag < 10 {
+				ec.addEvent(timeStr, INFO, fmt.Sprintf("Отставание потребителя %s значительно снизилось: %d -> %d", group, prev, lag), source)
+			}
+			ec.prevLags[group] = lag
+		}
+
+		for group := range ec.prevLags {
+			if _, exists := currentLags[group]; !exists {
+				ec.addEvent(timeStr, INFO, fmt.Sprintf("Группа потребителей %s удалена", group), source)
+				delete(ec.prevLags, group)
+			}
+		}
+	}
+
+	// ---- 5. Доступность брокеров ----
+	currentBrokers, err := ec.fetchBrokerStatus()
+	if err != nil {
+		log.Printf("[EventCollector] ошибка получения статуса брокеров: %v", err)
+	} else {
+		for id, available := range currentBrokers {
+			prevAvailable, exists := ec.prevBrokers[id]
+			if !exists {
+				ec.prevBrokers[id] = available
+				continue
+			}
+			if !available && prevAvailable {
+				ec.addEvent(timeStr, ERROR, fmt.Sprintf("Брокер %s недоступен", ec.getBrokerAddress(id)), ec.getBrokerAddress(id))
+			} else if available && !prevAvailable {
+				ec.addEvent(timeStr, INFO, fmt.Sprintf("Брокер %s восстановлен", ec.getBrokerAddress(id)), ec.getBrokerAddress(id))
+			}
+			ec.prevBrokers[id] = available
+		}
+	}
+}
+
+func (ec *EventCollector) getTopicPartitions(topic string) int32 {
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_8_0_0
+	client, err := sarama.NewClient([]string{ec.bootstrap}, config)
+	if err != nil {
+		return 0
+	}
+	defer client.Close()
+	partitions, err := client.Partitions(topic)
+	if err != nil {
+		return 0
+	}
+	return int32(len(partitions))
+}
+
+// --- Вспомогательные методы ---
+
 func (ec *EventCollector) fetchConsumerLags() (map[string]int64, error) {
 	admin, err := createAdminClient(ec.bootstrap)
 	if err != nil {
@@ -360,7 +486,6 @@ func (ec *EventCollector) fetchConsumerLags() (map[string]int64, error) {
 	return result, nil
 }
 
-// fetchTopicOffsets возвращает сумму latest offsets для каждого топика.
 func (ec *EventCollector) fetchTopicOffsets() (map[string]int64, error) {
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_8_0_0
@@ -393,7 +518,6 @@ func (ec *EventCollector) fetchTopicOffsets() (map[string]int64, error) {
 	return result, nil
 }
 
-// fetchTopicMetadata возвращает карту топик -> коэффициент репликации.
 func (ec *EventCollector) fetchTopicMetadata() (map[string]int16, error) {
 	admin, err := createAdminClient(ec.bootstrap)
 	if err != nil {
@@ -412,8 +536,6 @@ func (ec *EventCollector) fetchTopicMetadata() (map[string]int16, error) {
 	return result, nil
 }
 
-// fetchBrokerStatus возвращает карту ID брокера -> доступен ли (true/false).
-// Проверяет каждого брокера через Connected() с обработкой ошибки.
 func (ec *EventCollector) fetchBrokerStatus() (map[int32]bool, error) {
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_8_0_0
@@ -427,9 +549,9 @@ func (ec *EventCollector) fetchBrokerStatus() (map[int32]bool, error) {
 	brokers := client.Brokers()
 	result := make(map[int32]bool)
 	for _, b := range brokers {
+		ec.brokerAddresses[b.ID()] = b.Addr()
 		connected, err := b.Connected()
 		if err != nil {
-			// В случае ошибки считаем брокера недоступным
 			result[b.ID()] = false
 		} else {
 			result[b.ID()] = connected
@@ -438,7 +560,6 @@ func (ec *EventCollector) fetchBrokerStatus() (map[int32]bool, error) {
 	return result, nil
 }
 
-// fetchTopicConfigs возвращает конфигурации всех топиков (только ключевые параметры).
 func (ec *EventCollector) fetchTopicConfigs() (map[string]map[string]string, error) {
 	admin, err := createAdminClient(ec.bootstrap)
 	if err != nil {
@@ -459,10 +580,7 @@ func (ec *EventCollector) fetchTopicConfigs() (map[string]map[string]string, err
 		}
 		cfgMap := make(map[string]string)
 		for _, entry := range resp {
-			// Сохраняем только интересующие параметры
-			if entry.Name == "retention.ms" || entry.Name == "segment.bytes" || entry.Name == "min.insync.replicas" {
-				cfgMap[entry.Name] = entry.Value
-			}
+			cfgMap[entry.Name] = entry.Value
 		}
 		if len(cfgMap) > 0 {
 			result[topic] = cfgMap
@@ -471,13 +589,12 @@ func (ec *EventCollector) fetchTopicConfigs() (map[string]map[string]string, err
 	return result, nil
 }
 
-// GetEvents возвращает все события из буфера (для обработчика).
 func (ec *EventCollector) GetEvents() []DashboardEvent {
 	return ec.buffer.GetAll()
 }
 
 // =============================================================================
-// Глобальное управление сборщиком событий
+// Глобальное управление
 // =============================================================================
 
 var (
@@ -485,7 +602,6 @@ var (
 	eventCollectorMu      sync.RWMutex
 )
 
-// ensureEventCollectorForBootstrap создаёт или пересоздаёт сборщик для указанного кластера.
 func ensureEventCollectorForBootstrap(bootstrap string) {
 	eventCollectorMu.Lock()
 	defer eventCollectorMu.Unlock()
@@ -496,16 +612,10 @@ func ensureEventCollectorForBootstrap(bootstrap string) {
 		currentEventCollector.Stop()
 	}
 	log.Printf("[EventCollector] создаём сборщик для bootstrap: %s", bootstrap)
-	currentEventCollector = NewEventCollector(bootstrap, 200, 10*time.Second) // 200 событий, интервал 10 сек
+	currentEventCollector = NewEventCollector(bootstrap, 50, 10*time.Second)
 	currentEventCollector.Start()
 }
 
-// =============================================================================
-// HTTP-обработчик
-// =============================================================================
-
-// getDashboardEventsHandler возвращает последние события кластера.
-// Теперь использует реальные данные из сборщика.
 func getDashboardEventsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -516,7 +626,6 @@ func getDashboardEventsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Гарантируем, что сборщик запущен для этого кластера
 	ensureEventCollectorForBootstrap(bootstrap)
 
 	eventCollectorMu.RLock()
@@ -529,10 +638,6 @@ func getDashboardEventsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	events := collector.GetEvents()
-	// Возвращаем последние 50 (можно параметризовать)
-	if len(events) > 50 {
-		events = events[len(events)-50:]
-	}
 	response := EventsResponse{Events: events}
 	_ = json.NewEncoder(w).Encode(response)
 }
