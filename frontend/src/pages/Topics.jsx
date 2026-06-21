@@ -523,6 +523,12 @@ export default function Topics() {
 
       </div>
 
+      <div
+        className={`topics-content ${
+          detailTopic ? 'with-details' : ''
+        }`}
+      >
+
       <div className="topics-table-wrapper">
 
         <table className="topics-table">
@@ -560,7 +566,7 @@ export default function Topics() {
 
               <tr>
 
-                <td colSpan="3" className="topics-loading">
+                <td colSpan="4" className="topics-loading">
                   Загрузка топиков...
                 </td>
 
@@ -570,7 +576,7 @@ export default function Topics() {
 
               <tr>
 
-                <td colSpan="3" className="topics-empty-cell">
+                <td colSpan="4" className="topics-empty-cell">
 
                   <div className="topics-empty">
 
@@ -636,278 +642,43 @@ export default function Topics() {
 
         </table>
 
-      </div>
 
-      {/* DRAWER */}
 
       {detailTopic && (
 
-        <div
-          className="topic-drawer-overlay"
-          onClick={closePanel}
-        >
+        <div className="topic-details-panel">
 
-          <div
-            className="topic-drawer"
-            ref={panelRef}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="topic-details-header">
 
-            <div className="topic-drawer-header">
+            <h2>
+              {selectedTopic?.name}
+            </h2>
 
-              <div>
+            <button
+              className="topic-close-btn"
+              onClick={closePanel}
+            >
+              Закрыть
+            </button>
 
-                <h2>Детали топика</h2>
+          </div>
 
-              </div>
+          <div className="topic-details-body">
 
-              <button
-                className="topic-drawer-close-btn"
-                onClick={closePanel}
-              >
-                Скрыть
-              </button>
-
-            </div>
-
-            {detailLoading ? (
-
-              <div className="loading">
-                Загрузка деталей...
-              </div>
-
-            ) : (
-
-              <div className="topic-drawer-body">
-
-                {/* TOPIC META */}
-
-                <div className="topic-meta">
-
-                  <div className="topic-meta-item">
-
-                    <span>Название топика:</span>
-
-                    <strong>
-                      {selectedTopic?.name}
-                    </strong>
-
-                  </div>
-
-                  <div className="topic-meta-item">
-
-                    <span>Партиции:</span>
-
-                    <strong>
-                      {detailTopic.partitions?.length || 0}
-                    </strong>
-
-                  </div>
-
-                  <div className="topic-meta-item">
-
-                    <span>Репликация:</span>
-
-                    <strong>
-                      {detailTopic.replicationFactor}
-                    </strong>
-
-                  </div>
-
-                </div>
-
-                {/* PARTITIONS */}
-
-                {detailTopic.partitions && (
-
-                  <div className="topic-section">
-
-                    <h3>Партиции</h3>
-
-                    <div className="topic-config-wrapper">
-
-                      <table className="topic-config-table">
-
-                        <thead>
-
-                          <tr>
-
-                            <th>ID</th>
-
-                            <th>Лидер</th>
-
-                            <th>Реплики</th>
-
-                            <th>In-Sync Replicas</th>
-
-                          </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                          {detailTopic.partitions.map((partition) => (
-
-                            <tr key={partition.partition ?? partition.id}>
-
-                              <td>
-                                {partition.partition ?? partition.id}
-                              </td>
-
-                              <td>
-                                {partition.leader}
-                              </td>
-
-                              <td>
-                                {partition.replicas?.join(', ')}
-                              </td>
-
-                              <td>
-                                {partition.isr?.join(', ')}
-                              </td>
-
-                            </tr>
-
-                          ))}
-
-                        </tbody>
-
-                      </table>
-
-                    </div>
-
-                  </div>
-
-                )}
-
-                {/* CONFIGS */}
-
-                {detailTopic.configs && (
-
-                  <div className="topic-section">
-
-                    <div className="config-hint">
-                      Двойной клик по значению параметра — редактирование
-                    </div>
-
-                    <h3>Конфигурация</h3>
-
-                    <div className="topic-config-wrapper">
-
-                      <table className="topic-config-table">
-
-                        <thead>
-
-                          <tr>
-
-                            <th>Параметр</th>
-
-                            <th>Значение</th>
-
-                          </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                          {Object.entries(detailTopic.configs).map(
-                            ([key, value]) => (
-
-                              <tr
-                                key={key}
-                                className={
-                                  editingParam === key
-                                    ? 'active-config'
-                                    : ''
-                                }
-                              >
-
-                                <td className="config-key">
-                                  {key}
-                                </td>
-
-                                <td>
-
-                                  <span
-                                    className={
-                                      editingParam === key
-                                        ? 'editable-config editing-highlight'
-                                        : 'editable-config'
-                                    }
-                                    onDoubleClick={() =>
-                                      handleConfigDoubleClick(
-                                        key,
-                                        value
-                                      )
-                                    }
-                                  >
-                                    {String(value)}
-                                  </span>
-
-                                </td>
-
-                              </tr>
-
-                            )
-                          )}
-
-                        </tbody>
-
-                      </table>
-
-                    </div>
-
-                    {editingParam && (
-
-                      <div className="config-edit-box">
-
-                        <h4>
-                          Редактирование параметра:
-                          {' '}
-                          {editingParam}
-                        </h4>
-
-                        <input
-                          type="text"
-                          value={editValue}
-                          onChange={(e) =>
-                            setEditValue(e.target.value)
-                          }
-                        />
-
-                        <div className="config-edit-actions">
-
-                          <button
-                            onClick={handleSaveEdit}
-                          >
-                            Сохранить
-                          </button>
-
-                          <button
-                            onClick={handleCancelEdit}
-                          >
-                            Отмена
-                          </button>
-
-                        </div>
-
-                      </div>
-
-                    )}
-
-                  </div>
-
-                )}
-
-              </div>
-
-            )}
+            {/* сюда перенесем содержимое старого drawer */}
 
           </div>
 
         </div>
 
       )}
+     </div> {/* topics-table-wrapper */}
+
+     </div> {/* topics-content */}
+
+      {/* DRAWER */}
+
+
       {/* ===================================================== */}
       {/* CREATE MODAL */}
       {/* ===================================================== */}
