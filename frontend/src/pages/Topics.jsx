@@ -39,6 +39,9 @@ export default function Topics() {
 
   const [selectedTopic, setSelectedTopic] = useState(null);
 
+  // MULTI SELECT
+  const [selectedTopics, setSelectedTopics] = useState([]);
+
   const [detailTopic, setDetailTopic] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
@@ -193,13 +196,23 @@ export default function Topics() {
     }
   };
 
-  // =========================================================
   // TABLE EVENTS
-  // =========================================================
+  const handleRowClick = (topic) => { setSelectedTopic(topic); };
 
-  const handleRowClick = (topic) => {
+  const toggleTopicSelection = (topicName) => {
+    setSelectedTopics((prev) =>
+      prev.includes(topicName)
+        ? prev.filter((t) => t !== topicName)
+        : [...prev, topicName]
+    );
+  };
 
-    setSelectedTopic(topic);
+  const toggleSelectAll = () => {
+    if (selectedTopics.length === filteredTopics.length) {
+      setSelectedTopics([]);
+    } else {
+      setSelectedTopics(filteredTopics.map((t) => t.name));
+    }
   };
 
   const handleRowDoubleClick = (topic) => {
@@ -518,6 +531,19 @@ export default function Topics() {
 
             <tr>
 
+              <th className="checkbox-column">
+
+                <input
+                  type="checkbox"
+                  checked={
+                    filteredTopics.length > 0 &&
+                    selectedTopics.length === filteredTopics.length
+                  }
+                  onChange={toggleSelectAll}
+                />
+
+              </th>
+
               <th>Название</th>
 
               <th>Партиции</th>
@@ -575,6 +601,18 @@ export default function Topics() {
                       : ''
                   }
                 >
+                  <td className="checkbox-column">
+
+                    <input
+                      type="checkbox"
+                      checked={selectedTopics.includes(topic.name)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleTopicSelection(topic.name);
+                      }}
+                    />
+
+                  </td>
 
                   <td className="topic-name">
                     {topic.name}

@@ -405,3 +405,15 @@
      border: 1px solid var(--border-color);
      color: var(--text-primary);
 }
+/* =========================================
+   CHECKBOX COLUMN
+========================================= */
+
+.checkbox-column {
+    width: 52px;
+    text-align: center;
+}
+
+.checkbox-column input {
+    cursor: pointer;
+}
