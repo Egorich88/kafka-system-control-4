@@ -642,37 +642,36 @@ export default function Topics() {
 
         </table>
 
+        </div> {/* topics-table-wrapper */}
 
+        {detailTopic && (
 
-      {detailTopic && (
+          <div className="topic-details-panel">
 
-        <div className="topic-details-panel">
+            <div className="topic-details-header">
 
-          <div className="topic-details-header">
+              <h2>
+                {selectedTopic?.name}
+              </h2>
 
-            <h2>
-              {selectedTopic?.name}
-            </h2>
+              <button
+                className="topic-close-btn"
+                onClick={closePanel}
+              >
+                Закрыть
+              </button>
 
-            <button
-              className="topic-close-btn"
-              onClick={closePanel}
-            >
-              Закрыть
-            </button>
+            </div>
+
+            <div className="topic-details-body">
+
+              {/* сюда потом вернем содержимое */}
+
+            </div>
 
           </div>
 
-          <div className="topic-details-body">
-
-            {/* сюда перенесем содержимое старого drawer */}
-
-          </div>
-
-        </div>
-
-      )}
-     </div> {/* topics-table-wrapper */}
+        )}
 
      </div> {/* topics-content */}
 
