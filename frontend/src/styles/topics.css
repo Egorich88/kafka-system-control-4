@@ -93,8 +93,20 @@
  .topics-table tbody tr {
      cursor: pointer;
 }
- .topics-table tbody tr.selected {
-     background: rgba(59,130,246,0.16);
+.topics-table tbody tr.selected {
+    background: rgba(59,130,246,0.14);
+}
+
+.topics-table tbody tr.selected td {
+    color: #93c5fd;
+}
+
+.topics-table tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.topics-table tbody tr.selected:hover {
+    background: rgba(59,130,246,0.18);
 }
  .topics-table tbody tr:last-child td {
      border-bottom: none;

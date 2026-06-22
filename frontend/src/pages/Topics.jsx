@@ -69,6 +69,25 @@ export default function Topics() {
 
   const panelRef = useRef(null);
 
+  const formatRetention = (value) => {
+
+    if (!value || value === '-') return '-';
+
+    const ms = Number(value);
+
+    if (ms === -1) return 'infinite';
+
+    const days = Math.floor(ms / 86400000);
+
+    if (days >= 1) return `${days}d`;
+
+    const hours = Math.floor(ms / 3600000);
+
+    if (hours >= 1) return `${hours}h`;
+
+    return `${ms}ms`;
+  };
+
   useEffect(() => {
 
     if (detailTopic) {
@@ -133,6 +152,16 @@ export default function Topics() {
         name: t.name || t,
         partitions: t.partitions || 0,
         replicationFactor: t.replicationFactor || 1,
+
+        cleanupPolicy:
+          t.cleanupPolicy ||
+          t['cleanup.policy'] ||
+          '-',
+
+        retentionMs:
+          t.retentionMs ||
+          t['retention.ms'] ||
+          '-',
       }));
 
       setTopics(normalized);
@@ -550,10 +579,10 @@ export default function Topics() {
               </th>
 
               <th>Название</th>
-
               <th>Партиции</th>
-
               <th>Репликация</th>
+              <th>Cleanup</th>
+              <th>Retention</th>
 
             </tr>
 
@@ -598,6 +627,11 @@ export default function Topics() {
 
                 <tr
                   key={topic.name}
+                  className={
+                    selectedTopic?.name === topic.name
+                      ? 'selected'
+                      : ''
+                  }
                   onClick={() => handleRowClick(topic)}
                 >
                   <td className="checkbox-column">
@@ -623,6 +657,14 @@ export default function Topics() {
 
                   <td>
                     {topic.replicationFactor}
+                  </td>
+
+                  <td>
+                    {topic.cleanupPolicy}
+                  </td>
+
+                  <td>
+                    {formatRetention(topic.retentionMs)}
                   </td>
 
                 </tr>
