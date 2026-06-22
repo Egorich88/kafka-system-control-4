@@ -32,7 +32,7 @@
 /* Когда открыт топик */
 
 .topics-content.with-details {
-    grid-template-columns: minmax(0, 1fr) 420px;
+    grid-template-columns: minmax(0, 1fr) 700px;
 }
  .topics-container h1 {
      font-size: 32px;

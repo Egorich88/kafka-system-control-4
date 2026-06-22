@@ -665,7 +665,55 @@ export default function Topics() {
 
             <div className="topic-details-body">
 
-              {/* сюда потом вернем содержимое */}
+              <div className="topic-meta">
+
+                <div className="topic-meta-item">
+                  <strong>Партиций:</strong>
+                  {detailTopic.partitions?.length || 0}
+                </div>
+
+                <div className="topic-meta-item">
+                  <strong>Репликация:</strong>
+                  {detailTopic.replicationFactor}
+                </div>
+
+              </div>
+
+              <div className="topic-section">
+
+                <h3>Партиции</h3>
+
+                <table className="topic-config-table">
+
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Leader</th>
+                      <th>ISR</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+
+                    {detailTopic.partitions?.map((partition) => (
+
+                      <tr key={partition.id}>
+
+                        <td>{partition.id}</td>
+
+                        <td>{partition.leader}</td>
+
+                        <td>{partition.isr?.join(', ')}</td>
+
+                      </tr>
+
+                    ))}
+
+                  </tbody>
+
+                </table>
+
+              </div>
 
             </div>
 
