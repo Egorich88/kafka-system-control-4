@@ -197,7 +197,6 @@ export default function Topics() {
   };
 
   // TABLE EVENTS
-  const handleRowClick = (topic) => { setSelectedTopic(topic); };
 
   const toggleTopicSelection = (topicName) => {
     setSelectedTopics((prev) =>
@@ -215,7 +214,7 @@ export default function Topics() {
     }
   };
 
-  const handleRowDoubleClick = (topic) => {
+  const handleRowClick = (topic) => {
 
     setSelectedTopic(topic);
 
@@ -600,12 +599,6 @@ export default function Topics() {
                 <tr
                   key={topic.name}
                   onClick={() => handleRowClick(topic)}
-                  onDoubleClick={() => handleRowDoubleClick(topic)}
-                  className={
-                    selectedTopic?.name === topic.name
-                      ? 'selected'
-                      : ''
-                  }
                 >
                   <td className="checkbox-column">
 
@@ -683,35 +676,35 @@ export default function Topics() {
 
                 <h3>Партиции</h3>
 
-                <table className="topic-config-table">
+                <div className="topic-config-wrapper">
 
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Leader</th>
-                      <th>ISR</th>
-                    </tr>
-                  </thead>
+                  <table className="topic-config-table">
 
-                  <tbody>
-
-                    {detailTopic.partitions?.map((partition) => (
-
-                      <tr key={partition.id}>
-
-                        <td>{partition.id}</td>
-
-                        <td>{partition.leader}</td>
-
-                        <td>{partition.isr?.join(', ')}</td>
-
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Leader</th>
+                        <th>ISR</th>
                       </tr>
+                    </thead>
 
-                    ))}
+                    <tbody>
 
-                  </tbody>
+                      {detailTopic.partitions?.map((partition) => (
 
-                </table>
+                        <tr key={partition.id}>
+                          <td>{partition.id}</td>
+                          <td>{partition.leader}</td>
+                          <td>{partition.isr?.join(', ')}</td>
+                        </tr>
+
+                      ))}
+
+                    </tbody>
+
+                  </table>
+
+                </div>
 
               </div>
 

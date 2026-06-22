@@ -159,10 +159,9 @@
 /* ========================= CONFIG TABLE ========================= */
  .topic-config-wrapper {
      border-radius: 16px;
-     overflow: hidden;
      border: 1px solid var(--border-color);
      background: var(--card-bg);
-     max-height: 360px;
+     max-height: 240px;
      overflow-y: auto;
 }
 /* CONFIG SCROLLBAR */
@@ -188,6 +187,14 @@
  .topic-config-table tr.active-config {
      background: rgba(59,130,246,0.10);
 }
+.topic-config-table tbody tr:hover {
+    background: rgba(59,130,246,0.08);
+}
+.topic-config-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
  .topic-config-table td:not(:last-child), .topic-config-table th:not(:last-child) {
      border-right: 1px solid var(--border-color);
 }
