@@ -37,6 +37,9 @@ export default function Topics() {
 
   const [filter, setFilter] = useState('');
 
+  // EXPORT
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
   const [selectedTopic, setSelectedTopic] = useState(null);
 
   // MULTI SELECT
@@ -86,6 +89,17 @@ export default function Topics() {
     if (hours >= 1) return `${hours}h`;
 
     return `${ms}ms`;
+  };
+
+  const CONFIG_DESCRIPTIONS = {
+    'cleanup.policy': 'Политика очистки топика',
+    'retention.ms': 'Время хранения сообщений',
+    'min.insync.replicas': 'Минимальное количество синхронных реплик',
+    'segment.bytes': 'Максимальный размер сегмента',
+    'segment.ms': 'Время жизни сегмента',
+    'compression.type': 'Тип сжатия сообщений',
+    'max.message.bytes': 'Максимальный размер сообщения',
+    'message.timestamp.type': 'Тип временной метки',
   };
 
   useEffect(() => {
@@ -490,18 +504,128 @@ export default function Topics() {
     }
   };
 
-  // =========================================================
-  // FILTER
-  // =========================================================
+  // Экспорт списка топиков
+  const exportTopicsList = () => {
 
+    const selected =
+      selectedTopics.length > 0
+        ? topics.filter(t =>
+            selectedTopics.includes(t.name)
+          )
+        : topics;
+
+    const content = selected
+      .map(t => t.name)
+      .join('\n');
+
+    const blob = new Blob(
+      [content],
+      { type: 'text/plain;charset=utf-8' }
+    );
+
+    const url =
+      window.URL.createObjectURL(blob);
+
+    const link =
+      document.createElement('a');
+
+    link.href = url;
+
+    link.download =
+      'topics-list.txt';
+
+    link.click();
+
+    window.URL.revokeObjectURL(url);
+
+    setShowExportMenu(false);
+
+    toast.success(
+      `Экспортировано ${selected.length} топиков`
+    );
+  };
+
+  // Экспорт конфигурацити топиков
+  const exportTopicsConfig = async () => {
+
+    if (!currentCluster) {
+      return;
+    }
+
+    try {
+
+      const selected =
+        selectedTopics.length > 0
+          ? topics.filter(t =>
+              selectedTopics.includes(t.name)
+            )
+          : topics;
+
+      const result = [];
+
+      // Получаем конфигурацию каждого топика
+      for (const topic of selected) {
+
+        const response = await axios.get(
+          `/api/topics/${encodeURIComponent(topic.name)}`,
+          {
+            headers: {
+              'X-Kafka-Bootstrap': currentCluster.brokers,
+            },
+          }
+        );
+
+        result.push({
+          topic: topic.name,
+          configs: response.data.configs || {},
+        });
+      }
+
+      const blob = new Blob(
+        [JSON.stringify(result, null, 2)],
+        {
+          type: 'application/json;charset=utf-8',
+        }
+      );
+
+      const url =
+        window.URL.createObjectURL(blob);
+
+      const link =
+        document.createElement('a');
+
+      link.href = url;
+
+      link.download =
+        `topics-config-${selected.length}.json`;
+
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+
+      setShowExportMenu(false);
+
+      toast.success(
+        `Экспортировано ${selected.length} топиков`
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      toast.error(
+        'Ошибка экспорта конфигурации'
+      );
+    }
+  };
+
+  // FILTER
   const filteredTopics = topics.filter((topic) =>
     topic.name.toLowerCase().includes(filter.toLowerCase())
   );
 
-  // =========================================================
-  // RENDER
-  // =========================================================
 
+  // RENDER
   return (
 
     <div className="topics-container">
@@ -532,6 +656,7 @@ export default function Topics() {
 
         <div className="action-buttons">
 
+          {/* Создание топика */}
           <button
             className="action-btn"
             onClick={() => setShowCreateModal(true)}
@@ -539,6 +664,50 @@ export default function Topics() {
             Создать
           </button>
 
+          {/* Экспорт */}
+          <div className="export-dropdown">
+
+            <button
+              className="action-btn"
+              onClick={() =>
+                setShowExportMenu(!showExportMenu)
+              }
+            >
+              Экспорт ({selectedTopics.length || topics.length})
+              ▼
+            </button>
+
+            {showExportMenu && (
+
+              <div className="export-menu">
+
+                <button
+                  className="export-item"
+                  title="Экспорт только названий топиков"
+                  onClick={() =>
+                    exportTopicsList()
+                  }
+                >
+                  📄 Список топиков
+                </button>
+
+                <button
+                  className="export-item"
+                  title="Экспорт топиков вместе с конфигурацией"
+                  onClick={() =>
+                    exportTopicsConfig()
+                  }
+                >
+                  📄 Конфигурация топиков
+                </button>
+
+              </div>
+
+            )}
+
+          </div>
+
+          {/* Удаление */}
           <button
             className="action-btn delete"
             onClick={handleDeleteTopic}
@@ -700,16 +869,103 @@ export default function Topics() {
 
             <div className="topic-details-body">
 
-              <div className="topic-meta">
+              <div className="topic-section">
 
-                <div className="topic-meta-item">
-                  <strong>Партиций:</strong>
-                  {detailTopic.partitions?.length || 0}
+                <h3>Основная информация</h3>
+
+                <div className="topic-meta">
+
+                  <div className="topic-meta-item">
+                    <strong>Название:</strong>
+                    {detailTopic.name}
+                  </div>
+
+                  <div className="topic-meta-item">
+                    <strong>Партиций:</strong>
+                    {detailTopic.partitions?.length || 0}
+                  </div>
+
+                  <div className="topic-meta-item">
+                    <strong>Репликация:</strong>
+                    {detailTopic.replicationFactor}
+                  </div>
+
+                  <div className="topic-meta-item">
+                    <strong>Cleanup:</strong>
+                    {detailTopic.configs?.['cleanup.policy'] || '-'}
+                  </div>
+
+                  <div className="topic-meta-item">
+                    <strong>Retention:</strong>
+                    {detailTopic.configs?.['retention.ms'] || '-'}
+                  </div>
+
                 </div>
 
-                <div className="topic-meta-item">
-                  <strong>Репликация:</strong>
-                  {detailTopic.replicationFactor}
+              </div>
+
+              <div className="topic-section">
+
+                <h3>Конфигурация</h3>
+
+                <div className="topic-config-wrapper">
+
+                  <table className="topic-config-table">
+
+                    <thead>
+                      <tr>
+                        <th>Параметр</th>
+                        <th>Значение</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+
+                      {Object.entries(detailTopic.configs || {}).map(
+                        ([key, value]) => (
+
+                          <tr key={key}>
+
+                            <td className="config-key">
+
+                              <div className="config-key-name">
+                                {key}
+                              </div>
+
+                              {CONFIG_DESCRIPTIONS[key] && (
+                                <div className="config-key-description">
+                                  {CONFIG_DESCRIPTIONS[key]}
+                                </div>
+                              )}
+
+                            </td>
+
+                            <td>
+
+                              <span
+                                className={`editable-config ${
+                                  editingParam === key
+                                    ? 'editing-highlight'
+                                    : ''
+                                }`}
+                                onDoubleClick={() =>
+                                  handleConfigDoubleClick(key, value)
+                                }
+                              >
+                                {value}
+                              </span>
+
+                            </td>
+
+                          </tr>
+
+                        )
+                      )}
+
+                    </tbody>
+
+                  </table>
+
                 </div>
 
               </div>
@@ -747,6 +1003,37 @@ export default function Topics() {
                   </table>
 
                 </div>
+
+                {editingParam && (
+
+                  <div className="config-edit-box">
+
+                    <h4>
+                      Редактирование: {editingParam}
+                    </h4>
+
+                    <input
+                      value={editValue}
+                      onChange={(e) =>
+                        setEditValue(e.target.value)
+                      }
+                    />
+
+                    <div className="config-edit-actions">
+
+                      <button onClick={handleSaveEdit}>
+                        Сохранить
+                      </button>
+
+                      <button onClick={handleCancelEdit}>
+                        Отмена
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                )}
 
               </div>
 
