@@ -32,8 +32,9 @@
 /* Когда открыт топик */
 
 .topics-content.with-details {
-    grid-template-columns: minmax(0, 1fr) 950px;
-    /* Левая и правая колонка растягиваются одинаково */
+    grid-template-columns:
+        minmax(500px, 1fr)
+        clamp(420px, 38vw, 900px);
     align-items: stretch;
 }
  .topics-container h1 {
@@ -157,7 +158,9 @@
      border-radius: 14px;
      border: 1px solid var(--border-color);
      background: var(--card-bg);
-     max-height: 270px;
+     flex: 1;
+     min-height: 250px;
+     max-height: calc(100vh - 520px);
      overflow-y: auto;
 }
 /* CONFIG SCROLLBAR */
@@ -385,7 +388,15 @@
 }
 
 .topic-details-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     padding: 20px 20px 40px 20px; /* дополнительный нижний отступ */
+}
+.topic-config-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .topic-hide-btn {
@@ -469,30 +480,11 @@
 .export-item:hover {
   background: var(--hover-bg);
 }
-.topic-partitions-scroll {
-    max-height: 240px;
-    overflow-y: auto;
-
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-}
-.topic-partitions-table thead {
-    position: sticky;
-    top: 0;
-
-    z-index: 10;
-
-    background: var(--card-bg);
-}
 .topic-hint {
     margin-top: 12px;
-
     text-align: center;
-
     color: var(--text-secondary);
-
     font-size: 14px;
-
     font-style: italic;
 }
 
@@ -513,43 +505,3 @@
     );
 }
 
-.topic-partitions-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-/* Компактные строки таблицы партиций */
-.topic-partitions-table th {
-    padding: 8px 12px;
-    text-align: left;
-    font-size: 13px;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.topic-partitions-table td {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
-    font-size: 13px;
-}
-
-.topic-partitions-table th:not(:last-child),
-.topic-partitions-table td:not(:last-child) {
-    border-right: 1px solid var(--border-color);
-}
-
-.topic-partitions-table tbody tr:hover {
-    background: rgba(59,130,246,0.06);
-}
-
-.topic-partitions-table tbody tr:last-child td {
-    border-bottom: none;
-}
-.topic-partitions-section h3 {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-.topic-config-section h3 {
-    border-bottom: none;
-    padding-bottom: 0;
-}

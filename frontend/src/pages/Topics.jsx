@@ -22,10 +22,9 @@
  * Структура панели деталей топика:
  *   1. Заголовок с именем топика и кнопкой закрытия
  *   2. Основная информация (имя, фактор репликации)
- *   3. Таблица партиций (ID, Лидер, Реплики, ISR) с прокруткой (макс 5 строк)
- *   4. Подсказка "Двойной клик по значению параметра - редактирование"
- *   5. Таблица конфигурации (все параметры с описаниями)
- *   6. Редактирование параметра по двойному клику с сохранением/отменой
+ *   3. Подсказка "Двойной клик по значению параметра - редактирование"
+ *   4. Таблица конфигурации (все параметры с описаниями)
+ *   5. Редактирование параметра по двойному клику с сохранением/отменой
  */
 
 import '../styles/topics.css';
@@ -789,49 +788,28 @@ export default function Topics() {
 
             <div className="topic-summary">
               <div>
-                <strong>Название топика:</strong> {detailTopic.name}
+                <strong>Имя топика:</strong> {detailTopic.name}
               </div>
 
               <div>
-                <strong>Фактор репликации:</strong>{' '}
-                {detailTopic.replicationFactor}
+                <strong>Сообщений:</strong> {detailTopic.messageCount ?? '-'}
+              </div>
+
+              <div>
+                <strong>Фактор репликации:</strong> {detailTopic.replicationFactor}
+              </div>
+
+              <div>
+                <strong>Партиций:</strong> {detailTopic.partitions?.length ?? 0}
               </div>
             </div>
 
-              {/* =============================================================
-                  Блок таблицы партиций
-              ============================================================= */}
-              <div className="topic-section topic-partitions-section">
-                <h3>Партиции</h3>
 
-                <div className="topic-partitions-scroll">
-                  <table className="topic-partitions-table">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Лидер</th>
-                        <th>Реплики</th>
-                        <th>Синхронные реплики (ISR)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {detailTopic.partitions?.map((partition) => (
-                        <tr key={partition.id}>
-                          <td>{partition.id}</td>
-                          <td>{partition.leader}</td>
-                          <td>{partition.replicas?.join(', ') || '-'}</td>
-                          <td>{partition.isr?.join(', ') || '-'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
 
                 {/* Подсказка о редактировании */}
                 <div className="topic-hint">
                   Двойной клик по значению параметра — редактирование
                 </div>
-              </div>
 
               {/* =============================================================
                   Блок конфигурации топика
