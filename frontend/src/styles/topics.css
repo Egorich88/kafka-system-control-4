@@ -134,6 +134,7 @@
     outline: none;
     transition: 0.2s ease;
     width: 200px;
+    box-sizing: border-box;
 }
 
 .filter-input::placeholder {
@@ -153,7 +154,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 160px;
+    min-width: 0;
     justify-content: space-between;
 }
 
@@ -176,18 +177,19 @@
 /* Выпадающее меню экспорта */
 .export-menu {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 4px);
     left: 0;
-    width: auto;           /* ← вместо min-width */
-    min-width: 260px;      /* ← минимальная ширина, чтобы было комфортно */
-    max-width: 400px;      /* ← максимальная, чтобы не растягивалось слишком */
+    width: 100%;               /* ← ширина равна ширине кнопки */
+    min-width: 0;              /* ← убираем min-width */
+    max-width: none;           /* ← убираем max-width */
     background: var(--panel-bg);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-top: none;          /* ← убираем верхнюю границу, чтобы сливалось с кнопкой */
+    border-radius: 0 0 12px 12px;  /* ← скругление только снизу */
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     padding: 6px 0;
-    white-space: nowrap;   /* ← чтобы элементы не переносились */
+    white-space: nowrap;
 }
 
 .export-item {
@@ -815,6 +817,25 @@
 
 body.drawer-open {
     overflow: hidden;
+}
+
+/* ============================================================
+   ВЫРАВНИВАНИЕ ВЫСОТЫ ЭЛЕМЕНТОВ ТУЛБАРА
+   ============================================================ */
+
+.toolbar-left .filter-input,
+.toolbar-left .action-btn {
+    height: 46px !important;
+    box-sizing: border-box !important;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Дополнительно для поля поиска */
+.toolbar-left .filter-input {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }
 
 /* ============================================================
