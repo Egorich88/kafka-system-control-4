@@ -1,6 +1,6 @@
 /* ========================================= INPUTS ========================================= */
  .filter-input, .modal-content input, .modal-content select {
-     height: 52px;
+     height: 46px;
      border-radius: 14px;
      padding: 0 16px;
      background: var(--input-bg);
