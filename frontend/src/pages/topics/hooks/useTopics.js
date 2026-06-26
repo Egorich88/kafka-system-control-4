@@ -1,0 +1,553 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview Кастомный хук для управления топиками
+ * Содержит всю бизнес-логику страницы управления топиками
+ */
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { useCluster } from '../../../contexts/ClusterContext';
+import { CONFIG_DESCRIPTIONS } from '../constants/configDescriptions';
+
+/**
+ * Форматирует значение retention.ms в человекочитаемый вид
+ * @param {string} value - Значение в миллисекундах
+ * @returns {string} - Отформатированная строка (например, "7d", "24h", "infinite")
+ */
+export const formatRetention = (value) => {
+  if (!value || value === '-') return '-';
+  const ms = Number(value);
+  if (ms === -1) return 'infinite';
+  const days = Math.floor(ms / 86400000);
+  if (days >= 1) return `${days}d`;
+  const hours = Math.floor(ms / 3600000);
+  if (hours >= 1) return `${hours}h`;
+  return `${ms}ms`;
+};
+
+export function useTopics() {
+  const { currentCluster } = useCluster();
+
+  // Состояние списка топиков
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState('');
+
+  // Экспорт
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  // Выбранный топик для деталей
+  const [selectedTopic, setSelectedTopic] = useState(null);
+
+  // Множественный выбор топиков
+  const [selectedTopics, setSelectedTopics] = useState([]);
+
+  // Детали топика
+  const [detailTopic, setDetailTopic] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  // Модальное окно создания топика
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Форма создания нового топика
+  const [newTopic, setNewTopic] = useState({
+    topic: '',
+    partitions: '1',
+    replication: '1',
+    cleanupPolicy: 'delete',
+    retentionMs: '604800000',
+    minInSyncReplicas: '1',
+  });
+
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Редактирование конфигурации
+  const [editingParam, setEditingParam] = useState(null);
+  const [editValue, setEditValue] = useState('');
+  const [originalValue, setOriginalValue] = useState('');
+
+  // Подсветка выбранной строки в конфигурации
+  const [selectedConfigParam, setSelectedConfigParam] = useState(null);
+
+  // Рефы
+  const panelRef = useRef(null);
+  const exportMenuRef = useRef(null);
+
+  /**
+   * Блокировка прокрутки страницы при открытой панели деталей топика
+   */
+  useEffect(() => {
+    if (detailTopic) {
+      document.body.classList.add('drawer-open');
+    } else {
+      document.body.classList.remove('drawer-open');
+    }
+    return () => {
+      document.body.classList.remove('drawer-open');
+    };
+  }, [detailTopic]);
+
+  /**
+   * Сброс всех состояний при смене кластера
+   */
+  useEffect(() => {
+    setTopics([]);
+    setSelectedTopic(null);
+    setDetailTopic(null);
+    setEditingParam(null);
+    setFilter('');
+    setSelectedTopics([]);
+    setSelectedConfigParam(null);
+  }, [currentCluster?.brokers]);
+
+  /**
+   * Загружает список топиков из API
+   */
+  const fetchTopics = useCallback(async () => {
+    if (!currentCluster) {
+      setTopics([]);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.get('/api/topics/', {
+        headers: {
+          'X-Kafka-Bootstrap': currentCluster.brokers,
+        },
+      });
+
+      const topicsData = response.data.topics || [];
+
+      const normalized = topicsData.map((t) => ({
+        name: t.name || t,
+        partitions: t.partitions || 0,
+        replicationFactor: t.replicationFactor || 1,
+        cleanupPolicy: t.cleanupPolicy || t['cleanup.policy'] || '-',
+        retentionMs: t.retentionMs || t['retention.ms'] || '-',
+      }));
+
+      setTopics(normalized);
+    } catch (error) {
+      console.error(error);
+      setTopics([]);
+      toast.error('Ошибка загрузки топиков');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentCluster]);
+
+  useEffect(() => {
+    fetchTopics();
+  }, [fetchTopics]);
+
+  /**
+   * Загружает детальную информацию о выбранном топике
+   * @param {string} topicName - Имя топика
+   */
+  const loadTopicDetails = useCallback(async (topicName) => {
+    if (!currentCluster) return;
+
+    setDetailLoading(true);
+    setDetailTopic(null);
+    setEditingParam(null);
+    setSelectedConfigParam(null);
+
+    try {
+      const response = await axios.get(
+        `/api/topics/${encodeURIComponent(topicName)}`,
+        {
+          headers: {
+            'X-Kafka-Bootstrap': currentCluster.brokers,
+          },
+        }
+      );
+
+      setDetailTopic(response.data);
+    } catch (error) {
+      console.error(error);
+      toast.error('Ошибка загрузки деталей топика');
+    } finally {
+      setDetailLoading(false);
+    }
+  }, [currentCluster]);
+
+  /**
+   * Переключает выбор отдельного топика в таблице
+   */
+  const toggleTopicSelection = (topicName) => {
+    setSelectedTopics((prev) =>
+      prev.includes(topicName)
+        ? prev.filter((t) => t !== topicName)
+        : [...prev, topicName]
+    );
+  };
+
+  /**
+   * Выбирает или снимает выбор всех топиков на текущей странице
+   */
+  const toggleSelectAll = () => {
+    if (selectedTopics.length === filteredTopics.length) {
+      setSelectedTopics([]);
+    } else {
+      setSelectedTopics(filteredTopics.map((t) => t.name));
+    }
+  };
+
+  /**
+   * Обработчик клика по строке топика
+   */
+  const handleRowClick = (topic) => {
+    setSelectedTopic(topic);
+    loadTopicDetails(topic.name);
+  };
+
+  /**
+   * Закрывает панель деталей топика
+   */
+  const closePanel = () => {
+    setDetailTopic(null);
+    setEditingParam(null);
+    setSelectedConfigParam(null);
+  };
+
+  /**
+   * Закрывает панель при клике вне её области
+   */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        detailTopic &&
+        panelRef.current &&
+        !panelRef.current.contains(event.target)
+      ) {
+        closePanel();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [detailTopic]);
+
+  /**
+   * Обработчик двойного клика по параметру конфигурации
+   */
+  const handleConfigDoubleClick = (key, currentValue) => {
+    setEditingParam(key);
+    setEditValue(String(currentValue));
+    setOriginalValue(String(currentValue));
+  };
+
+  /**
+   * Сохраняет изменённое значение параметра конфигурации
+   */
+  const handleSaveEdit = useCallback(async () => {
+    if (!selectedTopic || !editingParam) return;
+
+    if (editValue === originalValue) {
+      setEditingParam(null);
+      return;
+    }
+
+    try {
+      await axios.patch(
+        `/api/topics/${encodeURIComponent(selectedTopic.name)}/config`,
+        {
+          configs: {
+            [editingParam]: editValue,
+          },
+        },
+        {
+          headers: {
+            'X-Kafka-Bootstrap': currentCluster.brokers,
+          },
+        }
+      );
+
+      toast.success(`Параметр ${editingParam} обновлён`);
+
+      setDetailTopic((prev) => ({
+        ...prev,
+        configs: {
+          ...prev.configs,
+          [editingParam]: editValue,
+        },
+      }));
+
+      setEditingParam(null);
+      setSelectedConfigParam(null);
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        'Ошибка сохранения: ' +
+          (error.response?.data?.error || error.message)
+      );
+    }
+  }, [selectedTopic, editingParam, editValue, originalValue, currentCluster]);
+
+  /**
+   * Отменяет редактирование параметра
+   */
+  const handleCancelEdit = () => {
+    setEditingParam(null);
+    setEditValue('');
+    setSelectedConfigParam(null);
+  };
+
+  /**
+   * Обработчик создания нового топика
+   */
+  const handleCreateTopic = useCallback(async (e) => {
+    e.preventDefault();
+
+    if (!currentCluster) return;
+
+    if (!newTopic.topic.trim()) {
+      toast.error('Введите имя топика');
+      return;
+    }
+
+    try {
+      const payload = {
+        topic: newTopic.topic.trim(),
+        partitions: Number(newTopic.partitions),
+        replication: Number(newTopic.replication),
+      };
+
+      if (showAdvanced) {
+        payload.configs = {
+          'cleanup.policy': newTopic.cleanupPolicy,
+          'retention.ms': newTopic.retentionMs,
+          'min.insync.replicas': newTopic.minInSyncReplicas,
+        };
+      }
+
+      await axios.post('/api/topics', payload, {
+        headers: {
+          'X-Kafka-Bootstrap': currentCluster.brokers,
+        },
+      });
+
+      toast.success(`Топик "${newTopic.topic}" создан`);
+
+      setNewTopic({
+        topic: '',
+        partitions: '1',
+        replication: '1',
+        cleanupPolicy: 'delete',
+        retentionMs: '604800000',
+        minInSyncReplicas: '1',
+      });
+      setShowAdvanced(false);
+      setShowCreateModal(false);
+
+      fetchTopics();
+    } catch (error) {
+      console.error(error);
+      const backendError = error.response?.data?.error || '';
+
+      if (
+        backendError.includes('Topic name is invalid') ||
+        backendError.includes('contains one or more characters')
+      ) {
+        toast.error(
+          'Ошибка создания топика. Используйте только латинские символы, цифры, ".", "_" или "-"'
+        );
+      } else {
+        toast.error(backendError || 'Ошибка создания топика');
+      }
+    }
+  }, [currentCluster, newTopic, showAdvanced, fetchTopics]);
+
+  /**
+   * Удаляет выбранный топик
+   */
+  const handleDeleteTopic = useCallback(async () => {
+    if (!selectedTopic) {
+      toast.error('Выберите топик');
+      return;
+    }
+
+    if (!window.confirm(`Удалить топик "${selectedTopic.name}"?`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `/api/topics/${encodeURIComponent(selectedTopic.name)}`,
+        {
+          headers: {
+            'X-Kafka-Bootstrap': currentCluster.brokers,
+          },
+        }
+      );
+
+      toast.success(`Топик "${selectedTopic.name}" удалён`);
+
+      closePanel();
+      fetchTopics();
+    } catch (error) {
+      console.error(error);
+      toast.error('Ошибка удаления топика');
+    }
+  }, [selectedTopic, currentCluster, fetchTopics]);
+
+  /**
+   * Экспортирует список названий выбранных топиков
+   */
+  const exportTopicsList = useCallback(() => {
+    const selected =
+      selectedTopics.length > 0
+        ? topics.filter((t) => selectedTopics.includes(t.name))
+        : topics;
+
+    const content = selected.map((t) => t.name).join('\n');
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'topics-list.txt';
+    link.click();
+    window.URL.revokeObjectURL(url);
+
+    setShowExportMenu(false);
+    toast.success(`Экспортировано ${selected.length} топиков`);
+  }, [topics, selectedTopics]);
+
+  /**
+   * Экспортирует конфигурацию выбранных топиков
+   */
+  const exportTopicsConfig = useCallback(async () => {
+    if (!currentCluster) {
+      return;
+    }
+
+    try {
+      const selected =
+        selectedTopics.length > 0
+          ? topics.filter((t) => selectedTopics.includes(t.name))
+          : topics;
+
+      const result = [];
+
+      for (const topic of selected) {
+        const response = await axios.get(
+          `/api/topics/${encodeURIComponent(topic.name)}`,
+          {
+            headers: {
+              'X-Kafka-Bootstrap': currentCluster.brokers,
+            },
+          }
+        );
+
+        result.push({
+          topic: topic.name,
+          configs: response.data.configs || {},
+        });
+      }
+
+      const blob = new Blob([JSON.stringify(result, null, 2)], {
+        type: 'application/json;charset=utf-8',
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `topics-config-${selected.length}.json`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      setShowExportMenu(false);
+      toast.success(`Экспортировано ${selected.length} топиков`);
+    } catch (error) {
+      console.error(error);
+      toast.error('Ошибка экспорта конфигурации');
+    }
+  }, [currentCluster, topics, selectedTopics]);
+
+  /**
+   * Закрытие меню экспорта при клике вне
+   */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showExportMenu && exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setShowExportMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
+
+  /**
+   * Фильтрует список топиков по названию
+   */
+  const filteredTopics = topics.filter((topic) =>
+    topic.name.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  return {
+    // Состояния
+    topics,
+    loading,
+    filter,
+    setFilter,
+    showExportMenu,
+    setShowExportMenu,
+    selectedTopics,
+    selectedTopic,
+    detailTopic,
+    detailLoading,
+    showCreateModal,
+    setShowCreateModal,
+    newTopic,
+    setNewTopic,
+    showAdvanced,
+    setShowAdvanced,
+    editingParam,
+    editValue,
+    setEditValue,
+    selectedConfigParam,
+    setSelectedConfigParam,
+    panelRef,
+    exportMenuRef,
+    filteredTopics,
+
+    // Обработчики
+    fetchTopics,
+    loadTopicDetails,
+    toggleTopicSelection,
+    toggleSelectAll,
+    handleRowClick,
+    closePanel,
+    handleConfigDoubleClick,
+    handleSaveEdit,
+    handleCancelEdit,
+    handleCreateTopic,
+    handleDeleteTopic,
+    exportTopicsList,
+    exportTopicsConfig,
+  };
+}

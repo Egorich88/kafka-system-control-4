@@ -1,0 +1,78 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview Таблица конфигурации топика
+ */
+
+import { CONFIG_DESCRIPTIONS } from '../constants/configDescriptions';
+
+export default function TopicConfigTable({
+  configs,
+  selectedConfigParam,
+  setSelectedConfigParam,
+  editingParam,
+  handleConfigDoubleClick,
+}) {
+  return (
+    <div className="topic-section topic-config-section">
+      <h3>Конфигурация</h3>
+
+      <div className="topic-config-wrapper">
+        <table className="topic-config-table">
+          <thead>
+            <tr>
+              <th>Параметр</th>
+              <th>Значение</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(configs || {}).map(([key, value]) => (
+              <tr
+                key={key}
+                className={
+                  selectedConfigParam === key ? 'active-config' : ''
+                }
+                onClick={() => setSelectedConfigParam(key)}
+              >
+                <td className="config-key-cell">
+                  <div className="config-key-name">{key}</div>
+                  {CONFIG_DESCRIPTIONS[key] && (
+                    <div className="config-key-desc">
+                      {CONFIG_DESCRIPTIONS[key]}
+                    </div>
+                  )}
+                </td>
+                <td>
+                  <span
+                    className={`config-value ${
+                      editingParam === key ? 'editing' : ''
+                    }`}
+                    onDoubleClick={() =>
+                      handleConfigDoubleClick(key, value)
+                    }
+                  >
+                    {value}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
