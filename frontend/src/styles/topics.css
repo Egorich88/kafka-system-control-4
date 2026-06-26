@@ -13,15 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- .topics-container {
-     display: flex;
-     flex-direction: column;
-     gap: 20px;
-}
-/* =========================================================
-   ОСНОВНОЙ LAYOUT СТРАНИЦЫ ТОПИКОВ
-   ========================================================= */
 
+/* ============================================================
+   СТРАНИЦА УПРАВЛЕНИЯ ТОПИКАМИ (topics.css)
+   ============================================================
+   Назначение: Стили для страницы управления топиками Kafka.
+   Включает: тулбар, таблицу топиков, панель деталей,
+   конфигурацию, модальное окно создания топика.
+   Все стили адаптивны и поддерживают тёмную/светлую тему.
+   ============================================================ */
+
+/* ============================================================
+   1. ОСНОВНЫЕ КОНТЕЙНЕРЫ
+   ============================================================ */
+
+.topics-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.topics-container h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ============================================================
+   2. СЕТКА СТРАНИЦЫ
+   ============================================================ */
+
+/* Основная сетка — одна колонка */
 .topics-content {
     display: grid;
     grid-template-columns: 1fr;
@@ -29,487 +51,29 @@
     min-height: calc(100vh - 220px);
 }
 
-/* Когда открыт топик */
-
+/* При открытой панели деталей — две колонки */
 .topics-content.with-details {
-    grid-template-columns:
-        minmax(500px, 1fr)
-        clamp(420px, 38vw, 900px);
+    grid-template-columns: minmax(500px, 1fr) clamp(420px, 38vw, 900px);
     align-items: stretch;
 }
- .topics-container h1 {
-     font-size: 32px;
-     font-weight: 700;
-     color: var(--text-primary);
-}
-/* =========================================================
-   ВЫРАВНИВАНИЕ ТАБЛИЦЫ И ПАНЕЛИ ДЕТАЛЕЙ
-   ========================================================= */
 
+/* Выравнивание высоты таблицы и панели деталей */
 .topics-content.with-details > .topics-table-wrapper,
 .topics-content.with-details > .topic-details-panel {
     height: calc(100vh - 240px);
 }
-/* ========================= TOOLBAR ========================= */
- .topics-toolbar {
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-     gap: 16px;
-}
- .action-buttons {
-     display: flex;
-     gap: 12px;
-}
-/* ========================= TABLE WRAPPER ========================= */
-.topics-table-wrapper {
-     width: 100%;
-     /* Таблица должна занимать всю высоту рядом с деталями */
-     height: 100%;
-     overflow-y: auto;
-     overflow-x: hidden;
-     border-radius: 18px;
-     border: 1px solid var(--border-color);
-     background: var(--card-bg);
-}
-/* ========================= TABLE ========================= */
- .topics-table thead {
-     position: sticky;
-     top: 0;
-     z-index: 20;
-     background: var(--card-bg);
-     color: var(--text-primary);
-     backdrop-filter: blur(8px);
-     box-shadow: inset 0 -1px 0 var(--border-color);
-}
- .topics-table th {
-     text-align: left;
-     padding: 16px 18px;
-     font-size: 14px;
-     font-weight: 700;
-     color: var(--text-secondary);
-     border-bottom: 1px solid var(--border-color);
-     background: var(--card-bg);
-}
- .topics-table td {
-     padding: 16px 18px;
-     border-bottom: 1px solid var(--border-color);
-     color: var(--text-primary);
-     font-size: 15px;
-}
-/* ВЕРТИКАЛЬНЫЕ ЛИНИИ */
- .topics-table th:not(:last-child), .topics-table td:not(:last-child) {
-     border-right: 1px solid var(--border-color);
-}
-/* ROWS */
- .topics-table tbody tr {
-     cursor: pointer;
-}
-.topics-table tbody tr.selected {
-    background: rgba(59,130,246,0.14);
-}
 
-.topics-table tbody tr.selected td {
-    color: #93c5fd;
-}
+/* ============================================================
+   3. ТУЛБАР (панель инструментов)
+   ============================================================ */
 
-.topics-table tbody tr:hover {
-    background: rgba(255,255,255,0.03);
-}
-
-.topics-table tbody tr.selected:hover {
-    background: rgba(59,130,246,0.18);
-}
- .topics-table tbody tr:last-child td {
-     border-bottom: none;
-}
-/* ========================= EMPTY ========================= */
- .topics-empty-cell {
-     padding: 48px !important;
-}
- .topics-empty {
-     text-align: center;
-}
- .topics-empty h3 {
-     margin-bottom: 12px;
-     color: var(--text-primary);
-}
- .topics-empty p {
-     color: var(--text-secondary);
-}
-/* ========================= LOADING ========================= */
- .topics-loading {
-     text-align: center;
-     padding: 32px;
-     color: var(--text-secondary);
-}
-/* ========================= Заголовок Конфигурация ========================= */
- .topic-section {
-     margin-top: 14px;
-}
-.topic-section h3 {
-    margin: 0 0 14px;
-    font-size: 18px;
-    font-weight: 600;
-}
-/* ========================= CONFIG TABLE ========================= */
-.topic-config-wrapper {
-     border-radius: 14px;
-     border: 1px solid var(--border-color);
-     background: var(--card-bg);
-     flex: 1;
-     min-height: 250px;
-     overflow-y: auto;
-}
-/* CONFIG SCROLLBAR */
- .topic-config-table thead {
-     position: sticky;
-     top: 0;
-     z-index: 20;
-     background: var(--panel-bg);
-}
- .topic-config-table th {
-     text-align: left;
-     padding: 10px 14px;
-     font-size: 13px;
-     color: var(--text-secondary);
-     border-bottom: 1px solid var(--border-color);
-}
- .topic-config-table td {
-     padding: 8px 14px;
-     border-bottom: 1px solid var(--border-color);
-     font-size: 14px;
-     color: var(--text-primary);
-}
-.topic-config-table tbody tr:hover {
-    background: rgba(59,130,246,0.08);
-}
-.topic-config-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
- .topic-config-table td:not(:last-child), .topic-config-table th:not(:last-child) {
-     border-right: 1px solid var(--border-color);
-}
-/* ========================= EDIT BOX ========================= */
- .config-edit-box {
-     margin-top: 22px;
-     padding: 20px;
-     border-radius: 18px;
-     background: var(--card-bg);
-     border: 1px solid var(--border-color);
-}
- .config-edit-box h4 {
-     margin-bottom: 16px;
-     color: var(--text-secondary);
-     font-size: 15px;
-}
- .config-edit-box input {
-     width: 100%;
-     height: 48px;
-     background: var(--input-bg);
-     border: 1px solid var(--border-color);
-     color: var(--text-primary);
-     border-radius: 12px;
-     padding: 0 14px;
-     margin-bottom: 16px;
-     outline: none;
-     transition: 0.2s ease;
-}
- .config-edit-box input:focus {
-     border-color: rgba(59,130,246,0.75);
-     box-shadow: 0 0 0 3px rgba(59,130,246,0.14);
-}
- .config-edit-actions {
-     display: flex;
-     gap: 12px;
-}
-.config-edit-actions button {
-    border: 1px solid var(--border-color);
-    background: var(--card-bg);
-    color: var(--text-primary);
-    border-radius: 12px;
-    padding: 10px 16px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.18s ease;
-}
-
-.config-edit-actions button:hover {
-    background: var(--sidebar-hover);
-}
-/* TITLE */
- .modal-content h2 {
-     font-size: 30px;
-     margin-bottom: 28px;
-     color: var(--text-primary);
-}
-/* FORM */
- .modal-content form {
-     display: flex;
-     flex-direction: column;
-     gap: 18px;
-}
-/* BUTTONS */
- .modal-buttons {
-     display: flex;
-     gap: 14px;
-     margin-top: 10px;
-}
- .modal-buttons button {
-     height: 48px;
-     padding: 0 20px;
-     border-radius: 14px;
-     border: 1px solid var(--border-color);
-     background: var(--card-bg);
-     color: var(--text-primary);
-     cursor: pointer;
-     font-weight: 600;
-     transition: 0.2s ease;
-}
- .modal-buttons button:hover {
-     transform: translateY(-1px);
-}
- .modal-buttons button[type="submit"] {
-     background: #2563eb;
-     border-color: #2563eb;
-}
- .modal-buttons button[type="submit"]:hover {
-     background: #1d4ed8;
-}
- .modal-buttons button[type="button"]:hover {
-     background: var(--sidebar-hover);
-}
-/* ========================================= ADVANCED TOPIC SETTINGS ========================================= */
- .advanced-toggle {
-     margin-top: 6px;
-     height: 46px;
-     border-radius: 14px;
-     border: 1px solid var(--border-color);
-     background: var(--card-bg);
-     color: var(--text-primary);
-     font-weight: 600;
-     cursor: pointer;
-     transition: 0.2s ease;
-}
- .advanced-toggle:hover {
-     background: var(--sidebar-hover);
-     border-color: var(--border-color);
-}
- .advanced-section {
-     display: flex;
-     flex-direction: column;
-     gap: 18px;
-     margin-top: 18px;
-     padding: 22px;
-     border-radius: 18px;
-     background: var(--card-bg);
-     border: 1px solid var(--border-color);
-     animation: fadeAdvanced 0.18s ease;
-}
-/* ANIMATION */
- @keyframes fadeAdvanced {
-     from {
-         opacity: 0;
-         transform: translateY(-6px);
-    }
-     to {
-         opacity: 1;
-         transform: translateY(0);
-    }
-}
-/* ========================= CREATE TOPIC MODAL ========================= */
- .modal-content {
-     background: var(--panel-bg);
-     border: 1px solid var(--border-color);
-     color: var(--text-primary);
-}
- .modal-content input, .modal-content select {
-     background: var(--input-bg);
-     border: 1px solid var(--border-color);
-     color: var(--text-primary);
-}
- .modal-content input:focus, .modal-content select:focus {
-     border-color: rgba(59,130,246,0.7);
-     box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-}
- .modal-content label {
-     color: var(--text-secondary);
-}
-/* ========================= CREATE TOPIC MODAL ========================= */
- .modal-overlay {
-     background: rgba(15, 23, 42, 0.35);
-     backdrop-filter: blur(4px);
-}
-/* =========================================
-   CHECKBOX COLUMN
-========================================= */
-
-.checkbox-column {
-    width: 52px;
-    text-align: center;
-}
-
-.checkbox-column input {
-    cursor: pointer;
-}
-/* =========================================================
-   ПАНЕЛЬ ДЕТАЛЕЙ ТОПИКА
-   ========================================================= */
-
-.topic-details-panel {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 18px;
-
-    overflow: hidden;
-
+.topics-toolbar {
     display: flex;
-    flex-direction: column;
-
-    min-height: 0;
-}
-
-.topic-details-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    position: relative;
+    justify-content: space-between;
+    gap: 16px;
 }
 
-.topic-details-header h2 {
-    font-size: 20px;
-    margin: 0;
-}
-/* Блок с информацией о топике */
-.topic-details-body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 12px 20px 20px;
-}
-.topic-config-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.topic-hide-btn {
-    border: none;
-
-    background: transparent;
-
-    color: #60a5fa;
-
-    cursor: pointer;
-
-    font-size: 13px;
-}
-
-.topic-hide-btn:hover {
-    color: #93c5fd;
-}
-
-.topic-close-btn:hover {
-    color: var(--text-primary);
-}
-.config-key-name {
-  font-weight: 600;
-}
-
-.config-key-desc {
-    margin-top: 2px;
-
-    font-size: 11px;
-
-    color: var(--text-secondary);
-
-    font-style: italic;
-
-    line-height: 1.3;
-}
-/* =========================================================
-   EXPORT MENU
-========================================================= */
-
-.export-dropdown {
-  position: relative;
-}
-
-.export-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-
-  min-width: 220px;
-
-  background: var(--panel-bg);
-
-  border: 1px solid var(--border-color);
-
-  border-radius: 10px;
-
-  box-shadow: 0 8px 24px rgba(0,0,0,.12);
-
-  z-index: 100;
-}
-
-.export-item {
-  width: 100%;
-
-  border: none;
-
-  background: transparent;
-
-  text-align: left;
-
-  padding: 12px 16px;
-
-  cursor: pointer;
-
-  color: var(--text-color);
-
-  font-size: 14px;
-}
-
-.export-item:hover {
-  background: var(--hover-bg);
-}
-
-/* Подсказка */
-.topic-hint {
-    margin: 6px 0 10px;
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-style: italic;
-}
-
-.topic-config-table tr.active-config {
-    background: rgba(255, 225, 120, 0.18);
-}
-.topic-details-header::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        rgba(59,130,246,0.7) 0%,
-        rgba(148,163,184,0.35) 100%
-    );
-}
-/* =========================================================
-   ТУЛБАР — левая группа кнопок
-   ========================================================= */
 .toolbar-left {
     display: flex;
     align-items: center;
@@ -517,42 +81,113 @@
     flex-wrap: wrap;
 }
 
-/* =========================================================
-   КНОПКА ЭКСПОРТА СО СТРЕЛКОЙ
-   ========================================================= */
+/* ============================================================
+   4. КНОПКИ ДЕЙСТВИЙ
+   ============================================================ */
+
+.action-btn {
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--panel-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.action-btn:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+/* Кнопка удаления — особый стиль */
+.action-btn.delete {
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+}
+
+.action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ============================================================
+   5. ПОЛЕ ПОИСКА ТОПИКОВ
+   ============================================================ */
+
+.filter-input {
+    height: 46px;
+    border-radius: 14px;
+    padding: 0 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s ease;
+    width: 200px;
+}
+
+.filter-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.filter-input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+/* ============================================================
+   6. КНОПКА ЭКСПОРТА С ВЫПАДАЮЩИМ МЕНЮ
+   ============================================================ */
+
 .export-btn {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 160px;
+    justify-content: space-between;
 }
 
-.export-btn svg {
+.export-icon {
     font-size: 16px;
     flex-shrink: 0;
 }
 
-/* =========================================================
-   КОНТЕЙНЕР ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ЭКСПОРТА
-   ========================================================= */
+.export-chevron {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
 .export-dropdown-wrapper {
     position: relative;
     display: inline-block;
 }
 
-/* =========================================================
-   ВЫПАДАЮЩЕЕ МЕНЮ ЭКСПОРТА
-   ========================================================= */
+/* Выпадающее меню экспорта */
 .export-menu {
     position: absolute;
     top: calc(100% + 6px);
     left: 0;
-    min-width: 260px;
+    width: auto;           /* ← вместо min-width */
+    min-width: 260px;      /* ← минимальная ширина, чтобы было комфортно */
+    max-width: 400px;      /* ← максимальная, чтобы не растягивалось слишком */
     background: var(--panel-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     padding: 6px 0;
+    white-space: nowrap;   /* ← чтобы элементы не переносились */
 }
 
 .export-item {
@@ -579,4 +214,684 @@
     font-size: 12px;
     color: var(--text-secondary);
     margin-top: 2px;
+}
+
+/* ============================================================
+   7. ТАБЛИЦА ТОПИКОВ
+   ============================================================ */
+
+.topics-table-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 18px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+}
+
+.topics-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Заголовок таблицы — фиксирован */
+.topics-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    box-shadow: inset 0 -1px 0 var(--border-color);
+}
+
+.topics-table th {
+    text-align: left;
+    padding: 16px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--card-bg);
+}
+
+.topics-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 400;  /* ← обычный вес */
+}
+
+/* Вертикальные линии между колонками */
+.topics-table th:not(:last-child),
+.topics-table td:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+}
+
+/* Строки таблицы */
+.topics-table tbody tr {
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.topics-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.topics-table tbody tr.selected {
+    background: rgba(59, 130, 246, 0.14);
+}
+
+.topics-table tbody tr.selected td {
+    color: #93c5fd;
+}
+
+.topics-table tbody tr.selected:hover {
+    background: rgba(59, 130, 246, 0.18);
+}
+
+.topics-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Колонка с чекбоксами */
+.checkbox-column {
+    width: 52px;
+    text-align: center;
+}
+
+.checkbox-column input {
+    cursor: pointer;
+}
+
+/* Имя топика — акцентный цвет */
+.topic-name {
+    font-weight: 400;
+    color: var(--accent-color);
+}
+
+/* ============================================================
+   8. ПУСТЫЕ И ЗАГРУЗОЧНЫЕ СОСТОЯНИЯ
+   ============================================================ */
+
+.topics-empty-cell {
+    padding: 48px !important;
+}
+
+.topics-empty {
+    text-align: center;
+}
+
+.topics-empty h3 {
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.topics-empty p {
+    color: var(--text-secondary);
+}
+
+.topics-loading {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-secondary);
+}
+
+/* ============================================================
+   9. ПАНЕЛЬ ДЕТАЛЕЙ ТОПИКА
+   ============================================================ */
+
+.topic-details-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Заголовок панели */
+.topic-details-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.topic-details-header h2 {
+    font-size: 20px;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* Декоративная голубая линия под заголовком */
+.topic-details-header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        rgba(59, 130, 246, 0.7) 0%,
+        rgba(148, 163, 184, 0.35) 100%
+    );
+}
+
+/* Кнопка скрытия панели */
+.topic-hide-btn {
+    border: none;
+    background: transparent;
+    color: #60a5fa;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+.topic-hide-btn:hover {
+    color: #93c5fd;
+}
+
+/* Тело панели — скроллируемое */
+.topic-details-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px 20px 20px;
+}
+
+/* ============================================================
+   10. ОСНОВНАЯ ИНФОРМАЦИЯ О ТОПИКЕ
+   ============================================================ */
+
+/* Информация о топике — отображается в столбик */
+.topic-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 0 12px;
+    margin-bottom: 8px;
+    /* border-bottom убран — нет длинной светлой черты */
+}
+
+.topic-summary div {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.topic-summary strong {
+    color: var(--text-primary);
+    margin-right: 6px;
+    font-weight: 600;
+}
+
+/* ============================================================
+   11. КОНФИГУРАЦИЯ ТОПИКА
+   ============================================================ */
+
+.topic-section {
+    margin-top: 14px;
+}
+
+.topic-section h3 {
+    margin: 0 0 14px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.topic-config-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Таблица конфигурации — с прокруткой */
+.topic-config-wrapper {
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    flex: 1;
+    min-height: 250px;
+    overflow-y: auto;
+}
+
+.topic-config-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Заголовок таблицы конфигурации — фиксирован */
+.topic-config-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--panel-bg);
+}
+
+.topic-config-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.topic-config-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+/* Вертикальные линии между колонками */
+.topic-config-table td:not(:last-child),
+.topic-config-table th:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+}
+
+.topic-config-table tbody tr {
+    transition: 0.15s ease;
+}
+
+.topic-config-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+/* Подсветка активной строки конфигурации (желтая) */
+.topic-config-table tr.active-config {
+    background: rgba(255, 225, 120, 0.18);
+}
+
+/* Имя параметра конфигурации */
+.config-key-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Описание параметра конфигурации */
+.config-key-desc {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-style: italic;
+    line-height: 1.3;
+}
+
+/* ============================================================
+   12. ПОДСКАЗКА О РЕДАКТИРОВАНИИ
+   ============================================================ */
+
+.topic-hint {
+    margin: 6px 0 10px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* ============================================================
+   13. РЕДАКТИРОВАНИЕ КОНФИГУРАЦИИ
+   ============================================================ */
+
+.config-edit-box {
+    margin-top: 22px;
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.config-edit-box h4 {
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.config-edit-box input {
+    width: 100%;
+    height: 48px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 0 14px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.config-edit-box input:focus {
+    border-color: rgba(59, 130, 246, 0.75);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.config-edit-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.config-edit-actions button {
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.18s ease;
+}
+
+.config-edit-actions button:hover {
+    background: var(--sidebar-hover);
+}
+
+/* ============================================================
+   14. МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ТОПИКА
+   ============================================================ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(2, 6, 23, 0.42);
+    backdrop-filter: blur(10px);
+    animation: overlayFade 0.18s ease;
+}
+
+@keyframes overlayFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 560px;
+    max-width: 92vw;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 5001;
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+    animation: slidePanel 0.22s ease;
+    padding: 28px;
+    color: var(--text-primary);
+}
+
+@keyframes slidePanel {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    font-size: 30px;
+    margin-bottom: 28px;
+    color: var(--text-primary);
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.modal-content input,
+.modal-content select {
+    height: 46px;
+    border-radius: 14px;
+    padding: 0 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.modal-content select {
+    appearance: none;
+}
+
+.modal-content option {
+    background: var(--panel-bg);
+    color: var(--text-primary);
+}
+
+.modal-content label {
+    color: var(--text-secondary);
+}
+
+.modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding-left: 2px;
+}
+
+/* Кнопка показа дополнительных параметров */
+.advanced-toggle {
+    margin-top: 6px;
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.advanced-toggle:hover {
+    background: var(--sidebar-hover);
+}
+
+/* Блок дополнительных параметров */
+.advanced-section {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 18px;
+    padding: 22px;
+    border-radius: 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    animation: fadeAdvanced 0.18s ease;
+}
+
+@keyframes fadeAdvanced {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Кнопки модального окна */
+.modal-buttons {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.modal-buttons button {
+    height: 48px;
+    padding: 0 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.modal-buttons button:hover {
+    transform: translateY(-1px);
+}
+
+.modal-buttons button[type="submit"] {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.modal-buttons button[type="submit"]:hover {
+    background: #1d4ed8;
+}
+
+.modal-buttons button[type="button"]:hover {
+    background: var(--sidebar-hover);
+}
+
+/* ============================================================
+   15. СКРОЛЛБАРЫ (единые для всей страницы)
+   ============================================================ */
+
+.topics-table-wrapper::-webkit-scrollbar,
+.topic-config-wrapper::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.topics-table-wrapper::-webkit-scrollbar-track,
+.topic-config-wrapper::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track {
+    background: var(--panel-bg);
+}
+
+.topics-table-wrapper::-webkit-scrollbar-thumb,
+.topic-config-wrapper::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 20px;
+    border: 2px solid var(--panel-bg);
+}
+
+.topics-table-wrapper::-webkit-scrollbar-thumb:hover,
+.topic-config-wrapper::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--sidebar-hover);
+}
+
+/* ============================================================
+   16. БЛОКИРОВКА ПРОКРУТКИ
+   ============================================================ */
+
+body.drawer-open {
+    overflow: hidden;
+}
+
+/* ============================================================
+   17. АДАПТИВНОСТЬ
+   ============================================================ */
+
+/* Планшеты и маленькие ноутбуки */
+@media (max-width: 1200px) {
+    .topics-content.with-details {
+        grid-template-columns: 1fr;
+    }
+
+    .topics-content.with-details > .topics-table-wrapper,
+    .topics-content.with-details > .topic-details-panel {
+        height: auto;
+        max-height: calc(100vh - 240px);
+    }
+
+    .topic-details-panel {
+        max-height: 600px;
+    }
+
+    .modal-content {
+        width: 95vw;
+    }
+}
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+    .topics-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-left {
+        flex-wrap: wrap;
+    }
+
+    .filter-input {
+        width: 100%;
+    }
+
+    .action-btn {
+        flex: 1;
+        min-width: 80px;
+        justify-content: center;
+    }
+
+    .export-btn {
+        min-width: 120px;
+    }
+
+    .modal-content {
+        width: 100vw;
+        max-width: 100vw;
+        border-radius: 0;
+    }
+
+    /* Информация о топике на мобильных — столбиком */
+    .topic-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px 0 12px;
+        margin-bottom: 8px;
+    }
+
+    .topic-summary div {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .topic-summary strong {
+        color: var(--text-primary);
+        margin-right: 6px;
+        font-weight: 600;
+    }
+
 }

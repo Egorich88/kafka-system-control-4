@@ -28,12 +28,6 @@
  */
 
 import '../styles/topics.css';
-import '../styles/shared/modals.css';
-import '../styles/shared/buttons.css';
-import '../styles/shared/forms.css';
-import '../styles/shared/tables.css';
-import '../styles/shared/scrollbars.css';
-
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
