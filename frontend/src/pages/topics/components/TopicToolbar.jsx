@@ -19,7 +19,7 @@
  * Содержит поле поиска, кнопки экспорта, создания и удаления
  */
 
-import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiDownload, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 export default function TopicToolbar({
   filter,
@@ -27,7 +27,6 @@ export default function TopicToolbar({
   showExportMenu,
   setShowExportMenu,
   selectedTopics,
-  topics,
   exportMenuRef,
   exportTopicsList,
   exportTopicsConfig,
@@ -53,19 +52,18 @@ export default function TopicToolbar({
             className="action-btn export-btn"
             onClick={() => setShowExportMenu(!showExportMenu)}
           >
-            Экспорт ({selectedTopics.length || topics.length})
-            {showExportMenu ? <FiChevronUp /> : <FiChevronDown />}
+            <FiDownload className="export-icon" />
+            Экспорт ({selectedTopics.length})
+            {showExportMenu ? <FiChevronUp className="export-chevron" /> : <FiChevronDown className="export-chevron" />}
           </button>
 
           {showExportMenu && (
             <div className="export-menu">
               <button className="export-item" onClick={exportTopicsList}>
-                <div className="export-item-title">📄 Список топиков</div>
-                <div className="export-item-desc">Экспортировать выбранные топики без конфигурации</div>
+                📄 Список топиков
               </button>
               <button className="export-item" onClick={exportTopicsConfig}>
-                <div className="export-item-title">📄 Конфигурация топиков</div>
-                <div className="export-item-desc">Экспортировать выбранные топики со всей конфигурацией</div>
+                📄 Конфигурация топиков
               </button>
             </div>
           )}

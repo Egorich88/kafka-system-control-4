@@ -20,11 +20,10 @@
  * Реализована пагинация (25 сообщений на страницу) и экспорт выделенных записей.
  * При смене кластера все данные и параметры поиска полностью сбрасываются.
  */
-
+import { FiDownload, FiChevronDown } from 'react-icons/fi';
 import SearchToolbar from '../pages/search/SearchToolbar'
 import MessagesTable from '../pages/search/MessagesTable'
 import Pagination from '../pages/search/Pagination'
-import ExportDropdown from '../pages/search/ExportDropdown'
 import MessageViewer from '../pages/search/MessageViewer'
 import '../styles/search.css';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -327,20 +326,32 @@ export default function Search() {
               <div className="search-results-badge">Найдено: {totalMessages} сообщений</div>
             </div>
             <div className="search-actions">
-              <ExportDropdown
-                type="selected"
-                exportMenu={exportMenu}
-                setExportMenu={setExportMenu}
-                exportMessages={exportMessages}
-                count={selectedRows.length}
-              />
-              <ExportDropdown
-                type="all"
-                exportMenu={exportMenu}
-                setExportMenu={setExportMenu}
-                exportMessages={exportMessages}
-                count={messages.length}
-              />
+              {/* Единый экспорт — если есть выбранные, экспортируем их, иначе все */}
+              <div className="export-dropdown">
+                <button
+                  type="button"
+                  className="export-btn"
+                  onClick={() => setExportMenu(exportMenu === 'export' ? null : 'export')}
+                >
+                  <FiDownload className="export-icon" />
+                  Экспорт ({selectedRows.length})
+                  <FiChevronDown className="export-chevron" />
+                </button>
+
+                {exportMenu === 'export' && (
+                  <div className="export-menu">
+                    <button onClick={() => exportMessages('json', selectedRows.length > 0)}>
+                      JSON
+                    </button>
+                    <button onClick={() => exportMessages('csv', selectedRows.length > 0)}>
+                      CSV
+                    </button>
+                    <button onClick={() => exportMessages('txt', selectedRows.length > 0)}>
+                      TXT
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
