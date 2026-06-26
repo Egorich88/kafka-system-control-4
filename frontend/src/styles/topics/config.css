@@ -1,0 +1,149 @@
+/* ============================================================
+   КОНФИГУРАЦИЯ ТОПИКА
+   ============================================================ */
+
+.topic-section {
+    margin-top: 14px;
+}
+
+.topic-section h3 {
+    margin: 0 0 14px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.topic-config-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Таблица конфигурации — с прокруткой */
+.topic-config-wrapper {
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    flex: 1;
+    min-height: 250px;
+    overflow-y: auto;
+}
+
+.topic-config-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Заголовок таблицы конфигурации — фиксирован */
+.topic-config-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--panel-bg);
+}
+
+.topic-config-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.topic-config-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+/* Вертикальные линии между колонками */
+.topic-config-table td:not(:last-child),
+.topic-config-table th:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+}
+
+.topic-config-table tbody tr {
+    transition: 0.15s ease;
+}
+
+.topic-config-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+/* Подсветка активной строки конфигурации (желтая) */
+.topic-config-table tr.active-config {
+    background: rgba(255, 225, 120, 0.18);
+}
+
+/* Имя параметра конфигурации */
+.config-key-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Описание параметра конфигурации */
+.config-key-desc {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-style: italic;
+    line-height: 1.3;
+}
+
+/* ============================================================
+   РЕДАКТИРОВАНИЕ КОНФИГУРАЦИИ
+   ============================================================ */
+
+.config-edit-box {
+    margin-top: 22px;
+    padding: 20px;
+    border-radius: 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.config-edit-box h4 {
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.config-edit-box input {
+    width: 100%;
+    height: 48px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 0 14px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.config-edit-box input:focus {
+    border-color: rgba(59, 130, 246, 0.75);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.config-edit-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.config-edit-actions button {
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.18s ease;
+}
+
+.config-edit-actions button:hover {
+    background: var(--sidebar-hover);
+}

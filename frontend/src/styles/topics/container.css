@@ -1,0 +1,39 @@
+/* ============================================================
+   ОСНОВНЫЕ КОНТЕЙНЕРЫ
+   ============================================================ */
+
+.topics-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.topics-container h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ============================================================
+   СЕТКА СТРАНИЦЫ
+   ============================================================ */
+
+/* Основная сетка — одна колонка */
+.topics-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    min-height: calc(100vh - 220px);
+}
+
+/* При открытой панели деталей — две колонки */
+.topics-content.with-details {
+    grid-template-columns: minmax(500px, 1fr) clamp(420px, 38vw, 900px);
+    align-items: stretch;
+}
+
+/* Выравнивание высоты таблицы и панели деталей */
+.topics-content.with-details > .topics-table-wrapper,
+.topics-content.with-details > .topic-details-panel {
+    height: calc(100vh - 240px);
+}

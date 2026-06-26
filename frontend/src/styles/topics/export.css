@@ -1,0 +1,71 @@
+/* ============================================================
+   КНОПКА ЭКСПОРТА С ВЫПАДАЮЩИМ МЕНЮ
+   ============================================================ */
+
+.export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    justify-content: space-between;
+}
+
+.export-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.export-chevron {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+.export-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Выпадающее меню экспорта */
+.export-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    padding: 6px 0;
+    white-space: nowrap;
+}
+
+.export-item {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: 0.15s ease;
+}
+
+.export-item:hover {
+    background: var(--sidebar-hover);
+}
+
+.export-item-title {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.export-item-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}

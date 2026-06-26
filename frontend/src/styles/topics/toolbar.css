@@ -1,0 +1,101 @@
+/* ============================================================
+   ТУЛБАР (панель инструментов)
+   ============================================================ */
+
+.topics-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   КНОПКИ ДЕЙСТВИЙ
+   ============================================================ */
+
+.action-btn {
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--panel-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.action-btn:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+}
+
+/* Кнопка удаления — особый стиль */
+.action-btn.delete {
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+}
+
+.action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ============================================================
+   ПОЛЕ ПОИСКА ТОПИКОВ
+   ============================================================ */
+
+.filter-input {
+    height: 46px;
+    border-radius: 14px;
+    padding: 0 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s ease;
+    width: 200px;
+    box-sizing: border-box;
+}
+
+.filter-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.filter-input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+/* ============================================================
+   ВЫРАВНИВАНИЕ ВЫСОТЫ ЭЛЕМЕНТОВ ТУЛБАРА
+   ============================================================ */
+
+.toolbar-left .filter-input,
+.toolbar-left .action-btn {
+    height: 46px !important;
+    box-sizing: border-box !important;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Дополнительно для поля поиска */
+.toolbar-left .filter-input {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}

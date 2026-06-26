@@ -1,0 +1,37 @@
+/* ============================================================
+   СКРОЛЛБАРЫ (единые для всей страницы)
+   ============================================================ */
+
+.topics-table-wrapper::-webkit-scrollbar,
+.topic-config-wrapper::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.topics-table-wrapper::-webkit-scrollbar-track,
+.topic-config-wrapper::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track {
+    background: var(--panel-bg);
+}
+
+.topics-table-wrapper::-webkit-scrollbar-thumb,
+.topic-config-wrapper::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 20px;
+    border: 2px solid var(--panel-bg);
+}
+
+.topics-table-wrapper::-webkit-scrollbar-thumb:hover,
+.topic-config-wrapper::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--sidebar-hover);
+}
+
+/* ============================================================
+   БЛОКИРОВКА ПРОКРУТКИ
+   ============================================================ */
+
+body.drawer-open {
+    overflow: hidden;
+}

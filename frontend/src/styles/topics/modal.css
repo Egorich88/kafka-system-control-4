@@ -1,0 +1,182 @@
+/* ============================================================
+   МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ТОПИКА
+   ============================================================ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(2, 6, 23, 0.42);
+    backdrop-filter: blur(10px);
+    animation: overlayFade 0.18s ease;
+}
+
+@keyframes overlayFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 560px;
+    max-width: 92vw;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 5001;
+    background: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+    animation: slidePanel 0.22s ease;
+    padding: 28px;
+    color: var(--text-primary);
+}
+
+@keyframes slidePanel {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    font-size: 30px;
+    margin-bottom: 28px;
+    color: var(--text-primary);
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.modal-content input,
+.modal-content select {
+    height: 46px;
+    border-radius: 14px;
+    padding: 0 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.modal-content select {
+    appearance: none;
+}
+
+.modal-content option {
+    background: var(--panel-bg);
+    color: var(--text-primary);
+}
+
+.modal-content label {
+    color: var(--text-secondary);
+}
+
+.modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding-left: 2px;
+}
+
+/* Кнопка показа дополнительных параметров */
+.advanced-toggle {
+    margin-top: 6px;
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.advanced-toggle:hover {
+    background: var(--sidebar-hover);
+}
+
+/* Блок дополнительных параметров */
+.advanced-section {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 18px;
+    padding: 22px;
+    border-radius: 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    animation: fadeAdvanced 0.18s ease;
+}
+
+@keyframes fadeAdvanced {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Кнопки модального окна */
+.modal-buttons {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.modal-buttons button {
+    height: 48px;
+    padding: 0 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.modal-buttons button:hover {
+    transform: translateY(-1px);
+}
+
+.modal-buttons button[type="submit"] {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.modal-buttons button[type="submit"]:hover {
+    background: #1d4ed8;
+}
+
+.modal-buttons button[type="button"]:hover {
+    background: var(--sidebar-hover);
+}

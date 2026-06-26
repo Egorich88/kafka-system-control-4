@@ -1,0 +1,77 @@
+/* ============================================================
+   АДАПТИВНОСТЬ
+   ============================================================ */
+
+/* Планшеты и маленькие ноутбуки */
+@media (max-width: 1200px) {
+    .topics-content.with-details {
+        grid-template-columns: 1fr;
+    }
+
+    .topics-content.with-details > .topics-table-wrapper,
+    .topics-content.with-details > .topic-details-panel {
+        height: auto;
+        max-height: calc(100vh - 240px);
+    }
+
+    .topic-details-panel {
+        max-height: 600px;
+    }
+
+    .modal-content {
+        width: 95vw;
+    }
+}
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+    .topics-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-left {
+        flex-wrap: wrap;
+    }
+
+    .filter-input {
+        width: 100%;
+    }
+
+    .action-btn {
+        flex: 1;
+        min-width: 80px;
+        justify-content: center;
+    }
+
+    .export-btn {
+        min-width: 120px;
+    }
+
+    .modal-content {
+        width: 100vw;
+        max-width: 100vw;
+        border-radius: 0;
+    }
+
+    /* Информация о топике на мобильных — столбиком */
+    .topic-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 8px 0 12px;
+        margin-bottom: 8px;
+    }
+
+    .topic-summary div {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .topic-summary strong {
+        color: var(--text-primary);
+        margin-right: 6px;
+        font-weight: 600;
+    }
+}
