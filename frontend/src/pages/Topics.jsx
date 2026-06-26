@@ -38,15 +38,14 @@ import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { useCluster } from '../contexts/ClusterContext';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 export default function Topics() {
   // ===========================================================================
   // Хуки контекста и состояния
   // ===========================================================================
 
-  const [selectedConfigParam, setSelectedConfigParam] =
-    useState(null);
-
+  const [selectedConfigParam, setSelectedConfigParam] = useState(null);
   const { currentCluster } = useCluster();
 
   // Состояние списка топиков
@@ -92,6 +91,9 @@ export default function Topics() {
   // Реф для панели деталей (закрытие по клику вне)
   const panelRef = useRef(null);
 
+  // Реф для меню экспорта (закрытие по клику вне)
+  const exportMenuRef = useRef(null);
+
   // ===========================================================================
   // Вспомогательные функции
   // ===========================================================================
@@ -134,14 +136,6 @@ export default function Topics() {
     'segment.jitter.ms': 'Случайное отклонение времени ротации сегмента',
     'retention.bytes': 'Максимальный размер данных топика',
     'message.max.bytes': 'Максимальный размер сообщения',
-    'compression.zstd.level': 'Уровень сжатия ZSTD',
-    'compression.lz4.level': 'Уровень сжатия LZ4',
-    'compression.gzip.level': 'Уровень сжатия GZIP',
-    'leader.replication.throttled.replicas': 'Ограничение скорости репликации лидера',
-    'follower.replication.throttled.replicas': 'Ограничение скорости репликации последователей',
-    'message.downconversion.enable': 'Разрешить преобразование формата сообщений',
-    'message.timestamp.before.max.ms': 'Максимальное отклонение времени сообщения назад',
-    'message.timestamp.after.max.ms': 'Максимальное отклонение времени сообщения вперёд',
   };
 
   // ===========================================================================
@@ -150,7 +144,6 @@ export default function Topics() {
 
   /**
    * Блокировка прокрутки страницы при открытой панели деталей топика
-   * Используется для предотвращения скролла фона при открытом сайдбаре
    */
   useEffect(() => {
     if (detailTopic) {
@@ -165,7 +158,6 @@ export default function Topics() {
 
   /**
    * Сброс всех состояний при смене кластера
-   * Предотвращает отображение данных от предыдущего кластера
    */
   useEffect(() => {
     setTopics([]);
@@ -174,6 +166,7 @@ export default function Topics() {
     setEditingParam(null);
     setFilter('');
     setSelectedTopics([]);
+    setSelectedConfigParam(null);
   }, [currentCluster?.brokers]);
 
   // ===========================================================================
@@ -182,7 +175,6 @@ export default function Topics() {
 
   /**
    * Загружает список топиков из API
-   * Нормализует данные и обновляет состояние
    */
   const fetchTopics = async () => {
     if (!currentCluster) {
@@ -201,7 +193,6 @@ export default function Topics() {
 
       const topicsData = response.data.topics || [];
 
-      // Нормализация данных для единообразного отображения
       const normalized = topicsData.map((t) => ({
         name: t.name || t,
         partitions: t.partitions || 0,
@@ -220,14 +211,12 @@ export default function Topics() {
     }
   };
 
-  // Автоматическая загрузка при смене кластера
   useEffect(() => {
     fetchTopics();
   }, [currentCluster?.brokers]);
 
   /**
    * Загружает детальную информацию о выбранном топике
-   * Включает партиции, конфигурацию и метаданные
    * @param {string} topicName - Имя топика
    */
   const loadTopicDetails = async (topicName) => {
@@ -236,6 +225,7 @@ export default function Topics() {
     setDetailLoading(true);
     setDetailTopic(null);
     setEditingParam(null);
+    setSelectedConfigParam(null);
 
     try {
       const response = await axios.get(
@@ -260,10 +250,6 @@ export default function Topics() {
   // Обработчики событий таблицы
   // ===========================================================================
 
-  /**
-   * Переключает выбор отдельного топика в таблице
-   * @param {string} topicName - Имя топика
-   */
   const toggleTopicSelection = (topicName) => {
     setSelectedTopics((prev) =>
       prev.includes(topicName)
@@ -272,9 +258,6 @@ export default function Topics() {
     );
   };
 
-  /**
-   * Выбирает или снимает выбор всех топиков на текущей странице
-   */
   const toggleSelectAll = () => {
     if (selectedTopics.length === filteredTopics.length) {
       setSelectedTopics([]);
@@ -283,11 +266,6 @@ export default function Topics() {
     }
   };
 
-  /**
-   * Обработчик клика по строке топика
-   * Загружает и отображает детали выбранного топика
-   * @param {Object} topic - Объект топика
-   */
   const handleRowClick = (topic) => {
     setSelectedTopic(topic);
     loadTopicDetails(topic.name);
@@ -297,19 +275,12 @@ export default function Topics() {
   // Управление панелью деталей
   // ===========================================================================
 
-  /**
-   * Закрывает панель деталей топика
-   * Сбрасывает состояние редактирования
-   */
   const closePanel = () => {
     setDetailTopic(null);
     setEditingParam(null);
+    setSelectedConfigParam(null);
   };
 
-  /**
-   * Закрывает панель при клике вне её области
-   * Использует реф для определения области панели
-   */
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -327,53 +298,19 @@ export default function Topics() {
     };
   }, [detailTopic]);
 
-  /**
-   * Закрытие режима редактирования конфигурации
-   * при клике вне блока редактирования.
-   */
-  useEffect(() => {
-    const handleEditOutside = (event) => {
-      if (!editingParam) return;
-
-      const editBox = document.querySelector('.config-edit-box');
-
-      if (editBox && !editBox.contains(event.target)) {
-        setEditingParam(null);
-        setEditValue('');
-      }
-    };
-
-    document.addEventListener('mousedown', handleEditOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleEditOutside);
-    };
-  }, [editingParam]);
-
   // ===========================================================================
   // Редактирование конфигурации
   // ===========================================================================
 
-  /**
-   * Обработчик двойного клика по параметру конфигурации
-   * Активирует режим редактирования параметра
-   * @param {string} key - Имя параметра
-   * @param {*} currentValue - Текущее значение параметра
-   */
   const handleConfigDoubleClick = (key, currentValue) => {
     setEditingParam(key);
     setEditValue(String(currentValue));
     setOriginalValue(String(currentValue));
   };
 
-  /**
-   * Сохраняет изменённое значение параметра конфигурации
-   * Отправляет PATCH-запрос на бэкенд
-   */
   const handleSaveEdit = async () => {
     if (!selectedTopic || !editingParam) return;
 
-    // Если значение не изменилось — просто выходим из режима редактирования
     if (editValue === originalValue) {
       setEditingParam(null);
       return;
@@ -396,7 +333,6 @@ export default function Topics() {
 
       toast.success(`Параметр ${editingParam} обновлён`);
 
-      // Обновляем локальное состояние деталей топика
       setDetailTopic((prev) => ({
         ...prev,
         configs: {
@@ -406,6 +342,7 @@ export default function Topics() {
       }));
 
       setEditingParam(null);
+      setSelectedConfigParam(null);
     } catch (error) {
       console.error(error);
       toast.error(
@@ -415,22 +352,16 @@ export default function Topics() {
     }
   };
 
-  /**
-   * Отменяет редактирование параметра без сохранения изменений
-   */
   const handleCancelEdit = () => {
     setEditingParam(null);
     setEditValue('');
+    setSelectedConfigParam(null);
   };
 
   // ===========================================================================
   // Управление топиками (создание, удаление)
   // ===========================================================================
 
-  /**
-   * Обработчик создания нового топика
-   * Отправляет POST-запрос на бэкенд
-   */
   const handleCreateTopic = async (e) => {
     e.preventDefault();
 
@@ -448,7 +379,6 @@ export default function Topics() {
         replication: Number(newTopic.replication),
       };
 
-      // Добавляем дополнительные параметры, если они включены
       if (showAdvanced) {
         payload.configs = {
           'cleanup.policy': newTopic.cleanupPolicy,
@@ -465,7 +395,6 @@ export default function Topics() {
 
       toast.success(`Топик "${newTopic.topic}" создан`);
 
-      // Сброс формы
       setNewTopic({
         topic: '',
         partitions: '1',
@@ -477,7 +406,6 @@ export default function Topics() {
       setShowAdvanced(false);
       setShowCreateModal(false);
 
-      // Обновляем список топиков
       fetchTopics();
     } catch (error) {
       console.error(error);
@@ -496,10 +424,6 @@ export default function Topics() {
     }
   };
 
-  /**
-   * Удаляет выбранный топик после подтверждения
-   * Отправляет DELETE-запрос на бэкенд
-   */
   const handleDeleteTopic = async () => {
     if (!selectedTopic) {
       toast.error('Выберите топик');
@@ -522,7 +446,6 @@ export default function Topics() {
 
       toast.success(`Топик "${selectedTopic.name}" удалён`);
 
-      // Закрываем панель и обновляем список
       closePanel();
       fetchTopics();
     } catch (error) {
@@ -535,10 +458,6 @@ export default function Topics() {
   // Экспорт данных
   // ===========================================================================
 
-  /**
-   * Экспортирует список названий выбранных топиков в текстовый файл
-   * Если топики не выбраны — экспортирует все
-   */
   const exportTopicsList = () => {
     const selected =
       selectedTopics.length > 0
@@ -559,10 +478,6 @@ export default function Topics() {
     toast.success(`Экспортировано ${selected.length} топиков`);
   };
 
-  /**
-   * Экспортирует конфигурацию выбранных топиков в JSON-файл
-   * Включает все параметры конфигурации каждого топика
-   */
   const exportTopicsConfig = async () => {
     if (!currentCluster) {
       return;
@@ -576,7 +491,6 @@ export default function Topics() {
 
       const result = [];
 
-      // Получаем конфигурацию каждого топика
       for (const topic of selected) {
         const response = await axios.get(
           `/api/topics/${encodeURIComponent(topic.name)}`,
@@ -612,13 +526,24 @@ export default function Topics() {
     }
   };
 
+  // Закрытие меню экспорта при клике вне
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showExportMenu && exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setShowExportMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
+
   // ===========================================================================
   // Фильтрация данных
   // ===========================================================================
 
-  /**
-   * Фильтрует список топиков по названию (регистронезависимый поиск)
-   */
   const filteredTopics = topics.filter((topic) =>
     topic.name.toLowerCase().includes(filter.toLowerCase())
   );
@@ -640,49 +565,44 @@ export default function Topics() {
 
       {/* Панель инструментов */}
       <div className="topics-toolbar">
-        {/* Поле поиска */}
-        <input
-          type="text"
-          placeholder="Поиск топика..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="filter-input"
-        />
+        <div className="toolbar-left">
+          {/* Поле поиска */}
+          <input
+            type="text"
+            placeholder="Поиск топика..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="filter-input"
+          />
 
-        <div className="action-buttons">
-          {/* Кнопка создания топика */}
-          <button className="action-btn" onClick={() => setShowCreateModal(true)}>
-            Создать
-          </button>
-
-          {/* Меню экспорта */}
-          <div className="export-dropdown">
+          {/* Экспорт с выпадающим меню */}
+          <div className="export-dropdown-wrapper" ref={exportMenuRef}>
             <button
-              className="action-btn"
+              className="action-btn export-btn"
               onClick={() => setShowExportMenu(!showExportMenu)}
             >
-              Экспорт ({selectedTopics.length || topics.length}) ▼
+              Экспорт ({selectedTopics.length || topics.length})
+              {showExportMenu ? <FiChevronUp /> : <FiChevronDown />}
             </button>
 
             {showExportMenu && (
               <div className="export-menu">
-                <button
-                  className="export-item"
-                  title="Экспорт только названий топиков"
-                  onClick={exportTopicsList}
-                >
-                  📄 Список топиков
+                <button className="export-item" onClick={exportTopicsList}>
+                  <div className="export-item-title">📄 Список топиков</div>
+                  <div className="export-item-desc">Экспортировать выбранные топики без конфигурации</div>
                 </button>
-                <button
-                  className="export-item"
-                  title="Экспорт топиков вместе с конфигурацией"
-                  onClick={exportTopicsConfig}
-                >
-                  📄 Конфигурация топиков
+                <button className="export-item" onClick={exportTopicsConfig}>
+                  <div className="export-item-title">📄 Конфигурация топиков</div>
+                  <div className="export-item-desc">Экспортировать выбранные топики со всей конфигурацией</div>
                 </button>
               </div>
             )}
           </div>
+
+          {/* Кнопка создания топика */}
+          <button className="action-btn" onClick={() => setShowCreateModal(true)}>
+            Создать
+          </button>
 
           {/* Кнопка удаления топика */}
           <button
@@ -769,51 +689,40 @@ export default function Topics() {
           </table>
         </div>
 
-        {/* Панель деталей топика (отображается при выборе топика) */}
+        {/* Панель деталей топика */}
         {detailTopic && (
           <div className="topic-details-panel" ref={panelRef}>
             {/* Заголовок панели */}
             <div className="topic-details-header">
               <h2>Детали топика</h2>
-
-              <button
-                className="topic-hide-btn"
-                onClick={closePanel}
-              >
+              <button className="topic-hide-btn" onClick={closePanel}>
                 Скрыть
               </button>
             </div>
 
             <div className="topic-details-body">
-
-            <div className="topic-summary">
-              <div>
-                <strong>Имя топика:</strong> {detailTopic.name}
-              </div>
-
-              <div>
-                <strong>Сообщений:</strong> {detailTopic.messageCount ?? '-'}
-              </div>
-
-              <div>
-                <strong>Фактор репликации:</strong> {detailTopic.replicationFactor}
-              </div>
-
-              <div>
-                <strong>Партиций:</strong> {detailTopic.partitions?.length ?? 0}
-              </div>
-            </div>
-
-
-
-                {/* Подсказка о редактировании */}
-                <div className="topic-hint">
-                  Двойной клик по значению параметра — редактирование
+              {/* Основная информация */}
+              <div className="topic-summary">
+                <div>
+                  <strong>Имя топика:</strong> {detailTopic.name}
                 </div>
+                <div>
+                  <strong>Сообщений:</strong> {detailTopic.messageCount ?? '-'}
+                </div>
+                <div>
+                  <strong>Фактор репликации:</strong> {detailTopic.replicationFactor}
+                </div>
+                <div>
+                  <strong>Партиций:</strong> {detailTopic.partitions?.length ?? 0}
+                </div>
+              </div>
 
-              {/* =============================================================
-                  Блок конфигурации топика
-              ============================================================= */}
+              {/* Подсказка о редактировании */}
+              <div className="topic-hint">
+                Двойной клик по значению параметра — редактирование
+              </div>
+
+              {/* Блок конфигурации топика */}
               <div className="topic-section topic-config-section">
                 <h3>Конфигурация</h3>
 
@@ -831,9 +740,7 @@ export default function Topics() {
                           <tr
                             key={key}
                             className={
-                              selectedConfigParam === key
-                                ? 'active-config'
-                                : ''
+                              selectedConfigParam === key ? 'active-config' : ''
                             }
                             onClick={() => setSelectedConfigParam(key)}
                           >
@@ -865,9 +772,7 @@ export default function Topics() {
                 </div>
               </div>
 
-              {/* =============================================================
-                  Редактирование параметра
-              ============================================================= */}
+              {/* Редактирование параметра */}
               {editingParam && (
                 <div className="config-edit-box">
                   <h4>Редактирование: {editingParam}</h4>
@@ -896,9 +801,7 @@ export default function Topics() {
         )}
       </div>
 
-      {/* ===================================================================
-          МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ТОПИКА
-      =================================================================== */}
+      {/* Модальное окно создания топика */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
