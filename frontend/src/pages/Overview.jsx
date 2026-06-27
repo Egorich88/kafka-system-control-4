@@ -156,8 +156,13 @@ export default function Overview() {
           <div className="welcome-logo-wrap">
             <img src="/kafka-system-logo.png" alt="Kafka System Control" className="welcome-logo" />
           </div>
-          <h1 className="welcome-title">Kafka System Control</h1>
-          <p className="welcome-subtitle">Open-source платформа</p>
+          <h1 className="welcome-title">
+            KAFKA SYSTEM CONTROL
+          </h1>
+
+          <p className="welcome-subtitle">
+            Movement - life!
+          </p>
           <div className="welcome-divider-small" />
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiInfo /></div>

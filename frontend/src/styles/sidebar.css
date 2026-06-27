@@ -28,10 +28,24 @@
     width: 64px;
     height: 64px;
 }
-.sidebar-logo h2 {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0;
+.sidebar-logo-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.sidebar-brand-text span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text-primary);
 }
 .sidebar-logo span {
     font-size: 13px;

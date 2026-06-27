@@ -99,8 +99,8 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
   // Результат сравнения версий
   const versionState = latestVersion ? compareVersions(version, latestVersion) : 0;
-  const hasUpdate = versionState === 1;      // доступна новая версия
-  const localIsNewer = versionState === -1; // локальная версия новее (может быть dev-сборка)
+  const hasUpdate = versionState === 1;
+  const localIsNewer = versionState === -1;
   const hasCluster = clusters.length > 0 && Boolean(currentCluster);
 
   // =========================================================================
@@ -112,29 +112,33 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
       <div className="sidebar-top">
         {/* Логотип и название проекта */}
         <div className="sidebar-logo">
-          <img src="/logo.svg" alt="Kafka System Control" />
-          <div>
-            <h2>Kafka System Control</h2>
-            {/* Ссылка на релизы с индикатором обновления */}
-            <a
-              href="https://github.com/Egorich88/kafka-system-control-4/releases"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`sidebar-version ${hasUpdate ? 'update-available' : ''}`}
-              title={
-                hasUpdate
-                  ? `Доступна версия ${latestVersion}`
-                  : localIsNewer
-                  ? `Локальная версия новее GitHub`
-                  : `Актуальная версия`
-              }
-            >
-              <span className="version-label">
-                Version {version}
-                {hasUpdate && <span className="version-update-dot" />}
-              </span>
-            </a>
+          <div className="sidebar-logo-brand">
+            <img src="/logo.svg" alt="KSC" />
+            <div className="sidebar-brand-text">
+              <span>KAFKA</span>
+              <span>SYSTEM</span>
+              <span>CONTROL</span>
+            </div>
           </div>
+          {/* Ссылка на релизы с индикатором обновления */}
+          <a
+            href="https://github.com/Egorich88/kafka-system-control-4/releases"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`sidebar-version ${hasUpdate ? 'update-available' : ''}`}
+            title={
+              hasUpdate
+                ? `Доступна версия ${latestVersion}`
+                : localIsNewer
+                ? `Локальная версия новее GitHub`
+                : `Актуальная версия`
+            }
+          >
+            <span className="version-label">
+              Version {version}
+              {hasUpdate && <span className="version-update-dot" />}
+            </span>
+          </a>
         </div>
 
         {/* Блок выбора / добавления кластера */}
