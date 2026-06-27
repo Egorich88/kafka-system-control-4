@@ -83,6 +83,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
   const { clusters, currentCluster, changeCluster } = useCluster();
   const version = packageJson.version;
   const [latestVersion, setLatestVersion] = useState(null);
+  const [animateVersion, setAnimateVersion] = useState(false);
 
   // ----- Проверка наличия обновлений (не чаще раза в час) -----
   useEffect(() => {
@@ -97,11 +98,43 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
     }
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimateVersion(true);
+
+      setTimeout(() => {
+        setAnimateVersion(false);
+      }, 2000);
+
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+
+
   // Результат сравнения версий
   const versionState = latestVersion ? compareVersions(version, latestVersion) : 0;
   const hasUpdate = versionState === 1;
   const localIsNewer = versionState === -1;
   const hasCluster = clusters.length > 0 && Boolean(currentCluster);
+
+  useEffect(() => {
+      if (!hasUpdate) return;
+
+      const interval = setInterval(() => {
+        setAnimateVersion(true);
+
+        setTimeout(() => {
+          setAnimateVersion(false);
+        }, 2000);
+
+      }, 60000);
+
+      return () => clearInterval(interval);
+    }, [hasUpdate]);
+
+
 
   // =========================================================================
   // Рендер
@@ -125,7 +158,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             href="https://github.com/Egorich88/kafka-system-control-4/releases"
             target="_blank"
             rel="noopener noreferrer"
-            className={`sidebar-version ${hasUpdate ? 'update-available' : ''}`}
+            className={`sidebar-version ${hasUpdate ? 'update-available' : ''} ${animateVersion ? 'animate' : ''}`}
             title={
               hasUpdate
                 ? `Доступна версия ${latestVersion}`
@@ -136,7 +169,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
           >
             <span className="version-label">
               Version {version}
-              {hasUpdate && <span className="version-update-dot" />}
+
             </span>
           </a>
         </div>

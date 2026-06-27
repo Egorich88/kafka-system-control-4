@@ -19,8 +19,9 @@
    ============================================================ */
 .sidebar-logo {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     padding: 28px 24px;
     border-bottom: 1px solid var(--border-color);
 }
@@ -37,21 +38,15 @@
 .sidebar-brand-text {
     display: flex;
     flex-direction: column;
-    line-height: 1;
+    gap: 4px;              /* расстояние между строками */
 }
 
 .sidebar-brand-text span {
     font-family: 'Orbitron', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 2px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
     color: var(--text-primary);
-}
-.sidebar-logo span {
-    font-size: 13px;
-    color: #60a5fa;
-    margin-top: -2px;
-    display: block;
 }
 
 /* ============================================================
@@ -230,35 +225,58 @@
 }
 /* версия продукта */
 .sidebar-version {
-    font-size: 12px;
-    color: #60a5fa !important;
-    display: inline-block;
-    margin-top: 2px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
     text-decoration: none;
-    transition: 0.2s ease;
+    background: linear-gradient(
+        90deg,
+        #FF8A00,
+        #FF4FD8,
+        #7A5CFF,
+        #00D4FF,
+        #FF8A00
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: opacity 0.2s ease;
 }
+@keyframes versionGradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
 .sidebar-version:hover {
     color: #93c5fd !important;
-}
-}
-.version-update-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    margin-left: 6px;
-    border-radius: 50%;
-    background: #f59e0b;
-    box-shadow:
-        0 0 8px rgba(245,158,11,0.9),
-        0 0 14px rgba(245,158,11,0.5);
-    vertical-align: middle;
 }
 .version-label {
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
-
+@keyframes versionGradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+.sidebar-version.animate {
+    animation:
+        versionGradientMove 8s linear infinite,
+        versionGradientFlow 2s linear;
+}
 
 /* ============================================================
    6. Боковые панели (оверлей и конфигурационная панель)
