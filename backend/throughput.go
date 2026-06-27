@@ -142,8 +142,7 @@ func (tc *ThroughputCollector) Stop() {
 }
 
 func (tc *ThroughputCollector) collect() {
-    log.Printf("[DEBUG] collect() started")
-	tc.mu.Lock()
+    tc.mu.Lock()
 	defer tc.mu.Unlock()
 
 	// Получаем текущие оффсеты: latest offsets (входящие) и committed offsets (исходящие)
@@ -230,16 +229,7 @@ func (tc *ThroughputCollector) collect() {
         outgoingRate = 0
     }
 
-    log.Printf(
-        "[DEBUG] totalNewMessages=%d totalNewConsumed=%d elapsed=%.2f incomingRate=%.1f outgoingRate=%.1f",
-        totalNewMessages,
-        totalNewConsumed,
-        elapsed,
-        incomingRate,
-        outgoingRate,
-    )
-
-	// Добавляем точку в буфер
+    // Добавляем точку в буфер
 	point := DashboardThroughputPoint{
 		Time:     now.Format("15:04:05"),
 		Incoming: incomingRate,
