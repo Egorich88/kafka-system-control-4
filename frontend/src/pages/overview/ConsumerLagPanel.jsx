@@ -240,7 +240,7 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
                   .map((group, idx) => (
                     <Line
                       key={group}
-                      type="natural"
+                      type="monotoneX"
                       dataKey={group}
                       stroke={getGroupColor(group, idx)}
                       strokeWidth={2}

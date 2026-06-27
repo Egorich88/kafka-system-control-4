@@ -156,7 +156,7 @@ export default function ThroughputPanel({ data }) {
             {/* Линия входящих сообщений */}
             {showIncoming && (
               <Line
-                type="natural"
+                type="monotoneX"
                 dataKey="incoming"
                 name="Входящие сообщения"
                 stroke="#3b82f6"
@@ -171,7 +171,7 @@ export default function ThroughputPanel({ data }) {
             {/* Линия исходящих сообщений */}
             {showOutgoing && (
               <Line
-                type="natural"
+                type="monotoneX"
                 dataKey="outgoing"
                 name="Исходящие сообщения"
                 stroke="#8b5cf6"

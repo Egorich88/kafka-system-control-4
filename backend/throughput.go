@@ -142,6 +142,7 @@ func (tc *ThroughputCollector) Stop() {
 }
 
 func (tc *ThroughputCollector) collect() {
+    log.Printf("[DEBUG] collect() started")
 	tc.mu.Lock()
 	defer tc.mu.Unlock()
 
@@ -220,6 +221,23 @@ func (tc *ThroughputCollector) collect() {
 	tc.lastMessagesOffsets = messagesOffsets
 	tc.lastConsumedOffsets = consumedOffsets
 	tc.lastTime = now
+
+    if incomingRate < 0 {
+        incomingRate = 0
+    }
+
+    if outgoingRate < 0 {
+        outgoingRate = 0
+    }
+
+    log.Printf(
+        "[DEBUG] totalNewMessages=%d totalNewConsumed=%d elapsed=%.2f incomingRate=%.1f outgoingRate=%.1f",
+        totalNewMessages,
+        totalNewConsumed,
+        elapsed,
+        incomingRate,
+        outgoingRate,
+    )
 
 	// Добавляем точку в буфер
 	point := DashboardThroughputPoint{

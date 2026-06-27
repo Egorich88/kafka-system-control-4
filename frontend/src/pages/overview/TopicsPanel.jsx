@@ -257,7 +257,7 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                   .map((topic, idx) => (
                     <Line
                       key={topic}
-                      type="natural"
+                      type="monotoneX"
                       dataKey={topic}
                       stroke={getTopicColor(topic, idx)}
                       strokeWidth={2}
