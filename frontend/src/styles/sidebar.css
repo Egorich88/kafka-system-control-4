@@ -229,23 +229,13 @@
     justify-content: center;
     width: 100%;
     margin-top: 8px;
+
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 500;
     text-decoration: none;
-    background: linear-gradient(
-        90deg,
-        #FF8A00,
-        #FF4FD8,
-        #7A5CFF,
-        #00D4FF,
-        #FF8A00
-    );
-    background-size: 300% 100%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    transition: opacity 0.2s ease;
+
+    color: #60a5fa; /* небесно-голубой как раньше */
 }
 @keyframes versionGradientMove {
     0% {
@@ -273,6 +263,20 @@
     }
 }
 .sidebar-version.animate {
+    background: linear-gradient(
+        90deg,
+        #FF8A00,
+        #FF4FD8,
+        #7A5CFF,
+        #00D4FF,
+        #FF8A00
+    );
+
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+
     animation:
         versionGradientMove 8s linear infinite,
         versionGradientFlow 2s linear;
