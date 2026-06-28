@@ -227,7 +227,7 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
         <div className="topics-layout">
           {/* График */}
           <div className="topics-chart">
-            <ResponsiveContainer width="100%" height={320}>
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={aggregatedData}
                 margin={{

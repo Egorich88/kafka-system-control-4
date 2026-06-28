@@ -213,7 +213,7 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
       <div className="panel-body">
         <div className="topics-layout">
           <div className="topics-chart">
-            <ResponsiveContainer width="100%" height={320}>
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={aggregatedData}
                 margin={{

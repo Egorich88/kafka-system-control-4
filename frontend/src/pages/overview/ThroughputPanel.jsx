@@ -96,7 +96,7 @@ export default function ThroughputPanel({ data }) {
       </div>
 
       <div className="panel-body throughput-chart">
-        <ResponsiveContainer width="100%" height={320}>
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
             margin={{
