@@ -20,6 +20,11 @@
  * таблицу брокеров, отставание групп и события.
  * При смене кластера автоматически очищает все данные и загружает новые.
  * Поддерживается автообновление с выбираемым интервалом (как в Grafana).
+ *
+ * Структура страницы:
+ *   - Верхний ряд: KPI-карточки (7 штук)
+ *   - Второй ряд: 3 графика (Throughput Cluster | Throughput Topics | Consumer Lag)
+ *   - Третий ряд: 2 таблицы (Брокеры | Последние события)
  */
 
 import { useEffect, useState, useRef } from 'react';
@@ -224,6 +229,7 @@ export default function Overview() {
         </div>
       </div>
 
+      {/* Верхний ряд: KPI-карточки */}
       <KpiCards
         brokers={brokers}
         overview={overview}
@@ -233,18 +239,17 @@ export default function Overview() {
         underReplicated={overview?.underReplicated ?? 0}
       />
 
-      <div className="dashboard-row dashboard-row-top">
+      {/* Второй ряд: 3 графика (Throughput Cluster | Throughput Topics | Consumer Lag) */}
+      <div className="dashboard-row dashboard-row-charts">
         <ThroughputPanel data={throughputData} />
         <TopicsPanel timeRange={timeRange.id} refreshKey={refreshKey} />
-      </div>
-
-      <div className="dashboard-row dashboard-row-middle">
         <ConsumerLagPanel timeRange={timeRange.id} refreshKey={refreshKey} />
-        <EventsPanel />
       </div>
 
+      {/* Третий ряд: таблицы брокеров и события (50/50) */}
       <div className="dashboard-row dashboard-row-bottom">
         <BrokersPanel brokers={brokers} />
+        <EventsPanel />
       </div>
     </div>
   );

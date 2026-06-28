@@ -19,16 +19,12 @@
 
    Назначение:
    Главный файл стилей страницы Overview мониторинга Kafka-кластера.
-   Импортирует части для KPI-карточек, таблицы брокеров и графика пропускной способности.
+   Импортирует части для KPI-карточек, таблицы брокеров, графиков и событий.
 
-   Структура:
-   1. Импорты частей
-   2. Основные контейнеры
-   3. Универсальная панель
-   4. Сетка рядов панелей
-   5. Верхняя панель управления
-   6. Welcome-страница
-   7. Адаптивность
+   Структура сетки:
+   - Верхний ряд: KPI-карточки (7 карточек в адаптивной сетке)
+   - Второй ряд: 3 графика с пропорциональной шириной (20% / 30% / 50%)
+   - Третий ряд: 2 таблицы (Брокеры | Последние события) по 50% ширины
 
    Все цвета берутся из themes.css через CSS-переменные.
    ============================================================ */
@@ -40,6 +36,9 @@
 @import './overview/kpi-cards.css';
 @import './overview/brokers-panel.css';
 @import './overview/throughput-panel.css';
+@import './overview/topics-panel.css';
+@import './overview/consumer-lag-panel.css';
+@import './overview/events-panel.css';
 
 /* ============================================================
    2. ОСНОВНЫЕ КОНТЕЙНЕРЫ
@@ -76,14 +75,17 @@
     font-weight: 600;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .panel-body {
     padding: 16px;
     color: var(--text-secondary);
-    height: 360px;
+    height: 320px;
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 /* ============================================================
@@ -92,22 +94,22 @@
 
 .dashboard-row {
     display: grid;
-    gap: 8px;
+    gap: 12px;
     margin-top: 10px;
 }
 
-.dashboard-row-top {
-    grid-template-columns: 2fr 3fr;
-}
-
-.dashboard-row-middle {
-    grid-template-columns: 1fr 1fr;
-    height: 360px;
+/* Второй ряд: 3 графика с пропорциональной шириной */
+.dashboard-row-charts {
+    grid-template-columns: 1fr 1fr 1fr;
+    height: 340px;
     align-items: stretch;
 }
 
+/* Третий ряд: таблицы брокеров и события (50/50) */
 .dashboard-row-bottom {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    height: 340px;
+    align-items: stretch;
 }
 
 /* ============================================================
@@ -400,13 +402,22 @@
    8. АДАПТИВНОСТЬ
    ============================================================ */
 
+/* Планшеты и маленькие ноутбуки */
 @media (max-width: 1200px) {
-    .dashboard-row-top,
-    .dashboard-row-middle {
+    .dashboard-row-charts {
+        grid-template-columns: 1fr 1fr;
+        height: auto;
+    }
+    .dashboard-row-charts > :last-child {
+        grid-column: span 2;
+    }
+    .dashboard-row-bottom {
         grid-template-columns: 1fr;
+        height: auto;
     }
 }
 
+/* Мобильные устройства */
 @media (max-width: 768px) {
     .dashboard-kpi-grid {
         grid-template-columns: 1fr;
@@ -421,5 +432,17 @@
     .dashboard-toolbar {
         flex-wrap: wrap;
         justify-content: flex-start;
+    }
+    .dashboard-row-charts {
+        grid-template-columns: 1fr;
+    }
+    .dashboard-row-charts > :last-child {
+        grid-column: span 1;
+    }
+    .dashboard-row-bottom {
+        grid-template-columns: 1fr;
+    }
+    .panel-body {
+        height: 280px;
     }
 }
