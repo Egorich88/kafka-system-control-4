@@ -241,12 +241,6 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
                   tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
-                  label={{
-                    value: 'Lag',
-                    angle: -90,
-                    position: 'insideLeft',
-                    style: { fill: 'var(--text-secondary)', fontSize: 12 }
-                  }}
                 />
                 <Tooltip content={<LagTooltip />} />
 

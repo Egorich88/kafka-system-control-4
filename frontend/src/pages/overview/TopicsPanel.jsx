@@ -254,12 +254,6 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                   axisLine={false}
                   domain={[0, 'auto']}
                   padding={{ top: 20 }}
-                  label={{
-                    value: 'Сообщения',
-                    angle: -90,
-                    position: 'insideLeft',
-                    style: { fill: 'var(--text-secondary)', fontSize: 12 }
-                  }}
                 />
                 <Tooltip content={<TopicsTooltip />} />
 

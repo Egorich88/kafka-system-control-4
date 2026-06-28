@@ -124,12 +124,6 @@ export default function ThroughputPanel({ data }) {
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
-              label={{
-                value: 'Сообщения',
-                angle: -90,
-                position: 'insideLeft',
-                style: { fill: 'var(--text-secondary)', fontSize: 12 }
-              }}
             />
 
             <Tooltip
