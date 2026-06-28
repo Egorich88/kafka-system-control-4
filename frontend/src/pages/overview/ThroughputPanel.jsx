@@ -32,16 +32,6 @@ import {
   CartesianGrid
 } from 'recharts';
 
-/**
- * Кастомный тултип для графика.
- * Отображает данные только для тех линий, которые присутствуют в payload.
- * Это позволяет корректно работать при скрытых линиях.
- *
- * @param {Object} props - Свойства тултипа от Recharts.
- * @param {boolean} props.active - Активен ли тултип.
- * @param {Array} props.payload - Массив данных точек, на которые наведён курсор.
- * @param {string} props.label - Метка оси X (время).
- */
 function ThroughputTooltip({ active, payload, label }) {
   if (!active || !payload || !payload.length) return null;
 
@@ -65,46 +55,26 @@ function ThroughputTooltip({ active, payload, label }) {
   );
 }
 
-/**
- * Панель пропускной способности кластера.
- *
- * @param {Object} props
- * @param {Array} props.data - Массив точек графика: { time, incoming, outgoing }
- */
 export default function ThroughputPanel({ data }) {
-  // Состояния видимости линий (управляются кликами, без кнопок)
   const [showIncoming, setShowIncoming] = useState(true);
   const [showOutgoing, setShowOutgoing] = useState(true);
 
-  // Последняя точка для отображения текущих значений в заголовке
   const latestPoint = data?.length ? data[data.length - 1] : null;
 
-  /**
-   * Обработчик клика по линии входящих сообщений.
-   * Оставляет видимой только линию входящих.
-   */
   const handleIncomingClick = () => {
-    if (showIncoming && !showOutgoing) return; // уже только входящие
+    if (showIncoming && !showOutgoing) return;
     setShowIncoming(true);
     setShowOutgoing(false);
   };
 
-  /**
-   * Обработчик клика по линии исходящих сообщений.
-   * Оставляет видимой только линию исходящих.
-   */
   const handleOutgoingClick = () => {
-    if (!showIncoming && showOutgoing) return; // уже только исходящие
+    if (!showIncoming && showOutgoing) return;
     setShowIncoming(false);
     setShowOutgoing(true);
   };
 
-  /**
-   * Обработчик клика по фону графика.
-   * Показывает обе линии.
-   */
   const handleChartClick = () => {
-    if (showIncoming && showOutgoing) return; // уже обе
+    if (showIncoming && showOutgoing) return;
     setShowIncoming(true);
     setShowOutgoing(true);
   };
@@ -115,7 +85,6 @@ export default function ThroughputPanel({ data }) {
         <div className="throughput-title">
           Пропускная способность кластера
         </div>
-
         <div className="throughput-current-values">
           <span className="incoming-value">
             Входящие: {latestPoint?.incoming?.toFixed(1) ?? 0} msg/s
@@ -128,35 +97,49 @@ export default function ThroughputPanel({ data }) {
 
       <div className="panel-body throughput-chart">
         <ResponsiveContainer width="100%" height={320}>
-          <LineChart data={data} onClick={handleChartClick}>
+          <LineChart
+            data={data}
+            margin={{
+              top: 10,
+              right: 10,
+              left: 0,
+              bottom: 30
+            }}
+            onClick={handleChartClick}
+          >
             <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
 
-            {/* Ось времени */}
             <XAxis
               dataKey="time"
+              height={45}
+              tickMargin={10}
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
             />
 
-            {/* Ось значений (сообщения/сек) */}
             <YAxis
               domain={[0, (dataMax) => Math.ceil(dataMax * 1.1)]}
+              padding={{ top: 20 }}
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
+              label={{
+                value: 'Сообщения',
+                angle: -90,
+                position: 'insideLeft',
+                style: { fill: 'var(--text-secondary)', fontSize: 12 }
+              }}
             />
 
-            {/* Тултип с кастомным содержимым */}
             <Tooltip
               content={<ThroughputTooltip />}
               cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
             />
 
-            {/* Линия входящих сообщений */}
             {showIncoming && (
               <Line
-                type="monotoneX"
+                type="monotone"
                 dataKey="incoming"
                 name="Входящие сообщения"
                 stroke="#3b82f6"
@@ -168,10 +151,9 @@ export default function ThroughputPanel({ data }) {
               />
             )}
 
-            {/* Линия исходящих сообщений */}
             {showOutgoing && (
               <Line
-                type="monotoneX"
+                type="monotone"
                 dataKey="outgoing"
                 name="Исходящие сообщения"
                 stroke="#8b5cf6"

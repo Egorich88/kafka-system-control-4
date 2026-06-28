@@ -81,8 +81,8 @@ const getTopicColor = (topic, index) => {
 export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
   const { currentCluster } = useCluster();
 
-  const [visibleTopics, setVisibleTopics] = useState([]);   // топики, отображаемые на графике и в легенде
-  const [allTopics, setAllTopics] = useState([]);          // все топики из данных (для расчёта активных)
+  const [visibleTopics, setVisibleTopics] = useState([]);
+  const [allTopics, setAllTopics] = useState([]);
   const [rawData, setRawData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -144,7 +144,7 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
         timeMap.set(point.time, { time: point.time });
       }
       const entry = timeMap.get(point.time);
-      // Второй уровень защиты: обрезаем отрицательные (на случай, если в rawData просочились)
+      // Второй уровень защиты: обрезаем отрицательные
       entry[point.topic] = Math.max(0, point.value || 0);
     }
     return Array.from(timeMap.values()).sort((a, b) => a.time.localeCompare(b.time));
@@ -159,7 +159,6 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
   const handleTopicSelect = (topic, event) => {
     if (event && event.stopPropagation) event.stopPropagation();
     if (event && event.ctrlKey) {
-      // Мультивыбор: добавляем или удаляем топик
       setVisibleTopics(prev =>
         prev.includes(topic)
           ? prev.filter(t => t !== topic)
@@ -168,7 +167,6 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
       return;
     }
     if (visibleTopics.length === 1 && visibleTopics[0] === topic) {
-      // Если уже только этот топик – возвращаем все активные
       const activeSet = new Set();
       for (const point of rawData) {
         if (point.value > 0) activeSet.add(point.topic);
@@ -176,13 +174,11 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
       const active = allTopics.filter(t => activeSet.has(t));
       setVisibleTopics(active.length > 0 ? active : allTopics);
     } else {
-      // Оставляем только этот топик
       setVisibleTopics([topic]);
     }
   };
 
   const handleChartClick = () => {
-    // Возвращаем все активные топики
     const activeSet = new Set();
     for (const point of rawData) {
       if (point.value > 0) activeSet.add(point.topic);
@@ -234,12 +230,20 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
             <ResponsiveContainer width="100%" height={320}>
               <LineChart
                 data={aggregatedData}
+                margin={{
+                  top: 10,
+                  right: 10,
+                  left: 0,
+                  bottom: 30
+                }}
                 onClick={handleChartClick}
                 cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
               >
                 <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
                 <XAxis
                   dataKey="time"
+                  height={45}
+                  tickMargin={10}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
@@ -249,6 +253,13 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                   tickLine={false}
                   axisLine={false}
                   domain={[0, 'auto']}
+                  padding={{ top: 20 }}
+                  label={{
+                    value: 'Сообщения',
+                    angle: -90,
+                    position: 'insideLeft',
+                    style: { fill: 'var(--text-secondary)', fontSize: 12 }
+                  }}
                 />
                 <Tooltip content={<TopicsTooltip />} />
 
@@ -257,7 +268,7 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                   .map((topic, idx) => (
                     <Line
                       key={topic}
-                      type="monotoneX"
+                      type="monotone"
                       dataKey={topic}
                       stroke={getTopicColor(topic, idx)}
                       strokeWidth={2}

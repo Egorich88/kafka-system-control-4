@@ -216,22 +216,37 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
             <ResponsiveContainer width="100%" height={320}>
               <LineChart
                 data={aggregatedData}
+                margin={{
+                  top: 10,
+                  right: 10,
+                  left: 0,
+                  bottom: 30
+                }}
                 onClick={handleChartClick}
                 cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
               >
                 <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
                 <XAxis
                   dataKey="time"
+                  height={45}
+                  tickMargin={10}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
                 />
+                {/* Ось Y с нулём и подписью "Lag" */}
                 <YAxis
+                  domain={[0, 'auto']}
+                  padding={{ top: 20 }}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
-                  domain={[0, 'auto']}
-                  padding={{ top: 20, bottom: 0 }}   // ← добавляем отступ сверху
+                  label={{
+                    value: 'Lag',
+                    angle: -90,
+                    position: 'insideLeft',
+                    style: { fill: 'var(--text-secondary)', fontSize: 12 }
+                  }}
                 />
                 <Tooltip content={<LagTooltip />} />
 
@@ -240,7 +255,7 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
                   .map((group, idx) => (
                     <Line
                       key={group}
-                      type="monotoneX"
+                      type="monotone"
                       dataKey={group}
                       stroke={getGroupColor(group, idx)}
                       strokeWidth={2}
