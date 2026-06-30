@@ -49,7 +49,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-bottom: 12px;          /* ← отступ снизу страницы */
+    padding-bottom: clamp(16px, 2vw, 40px);
 }
 
 /* ============================================================
@@ -83,7 +83,7 @@
 .panel-body {
     padding: 16px;
     color: var(--text-secondary);
-    height: 320px;
+    
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -109,7 +109,7 @@
 
 .panel-throughput,
 .panel-topics {
-    height: 340px;
+    height: clamp(280px, 20vw, 340px);
 }
 
 /* Ряд 3 + Ряд 4: Consumer Lag (60%) | Events (40%) + Brokers (60%) */
@@ -117,6 +117,7 @@
     display: grid;
     grid-template-columns: 60% 40%;
     gap: 12px;
+    /* margin-bottom удалён — используем padding у контейнера */
 }
 
 .dashboard-main-left {
@@ -126,15 +127,15 @@
 }
 
 .panel-lag {
-    height: 340px;
+    height: clamp(280px, 20vw, 340px);
 }
 
 .panel-brokers {
-    height: 340px;
+    height: clamp(200px, 14vw, 240px);
 }
 
 .panel-events {
-    height: 692px;  /* 340px + 340px + 12px (gap) */
+    height: calc(340px + 240px + 12px);
 }
 
 /* ============================================================
@@ -470,11 +471,4 @@
     .panel-body {
         height: 280px;
     }
-}
-/* ============================================================
-   Отступ снизу для последнего ряда
-   ============================================================ */
-
-.dashboard-row:last-child {
-    margin-bottom: 4px;
 }

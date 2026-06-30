@@ -40,7 +40,7 @@
      overflow-y: auto;
      background: var(--bg-primary);
      color: var(--text-primary);
-     padding: 28px;
+     padding: 28px 28px 48px 28px;
 }
 .settings-theme-select:focus {
   border-color: var(--accent-color);

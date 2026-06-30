@@ -12,11 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*======================================================
-               KPI-КАРТОЧКИ.
-  Основные показатели состояния Kafka-кластера.
-  Отображаются всегда сверху страницы.
-======================================================== */
+
+/**
+ * @fileoverview KPI-карточки страницы Overview.
+ * Отображают ключевые показатели состояния Kafka-кластера:
+ * - Количество брокеров, топиков, партиций, групп потребителей
+ * - Входящие и исходящие сообщения (msg/s)
+ * - Количество недореплицированных партиций
+ *
+ * Иконки расположены слева от названия и увеличены в 2.5 раза для лучшей видимости.
+ */
+
 import {
   FiServer,
   FiLayers,
@@ -41,7 +47,7 @@ export default function KpiCards({
       <div className="kpi-card">
         <div className="kpi-header">
           <FiServer className="kpi-icon kpi-icon-blue" />
-          <div className="kpi-title">Брокеры</div>
+          <span className="kpi-title">Брокеры</span>
         </div>
         <div className="kpi-value">{brokers.length}</div>
         <div className="kpi-sub">Онлайн: {brokers.length}</div>
@@ -51,7 +57,7 @@ export default function KpiCards({
       <div className="kpi-card">
         <div className="kpi-header">
           <FiLayers className="kpi-icon kpi-icon-purple" />
-          <div className="kpi-title">Топики</div>
+          <span className="kpi-title">Топики</span>
         </div>
         <div className="kpi-value">{overview?.topics ?? 0}</div>
         <div className="kpi-sub">Активных: {overview?.topics ?? 0}</div>
@@ -61,7 +67,7 @@ export default function KpiCards({
       <div className="kpi-card">
         <div className="kpi-header">
           <FiGrid className="kpi-icon kpi-icon-orange" />
-          <div className="kpi-title">Партиции</div>
+          <span className="kpi-title">Партиции</span>
         </div>
         <div className="kpi-value">{overview?.partitions ?? 0}</div>
         <div className="kpi-sub">Всего партиций</div>
@@ -71,7 +77,7 @@ export default function KpiCards({
       <div className="kpi-card">
         <div className="kpi-header">
           <FiUsers className="kpi-icon kpi-icon-green" />
-          <div className="kpi-title">Группы потребителей</div>
+          <span className="kpi-title">Группы потребителей</span>
         </div>
         <div className="kpi-value">{consumerGroups.length}</div>
         <div className="kpi-sub">Активных групп</div>
@@ -81,7 +87,7 @@ export default function KpiCards({
       <div className="kpi-card">
         <div className="kpi-header">
           <FiArrowDown className="kpi-icon kpi-icon-blue" />
-          <div className="kpi-title">Входящие сообщения</div>
+          <span className="kpi-title">Входящие сообщения</span>
         </div>
         <div className="kpi-value">{messagesIn}</div>
         <div className="kpi-sub">сообщений/сек</div>
@@ -91,7 +97,7 @@ export default function KpiCards({
       <div className="kpi-card">
         <div className="kpi-header">
           <FiArrowUp className="kpi-icon kpi-icon-purple" />
-          <div className="kpi-title">Исходящие сообщения</div>
+          <span className="kpi-title">Исходящие сообщения</span>
         </div>
         <div className="kpi-value">{messagesOut}</div>
         <div className="kpi-sub">сообщений/сек</div>
@@ -101,7 +107,7 @@ export default function KpiCards({
       <div className="kpi-card">
         <div className="kpi-header">
           <FiAlertTriangle className="kpi-icon kpi-icon-red" />
-          <div className="kpi-title">Недореплицированные</div>
+          <span className="kpi-title">Недореплицированные</span>
         </div>
         <div className="kpi-value">{underReplicated}</div>
         <div className="kpi-sub">проблемных партиций</div>

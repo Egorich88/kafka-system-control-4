@@ -25,7 +25,7 @@
    1. Контейнер сетки карточек
    2. Сама карточка
    3. Заголовок, значение и подпись
-   4. Иконки с цветовой кодировкой
+   4. Иконки с цветовой кодировкой (увеличены в 2.5 раза)
    ============================================================ */
 
 /* ============================================================
@@ -48,7 +48,6 @@
     border: 1px solid var(--border-color);
     border-radius: 18px;
     padding: 18px;
-    align-items: center;
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-primary);
@@ -65,43 +64,69 @@
    3. ЗАГОЛОВОК, ЗНАЧЕНИЕ И ПОДПИСЬ
    ============================================================ */
 
+/**
+ * Заголовок карточки.
+ * Иконка расположена слева от названия.
+ * Используется flex с выравниванием по центру по вертикали.
+ */
 .kpi-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: flex-start;  /* ← выравнивание по левому краю */
+    gap: 12px;
     margin-bottom: 12px;
+    padding-left: 4px;
 }
 
+/**
+ * Название KPI-показателя.
+ * Расположено справа от иконки.
+ */
 .kpi-title {
     font-size: 0.9rem;
+    font-weight: 500;
     color: var(--text-secondary);
     margin-bottom: 0;
 }
 
+/**
+ * Числовое значение показателя.
+ */
 .kpi-value {
     font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
+    text-align: center;
 }
 
+/**
+ * Дополнительная подпись под значением.
+ */
 .kpi-sub {
     margin-top: 10px;
     font-size: 14px;
     font-weight: 500;
     color: var(--success-color);
+    text-align: center;
 }
 
 /* ============================================================
    4. ИКОНКИ С ЦВЕТОВОЙ КОДИРОВКОЙ
    ============================================================ */
 
+/**
+ * Иконки KPI-карточек.
+ * Увеличены в 2.5 раза (22px * 2.5 = 55px).
+ * Цвет соответствует типу показателя.
+ */
 .kpi-icon {
-    font-size: 22px;
+    font-size: 28px;
     flex-shrink: 0;
+    line-height: 1;
 }
 
+/* Цвета иконок для разных типов показателей */
 .kpi-icon-blue {
     color: #3b82f6;
 }
@@ -130,7 +155,21 @@
     .dashboard-kpi-grid {
         grid-template-columns: 1fr;
     }
+
     .kpi-value {
         font-size: 1.8rem;
+    }
+
+    /**
+     * На мобильных устройствах иконки немного уменьшаем,
+     * чтобы они не занимали слишком много места.
+     */
+    .kpi-icon {
+        font-size: 24px;
+    }
+
+    .kpi-header {
+        gap: 10px;
+        padding-left: 2px;
     }
 }
