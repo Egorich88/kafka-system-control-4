@@ -271,7 +271,7 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
           <div className="topics-legend">
             <div className="topics-legend-header">
               <span>Группа</span>
-              <span>Lag</span>
+              <span>Отставание</span>
             </div>
             {visibleGroups.length === 0 ? (
               <div className="topics-legend-placeholder">Нет активных групп за выбранный период</div>

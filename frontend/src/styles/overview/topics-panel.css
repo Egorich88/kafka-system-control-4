@@ -49,7 +49,7 @@
 
 /* Легенда – список топиков */
 .topics-legend {
-    width: 240px;
+    width: clamp(180px, 15vw, 260px);
     max-height: 320px;
     display: flex;
     flex-direction: column;
