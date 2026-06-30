@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// =============================================================================
+// Файл: consumer_lag_panel.go
+// =============================================================================
+// Назначение:
+//   Предоставляет REST API для получения данных об отставании (lag)
+//   групп потребителей Kafka. Включает сбор метрик в фоновом режиме,
+//   хранение в кольцевом буфере и выдачу через HTTP-эндпоинт.
+//
+// Структура данных:
+//   LagPoint      - точка графика с информацией о группе, времени, общем lag
+//                   и разбивке по топикам
+//   LagResponse   - ответ API
+//
+// Сборщик:
+//   LagCollector  - фоновый сборщик, опрашивающий Kafka каждые 10 секунд
+//   Хранит историю в кольцевом буфере (288 точек = 48 минут)
+//
+// Маршрут API:
+//   GET /api/overview/consumer-lag?range=15m|1h|6h|24h
+//   Заголовок: X-Kafka-Bootstrap: <адрес брокера>
+// =============================================================================
+
 package main
 
 import (
@@ -30,14 +52,16 @@ import (
 // Модели данных
 // =============================================================================
 
-// LagPoint – точка графика для одной consumer группы.
+// LagPoint – точка графика для одной consumer группы с информацией о топиках.
+// Используется для построения графиков на фронтенде.
 type LagPoint struct {
-	Time  string `json:"time"`  // время в формате HH:MM:SS
-	Group string `json:"group"` // название группы потребителей
-	Value int64  `json:"value"` // отставание (lag) в сообщениях
+	Time   string            `json:"time"`   // время в формате HH:MM:SS
+	Group  string            `json:"group"`  // название группы потребителей
+	Value  int64             `json:"value"`  // общее отставание (lag) в сообщениях
+	Topics map[string]int64  `json:"topics"` // отставание по каждому топику (ключ — название топика, значение — lag)
 }
 
-// LagResponse – ответ API с массивом точек.
+// LagResponse – ответ API с массивом точек для построения графиков.
 type LagResponse struct {
 	Points []LagPoint `json:"points"`
 }
@@ -46,7 +70,8 @@ type LagResponse struct {
 // Кольцевой буфер для хранения lag точек по группам
 // =============================================================================
 
-// lagRingBuffer – кольцевой буфер для одной группы.
+// lagRingBuffer – кольцевой буфер для хранения истории одной группы.
+// Используется для хранения до 288 точек (при интервале 10 сек = 48 минут).
 type lagRingBuffer struct {
 	points []LagPoint
 	idx    int
@@ -54,13 +79,15 @@ type lagRingBuffer struct {
 	mu     sync.RWMutex
 }
 
-// lagMetricsStorage – хранилище буферов для всех групп.
+// lagMetricsStorage – хранилище кольцевых буферов для всех групп потребителей.
+// Обеспечивает потокобезопасный доступ и создание буферов по требованию.
 type lagMetricsStorage struct {
 	mu   sync.RWMutex
 	data map[string]*lagRingBuffer
 	size int
 }
 
+// newLagMetricsStorage создаёт новое хранилище с указанным размером буфера.
 func newLagMetricsStorage(bufferSize int) *lagMetricsStorage {
 	return &lagMetricsStorage{
 		data: make(map[string]*lagRingBuffer),
@@ -68,6 +95,7 @@ func newLagMetricsStorage(bufferSize int) *lagMetricsStorage {
 	}
 }
 
+// getOrCreateBuffer возвращает буфер для группы, создавая его при необходимости.
 func (s *lagMetricsStorage) getOrCreateBuffer(group string) *lagRingBuffer {
 	s.mu.RLock()
 	buf, exists := s.data[group]
@@ -89,6 +117,7 @@ func (s *lagMetricsStorage) getOrCreateBuffer(group string) *lagRingBuffer {
 	return buf
 }
 
+// addPoint добавляет новую точку в хранилище для указанной группы.
 func (s *lagMetricsStorage) addPoint(group string, point LagPoint) {
 	buf := s.getOrCreateBuffer(group)
 	buf.mu.Lock()
@@ -100,6 +129,7 @@ func (s *lagMetricsStorage) addPoint(group string, point LagPoint) {
 	}
 }
 
+// getAllPoints собирает все точки из всех буферов в единый массив.
 func (s *lagMetricsStorage) getAllPoints() []LagPoint {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -129,29 +159,32 @@ func (s *lagMetricsStorage) getAllPoints() []LagPoint {
 }
 
 // =============================================================================
-// Сборщик метрик lag
+// Сборщик метрик lag с топиками
 // =============================================================================
 
-// LagCollector собирает lag для всех consumer групп.
+// LagCollector – фоновый сборщик, опрашивающий Kafka каждые 10 секунд.
+// Сохраняет историю lag для всех групп с разбивкой по топикам.
 type LagCollector struct {
-	storage      *lagMetricsStorage
-	bootstrap    string
-	lastLags     map[string]int64 // для текущего lag, не используется для истории, но можно оставить
-	mu           sync.Mutex
-	stopChan     chan struct{}
-	interval     time.Duration
+	storage   *lagMetricsStorage
+	bootstrap string
+	mu        sync.Mutex
+	stopChan  chan struct{}
+	interval  time.Duration
 }
 
+// NewLagCollector создаёт новый сборщик для указанного кластера.
+// bufferSize — количество точек в кольцевом буфере (рекомендуется 288).
+// interval — частота опроса Kafka (рекомендуется 10 секунд).
 func NewLagCollector(bootstrap string, bufferSize int, interval time.Duration) *LagCollector {
 	return &LagCollector{
 		storage:   newLagMetricsStorage(bufferSize),
 		bootstrap: bootstrap,
-		lastLags:  make(map[string]int64),
 		stopChan:  make(chan struct{}),
 		interval:  interval,
 	}
 }
 
+// Start запускает фоновую горутину для сбора метрик.
 func (lc *LagCollector) Start() {
 	go func() {
 		ticker := time.NewTicker(lc.interval)
@@ -168,66 +201,75 @@ func (lc *LagCollector) Start() {
 	}()
 }
 
+// Stop останавливает фоновый сбор метрик.
 func (lc *LagCollector) Stop() {
 	close(lc.stopChan)
 }
 
+// collect — основной метод сбора данных.
+// Опрашивает Kafka и сохраняет точки в кольцевом буфере.
 func (lc *LagCollector) collect() {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
 
-	lagMap, err := lc.fetchConsumerLags()
+	lagMap, topicsMap, err := lc.fetchConsumerLagsWithTopics()
 	if err != nil {
 		log.Printf("[LagCollector] ошибка получения lag: %v", err)
 		return
 	}
 
 	now := time.Now()
-	for group, lag := range lagMap {
-		// lag может быть отрицательным? Нет, он всегда >= 0, но на всякий случай обрезаем
-		if lag < 0 {
-			lag = 0
+	for group, totalLag := range lagMap {
+		if totalLag < 0 {
+			totalLag = 0
 		}
 		point := LagPoint{
-			Time:  now.Format("15:04:05"),
-			Group: group,
-			Value: lag,
+			Time:   now.Format("15:04:05"),
+			Group:  group,
+			Value:  totalLag,
+			Topics: topicsMap[group],
 		}
 		lc.storage.addPoint(group, point)
 	}
 	log.Printf("[LagCollector] собрано lag для %d групп", len(lagMap))
 }
 
-// fetchConsumerLags возвращает текущий lag для каждой активной consumer группы.
-func (lc *LagCollector) fetchConsumerLags() (map[string]int64, error) {
+// fetchConsumerLagsWithTopics возвращает текущий lag для каждой группы с разбивкой по топикам.
+// Использует AdminClient для получения offsets и Client для latest offsets.
+func (lc *LagCollector) fetchConsumerLagsWithTopics() (map[string]int64, map[string]map[string]int64, error) {
 	admin, err := createAdminClient(lc.bootstrap)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer admin.Close()
 
-	// Создаём клиент для получения latest offset
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_8_0_0
 	client, err := sarama.NewClient([]string{lc.bootstrap}, config)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer client.Close()
 
 	groupsMap, err := admin.ListConsumerGroups()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	result := make(map[string]int64)
+	topicsResult := make(map[string]map[string]int64)
+
 	for groupName := range groupsMap {
 		offsets, err := admin.ListConsumerGroupOffsets(groupName, nil)
 		if err != nil {
 			continue
 		}
+
 		var totalLag int64
+		groupTopics := make(map[string]int64)
+
 		for topic, partitions := range offsets.Blocks {
+			var topicLag int64
 			for partition, block := range partitions {
 				latestOffset, err := client.GetOffset(topic, partition, sarama.OffsetNewest)
 				if err != nil {
@@ -235,15 +277,25 @@ func (lc *LagCollector) fetchConsumerLags() (map[string]int64, error) {
 				}
 				lag := latestOffset - block.Offset
 				if lag > 0 {
-					totalLag += lag
+					topicLag += lag
 				}
 			}
+			if topicLag > 0 {
+				groupTopics[topic] = topicLag
+				totalLag += topicLag
+			}
 		}
-		result[groupName] = totalLag
+
+		if totalLag > 0 {
+			result[groupName] = totalLag
+			topicsResult[groupName] = groupTopics
+		}
 	}
-	return result, nil
+
+	return result, topicsResult, nil
 }
 
+// GetPoints возвращает все собранные точки из хранилища.
 func (lc *LagCollector) GetPoints() []LagPoint {
 	return lc.storage.getAllPoints()
 }
@@ -257,6 +309,8 @@ var (
 	lagCollectorMu      sync.RWMutex
 )
 
+// ensureLagCollectorForBootstrap создаёт или переключает сборщик для указанного кластера.
+// Поддерживает несколько кластеров за счёт пересоздания сборщика при смене bootstrap.
 func ensureLagCollectorForBootstrap(bootstrap string) {
 	lagCollectorMu.Lock()
 	defer lagCollectorMu.Unlock()
@@ -267,12 +321,18 @@ func ensureLagCollectorForBootstrap(bootstrap string) {
 		currentLagCollector.Stop()
 	}
 	log.Printf("[LagCollector] создаём сборщик для bootstrap: %s", bootstrap)
-	// Буфер на 288 точек (24 часа при интервале 10 секунд – 2880, но оставим 288 для согласованности)
+	// Буфер на 288 точек (48 минут при интервале 10 секунд)
 	currentLagCollector = NewLagCollector(bootstrap, 288, 10*time.Second)
 	currentLagCollector.Start()
 }
 
-// GetConsumerLagHandler – обработчик API, возвращает точки lag для фронтенда.
+// GetConsumerLagHandler – HTTP-обработчик для получения данных об отставании.
+// Поддерживает параметр range для фильтрации по времени.
+// Возвращает JSON с массивом точек (LagResponse).
+//
+// Пример запроса:
+//   GET /api/overview/consumer-lag?range=15m
+//   Header: X-Kafka-Bootstrap: localhost:9092
 func GetConsumerLagHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -294,20 +354,20 @@ func GetConsumerLagHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Поддержка параметра range (аналогично topics)
+	// Определяем лимит точек в зависимости от выбранного диапазона
 	rangeParam := r.URL.Query().Get("range")
 	limit := 0
 	switch rangeParam {
 	case "15m":
-		limit = 90
+		limit = 90 // 90 точек = 15 минут (10 сек интервал)
 	case "1h":
-		limit = 360
+		limit = 360 // 360 точек = 1 час
 	case "6h":
-		limit = 2160
+		limit = 2160 // 2160 точек = 6 часов
 	case "24h":
-		limit = 8640
+		limit = 8640 // 8640 точек = 24 часа
 	default:
-		limit = 0
+		limit = 0 // все доступные точки
 	}
 
 	allPoints := collector.GetPoints()

@@ -1,20 +1,44 @@
 /*
  * Copyright 2026 Egor Khomenko (Egorich88)
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* ============================================================
-   Consumer Lag Panel – стили
+   consumer-lag-panel.css - ОПТИМИЗИРОВАННАЯ ВЕРСИЯ
+
+   НАЗНАЧЕНИЕ:
+   Стили для панели отставания групп потребителей (Consumer Lag).
+   Оптимизированы для экономии места при сохранении читаемости.
+
+   ОСОБЕННОСТИ:
+   - Каждая линия на графике = группа (топик)
+   - Компактные отступы как в Grafana
+   - Названия отображаются полностью
+   - Автоматическое масштабирование
    ============================================================ */
 
-.consumer-lag-panel-title {
-    font-size: 16px;
+/* ============================================================
+   1. ЗАГОЛОВОК ПАНЕЛИ И ПЛЕЙСХОЛДЕРЫ
+   ============================================================ */
+
+.topics-panel-title {
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
 }
 
-.consumer-lag-placeholder {
+.topics-placeholder {
     height: 260px;
     display: flex;
     align-items: center;
@@ -24,80 +48,171 @@
 }
 
 /* ============================================================
-   График и легенда
+   2. КОНТЕЙНЕР ГРАФИКА И ЛЕГЕНДЫ - ОПТИМИЗИРОВАН
    ============================================================ */
 
-.consumer-lag-layout {
+.topics-layout {
     flex: 1;
     min-height: 0;
     display: flex;
-    gap: 16px;
+    gap: 12px;
     height: 100%;
+    width: 100%;
 }
 
-.consumer-lag-chart {
+.topics-chart {
     flex: 1;
     min-width: 0;
     height: 100%;
 }
 
-.consumer-lag-legend {
-    width: 240px;
+/* Легенда - компактная, но с запасом для длинных названий */
+.topics-legend {
+    flex: 0 0 auto;
+    min-width: 160px;
+    max-width: 35%;
     max-height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 1px;
     overflow-y: auto;
+    padding-right: 4px;
 }
 
-.consumer-lag-legend-row {
+/* ============================================================
+   3. СТРОКА ЛЕГЕНДЫ - КОМПАКТНАЯ
+   ============================================================ */
+
+.topics-legend-row {
     outline: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 400;
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 3px 8px;
+    border-radius: 6px;
     flex-shrink: 0;
+    transition: background 0.15s ease;
+    min-height: 26px;
+    gap: 10px;
 }
 
-.consumer-lag-legend-row.active {
+.topics-legend-row:hover {
     background: var(--hover-color);
 }
 
-.consumer-lag-legend-row:focus,
-.consumer-lag-legend-row:focus-visible {
+.topics-legend-row.active {
+    background: var(--hover-color);
+}
+
+.topics-legend-row:focus,
+.topics-legend-row:focus-visible {
     outline: none;
 }
 
-.consumer-lag-legend-value {
-    font-size: 14px;
-    font-weight: 400;
+.topics-legend-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
 }
 
-.consumer-lag-legend-header {
+/* ============================================================
+   4. ЦВЕТНОЙ ИНДИКАТОР
+   ============================================================ */
+
+.topics-legend-color-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    transition: box-shadow 0.2s ease;
+}
+
+.topics-legend-row:hover .topics-legend-color-dot {
+    box-shadow: 0 0 12px var(--accent-color) !important;
+}
+
+/* ============================================================
+   5. НАЗВАНИЕ ЛИНИИ
+   ============================================================ */
+
+.topics-legend-line-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 12px;
+    white-space: nowrap;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: keep-all;
+}
+
+/* ============================================================
+   6. ЗНАЧЕНИЕ ОТСТАВАНИЯ
+   ============================================================ */
+
+.topics-legend-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+    min-width: 40px;
+    text-align: right;
+}
+
+/* ============================================================
+   7. ЗАГОЛОВОК ЛЕГЕНДЫ
+   ============================================================ */
+
+/* Заголовок легенды - "Группа (топик)" и "Отставание" */
+.topics-legend-header {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
-    font-weight: 400;
+    align-items: center;
+    font-size: 12px; /* Размер как у строк */
+    font-weight: 500;
     color: var(--text-secondary);
-    margin-bottom: 6px;
-    padding-left: 12px;
-    padding-right: 12px;
+    margin-bottom: 4px;
+    padding: 2px 8px 4px 8px;
+    border-bottom: 1px solid var(--border-color);
+    gap: 10px;
 }
 
-.consumer-lag-legend-placeholder {
+/* "Группа (топик)" - жирный, но того же размера */
+.topics-legend-header span:first-child {
+    font-weight: 600;
+    flex: 1;
+    font-size: 12px; /* Тот же размер что и у строк */
+}
+
+/* "Отставание" - того же размера */
+.topics-legend-header span:last-child {
+    font-weight: 500;
+    flex-shrink: 0;
+    min-width: 40px;
+    text-align: right;
+    font-size: 12px; /* Тот же размер что и у строк */
+    opacity: 0.7;
+}
+
+.topics-legend-placeholder {
     padding: 12px;
     text-align: center;
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
 }
 
 /* ============================================================
-   Сброс фокуса Recharts
+   8. СБРОС ФОКУСА RECHARTS
    ============================================================ */
 
 .recharts-wrapper:focus,
@@ -121,37 +236,40 @@ path:focus {
 }
 
 /* ============================================================
-   Tooltip
+   9. КАСТОМНЫЙ ТУЛТИП
    ============================================================ */
 
-.consumer-lag-tooltip {
+.topics-tooltip {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    padding: 10px 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    padding: 10px 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    min-width: 180px;
 }
 
-.consumer-lag-tooltip-title {
+.topics-tooltip-title {
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: var(--text-primary);
+    font-size: 12px;
 }
 
-.consumer-lag-tooltip-row {
+.topics-tooltip-row {
     display: flex;
     justify-content: space-between;
     gap: 16px;
     color: var(--text-secondary);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
+    font-size: 12px;
 }
 
-.consumer-lag-tooltip-row strong {
+.topics-tooltip-row strong {
     color: var(--text-primary);
 }
 
 /* ============================================================
-   Вертикальный курсор
+   10. ВЕРТИКАЛЬНЫЙ КУРСОР
    ============================================================ */
 
 .recharts-cursor {
@@ -168,13 +286,141 @@ path:focus {
 }
 
 /* ============================================================
-   Подписи осей
+   11. ПОДПИСИ ОСЕЙ
    ============================================================ */
 
 .recharts-cartesian-axis-tick text,
 .recharts-xAxis .recharts-cartesian-axis-tick text,
 .recharts-yAxis .recharts-cartesian-axis-tick text,
 .recharts-cartesian-axis-tick tspan {
-    font-size: 12px !important;
+    font-size: 11px !important;
     fill: var(--text-secondary) !important;
+}
+
+/* ============================================================
+   12. СКРОЛЛБАР
+   ============================================================ */
+
+.topics-legend::-webkit-scrollbar {
+    width: 4px;
+}
+
+.topics-legend::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.topics-legend::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.topics-legend::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* ============================================================
+   13. АДАПТИВНОСТЬ
+   ============================================================ */
+
+@media (max-width: 1200px) {
+    .topics-legend {
+        min-width: 140px;
+        max-width: 30%;
+    }
+
+    .topics-legend-row {
+        font-size: 11px;
+        padding: 2px 6px;
+        min-height: 22px;
+        gap: 8px;
+    }
+
+    .topics-legend-line-name {
+        font-size: 11px;
+    }
+
+    .topics-legend-value {
+        font-size: 11px;
+        min-width: 35px;
+    }
+
+    .topics-legend-header {
+        font-size: 10px;
+        padding: 2px 6px 4px 6px;
+        gap: 8px;
+    }
+
+    .topics-legend-header span:last-child {
+        min-width: 35px;
+    }
+}
+
+@media (max-width: 768px) {
+    .topics-layout {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .topics-legend {
+        flex: 1 1 auto;
+        min-width: 100%;
+        max-width: 100%;
+        max-height: 180px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 3px;
+        padding: 4px 0;
+        overflow-y: auto;
+    }
+
+    .topics-legend-header {
+        display: none;
+    }
+
+    .topics-legend-row {
+        flex: 0 0 auto;
+        padding: 3px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--card-bg);
+        min-height: 22px;
+        gap: 6px;
+    }
+
+    .topics-legend-left {
+        gap: 4px;
+    }
+
+    .topics-legend-line-name {
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .topics-legend-value {
+        font-size: 10px;
+        min-width: 30px;
+    }
+
+    .topics-legend-color-dot {
+        width: 7px;
+        height: 7px;
+    }
+}
+
+@media (max-width: 480px) {
+    .topics-legend-row {
+        font-size: 9px;
+        padding: 2px 6px;
+        min-height: 18px;
+        gap: 4px;
+    }
+
+    .topics-legend-line-name {
+        font-size: 9px;
+    }
+
+    .topics-legend-value {
+        font-size: 9px;
+        min-width: 25px;
+    }
 }
