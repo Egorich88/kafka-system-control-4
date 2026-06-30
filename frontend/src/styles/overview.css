@@ -135,7 +135,7 @@
 }
 
 .panel-events {
-    height: calc(clamp(280px, 20vw, 340px)+clamp(200px, 14vw, 240px)+12px);
+    height: calc(340px + 240px + 12px);
 }
 
 /* ============================================================
