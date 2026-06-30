@@ -22,9 +22,10 @@
  * Поддерживается автообновление с выбираемым интервалом (как в Grafana).
  *
  * Структура страницы:
- *   - Верхний ряд: KPI-карточки (7 штук)
- *   - Второй ряд: 3 графика (Throughput Cluster | Throughput Topics | Consumer Lag)
- *   - Третий ряд: 2 таблицы (Брокеры | Последние события)
+ *   - Ряд 1: KPI-карточки (7 штук)
+ *   - Ряд 2: Throughput (40%) | Topics (60%)
+ *   - Ряд 3 + Ряд 4: Consumer Lag (60%) | Events (40%)
+ *                    Brokers (60%)   |
  */
 
 import { useEffect, useState, useRef } from 'react';
@@ -72,7 +73,6 @@ export default function Overview() {
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
   const [loading, setLoading] = useState(false);
 
-  // Ключ для принудительного обновления дочерних панелей (TopicsPanel, ConsumerLagPanel)
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [autoRefreshInterval, setAutoRefreshInterval] = useState(10);
@@ -121,7 +121,6 @@ export default function Overview() {
       setMessagesIn(latestPoint?.incoming || 0);
       setMessagesOut(latestPoint?.outgoing || 0);
 
-      // Увеличиваем refreshKey, чтобы триггернуть обновление TopicsPanel и ConsumerLagPanel
       setRefreshKey(prev => prev + 1);
 
     } catch (error) {
@@ -135,7 +134,6 @@ export default function Overview() {
     loadDashboard();
   }, [currentCluster, timeRange]);
 
-  // Автообновление
   useEffect(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -229,7 +227,7 @@ export default function Overview() {
         </div>
       </div>
 
-      {/* Верхний ряд: KPI-карточки */}
+      {/* Ряд 1: KPI-карточки */}
       <KpiCards
         brokers={brokers}
         overview={overview}
@@ -239,17 +237,29 @@ export default function Overview() {
         underReplicated={overview?.underReplicated ?? 0}
       />
 
-      {/* Второй ряд: 3 графика (Throughput Cluster | Throughput Topics | Consumer Lag) */}
-      <div className="dashboard-row dashboard-row-charts">
-        <ThroughputPanel data={throughputData} />
-        <TopicsPanel timeRange={timeRange.id} refreshKey={refreshKey} />
-        <ConsumerLagPanel timeRange={timeRange.id} refreshKey={refreshKey} />
+      {/* Ряд 2: Throughput (40%) | Topics (60%) */}
+      <div className="dashboard-row dashboard-row-top">
+        <div className="panel-throughput">
+          <ThroughputPanel data={throughputData} />
+        </div>
+        <div className="panel-topics">
+          <TopicsPanel timeRange={timeRange.id} refreshKey={refreshKey} />
+        </div>
       </div>
 
-      {/* Третий ряд: таблицы брокеров и события (50/50) */}
-      <div className="dashboard-row dashboard-row-bottom">
-        <BrokersPanel brokers={brokers} />
-        <EventsPanel />
+      {/* Ряд 3 + Ряд 4: Consumer Lag + Brokers (60%) | Events (40%) */}
+      <div className="dashboard-row dashboard-row-main">
+        <div className="dashboard-main-left">
+          <div className="panel-lag">
+            <ConsumerLagPanel timeRange={timeRange.id} refreshKey={refreshKey} />
+          </div>
+          <div className="panel-brokers">
+            <BrokersPanel brokers={brokers} />
+          </div>
+        </div>
+        <div className="panel-events">
+          <EventsPanel />
+        </div>
       </div>
     </div>
   );
