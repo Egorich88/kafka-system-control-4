@@ -254,7 +254,7 @@ export default function Overview() {
             <ConsumerLagPanel timeRange={timeRange.id} refreshKey={refreshKey} />
           </div>
           <div className="panel-brokers">
-            <BrokersPanel brokers={brokers} />
+            <BrokersPanel brokers={brokers} refreshKey={refreshKey} />
           </div>
         </div>
         <div className="panel-events">

@@ -19,23 +19,31 @@
 
    НАЗНАЧЕНИЕ:
    Стили для таблицы брокеров на странице Overview.
-   - Профессиональная шапка таблицы
-   - Статус с анимированной точкой
-   - Бейдж контроллера
-   - Версия Kafka
-   - Адаптивная сетка
+
+   СТОЛБЦЫ (9 колонок):
+   1. ID          - идентификатор брокера
+   2. Адрес       - сетевой адрес (host:port)
+   3. Статус      - Онлайн/Оффлайн с анимированной точкой
+   4. Контроллер  - является ли брокер контроллером кластера
+   5. Версия      - версия Kafka
+   6. Лидеры      - количество лидерских партиций (нагрузка)
+   7. Реплики     - количество реплик (дисковое пространство)
+   8. CPU         - загрузка процессора в процентах
+   9. Память      - использование памяти в MB
    ============================================================ */
 
 /* ============================================================
    1. ЗАГОЛОВОК ПАНЕЛИ
    ============================================================ */
 
+/* Заголовок панели */
 .brokers-panel-title {
     font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
 }
 
+/* Счётчик брокеров справа */
 .brokers-panel-count {
     font-size: 12px;
     color: var(--text-secondary);
@@ -45,6 +53,7 @@
     border-radius: 12px;
 }
 
+/* Плейсхолдер при отсутствии данных */
 .brokers-placeholder {
     height: 100%;
     display: flex;
@@ -58,6 +67,7 @@
    2. ТАБЛИЦА БРОКЕРОВ
    ============================================================ */
 
+/* Основной контейнер таблицы */
 .broker-table {
     display: flex;
     flex-direction: column;
@@ -69,9 +79,11 @@
    3. ШАПКА ТАБЛИЦЫ
    ============================================================ */
 
+/* Шапка с 9 колонками */
 .broker-table-header {
     display: grid;
-    grid-template-columns: 60px 1fr 100px 110px 100px;
+    grid-template-columns: 50px 1fr 80px 100px 80px 70px 70px 70px 90px;
+    /* ID | Адрес | Статус | Контроллер | Версия | Лидеры | Реплики | CPU | Память */
     padding: 8px 16px;
     font-size: 11px;
     font-weight: 600;
@@ -83,68 +95,52 @@
     border-radius: 8px 8px 0 0;
 }
 
-/* Колонки шапки */
-.broker-table-header .col-id {
-    text-align: left;
-}
-
-.broker-table-header .col-address {
-    text-align: left;
-}
-
-.broker-table-header .col-status {
-    text-align: left;
-}
-
-.broker-table-header .col-controller {
-    text-align: center;
-}
-
-.broker-table-header .col-version {
-    text-align: center;
-}
+/* Выравнивание колонок шапки */
+.broker-table-header .col-id       { text-align: left; }
+.broker-table-header .col-address  { text-align: left; }
+.broker-table-header .col-status   { text-align: left; }
+.broker-table-header .col-controller { text-align: center; }
+.broker-table-header .col-version  { text-align: center; }
+.broker-table-header .col-leaders  { text-align: center; }
+.broker-table-header .col-replicas { text-align: center; }
+.broker-table-header .col-cpu      { text-align: right; }
+.broker-table-header .col-memory   { text-align: right; }
 
 /* ============================================================
    4. СТРОКИ ТАБЛИЦЫ
    ============================================================ */
 
+/* Строка с 9 колонками */
 .broker-table-row {
     display: grid;
-    grid-template-columns: 60px 1fr 100px 110px 100px;
+    grid-template-columns: 50px 1fr 80px 100px 80px 70px 70px 70px 90px;
+    /* ID | Адрес | Статус | Контроллер | Версия | Лидеры | Реплики | CPU | Память */
     align-items: center;
     padding: 10px 16px;
     border-bottom: 1px solid var(--border-color);
     transition: background 0.15s ease;
 }
 
+/* Убираем нижнюю границу у последней строки */
 .broker-table-row:last-child {
     border-bottom: none;
 }
 
+/* Подсветка строки при наведении */
 .broker-table-row:hover {
     background: var(--table-row-hover);
 }
 
-/* Колонки строк */
-.broker-table-row .col-id {
-    text-align: left;
-}
-
-.broker-table-row .col-address {
-    text-align: left;
-}
-
-.broker-table-row .col-status {
-    text-align: left;
-}
-
-.broker-table-row .col-controller {
-    text-align: center;
-}
-
-.broker-table-row .col-version {
-    text-align: center;
-}
+/* Выравнивание колонок строк */
+.broker-table-row .col-id       { text-align: left; }
+.broker-table-row .col-address  { text-align: left; }
+.broker-table-row .col-status   { text-align: left; }
+.broker-table-row .col-controller { text-align: center; }
+.broker-table-row .col-version  { text-align: center; }
+.broker-table-row .col-leaders  { text-align: center; }
+.broker-table-row .col-replicas { text-align: center; }
+.broker-table-row .col-cpu      { text-align: right; }
+.broker-table-row .col-memory   { text-align: right; }
 
 /* ============================================================
    5. ID БРОКЕРА
@@ -170,6 +166,7 @@
    7. СТАТУС БРОКЕРА
    ============================================================ */
 
+/* Контейнер статуса с точкой */
 .broker-status {
     display: inline-flex;
     align-items: center;
@@ -179,6 +176,7 @@
     font-size: 12px;
 }
 
+/* Анимированная точка статуса */
 .broker-status-dot {
     width: 8px;
     height: 8px;
@@ -187,6 +185,7 @@
     animation: brokerPulse 2s ease-in-out infinite;
 }
 
+/* Пульсация точки */
 @keyframes brokerPulse {
     0%, 100% {
         opacity: 1;
@@ -202,6 +201,7 @@
    8. КОНТРОЛЛЕР
    ============================================================ */
 
+/* Бейдж "Контроллер" */
 .broker-controller-badge {
     display: inline-block;
     padding: 2px 10px;
@@ -213,6 +213,7 @@
     letter-spacing: 0.3px;
 }
 
+/* Если брокер не контроллер */
 .broker-no-controller {
     color: var(--text-secondary);
     font-size: 12px;
@@ -235,67 +236,139 @@
 }
 
 /* ============================================================
-   10. АДАПТИВНОСТЬ
+   10. ЛИДЕРЫ
    ============================================================ */
 
-@media (max-width: 768px) {
+.broker-leaders {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============================================================
+   11. РЕПЛИКИ
+   ============================================================ */
+
+.broker-replicas {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============================================================
+   12. CPU
+   ============================================================ */
+
+.broker-cpu {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Цветовые индикаторы для CPU (опционально) */
+.broker-cpu.low    { color: var(--success-color); }
+.broker-cpu.medium { color: var(--warning-color); }
+.broker-cpu.high   { color: var(--danger-color); }
+
+/* ============================================================
+   13. ПАМЯТЬ (MEMORY)
+   ============================================================ */
+
+.broker-memory {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============================================================
+   14. АДАПТИВНОСТЬ ДЛЯ РАЗНЫХ ЭКРАНОВ
+   ============================================================ */
+
+/* Планшеты и маленькие ноутбуки (1200px) */
+@media (max-width: 1200px) {
     .broker-table-header,
     .broker-table-row {
-        grid-template-columns: 40px 1fr 80px 80px 70px;
+        grid-template-columns: 40px 1fr 70px 80px 70px 60px 60px 60px 80px;
         padding: 6px 10px;
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .broker-table-header {
         font-size: 9px;
     }
 
-    .broker-address {
-        font-size: 10px;
-    }
-
-    .broker-id {
-        font-size: 12px;
-    }
-
-    .broker-status {
-        font-size: 10px;
-    }
-
-    .broker-controller-badge {
-        font-size: 9px;
-        padding: 1px 6px;
-    }
-
-    .broker-version {
-        font-size: 9px;
-        padding: 1px 6px;
-    }
-
-    .broker-table-header .col-controller,
-    .broker-table-header .col-version {
-        text-align: center;
-    }
+    .broker-address { font-size: 10px; }
+    .broker-id { font-size: 12px; }
+    .broker-status { font-size: 10px; }
+    .broker-controller-badge { font-size: 9px; padding: 1px 6px; }
+    .broker-version { font-size: 9px; padding: 1px 6px; }
+    .broker-leaders { font-size: 10px; }
+    .broker-replicas { font-size: 10px; }
+    .broker-cpu { font-size: 10px; }
+    .broker-memory { font-size: 10px; }
 }
 
-@media (max-width: 480px) {
+/* Мобильные устройства (768px) */
+@media (max-width: 768px) {
     .broker-table-header,
     .broker-table-row {
-        grid-template-columns: 30px 1fr 60px 60px 50px;
+        grid-template-columns: 30px 1fr 60px 60px 60px 50px 50px 50px 60px;
         padding: 4px 8px;
-        font-size: 10px;
+        font-size: 9px;
         gap: 4px;
     }
 
     .broker-table-header {
         font-size: 8px;
+        padding: 4px 8px;
     }
 
-    .broker-address {
-        font-size: 9px;
+    .broker-address { font-size: 9px; }
+    .broker-id { font-size: 10px; }
+    .broker-status { font-size: 9px; gap: 4px; }
+    .broker-status-dot { width: 6px; height: 6px; }
+    .broker-controller-badge { font-size: 8px; padding: 1px 4px; }
+    .broker-version { font-size: 8px; padding: 1px 4px; }
+    .broker-leaders { font-size: 9px; }
+    .broker-replicas { font-size: 9px; }
+    .broker-cpu { font-size: 9px; }
+    .broker-memory { font-size: 9px; }
+
+    .broker-table-header .col-cpu,
+    .broker-table-header .col-memory,
+    .broker-table-row .col-cpu,
+    .broker-table-row .col-memory {
+        text-align: right;
+    }
+}
+
+/* Очень маленькие экраны (480px) */
+@media (max-width: 480px) {
+    .broker-table-header,
+    .broker-table-row {
+        grid-template-columns: 50px 1fr 80px 100px 70px 70px 70px 90px 90px;
+        padding: 3px 6px;
+        font-size: 8px;
+        gap: 2px;
     }
 
-    .broker-id {
-        font-size: 10px;
+    .broker-table-header {
+        font-size: 7px;
+        padding: 3px 6px;
     }
+
+    .broker-address { font-size: 8px; }
+    .broker-id { font-size: 9px; }
+    .broker-status { font-size: 8px; gap: 3px; }
+    .broker-status-dot { width: 5px; height: 5px; }
+    .broker-controller-badge { font-size: 7px; padding: 1px 3px; }
+    .broker-version { font-size: 7px; padding: 0px 3px; }
+    .broker-leaders { font-size: 8px; }
+    .broker-replicas { font-size: 8px; }
+    .broker-cpu { font-size: 8px; }
+    .broker-memory { font-size: 8px; }
 }
