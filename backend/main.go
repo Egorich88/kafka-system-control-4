@@ -104,6 +104,7 @@ func main() {
 	// ----- Маршруты для Overview (метрики кластера) -----
 	http.HandleFunc("/api/overview", getDashboardOverviewHandler)
 	http.HandleFunc("/api/overview/brokers", getDashboardBrokersHandler)
+	http.HandleFunc("/api/overview/brokers-detailed", GetBrokersHandler)
 	http.HandleFunc("/api/overview/consumer-groups", getDashboardConsumerGroupsHandler)
 	http.HandleFunc("/api/overview/partitions", getDashboardPartitionsHandler)
 	http.HandleFunc("/api/overview/throughput", getDashboardThroughputHandler)

@@ -106,7 +106,7 @@ export default function Overview() {
 
       const [overviewResponse, brokersResponse, groupsResponse, throughputResponse] = await Promise.all([
         axios.get('/api/overview', { headers }),
-        axios.get('/api/overview/brokers', { headers }),
+        axios.get('/api/overview/brokers-detailed', { headers }),  // ← НОВЫЙ API
         axios.get('/api/overview/consumer-groups', { headers }),
         axios.get(`/api/overview/throughput?range=${timeRange.id}`, { headers })
       ]);

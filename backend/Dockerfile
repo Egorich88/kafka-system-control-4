@@ -5,7 +5,12 @@ WORKDIR /app
 
 # Копируем файлы зависимостей (для кеширования)
 COPY go.mod go.sum ./
+
+# Скачиваем зависимости
 RUN go mod download
+
+# ПРИНУДИТЕЛЬНО ОБНОВЛЯЕМ SARAMA ДО ПОСЛЕДНЕЙ ВЕРСИИ
+RUN go get -u github.com/IBM/sarama@latest && go mod tidy
 
 # Копируем остальной код
 COPY . .

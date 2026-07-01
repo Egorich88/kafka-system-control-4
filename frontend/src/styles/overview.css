@@ -472,3 +472,15 @@
         height: 280px;
     }
 }
+/* ============================================================
+   9. ПЛЕЙСХОЛДЕРЫ ДЛЯ ПАНЕЛЕЙ
+   ============================================================ */
+
+.brokers-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+}

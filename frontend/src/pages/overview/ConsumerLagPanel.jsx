@@ -72,7 +72,7 @@ const LagTooltip = ({ active, payload, label }) => {
 
   return (
     <div className="topics-tooltip">
-      <div className="topics-tooltip-title">⏱ Время: {label}</div>
+      <div className="topics-tooltip-title">Время: {label}</div>
       {filtered.map((entry) => (
         <div
           key={entry.dataKey}
@@ -338,7 +338,7 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
           <div className="topics-panel-title">Отставание групп потребителей</div>
         </div>
         <div className="panel-body topics-placeholder">
-          📭 Нет данных о группах и топиках за выбранный период
+          Нет данных о группах и топиках за выбранный период
         </div>
       </div>
     );
