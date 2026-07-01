@@ -16,8 +16,8 @@
 
 /**
  * @fileoverview Панель со списком брокеров Kafka-кластера.
- * Отображает таблицу: ID, адрес, статус, контроллер, версия,
- * лидеры, реплики, CPU, Memory.
+ * Отображает таблицу: ID, адрес, статус, контроллер,
+ * лидеры, реплики, CPU, память, диск, версия.
  * Данные приходят с бэкенда через API.
  */
 
@@ -50,7 +50,7 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
     };
 
     loadBrokers();
-  }, [currentCluster, refreshKey]); // ← refreshKey триггерит перезагрузку
+  }, [currentCluster, refreshKey]);
 
   if (loading && brokers.length === 0) {
     return (
@@ -89,7 +89,7 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
 
       <div className="panel-body">
         <div className="broker-table">
-          {/* Заголовок таблицы */}
+          {/* Заголовок таблицы - 10 колонок */}
           <div className="broker-table-header">
             <div className="col-id">ID</div>
             <div className="col-address">Адрес</div>
@@ -99,54 +99,60 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
             <div className="col-replicas">Реплики</div>
             <div className="col-cpu">CPU</div>
             <div className="col-memory">Память</div>
+            <div className="col-disk">Диск (Used/Total)</div>
             <div className="col-version">Версия</div>
           </div>
 
           {/* Список брокеров */}
-                    {brokers.map((broker) => (
-                      <div key={broker.id} className="broker-table-row">
-                        <div className="col-id broker-id">{broker.id}</div>
-                        <div className="col-address broker-address">{broker.address}</div>
-                        <div className="col-status">
-                          <span className="broker-status">
-                            <span className="broker-status-dot" />
-                            Онлайн
-                          </span>
-                        </div>
-                        <div className="col-controller">
-                          {broker.controller ? (
-                            <span className="broker-controller-badge">Контроллер</span>
-                          ) : (
-                            <span className="broker-no-controller">—</span>
-                          )}
-                        </div>
-                        <div className="col-leaders">
-                          <span className="broker-leaders">
-                            {broker.leaderCount || 0}
-                          </span>
-                        </div>
-                        <div className="col-replicas">
-                          <span className="broker-replicas">
-                            {broker.replicaCount || 0}
-                          </span>
-                        </div>
-                        <div className="col-cpu">
-                          <span className="broker-cpu">
-                            {broker.cpu ? `${broker.cpu.toFixed(1)}%` : '—'}
-                          </span>
-                        </div>
-                        <div className="col-memory">
-                          <span className="broker-memory">
-                            {broker.memory ? `${broker.memory.toFixed(0)} MB` : '—'}
-                          </span>
-                        </div>
-                        <div className="col-version">
-                          <span className="broker-version">
-                            {broker.version || '2.8.0'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+          {brokers.map((broker) => (
+            <div key={broker.id} className="broker-table-row">
+              <div className="col-id broker-id">{broker.id}</div>
+              <div className="col-address broker-address">{broker.address}</div>
+              <div className="col-status">
+                <span className="broker-status">
+                  <span className="broker-status-dot" />
+                  Онлайн
+                </span>
+              </div>
+              <div className="col-controller">
+                {broker.controller ? (
+                  <span className="broker-controller-badge">Контроллер</span>
+                ) : (
+                  <span className="broker-no-controller">—</span>
+                )}
+              </div>
+              <div className="col-leaders">
+                <span className="broker-leaders">
+                  {broker.leaderCount || 0}
+                </span>
+              </div>
+              <div className="col-replicas">
+                <span className="broker-replicas">
+                  {broker.replicaCount || 0}
+                </span>
+              </div>
+              <div className="col-cpu">
+                <span className="broker-cpu">
+                  {broker.cpu ? `${broker.cpu.toFixed(1)}%` : '—'}
+                </span>
+              </div>
+              <div className="col-memory">
+                <span className="broker-memory">
+                  {broker.memory ? `${broker.memory.toFixed(0)} MB` : '—'}
+                </span>
+              </div>
+              <div className="col-disk">
+                <span className="broker-disk">
+                  {broker.diskUsage && broker.diskTotal ? `${broker.diskUsage.toFixed(1)}/${broker.diskTotal.toFixed(0)} GB` : '—'}
+                </span>
+              </div>
+              <div className="col-version">
+                <span className="broker-version">
+                  {broker.version || '2.8.0'}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
