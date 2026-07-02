@@ -15,7 +15,7 @@
 **Kafka System Control** — современный веб‑интерфейс для администрирования Apache Kafka.  
 Построен на **Go** и **React** с нуля, от консольных утилит до production‑готового микросервиса с CI/CD, контейнеризацией и деплоем в Kubernetes.
 
-![Dashboard preview](https://github.com/user-attachments/assets/4d3f6079-6787-42f1-9d54-9b508c35cd06)
+![img.png](img.png)
 
 ---
 

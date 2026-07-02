@@ -80,6 +80,17 @@ export default function Overview() {
 
   const currentRefreshItem = REFRESH_ITEMS.find(item => item.id === autoRefreshInterval) || REFRESH_ITEMS[0];
 
+  // ============================================================
+  // Логотип приветственной страницы
+  // ============================================================
+
+  const isLightTheme =
+    document.documentElement.getAttribute('data-theme') === 'light';
+
+  const welcomeLogo = isLightTheme
+    ? '/logo_light.png'
+    : '/logo_dark.png';
+
   const clearDashboardData = () => {
     setOverview(null);
     setBrokers([]);
@@ -157,14 +168,11 @@ export default function Overview() {
       <div className="welcome-page">
         <div className="welcome-card">
           <div className="welcome-logo-wrap">
-            <img src="/kafka-system-logo.png" alt="Kafka System Control" className="welcome-logo" />
+            <img src={welcomeLogo} alt="Kafka System Control" className="welcome-logo" />
           </div>
-          <h1 className="welcome-title">
-            KAFKA SYSTEM CONTROL
-          </h1>
 
           <p className="welcome-subtitle">
-            Movement - life!
+              Monitor  •  Control  •  Analyze
           </p>
           <div className="welcome-divider-small" />
           <div className="welcome-feature">

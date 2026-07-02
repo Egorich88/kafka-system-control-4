@@ -20,35 +20,20 @@
 .sidebar-logo {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
-    padding: 28px 24px;
+    padding: 22px 18px;
     border-bottom: 1px solid var(--border-color);
 }
-.sidebar-logo img {
-    width: 64px;
-    height: 64px;
+.sidebar-logo-image {
+    width: 120px;
+    height: auto;
+    display: block;
 }
 .sidebar-logo-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    justify-content: center;
+    width: 100%;
 }
-
-.sidebar-brand-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;              /* расстояние между строками */
-}
-
-.sidebar-brand-text span {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 2.5px;
-    color: var(--text-primary);
-}
-
 /* ============================================================
    2. Блок выбора и управления кластером
    ============================================================ */

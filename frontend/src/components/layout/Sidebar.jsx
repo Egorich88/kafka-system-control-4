@@ -85,6 +85,17 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
   const [latestVersion, setLatestVersion] = useState(null);
   const [animateVersion, setAnimateVersion] = useState(false);
 
+  // ============================================================
+  // Логотип в зависимости от темы
+  // ============================================================
+
+  const isLightTheme =
+    document.documentElement.getAttribute('data-theme') === 'light';
+
+  const sidebarLogo = isLightTheme
+    ? '/logo_light.svg'
+    : '/logo_dark.svg';
+
   // ----- Проверка наличия обновлений (не чаще раза в час) -----
   useEffect(() => {
     const lastCheck = localStorage.getItem('lastVersionCheck');
@@ -146,12 +157,11 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
         {/* Логотип и название проекта */}
         <div className="sidebar-logo">
           <div className="sidebar-logo-brand">
-            <img src="/logo.svg" alt="KSC" />
-            <div className="sidebar-brand-text">
-              <span>KAFKA</span>
-              <span>SYSTEM</span>
-              <span>CONTROL</span>
-            </div>
+            <img
+              src={sidebarLogo}
+              alt="Kafka System Control"
+              className="sidebar-logo-image"
+            />
           </div>
           {/* Ссылка на релизы с индикатором обновления */}
           <a
