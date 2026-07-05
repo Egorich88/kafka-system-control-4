@@ -79,6 +79,13 @@ export default function ThroughputPanel({ data }) {
     setShowOutgoing(true);
   };
 
+  // Данные для отображения (если нет данных - подставляем заглушку с 0)
+  const chartData = (!data || data.length === 0)
+    ? [{ time: 'Нет данных', incoming: 0, outgoing: 0 }]
+    : data;
+
+  const hasData = data && data.length > 0;
+
   return (
     <div className="dashboard-panel">
       <div className="panel-header throughput-header">
@@ -98,14 +105,14 @@ export default function ThroughputPanel({ data }) {
       <div className="panel-body throughput-chart">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={data}
+            data={chartData}
             margin={{
               top: 10,
               right: 10,
               left: 0,
               bottom: 30
             }}
-            onClick={handleChartClick}
+            onClick={hasData ? handleChartClick : undefined}
           >
             <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
 
@@ -119,17 +126,19 @@ export default function ThroughputPanel({ data }) {
             />
 
             <YAxis
-              domain={[0, (dataMax) => Math.ceil(dataMax * 1.1)]}
+              domain={[0, 'auto']}
               padding={{ top: 20 }}
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
             />
 
-            <Tooltip
-              content={<ThroughputTooltip />}
-              cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
-            />
+            {hasData && (
+              <Tooltip
+                content={<ThroughputTooltip />}
+                cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
+              />
+            )}
 
             {showIncoming && (
               <Line
@@ -139,9 +148,9 @@ export default function ThroughputPanel({ data }) {
                 stroke="#3b82f6"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 5, stroke: '#ffffff', strokeWidth: 2, fill: '#3b82f6' }}
-                onClick={handleIncomingClick}
-                style={{ cursor: 'pointer' }}
+                activeDot={hasData ? { r: 5, stroke: '#ffffff', strokeWidth: 2, fill: '#3b82f6' } : false}
+                onClick={hasData ? handleIncomingClick : undefined}
+                style={{ cursor: hasData ? 'pointer' : 'default' }}
               />
             )}
 
@@ -153,9 +162,9 @@ export default function ThroughputPanel({ data }) {
                 stroke="#8b5cf6"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 5, stroke: '#ffffff', strokeWidth: 2, fill: '#8b5cf6' }}
-                onClick={handleOutgoingClick}
-                style={{ cursor: 'pointer' }}
+                activeDot={hasData ? { r: 5, stroke: '#ffffff', strokeWidth: 2, fill: '#8b5cf6' } : false}
+                onClick={hasData ? handleOutgoingClick : undefined}
+                style={{ cursor: hasData ? 'pointer' : 'default' }}
               />
             )}
           </LineChart>
