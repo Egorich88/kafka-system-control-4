@@ -48,7 +48,7 @@
 .dashboard-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 12px; /* ← ОДИНАКОВЫЙ ОТСТУП ПО ВЕРТИКАЛИ */
     padding-bottom: clamp(16px, 2vw, 40px);
 }
 
@@ -96,15 +96,15 @@
 
 .dashboard-row {
     display: grid;
-    gap: 12px;
-    margin-top: 10px;
+    gap: 12px; /* ← ОДИНАКОВЫЙ ОТСТУП ПО ГОРИЗОНТАЛИ */
+    margin-top: 0; /* ← УБИРАЕМ margin-top, чтобы не было двойного отступа */
 }
 
 /* Ряд 2: Throughput (40%) | Topics (60%) */
 .dashboard-row-top {
     display: grid;
     grid-template-columns: 40% 60%;
-    gap: 12px;
+    gap: 12px; /* ← ТОТ ЖЕ GAP */
 }
 
 .panel-throughput,
@@ -116,8 +116,7 @@
 .dashboard-row-main {
     display: grid;
     grid-template-columns: 60% 40%;
-    gap: 12px;
-    /* margin-bottom удалён — используем padding у контейнера */
+    gap: 12px; /* ← ТОТ ЖЕ GAP */
 }
 
 .dashboard-main-left {
