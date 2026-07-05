@@ -387,7 +387,7 @@
     width: auto;
     background: linear-gradient(180deg, #3b82f6, #2563eb);
     border: none;
-    color: var(--text-primary);
+    color: #ffffff !important; /* ← ЯВНО БЕЛЫЙ ЦВЕТ */
     border-radius: 14px;
     padding: 12px 22px;
     cursor: pointer;
@@ -397,6 +397,7 @@
 .primary-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 8px 20px rgba(37,99,235,0.35);
+    color: #ffffff !important; /* ← И ПРИ НАВЕДЕНИИ БЕЛЫЙ */
 }
 .secondary-btn {
     width: auto;
