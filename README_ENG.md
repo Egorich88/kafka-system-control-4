@@ -97,7 +97,7 @@ All version history is available on the Releases page. Each release includes:
 
   - ✅ Message search (by partition, offset)
 
-  - ⏳ Monitoring dashboard (lag graphs, throughput, errors)
+  - ✅ Monitoring dashboard (lag graphs, throughput, errors)
 
   - ⏳ Consumer group management (view, offset reset)
 
