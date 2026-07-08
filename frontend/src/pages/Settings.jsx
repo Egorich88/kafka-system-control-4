@@ -22,7 +22,6 @@
 
 import { useTheme } from '../contexts/ThemeContext';
 import Dropdown from '../components/common/Dropdown';
-import '../App.css';
 import '../styles/settings.css';
 
 /** Список тем: ключ и отображаемая метка */

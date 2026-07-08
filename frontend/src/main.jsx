@@ -13,28 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import './styles/themes.css';
-import './styles/sidebar.css';
-import { ThemeProvider } from './contexts/ThemeContext';
+
+/**
+ * @fileoverview
+ * Точка входа (Entry Point) frontend-приложения Kafka System Control.
+ *
+ * Назначение файла:
+ * - является первой точкой запуска React-приложения;
+ * - подключает глобальные стили приложения;
+ * - инициализирует систему локализации (i18n);
+ * - подключает глобальные Context Provider'ы;
+ * - монтирует корневой компонент <App /> в DOM.
+ *
+ * Что НЕ должно находиться в этом файле:
+ * - бизнес-логика;
+ * - маршрутизация приложения;
+ * - компоненты интерфейса;
+ * - запросы к API;
+ * - состояние приложения.
+ *
+ * Любая логика должна располагаться в соответствующих компонентах,
+ * сервисах или Context Provider'ах.
+ */
+
+/* Библиотеки React */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
-import './App.css';
+
+/* Глобальные стили */
+import './styles/global.css';
+import './styles/themes.css';
+import './styles/layout.css';
+import './styles/sidebar.css';
+
+/* Инициализация локализации */
 import './i18n';
+
+/* Корневой компонент приложения */
+import App from './App';
+
+/* Глобальные провайдеры */
+import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-
     <ThemeProvider>
-
       <LanguageProvider>
-
         <App />
-
       </LanguageProvider>
-
     </ThemeProvider>
-
   </React.StrictMode>
 );
