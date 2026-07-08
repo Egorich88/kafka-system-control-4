@@ -58,10 +58,6 @@ import Sidebar from './Sidebar';
 import CreateClusterPanel from '../CreateClusterPanel';
 import ClusterSettingsPanel from '../ClusterSettingsPanel';
 
-// Прочее
-import packageJson from '../../../package.json';
-import { useTranslation } from 'react-i18next';
-
 // =============================================================================
 // КОМПОНЕНТ LAYOUT
 // =============================================================================
