@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout';
+import Layout from './components/layout/Layout';
 import Overview from './pages/Overview';
 import Topics from './pages/Topics';
 import Groups from './pages/Groups';
