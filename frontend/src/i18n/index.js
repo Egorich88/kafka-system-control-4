@@ -25,7 +25,7 @@ i18n
       }
     },
 
-    lng: 'ru',
+    lng: localStorage.getItem('ksc_language') || 'ru',
 
     fallbackLng: 'en',
 

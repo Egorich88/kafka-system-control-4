@@ -14,184 +14,213 @@
  * limitations under the License.
  */
 
-import { Outlet, useNavigate } from 'react-router-dom';
+/**
+ * =============================================================================
+ * @file Layout.jsx
+ * =============================================================================
+ *
+ * Основной макет (Layout) приложения Kafka System Control.
+ *
+ * @description
+ * Формирует общий каркас пользовательского интерфейса:
+ * - отображает боковую панель навигации (Sidebar);
+ * - предоставляет область для отображения страниц приложения (Outlet);
+ * - управляет окнами создания и редактирования Kafka-кластеров.
+ *
+ * @responsibility
+ * - отображение общего Layout приложения;
+ * - взаимодействие с ClusterContext;
+ * - открытие и закрытие панелей управления кластерами;
+ * - передача обработчиков в Sidebar;
+ * - отображение текущей страницы через Outlet.
+ *
+ * @note
+ * Layout является единым контейнером для всего пользовательского интерфейса.
+ * Не отвечает за отображение страниц, работу с API или бизнес-логику.
+ * =============================================================================
+ */
 
-import { useCluster } from '../../contexts/ClusterContext';
+// =============================================================================
+// ИМПОРТЫ
+// =============================================================================
 
+// React и хуки
 import { useState } from 'react';
 
-import CreateClusterPanel from '../CreateClusterPanel';
+// React Router
+import { Outlet, useNavigate } from 'react-router-dom';
 
+// Контексты
+import { useCluster } from '../../contexts/ClusterContext';
+
+// Компоненты
+import Sidebar from './Sidebar';
+import CreateClusterPanel from '../CreateClusterPanel';
 import ClusterSettingsPanel from '../ClusterSettingsPanel';
 
-import Sidebar from './Sidebar';
-
+// Прочее
 import packageJson from '../../../package.json';
-
 import { useTranslation } from 'react-i18next';
 
+// =============================================================================
+// КОМПОНЕНТ LAYOUT
+// =============================================================================
+
+/**
+ * Основной компонент макета приложения.
+ *
+ * @component
+ * @returns {JSX.Element} - Разметка основного макета
+ */
 const Layout = () => {
+  // =========================================================================
+  // ХУКИ И СОСТОЯНИЯ
+  // =========================================================================
+
+  /** Хук навигации React Router */
   const navigate = useNavigate();
-  const { t } = useTranslation();
 
+  /** Хук управления кластерами */
   const {
-
     clusters,
     currentCluster,
     changeCluster,
     addCluster,
     updateCluster,
     removeCluster
-
   } = useCluster();
 
-  const [showPanel, setShowPanel] =
-    useState(false);
+  /** Состояние: видимость панели управления кластером */
+  const [showPanel, setShowPanel] = useState(false);
 
-  const [panelMode, setPanelMode] =
-    useState(null);
+  /** Состояние: режим панели ('create' | 'settings' | null) */
+  const [panelMode, setPanelMode] = useState(null);
 
-  const [editingCluster, setEditingCluster] =
-    useState(null);
+  /** Состояние: редактируемый кластер (null — создание нового) */
+  const [editingCluster, setEditingCluster] = useState(null);
 
+  // =========================================================================
+  // ОБРАБОТЧИКИ СОБЫТИЙ
+  // =========================================================================
+
+  /**
+   * Открывает панель создания нового кластера.
+   */
   const handleAdd = () => {
-
     setPanelMode('create');
-
     setEditingCluster(null);
-
     setShowPanel(true);
   };
 
+  /**
+   * Открывает панель редактирования текущего кластера.
+   */
   const handleEdit = () => {
-
     if (!currentCluster) return;
-
     setPanelMode('settings');
-
     setEditingCluster(currentCluster);
-
     setShowPanel(true);
   };
 
+  /**
+   * Сохраняет кластер (создание или обновление).
+   *
+   * @param {Object} clusterConfig - Конфигурация кластера
+   */
   const handleSave = (clusterConfig) => {
-
+    // Проверка: если редактируемый кластер был удалён
     if (
       editingCluster &&
-      !clusters.find(
-        c => c.id === editingCluster.id
-      )
+      !clusters.find(c => c.id === editingCluster.id)
     ) {
-
-      setShowPanel(false);
-
-      setEditingCluster(null);
-
-      setPanelMode(null);
-
+      handleClose();
       return;
     }
 
+    // Обновление существующего кластера
     if (editingCluster) {
-
       updateCluster({
-
         ...clusterConfig,
-
-        id: editingCluster.id
+        id: editingCluster.id,
       });
-
-    } else {
-
+    }
+    // Создание нового кластера
+    else {
       addCluster(clusterConfig);
     }
 
+    handleClose();
+  };
+
+  /**
+   * Закрывает панель управления кластером и сбрасывает состояние.
+   */
+  const handleClose = () => {
     setShowPanel(false);
-
     setEditingCluster(null);
-
     setPanelMode(null);
   };
 
-  const handleCancel = () => {
-
-    setShowPanel(false);
-
-    setEditingCluster(null);
-
-    setPanelMode(null);
+  /**
+   * Удаляет кластер и закрывает панель.
+   *
+   * @param {string} clusterId - ID удаляемого кластера
+   */
+  const handleDelete = (clusterId) => {
+    removeCluster(clusterId);
+    handleClose();
+    navigate('/');
   };
 
-  const version = packageJson.version;
-
-  const author = 'Егор Хоменко';
-
-  const githubUrl =
-    'https://github.com/Egorich88';
+  // =========================================================================
+  // РЕНДЕР
+  // =========================================================================
 
   return (
-
     <div className="app-layout sidebar-dark">
-
+      {/* Боковая панель */}
       <Sidebar
         onAddCluster={handleAdd}
         onEditCluster={handleEdit}
       />
 
+      {/* Основная область контента */}
       <main className="main-content">
-
         <Outlet />
-
       </main>
 
+      {/* Модальное окно управления кластером */}
       {showPanel && (
-
         <div
           className="config-overlay"
-          onClick={handleCancel}
+          onClick={handleClose}
+          role="dialog"
+          aria-modal="true"
         >
-
           <div
             className="config-panel"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
-
+            {/* Панель создания кластера */}
             {panelMode === 'create' && (
-
               <CreateClusterPanel
                 onSave={handleSave}
-                onCancel={handleCancel}
+                onCancel={handleClose}
               />
             )}
 
+            {/* Панель редактирования кластера */}
             {panelMode === 'settings' && (
-
               <ClusterSettingsPanel
                 cluster={editingCluster}
                 onSave={handleSave}
-                onCancel={handleCancel}
-                onDelete={(clusterId) => {
-
-                  removeCluster(clusterId);
-
-                  setShowPanel(false);
-
-                  setEditingCluster(null);
-
-                  setPanelMode(null);
-
-                  navigate('/');
-                }}
+                onCancel={handleClose}
+                onDelete={handleDelete}
               />
             )}
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 };
