@@ -106,6 +106,14 @@ export function ClusterProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // только один раз при монтировании
 
+  // --- Автоматическое сохранение списка кластеров ---
+  useEffect(() => {
+    localStorage.setItem(
+      'kafka_clusters',
+      JSON.stringify(clusters)
+    );
+  }, [clusters]);
+
   const addCluster = (cluster) => {
     const newCluster = {
       ...cluster,
@@ -113,21 +121,21 @@ export function ClusterProvider({ children }) {
       connectionStatus: 'checking'
     };
     setClusters(prev => [...prev, newCluster]);
-    localStorage.setItem('kafka_clusters', JSON.stringify([...clusters, newCluster]));
+
     setCurrentCluster(newCluster);
     checkClusterStatus(newCluster.id, newCluster.brokers);
   };
 
   const updateCluster = (updatedCluster) => {
     setClusters(prev => prev.map(c => c.id === updatedCluster.id ? updatedCluster : c));
-    localStorage.setItem('kafka_clusters', JSON.stringify(clusters.map(c => c.id === updatedCluster.id ? updatedCluster : c)));
+
     if (currentCluster?.id === updatedCluster.id) setCurrentCluster(updatedCluster);
   };
 
   const removeCluster = (clusterId) => {
     const newClusters = clusters.filter(c => c.id !== clusterId);
     setClusters(newClusters);
-    localStorage.setItem('kafka_clusters', JSON.stringify(newClusters));
+
     if (currentCluster?.id === clusterId) setCurrentCluster(newClusters[0] || null);
   };
 
