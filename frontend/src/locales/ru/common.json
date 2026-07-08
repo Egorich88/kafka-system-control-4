@@ -4,7 +4,7 @@
   "topics": "Топики",
   "consumerGroups": "Группы потребителей",
   "searchMessages": "Поиск сообщений",
-  "settings": "Настройки",
   "healthy": "Стабильно",
-  "cluster": "Кластер"
+  "cluster": "Кластер",
+  "settings": { "title": "Настройки", "subtitle": "Персонализация интерфейса", "theme": "Темы", "themeDescription": "Настройка внешнего вида интерфейса", "language": "Язык", "languageDescription": "Выбор языка интерфейса" }
 }

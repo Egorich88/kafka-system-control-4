@@ -4,7 +4,16 @@
   "topics": "Topics",
   "consumerGroups": "Consumer Groups",
   "searchMessages": "Search Messages",
-  "settings": "Settings",
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Interface personalization",
+
+    "theme": "Themes",
+    "themeDescription": "Customize the application appearance",
+
+    "language": "Language",
+    "languageDescription": "Select application language"
+  },
   "healthy": "Healthy",
   "cluster": "Cluster"
 }

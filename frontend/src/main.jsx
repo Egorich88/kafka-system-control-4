@@ -47,7 +47,7 @@ import './styles/layout.css';
 import './styles/sidebar.css';
 
 /* Инициализация локализации */
-import './i18n';
+import './i18n/index.js';
 
 /* Корневой компонент приложения */
 import App from './App';

@@ -22,6 +22,7 @@
 
 import { useTheme } from '../contexts/ThemeContext';
 import Dropdown from '../components/common/Dropdown';
+import { useTranslation } from 'react-i18next';
 import '../styles/settings.css';
 
 /** Список тем: ключ и отображаемая метка */
@@ -46,11 +47,43 @@ const THEMES_LIST = [
   { id: 'rainbow', name: 'Rainbow' }
 ];
 
+const LANGUAGES = [
+    {
+        id: 'ru',
+        name: 'Русский'
+    },
+    {
+        id: 'en',
+        name: 'English'
+    }
+];
+
 export default function Settings() {
   const { theme, setTheme } = useTheme();
+  const { t, i18n } = useTranslation();
+
+  console.log('LANG =', i18n.language);
+  console.log('RU =', i18n.getResourceBundle('ru', 'translation'));
+  console.log('EN =', i18n.getResourceBundle('en', 'translation'));
+  console.log('TITLE =', t('settings.title'));
 
   // Текущий выбранный объект для Dropdown
   const currentThemeObj = THEMES_LIST.find(t => t.id === theme) || THEMES_LIST[0];
+
+  const currentLanguageObj =
+      LANGUAGES.find(
+          lang => lang.id === i18n.language
+      ) || LANGUAGES[0];
+
+  const handleLanguageSelect = (selected) => {
+
+      i18n.changeLanguage(selected.id);
+
+      localStorage.setItem(
+          'ksc_language',
+          selected.id
+      );
+  };
 
   const handleThemeSelect = (selected) => {
     setTheme(selected.id);
@@ -59,24 +92,40 @@ export default function Settings() {
   return (
     <div className="settings-page">
       <div className="settings-page-header">
-        <h1>Настройки</h1>
-        <p>Персонализация интерфейса</p>
+        <h1>{t('settings.title')}</h1>
+        <p>{t('settings.subtitle')}</p>
       </div>
 
       <div className="settings-card">
+
+        {/* Темы */}
         <div className="settings-block">
           <div className="settings-block-info">
-            <h3>Темы</h3>
-            <p>Настройка внешнего вида интерфейса</p>
+            <h3>{t('settings.theme')}</h3>
+            <p>{t('settings.themeDescription')}</p>
           </div>
 
-          {/* Используем универсальный Dropdown */}
           <Dropdown
             selectedItem={currentThemeObj}
             items={THEMES_LIST.filter(item => item.id !== theme)}
             onSelect={handleThemeSelect}
           />
         </div>
+
+        {/* Язык */}
+        <div className="settings-block">
+          <div className="settings-block-info">
+            <h3>{t('settings.language')}</h3>
+            <p>{t('settings.languageDescription')}</p>
+          </div>
+
+          <Dropdown
+            selectedItem={currentLanguageObj}
+            items={LANGUAGES.filter(item => item.id !== i18n.language)}
+            onSelect={handleLanguageSelect}
+          />
+        </div>
+
       </div>
     </div>
   );

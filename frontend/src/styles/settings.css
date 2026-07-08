@@ -63,3 +63,9 @@
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px var(--input-focus);
 }
+
+.settings-block + .settings-block {
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border-color);
+}
