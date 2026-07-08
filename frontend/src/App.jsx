@@ -52,6 +52,8 @@ import Layout from './components/layout/Layout';
 
 // Pages
 import Overview from './pages/Overview';
+import Brokers from './pages/Brokers';
+import Console from './pages/Console';
 import Topics from './pages/Topics';
 import Groups from './pages/Groups';
 import Acl from './pages/Acl';
@@ -83,6 +85,9 @@ function App() {
             {/* Раздел "Обзор" */}
             <Route path="overview" element={<Overview />} />
 
+            {/* Управление брокерами */}
+            <Route path="brokers" element={<Brokers />} />
+
             {/* Управление топиками */}
             <Route path="topics" element={<Topics />} />
 
@@ -94,6 +99,9 @@ function App() {
 
             {/* Поиск сообщений */}
             <Route path="search" element={<Search />} />
+
+            {/* Консоль Kafka */}
+            <Route path="console" element={<Console />} />
 
              {/* Настройки приложения */}
             <Route path="/settings" element={<Settings />} />

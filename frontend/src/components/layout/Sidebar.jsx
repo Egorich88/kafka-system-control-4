@@ -24,14 +24,15 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   FiHome,
+  FiServer,
   FiLayers,
   FiUsers,
   FiSearch,
   FiSliders,
   FiShield,
-  FiRotateCcw,
   FiAlertTriangle,
   FiFileText,
+  FiTerminal,
   FiSettings,
   FiGithub
 } from 'react-icons/fi';
@@ -215,37 +216,68 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
         {/* -------------------- Основная навигация (отображается только при выбранном кластере) -------------------- */}
         {hasCluster && (
           <nav className="sidebar-nav">
+            {/* Обзор */}
             <NavLink to="/" end className="sidebar-link">
               <FiHome />
               <span>Обзор</span>
             </NavLink>
+
+            {/* ----------------------------------------------------------
+                Разделитель навигации
+            ----------------------------------------------------------- */}
+            <div className="sidebar-divider" />
+
+            {/* Брокеры */}
+            <NavLink to="/brokers" className="sidebar-link">
+              <FiServer />
+              <span>Брокеры</span>
+            </NavLink>
+
+            {/* Топики */}
             <NavLink to="/topics" className="sidebar-link">
               <FiLayers />
               <span>Топики</span>
             </NavLink>
+
+            {/* Группы потребителей */}
             <NavLink to="/groups" className="sidebar-link">
               <FiUsers />
-              <span>Консьюмеры</span>
+              <span>Группы потребителей</span>
             </NavLink>
-            <NavLink to="/offset-reset" className="sidebar-link">
-              <FiRotateCcw />
-              <span>Сброс оффсетов</span>
-            </NavLink>
+
+            {/* Поиск сообщений */}
             <NavLink to="/search" className="sidebar-link">
               <FiSearch />
               <span>Поиск сообщений</span>
             </NavLink>
+
+            {/* ACL */}
             <NavLink to="/acls" className="sidebar-link">
               <FiShield />
               <span>ACL</span>
             </NavLink>
+
+            {/* ----------------------------------------------------------
+                Разделитель навигации
+            ----------------------------------------------------------- */}
+            <div className="sidebar-divider" />
+
+            {/* Оповещения */}
             <NavLink to="/alerts" className="sidebar-link">
               <FiAlertTriangle />
               <span>Оповещения</span>
             </NavLink>
+
+            {/* Аудит */}
             <NavLink to="/logs" className="sidebar-link">
               <FiFileText />
-              <span>Логи</span>
+              <span>Аудит</span>
+            </NavLink>
+
+            {/* Консоль Kafka */}
+            <NavLink to="/console" className="sidebar-link">
+              <FiTerminal />
+              <span>Консоль</span>
             </NavLink>
           </nav>
         )}
@@ -254,7 +286,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
       {/* -------------------- Нижняя область (настройки + футер) -------------------- */}
       <div className="sidebar-bottom">
         {/* Настройки */}
-        <nav className="sidebar-nav sidebar-settings-nav">
+        <nav className="sidebar-nav">
           <NavLink to="/settings" className="sidebar-link">
             <FiSettings />
             <span>Настройки</span>
