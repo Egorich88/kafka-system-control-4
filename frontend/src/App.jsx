@@ -13,28 +13,89 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ /**
+  * =============================================================================
+  * @file App.jsx
+  * =============================================================================
+  *
+  * Корневой компонент приложения Kafka System Control.
+  *
+  * Назначение файла:
+  * - определяет основную структуру React-приложения;
+  * - инициализирует маршрутизацию (React Router);
+  * - подключает глобальный контекст кластеров (ClusterContext);
+  * - связывает Layout со всеми страницами приложения.
+  *
+  * Ответственность файла:
+  * - регистрация маршрутов приложения;
+  * - определение стартовой страницы;
+  * - подключение глобальных Provider'ов, относящихся к приложению;
+  * - формирование общей структуры навигации.
+  *
+  * В этом файле запрещено размещать:
+  * - бизнес-логику;
+  * - запросы к API;
+  * - состояние отдельных страниц;
+  * - код пользовательского интерфейса страниц;
+  * - стили компонентов.
+  *
+  * App.jsx является точкой сборки всего интерфейса приложения.
+  * =============================================================================
+  */
+
+// React Router
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+// Layout
 import Layout from './components/layout/Layout';
+
+// Pages
 import Overview from './pages/Overview';
 import Topics from './pages/Topics';
 import Groups from './pages/Groups';
 import Acl from './pages/Acl';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
+
+// Contexts
 import { ClusterProvider } from './contexts/ClusterContext';
 
 function App() {
   return (
+      /* ============================================================
+         Глобальный контекст управления Kafka-кластерами
+         ============================================================ */
     <ClusterProvider>
+        {/* ============================================================
+            Маршрутизация приложения
+            ============================================================ */}
       <BrowserRouter>
         <Routes>
+            {/* ========================================================
+                Общий макет приложения (Sidebar + область контента)
+                ======================================================== */}
           <Route element={<Layout />}>
+
+            {/* Главная страница */}
             <Route index element={<Overview />} />
+
+            {/* Раздел "Обзор" */}
             <Route path="overview" element={<Overview />} />
+
+            {/* Управление топиками */}
             <Route path="topics" element={<Topics />} />
+
+            {/* Управление группами консьюмеров */}
             <Route path="groups" element={<Groups />} />
+
+            {/* Управление ACL */}
             <Route path="acls" element={<Acl />} />
+
+            {/* Поиск сообщений */}
             <Route path="search" element={<Search />} />
+
+             {/* Настройки приложения */}
             <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>

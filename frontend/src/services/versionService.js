@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
- /* СЕРВИС ОТВЕЧАЮЩИЙ ЗА ОБНОВЛЕНИЕ ВЕРСИИ */
+ /**
+  * @fileoverview
+  * Сервис для получения информации о последней версии Kafka System Control
+  * из GitHub Releases.
+  *
+  * Используется Sidebar для проверки наличия новых версий приложения.
+  */
 export async function getLatestVersion() {
   try {
     const response = await fetch(
