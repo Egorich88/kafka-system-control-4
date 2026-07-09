@@ -25,6 +25,14 @@
     padding: 22px 18px;
     border-bottom: 1px solid var(--border-color);
 }
+/* Верхняя строка Sidebar */
+.sidebar-header {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+}
 .sidebar-logo-image {
     width: 120px;
     height: auto;
@@ -692,6 +700,13 @@
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border-color);
     color: var(--text-primary);
+    /* Плавное изменение ширины Sidebar */
+    transition: width .25s ease;
+}
+/* Свернутый Sidebar */
+.sidebar.collapsed {
+    width: 72px;
+    min-width: 72px;
 }
 .sidebar-top {
     display: flex;
@@ -752,4 +767,35 @@
         min-width: 38px;
         font-size: 22px;
     }
+}
+/* ==========================================================
+   Кнопка сворачивания Sidebar
+========================================================== */
+
+.sidebar-collapse-button {
+  position: absolute;
+  top: -8px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition:
+    background-color .2s ease,
+    color .2s ease;
+}
+
+.sidebar-collapse-button:hover {
+  background: var(--hover-color);
+}
+
+.sidebar-collapse-button svg {
+  width: 18px;
+  height: 18px;
 }

@@ -34,7 +34,8 @@ import {
   FiFileText,
   FiTerminal,
   FiSettings,
-  FiGithub
+  FiGithub,
+  FiSidebar
 } from 'react-icons/fi';
 import packageJson from '../../../package.json';
 import Dropdown from '../common/Dropdown';
@@ -86,10 +87,10 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
   const [latestVersion, setLatestVersion] = useState(null);
   const [animateVersion, setAnimateVersion] = useState(false);
 
-  // ============================================================
-  // Логотип в зависимости от темы
-  // ============================================================
+  // Состояние боковой панели
+  const [collapsed, setCollapsed] = useState(false);
 
+  // Логотип в зависимости от темы
   const isLightTheme =
     document.documentElement.getAttribute('data-theme') === 'light';
 
@@ -152,19 +153,38 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
   // Рендер
   // =========================================================================
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       {/* -------------------- Верхняя область (логотип + кластер) -------------------- */}
       <div className="sidebar-top">
         {/* Логотип и название проекта */}
         <div className="sidebar-logo">
-          <div className="sidebar-logo-brand">
-            <img
-              src={sidebarLogo}
-              alt="Kafka System Control"
-              className="sidebar-logo-image"
-            />
+
+          {/* ----------------------------------------------------------
+              Верхняя строка Sidebar
+          ----------------------------------------------------------- */}
+          <div className="sidebar-header">
+
+            {/* Логотип */}
+            <div className="sidebar-logo-brand">
+              <img
+                src={sidebarLogo}
+                alt="Kafka System Control"
+                className="sidebar-logo-image"
+              />
+            </div>
+
+            {/* Кнопка сворачивания боковой панели */}
+            <button
+              className="sidebar-collapse-button"
+              onClick={() => setCollapsed(!collapsed)}
+              title={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
+            >
+              <FiSidebar />
+            </button>
+
           </div>
-          {/* Ссылка на релизы с индикатором обновления */}
+
+          {/* Ссылка на релизы */}
           <a
             href="https://github.com/Egorich88/kafka-system-control-4/releases"
             target="_blank"
