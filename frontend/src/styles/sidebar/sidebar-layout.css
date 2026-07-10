@@ -1,0 +1,97 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ============================================================
+   sidebar-layout.css
+
+   Назначение:
+   Основной каркас Sidebar.
+
+   Файл содержит только контейнеры Sidebar и отвечает за:
+
+   • размеры Sidebar;
+   • ширину в обычном и свернутом состоянии;
+   • расположение верхней и нижней частей;
+   • базовую анимацию изменения ширины.
+
+   Здесь НЕ размещаются:
+
+   • логотип;
+   • меню;
+   • кнопки;
+   • выбор кластера;
+   • конфигурационная панель.
+
+   ============================================================ */
+
+
+/* ============================================================
+   Основной контейнер Sidebar
+   ============================================================ */
+
+/* Основной контейнер Sidebar */
+.sidebar {
+    width: 290px;
+    min-width: 290px;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+
+    color: var(--text-primary);
+
+    /* Плавное изменение ширины Sidebar */
+    transition: width .25s ease;
+}
+
+
+/* Свернутый Sidebar */
+.sidebar.collapsed {
+    width: 72px;
+    min-width: 72px;
+}
+
+
+/* Верхняя часть Sidebar
+   (логотип, выбор кластера, навигация) */
+.sidebar-top {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+
+/* Нижняя часть Sidebar
+   (настройки, версия, GitHub) */
+.sidebar-bottom {
+    display: flex;
+    flex-direction: column;
+
+    margin-top: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+
+/* Контейнер блока "Настройки" */
+.sidebar-settings-nav {
+    padding: 0 16px 14px;
+}

@@ -1,0 +1,348 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ============================================================
+   config-panel.css
+
+   Назначение:
+   Стили панели настройки Kafka-кластера.
+
+   Отвечает за:
+   • затемнение страницы (Overlay)
+   • выезжающую панель справа
+   • форму настройки кластера
+   • поля ввода
+   • кнопки управления
+   • карточки выбора аутентификации
+
+   Используется:
+   ClusterConfigModal.jsx
+   Sidebar.jsx
+
+   Все цвета берутся из themes.css.
+   ============================================================ */
+
+
+/* ============================================================
+   Затемнение страницы
+   ============================================================ */
+
+.config-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: flex-end;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(3px);
+    z-index: 9999;
+}
+
+
+/* ============================================================
+   Правая выезжающая панель
+   ============================================================ */
+
+.config-panel {
+    width: 560px;
+    max-width: 92vw;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-left: 1px solid rgba(255,255,255,.08);
+    box-shadow: -12px 0 40px rgba(0,0,0,.45);
+    animation: slidePanel .22s ease;
+}
+
+
+/* ============================================================
+   Анимация открытия панели
+   ============================================================ */
+
+@keyframes slidePanel {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+
+/* ============================================================
+   Основной контейнер формы
+   ============================================================ */
+
+.cluster-config-modal {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-primary);
+}
+
+
+/* ============================================================
+   Заголовок панели
+   ============================================================ */
+
+.cluster-config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 28px 28px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cluster-config-header h2 {
+    margin-bottom: 6px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.cluster-config-header span {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   Кнопка закрытия панели
+   ============================================================ */
+
+.modal-hide-btn {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.modal-hide-btn:hover {
+    color: var(--text-primary);
+}
+
+
+/* ============================================================
+   Основная форма
+   ============================================================ */
+
+.cluster-config-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px 28px;
+}
+
+.cluster-config-body label {
+    margin-bottom: -10px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   Поля ввода
+   ============================================================ */
+
+.cluster-config-body input,
+.cluster-config-body select,
+.cluster-config-body textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: .2s;
+}
+
+.cluster-config-body input:focus,
+.cluster-config-body select:focus,
+.cluster-config-body textarea:focus {
+    border-color: rgba(59,130,246,.8);
+    box-shadow: 0 0 0 3px var(--input-focus);
+}
+
+.cluster-config-body input::placeholder,
+.cluster-config-body textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+
+/* ============================================================
+   Нижняя панель кнопок
+   ============================================================ */
+
+.cluster-config-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    border-top: 1px solid var(--border-color);
+}
+
+.cluster-config-footer-right {
+    display: flex;
+    gap: 12px;
+}
+
+
+/* ============================================================
+   Первичная кнопка
+   ============================================================ */
+
+.primary-btn {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(180deg,#3b82f6,#2563eb);
+    color: #fff !important;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.primary-btn:hover {
+    transform: translateY(-1px);
+    color:#fff !important;
+    box-shadow:0 8px 20px rgba(37,99,235,.35);
+}
+
+
+/* ============================================================
+   Вторичная кнопка
+   ============================================================ */
+
+.secondary-btn {
+    padding:12px 22px;
+    border-radius:14px;
+    border:1px solid var(--border-color);
+    background:var(--card-bg);
+    color:var(--text-primary);
+    cursor:pointer;
+    transition:.2s;
+}
+
+.secondary-btn:hover {
+    background:rgba(255,255,255,.08);
+}
+
+
+/* ============================================================
+   Кнопка удаления кластера
+   ============================================================ */
+
+.delete-cluster-btn-danger {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 18px;
+    border-radius:14px;
+    border:1px solid rgba(239,68,68,.3);
+    background:rgba(239,68,68,.12);
+    color:#ef4444;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.delete-cluster-btn-danger:hover {
+    background:rgba(239,68,68,.2);
+}
+
+
+/* ============================================================
+   Блок выбора типа аутентификации
+   ============================================================ */
+
+.auth-section-title {
+    margin-top:10px;
+    margin-bottom:4px;
+    color:var(--text-primary);
+    font-size:15px;
+    font-weight:700;
+}
+
+.auth-card {
+    display:flex;
+    gap:18px;
+    padding:22px;
+    border-radius:18px;
+    border:1px solid var(--border-color);
+    background:var(--card-bg);
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.auth-card:hover {
+    background:rgba(255,255,255,.05);
+}
+
+.auth-card.active {
+    border:1px solid rgba(59,130,246,.9);
+    box-shadow:0 0 0 1px rgba(59,130,246,.35);
+}
+
+.auth-card h4 {
+    margin-bottom:10px;
+    color:var(--text-primary);
+    font-size:18px;
+}
+
+.auth-card p {
+    margin-bottom:6px;
+    color:var(--text-secondary);
+    line-height:1.5;
+    font-size:14px;
+}
+
+.auth-radio {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    width:24px;
+    height:24px;
+    margin-top:2px;
+    flex-shrink:0;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,.3);
+}
+
+.auth-card.active .auth-radio {
+    border-color:#3b82f6;
+}
+
+.auth-radio-dot {
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#3b82f6;
+    opacity:0;
+}
+
+.auth-card.active .auth-radio-dot {
+    opacity:1;
+}
+
+.auth-fields {
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}

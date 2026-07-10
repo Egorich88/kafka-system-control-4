@@ -1,0 +1,125 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ============================================================
+   sidebar-header.css
+
+   Назначение:
+   Верхняя часть Sidebar.
+
+   Файл отвечает за:
+
+   • отображение логотипа;
+   • расположение логотипа;
+   • контейнер шапки Sidebar;
+   • поведение логотипа при сворачивании Sidebar.
+
+   Здесь НЕ находятся:
+
+   • кнопка сворачивания Sidebar;
+   • выбор кластера;
+   • навигационное меню.
+
+   ============================================================ */
+
+
+/* ============================================================
+   Контейнер логотипа
+   ============================================================ */
+
+/* Основной контейнер логотипа */
+.sidebar-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    padding: 18px 18px;
+
+    border-bottom: 1px solid var(--border-color);
+}
+
+
+/* Верхняя строка Sidebar */
+.sidebar-header {
+    position: relative;
+    overflow: visible;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    width: 100%;
+}
+
+
+/* Изображение логотипа */
+.sidebar-logo-image {
+    width: 120px;
+    height: auto;
+
+    display: block;
+
+    transition:
+        width .25s ease,
+        opacity .25s ease,
+        transform .25s ease;
+}
+
+
+/* Контейнер бренда */
+.sidebar-logo-brand {
+    justify-content: center;
+    width: 100%;
+}
+
+
+/* ============================================================
+   Свернутый Sidebar
+   ============================================================ */
+
+/* Центрирование логотипа */
+.sidebar.collapsed .sidebar-logo {
+    align-items: center;
+}
+
+
+/* Центрирование header */
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+}
+
+
+/* Центрирование бренда */
+.sidebar.collapsed .sidebar-logo-brand {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+
+/* Уменьшенный логотип */
+.sidebar.collapsed .sidebar-logo-image {
+    width: 54px;
+
+    margin: 0 auto;
+
+    opacity: 1;
+
+    transition:
+        opacity .18s ease,
+        transform .18s ease;
+}

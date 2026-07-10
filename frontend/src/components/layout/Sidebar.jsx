@@ -219,28 +219,43 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
               </div>
           )}
           {hasCluster ? (
-            <div className={`cluster-row ${collapsed ? 'collapsed' : ''}`}>
-              {!collapsed && (
-                  <Dropdown
-                      selectedItem={currentCluster}
-                      items={clusters.filter(cluster => cluster.id !== currentCluster.id)}
-                      onSelect={changeCluster}
-                      addLabel="+ Добавить кластер"
-                      onAdd={onAddCluster}
-                      statusResolver={(cluster) => cluster?.connectionStatus || 'unknown'}
+              <div className={`cluster-row ${collapsed ? 'collapsed' : ''}`}>
+                  {!collapsed && (
+                      <Dropdown
+                          selectedItem={currentCluster}
+                          items={clusters.filter(cluster => cluster.id !== currentCluster.id)}
+                          onSelect={changeCluster}
+                          addLabel="+ Добавить кластер"
+                          onAdd={onAddCluster}
+                          statusResolver={(cluster) => cluster?.connectionStatus || 'unknown'}
+                      />
+                  )}
+
+                  <FiSliders
+                      className="cluster-settings-icon"
+                      onClick={onEditCluster}
+                      data-tooltip-id="sidebar-tooltip"
+                      data-tooltip-content="Настройки кластера"
                   />
-              )}
-              <FiSliders
-                  className="cluster-settings-icon"
-                  onClick={onEditCluster}
-                  data-tooltip-id="sidebar-tooltip"
-                  data-tooltip-content="Настройки кластера"
-              />
-            </div>
+              </div>
           ) : (
-            <div className="cluster-add-link" onClick={onAddCluster}>
-              + Добавить кластер
-            </div>
+              collapsed ? (
+                  <button
+                      className="cluster-add-collapsed"
+                      onClick={onAddCluster}
+                      data-tooltip-id="sidebar-tooltip"
+                      data-tooltip-content="Добавить кластер"
+                  >
+                      +
+                  </button>
+              ) : (
+                  <div
+                      className="cluster-add-link"
+                      onClick={onAddCluster}
+                  >
+                      + Добавить кластер
+                  </div>
+              )
           )}
         </div>
 

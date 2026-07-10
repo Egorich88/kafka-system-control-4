@@ -1,0 +1,167 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ============================================================
+   footer.css
+
+   Назначение:
+   Стили нижней части Sidebar.
+
+   Отвечает за:
+   • ссылки на GitHub проекта
+   • отображение лицензии
+   • отображение версии продукта
+   • анимацию версии
+   • нижний контейнер Sidebar
+
+   Используется:
+   Sidebar.jsx
+   ============================================================ */
+
+
+/* ============================================================
+   Нижняя часть Sidebar
+   ============================================================ */
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   Ссылка на GitHub проекта
+   ============================================================ */
+
+.footer-project-link {
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: .2s ease;
+}
+
+.footer-project-link:hover {
+    color: #3b82f6;
+}
+
+
+/* ============================================================
+   Иконка GitHub
+   ============================================================ */
+
+.footer-github-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    opacity: .95;
+}
+
+
+/* ============================================================
+   Ссылка на лицензию
+   ============================================================ */
+
+.footer-license {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    transition: .2s ease;
+}
+
+.footer-license:hover {
+    color: var(--text-primary);
+}
+
+
+/* ============================================================
+   Версия продукта
+   ============================================================ */
+
+.sidebar-version {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    color: #60a5fa;
+}
+
+.sidebar-version:hover {
+    color: #93c5fd !important;
+}
+
+
+/* ============================================================
+   Контейнер текста версии
+   ============================================================ */
+
+.version-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* ============================================================
+   Анимация перелива версии
+   ============================================================ */
+
+@keyframes versionGradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes versionGradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+.sidebar-version.animate {
+    background: linear-gradient(
+        90deg,
+        #FF8A00,
+        #FF4FD8,
+        #7A5CFF,
+        #00D4FF,
+        #FF8A00
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation:
+        versionGradientMove 8s linear infinite,
+        versionGradientFlow 2s linear;
+}

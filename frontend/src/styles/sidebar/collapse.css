@@ -1,0 +1,98 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/* ============================================================
+   collapse.css
+
+   Назначение:
+   Стили кнопки сворачивания и разворачивания Sidebar.
+
+   Отвечает за:
+   • кнопку сворачивания
+   • анимацию появления кнопки
+   • скрытие логотипа
+   • hover-эффекты
+   • поведение в свернутом состоянии Sidebar
+
+   Используется:
+   Sidebar.jsx
+   ============================================================ */
+
+/* Кнопка сворачивания / разворачивания Sidebar */
+.sidebar-collapse-button {
+    position: absolute;
+    top: -8px;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-secondary);
+    opacity: 1;
+    transition:
+        opacity .18s ease,
+        background-color .18s ease,
+        color .18s ease,
+        transform .18s ease;
+}
+
+/* Hover как раньше */
+.sidebar-collapse-button:hover {
+    background: var(--sidebar-hover);
+    color: var(--text-primary);
+    transform: scale(1.08);
+}
+
+/* Нажатие */
+.sidebar-collapse-button:active {
+    transform: scale(.94);
+}
+
+.sidebar-collapse-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ----------------------------------------------------------
+   Свернутый Sidebar
+   ---------------------------------------------------------- */
+
+/* По умолчанию кнопка скрыта */
+.sidebar.collapsed .sidebar-collapse-button {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(.9);
+}
+
+/* При наведении логотип плавно исчезает */
+.sidebar.collapsed .sidebar-logo:hover .sidebar-logo-image {
+    opacity: 0;
+    transform: scale(.86);
+}
+
+/* Вместо логотипа появляется кнопка */
+.sidebar.collapsed .sidebar-logo:hover .sidebar-collapse-button {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
