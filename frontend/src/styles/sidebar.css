@@ -217,7 +217,7 @@
 }
 .sidebar-link.active {
     position: relative;
-    background: rgba(59,130,246,.10);
+    background: var(--menu-active-bg);
     color: var(--text-primary);
     border-radius: 0;
 }
@@ -228,7 +228,7 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: #3b82f6;
+    background: var(--accent-color);
 }
 .sidebar-link span{
     white-space:nowrap;
