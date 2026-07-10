@@ -1,3 +1,4 @@
+![img.png](img.png)
 # Kafka System Control
 
 <p align="left">
@@ -15,7 +16,7 @@
 **Kafka System Control** — современный веб‑интерфейс для администрирования Apache Kafka.  
 Построен на **Go** и **React** с нуля, от консольных утилит до production‑готового микросервиса с CI/CD, контейнеризацией и деплоем в Kubernetes.
 
-![img.png](img.png)
+
 
 ---
 

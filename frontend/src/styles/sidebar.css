@@ -22,12 +22,13 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-    padding: 22px 18px;
+    padding: 18px 18px;
     border-bottom: 1px solid var(--border-color);
 }
 /* Верхняя строка Sidebar */
 .sidebar-header {
     position: relative;
+    overflow: visible;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -37,6 +38,32 @@
     width: 120px;
     height: auto;
     display: block;
+    transition:
+        width .25s ease,
+        opacity .25s ease,
+        transform .25s ease;
+}
+.sidebar.collapsed .sidebar-logo {
+    align-items: center;
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-logo-brand {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+/* Логотип исчезновение */
+.sidebar.collapsed .sidebar-logo-image {
+    width: 54px;
+    margin: 0 auto;
+    opacity: 1;
+    transition:
+        opacity .18s ease,
+        transform .18s ease;
 }
 .sidebar-logo-brand {
     justify-content: center;
@@ -169,15 +196,39 @@
         transform 0.18s ease;
 }
 .sidebar-link svg {
-    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
 }
 .sidebar-link:hover {
     background: var(--sidebar-hover);
     color: var(--text-primary);
 }
 .sidebar-link.active {
+    position:relative;
     background: rgba(59,130,246,0.10);
     color: var(--text-primary);
+}
+.sidebar-link.active::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:8px;
+    bottom:8px;
+    width:3px;
+    border-radius:3px;
+    background:#3b82f6;
+}
+.sidebar-link span{
+    white-space:nowrap;
+    overflow:hidden;
+    transition:
+        opacity .18s ease,
+        width .18s ease;
+}
+.sidebar.collapsed .sidebar-link span{
+    opacity:0;
+    width:0;
 }
 /* ============================================================
    Разделители навигации Sidebar
@@ -195,6 +246,7 @@
     );
 }
 
+
 .sidebar-divider-bottom {
     margin-top: 14px;
 }
@@ -203,7 +255,7 @@
    ============================================================ */
 .sidebar-footer {
     margin-top: auto;
-    padding: 20px 24px;
+    padding: 14px 24px;
     border-top: 1px solid var(--border-color);
     color: var(--text-secondary);
     font-size: 13px;
@@ -708,6 +760,13 @@
     width: 72px;
     min-width: 72px;
 }
+.sidebar.collapsed .sidebar-link {
+    justify-content: center;
+    padding: 14px 0;
+    gap:0;
+}
+
+
 .sidebar-top {
     display: flex;
     flex-direction: column;
@@ -718,8 +777,8 @@
     margin-top: auto;
     display: flex;
     flex-direction: column;
-    padding-top: 14px;
-    padding-bottom: 14px;
+    padding-top: 8px;
+    padding-bottom: 8px;
 }
 .sidebar-settings-nav {
     padding: 0 16px 14px;
@@ -769,33 +828,80 @@
     }
 }
 /* ==========================================================
-   Кнопка сворачивания Sidebar
-========================================================== */
+   Кнопка сворачивания / разворачивания Sidebar
+   ========================================================== */
 
 .sidebar-collapse-button {
-  position: absolute;
-  top: -8px;
-  right: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--text-secondary);
-  transition:
-    background-color .2s ease,
-    color .2s ease;
+    position: absolute;
+    top: -8px;
+    right: 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+
+    cursor: pointer;
+    color: var(--text-secondary);
+
+    opacity: 1;
+
+    transition:
+        opacity .18s ease,
+        background-color .18s ease,
+        color .18s ease,
+        transform .18s ease;
 }
 
+/* Hover как раньше */
 .sidebar-collapse-button:hover {
-  background: var(--hover-color);
+    background: var(--sidebar-hover);
+    color: var(--text-primary);
+    transform: scale(1.08);
+}
+
+/* Нажатие */
+.sidebar-collapse-button:active {
+    transform: scale(.94);
 }
 
 .sidebar-collapse-button svg {
-  width: 18px;
-  height: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* ----------------------------------------------------------
+   Свернутый Sidebar
+   ---------------------------------------------------------- */
+
+/* По умолчанию кнопка скрыта */
+.sidebar.collapsed .sidebar-collapse-button {
+    top: 50%;
+    left: 50%;
+    right: auto;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transform: translate(-50%, -50%) scale(.9);
+}
+
+/* При наведении логотип плавно исчезает */
+.sidebar.collapsed .sidebar-logo:hover .sidebar-logo-image {
+    opacity: 0;
+    transform: scale(.86);
+}
+
+/* Вместо логотипа появляется кнопка */
+.sidebar.collapsed .sidebar-logo:hover .sidebar-collapse-button {
+    opacity: 1;
+    pointer-events: auto;
+
+    transform: translate(-50%, -50%) scale(1);
 }

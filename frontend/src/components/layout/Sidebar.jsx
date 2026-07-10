@@ -167,9 +167,8 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             {/* Логотип */}
             <div className="sidebar-logo-brand">
               <img
-                src={sidebarLogo}
-                alt="Kafka System Control"
-                className="sidebar-logo-image"
+                  src={collapsed ? "/logo.svg" : sidebarLogo}
+                  className="sidebar-logo-image"
               />
             </div>
 
@@ -177,7 +176,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             <button
               className="sidebar-collapse-button"
               onClick={() => setCollapsed(!collapsed)}
-              title={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
+              title={collapsed ? "Открыть боковую панель" : "Закрыть боковую панель"}
             >
               <FiSidebar />
             </button>
@@ -186,27 +185,33 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
           {/* Ссылка на релизы */}
           <a
-            href="https://github.com/Egorich88/kafka-system-control-4/releases"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`sidebar-version ${hasUpdate ? 'update-available' : ''} ${animateVersion ? 'animate' : ''}`}
-            title={
-              hasUpdate
-                ? `Доступна версия ${latestVersion}`
-                : localIsNewer
-                ? `Локальная версия новее GitHub`
-                : `Актуальная версия`
-            }
+              href="https://github.com/Egorich88/kafka-system-control-4/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`sidebar-version ${hasUpdate ? 'update-available' : ''} ${animateVersion ? 'animate' : ''}`}
+              title={
+                  hasUpdate
+                      ? `Доступна версия ${latestVersion}`
+                      : localIsNewer
+                          ? `Локальная версия новее GitHub`
+                          : `Актуальная версия`
+              }
           >
-            <span className="version-label">
-              Version {version}
 
-            </span>
+              <span className="version-label">
+
+                  {collapsed
+                      ? version
+                      : `Version ${version}`}
+
+              </span>
+
           </a>
         </div>
 
         {/* Блок выбора / добавления кластера */}
-        <div className="sidebar-cluster">
+        {!collapsed && (
+            <div className="sidebar-cluster">
           <div className="cluster-top">
             <span>КЛАСТЕР</span>
           </div>
@@ -232,14 +237,16 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             </div>
           )}
         </div>
-
+        )}
         {/* -------------------- Основная навигация (отображается только при выбранном кластере) -------------------- */}
         {hasCluster && (
           <nav className="sidebar-nav">
             {/* Обзор */}
-            <NavLink to="/" end className="sidebar-link">
+            <NavLink to="/" end className="sidebar-link" title={collapsed ? "Обзор" : ""}>
               <FiHome />
-              <span>Обзор</span>
+              {!collapsed && (
+                <span>Обзор</span>
+              )}
             </NavLink>
 
             {/* ----------------------------------------------------------
@@ -248,33 +255,43 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             <div className="sidebar-divider" />
 
             {/* Брокеры */}
-            <NavLink to="/brokers" className="sidebar-link">
+            <NavLink to="/brokers" className="sidebar-link" title={collapsed ? "Брокеры" : ""}>
               <FiServer />
-              <span>Брокеры</span>
+              {!collapsed && (
+                <span>Брокеры</span>
+              )}
             </NavLink>
 
             {/* Топики */}
-            <NavLink to="/topics" className="sidebar-link">
+            <NavLink to="/topics" className="sidebar-link" title={collapsed ? "Топики" : ""}>
               <FiLayers />
-              <span>Топики</span>
+              {!collapsed && (
+                <span>Топики</span>
+              )}
             </NavLink>
 
             {/* Группы потребителей */}
-            <NavLink to="/groups" className="sidebar-link">
+            <NavLink to="/groups" className="sidebar-link" title={collapsed ? "Группы потребителей" : ""}>
               <FiUsers />
+              {!collapsed && (
               <span>Группы потребителей</span>
+              )}
             </NavLink>
 
             {/* Поиск сообщений */}
-            <NavLink to="/search" className="sidebar-link">
+            <NavLink to="/search" className="sidebar-link" title={collapsed ? "Поиск сообщений" : ""}>
               <FiSearch />
+              {!collapsed && (
               <span>Поиск сообщений</span>
+              )}
             </NavLink>
 
             {/* ACL */}
-            <NavLink to="/acls" className="sidebar-link">
+            <NavLink to="/acls" className="sidebar-link" title={collapsed ? "ACL" : ""}>
               <FiShield />
+              {!collapsed && (
               <span>ACL</span>
+              )}
             </NavLink>
 
             {/* ----------------------------------------------------------
@@ -283,21 +300,27 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             <div className="sidebar-divider" />
 
             {/* Оповещения */}
-            <NavLink to="/alerts" className="sidebar-link">
+            <NavLink to="/alerts" className="sidebar-link" title={collapsed ? "Оповещения" : ""}>
               <FiAlertTriangle />
+              {!collapsed && (
               <span>Оповещения</span>
+              )}
             </NavLink>
 
             {/* Аудит */}
-            <NavLink to="/logs" className="sidebar-link">
+            <NavLink to="/logs" className="sidebar-link" title={collapsed ? "Аудит" : ""}>
               <FiFileText />
+              {!collapsed && (
               <span>Аудит</span>
+              )}
             </NavLink>
 
             {/* Консоль Kafka */}
-            <NavLink to="/console" className="sidebar-link">
+            <NavLink to="/console" className="sidebar-link" title={collapsed ? "Консоль" : ""}>
               <FiTerminal />
+              {!collapsed && (
               <span>Консоль</span>
+              )}
             </NavLink>
           </nav>
         )}
@@ -307,9 +330,11 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
       <div className="sidebar-bottom">
         {/* Настройки */}
         <nav className="sidebar-nav">
-          <NavLink to="/settings" className="sidebar-link">
+          <NavLink to="/settings" className="sidebar-link" title={collapsed ? "Настройки" : ""}>
             <FiSettings />
+            {!collapsed && (
             <span>Настройки</span>
+            )}
           </NavLink>
         </nav>
 
@@ -323,16 +348,20 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             title="Автор продукта"
           >
             <FiGithub className="footer-github-icon" />
+            {!collapsed && (
             <span>Egorich88</span>
+            )}
           </a>
-          <a
-            href="https://www.apache.org/licenses/LICENSE-2.0"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-license"
-          >
-            Apache License 2.0
-          </a>
+          {!collapsed && (
+              <a
+                  href="https://www.apache.org/licenses/LICENSE-2.0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-license"
+              >
+                  Apache License 2.0
+              </a>
+          )}
         </div>
       </div>
     </aside>
