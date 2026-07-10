@@ -210,21 +210,24 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
         </div>
 
         {/* Блок выбора / добавления кластера */}
-        {!collapsed && (
-            <div className="sidebar-cluster">
-          <div className="cluster-top">
-            <span>КЛАСТЕР</span>
-          </div>
+        <div className="sidebar-cluster">
+          {!collapsed && (
+              <div className="cluster-top">
+                  <span>КЛАСТЕР</span>
+              </div>
+          )}
           {hasCluster ? (
-            <div className="cluster-row">
-              <Dropdown
-                selectedItem={currentCluster}
-                items={clusters.filter(cluster => cluster.id !== currentCluster.id)}
-                onSelect={changeCluster}
-                addLabel="+ Добавить кластер"
-                onAdd={onAddCluster}
-                statusResolver={(cluster) => cluster?.connectionStatus || 'unknown'}
-              />
+            <div className={`cluster-row ${collapsed ? 'collapsed' : ''}`}>
+              {!collapsed && (
+                  <Dropdown
+                      selectedItem={currentCluster}
+                      items={clusters.filter(cluster => cluster.id !== currentCluster.id)}
+                      onSelect={changeCluster}
+                      addLabel="+ Добавить кластер"
+                      onAdd={onAddCluster}
+                      statusResolver={(cluster) => cluster?.connectionStatus || 'unknown'}
+                  />
+              )}
               <FiSliders
                 className="cluster-settings-icon"
                 title="Настройки кластера"
@@ -237,7 +240,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             </div>
           )}
         </div>
-        )}
+
         {/* -------------------- Основная навигация (отображается только при выбранном кластере) -------------------- */}
         {hasCluster && (
           <nav className="sidebar-nav">
