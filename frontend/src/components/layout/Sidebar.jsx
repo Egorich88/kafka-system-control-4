@@ -21,6 +21,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { Tooltip } from 'react-tooltip';
 import { NavLink } from 'react-router-dom';
 import {
   FiHome,
@@ -174,9 +175,10 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
             {/* Кнопка сворачивания боковой панели */}
             <button
-              className="sidebar-collapse-button"
-              onClick={() => setCollapsed(!collapsed)}
-              title={collapsed ? "Открыть боковую панель" : "Закрыть боковую панель"}
+                className="sidebar-collapse-button"
+                onClick={() => setCollapsed(!collapsed)}
+                data-tooltip-id="sidebar-tooltip"
+                data-tooltip-content={collapsed ? "Открыть боковую панель" : "Закрыть боковую панель"}
             >
               <FiSidebar />
             </button>
@@ -229,9 +231,10 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
                   />
               )}
               <FiSliders
-                className="cluster-settings-icon"
-                title="Настройки кластера"
-                onClick={onEditCluster}
+                  className="cluster-settings-icon"
+                  onClick={onEditCluster}
+                  data-tooltip-id="sidebar-tooltip"
+                  data-tooltip-content="Настройки кластера"
               />
             </div>
           ) : (
@@ -245,7 +248,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
         {hasCluster && (
           <nav className="sidebar-nav">
             {/* Обзор */}
-            <NavLink to="/" end className="sidebar-link" title={collapsed ? "Обзор" : ""}>
+            <NavLink to="/" end className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "Обзор" : undefined}>
               <FiHome />
               {!collapsed && (
                 <span>Обзор</span>
@@ -258,7 +263,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             <div className="sidebar-divider" />
 
             {/* Брокеры */}
-            <NavLink to="/brokers" className="sidebar-link" title={collapsed ? "Брокеры" : ""}>
+            <NavLink to="/brokers" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "Брокеры" : undefined}>
               <FiServer />
               {!collapsed && (
                 <span>Брокеры</span>
@@ -266,7 +273,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             </NavLink>
 
             {/* Топики */}
-            <NavLink to="/topics" className="sidebar-link" title={collapsed ? "Топики" : ""}>
+            <NavLink to="/topics" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "Топики" : undefined}>
               <FiLayers />
               {!collapsed && (
                 <span>Топики</span>
@@ -274,7 +283,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             </NavLink>
 
             {/* Группы потребителей */}
-            <NavLink to="/groups" className="sidebar-link" title={collapsed ? "Группы потребителей" : ""}>
+            <NavLink to="/groups" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "Группы потребителей" : undefined}>
               <FiUsers />
               {!collapsed && (
               <span>Группы потребителей</span>
@@ -282,7 +293,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             </NavLink>
 
             {/* Поиск сообщений */}
-            <NavLink to="/search" className="sidebar-link" title={collapsed ? "Поиск сообщений" : ""}>
+            <NavLink to="/search" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "Поиск сообщений" : undefined}>
               <FiSearch />
               {!collapsed && (
               <span>Поиск сообщений</span>
@@ -290,7 +303,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             </NavLink>
 
             {/* ACL */}
-            <NavLink to="/acls" className="sidebar-link" title={collapsed ? "ACL" : ""}>
+            <NavLink to="/acls" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "ACL" : undefined}>
               <FiShield />
               {!collapsed && (
               <span>ACL</span>
@@ -303,7 +318,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             <div className="sidebar-divider" />
 
             {/* Оповещения */}
-            <NavLink to="/alerts" className="sidebar-link" title={collapsed ? "Оповещения" : ""}>
+            <NavLink to="/alerts" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "Оповещения" : undefined}>
               <FiAlertTriangle />
               {!collapsed && (
               <span>Оповещения</span>
@@ -311,7 +328,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             </NavLink>
 
             {/* Аудит */}
-            <NavLink to="/logs" className="sidebar-link" title={collapsed ? "Аудит" : ""}>
+            <NavLink to="/logs" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "Аудит" : undefined}>
               <FiFileText />
               {!collapsed && (
               <span>Аудит</span>
@@ -319,7 +338,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             </NavLink>
 
             {/* Консоль Kafka */}
-            <NavLink to="/console" className="sidebar-link" title={collapsed ? "Консоль" : ""}>
+            <NavLink to="/console" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? "Консоль" : undefined}>
               <FiTerminal />
               {!collapsed && (
               <span>Консоль</span>
@@ -333,7 +354,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
       <div className="sidebar-bottom">
         {/* Настройки */}
         <nav className="sidebar-nav">
-          <NavLink to="/settings" className="sidebar-link" title={collapsed ? "Настройки" : ""}>
+          <NavLink to="/settings" className="sidebar-link"
+              data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+              data-tooltip-content={collapsed ? "Настройки" : undefined}>
             <FiSettings />
             {!collapsed && (
             <span>Настройки</span>
@@ -367,6 +390,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
           )}
         </div>
       </div>
+      <Tooltip id="sidebar-tooltip" place="right" offset={12} />
     </aside>
   );
 }

@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Страница настроек приложения.
- * Позволяет выбрать тему оформления из выпадающего списка.
+ * Позволяет выбрать тему оформления и язык интерфейса.
  * Использует универсальный компонент Dropdown.
  */
 
@@ -25,37 +25,57 @@ import Dropdown from '../components/common/Dropdown';
 import { useTranslation } from 'react-i18next';
 import '../styles/settings.css';
 
-/** Список тем: ключ и отображаемая метка */
+/**
+ * Список доступных тем оформления.
+ *
+ * id — используется в коде (data-theme)
+ * name — отображается в интерфейсе (оригинальные названия)
+ *
+ * Названия тем соответствуют оригинальным именам:
+ * - Dark      → Dark (стандартная тёмная)
+ * - Light     → Light (стандартная светлая)
+ * - Linux     → Forest (зелёная, как терминал)
+ * - Kitty     → Lavender (лавандовая)
+ * - Dracula   → Dracula (пурпурная, Dracula Theme)
+ * - Nord      → Nord (ледяная, Nord Theme)
+ * - Solarized → Solarized (янтарная)
+ * - Coffee    → Coffee (кофейная)
+ * - Material  → Material (индиго, Material Theme)
+ * - Monocai   → Monocai (фиолетовая)
+ * - Monokai   → Monokai (золотая)
+ * - Ocean     → Ocean (тёмно-синяя)
+ * - GitHub    → GitHub (графитовая)
+ * - Mac       → Mac (серебристая)
+ * - Windows   → Windows (угольная)
+ * - Rainbow   → Rainbow (радужная)
+ */
 const THEMES_LIST = [
   { id: 'dark', name: 'Dark' },
   { id: 'light', name: 'Light' },
   { id: 'linux', name: 'Forest' },
-  { id: 'kitty', name: 'Lavender' },
-  { id: 'dracula', name: 'Purple' },
-  { id: 'nord', name: 'Ice Blue' },
-  { id: 'solarized-light', name: 'Amber Light' },
-  { id: 'solarized-dark', name: 'Amber Dark' },
-  { id: 'coffee', name: 'Brown' },
-  { id: 'material', name: 'Indigo' },
-  { id: 'monocai', name: 'Violet' },
-  { id: 'monokai-pro', name: 'Golden' },
-  { id: 'deep-ocean', name: 'Navy' },
-  { id: 'github-light', name: 'Graphite Light' },
-  { id: 'github-dark', name: 'Graphite Dark' },
-  { id: 'mac', name: 'Silver' },
-  { id: 'windows-dark', name: 'Charcoal' },
+  { id: 'kitty', name: 'Kitty' },
+  { id: 'dracula', name: 'Dracula' },
+  { id: 'nord', name: 'Nord' },
+  { id: 'solarized-light', name: 'Solarized Light' },
+  { id: 'solarized-dark', name: 'Solarized Dark' },
+  { id: 'coffee', name: 'Coffee' },
+  { id: 'material', name: 'Material' },
+  { id: 'monocai', name: 'Monocai' },
+  { id: 'monokai-pro', name: 'Monokai' },
+  { id: 'deep-ocean', name: 'Ocean' },
+  { id: 'github-light', name: 'GitHub Light' },
+  { id: 'github-dark', name: 'GitHub Dark' },
+  { id: 'mac', name: 'Mac' },
+  { id: 'windows-dark', name: 'Windows' },
   { id: 'rainbow', name: 'Rainbow' }
 ];
 
+/**
+ * Список доступных языков интерфейса.
+ */
 const LANGUAGES = [
-    {
-        id: 'ru',
-        name: 'Русский'
-    },
-    {
-        id: 'en',
-        name: 'English'
-    }
+  { id: 'ru', name: 'Русский' },
+  { id: 'en', name: 'English' }
 ];
 
 export default function Settings() {
@@ -67,24 +87,26 @@ export default function Settings() {
   console.log('EN =', i18n.getResourceBundle('en', 'translation'));
   console.log('TITLE =', t('settings.title'));
 
-  // Текущий выбранный объект для Dropdown
+  // Текущий выбранный объект темы для Dropdown
   const currentThemeObj = THEMES_LIST.find(t => t.id === theme) || THEMES_LIST[0];
 
+  // Текущий выбранный объект языка для Dropdown
   const currentLanguageObj =
-      LANGUAGES.find(
-          lang => lang.id === i18n.language
-      ) || LANGUAGES[0];
+      LANGUAGES.find(lang => lang.id === i18n.language) || LANGUAGES[0];
 
+  /**
+   * Обработчик выбора языка.
+   * Меняет язык в i18n и сохраняет в localStorage.
+   */
   const handleLanguageSelect = (selected) => {
-
-      i18n.changeLanguage(selected.id);
-
-      localStorage.setItem(
-          'ksc_language',
-          selected.id
-      );
+    i18n.changeLanguage(selected.id);
+    localStorage.setItem('ksc_language', selected.id);
   };
 
+  /**
+   * Обработчик выбора темы.
+   * Меняет тему в контексте.
+   */
   const handleThemeSelect = (selected) => {
     setTheme(selected.id);
   };
@@ -98,7 +120,7 @@ export default function Settings() {
 
       <div className="settings-card">
 
-        {/* Темы */}
+        {/* Блок выбора темы оформления */}
         <div className="settings-block">
           <div className="settings-block-info">
             <h3>{t('settings.theme')}</h3>
@@ -112,7 +134,7 @@ export default function Settings() {
           />
         </div>
 
-        {/* Язык */}
+        {/* Блок выбора языка интерфейса */}
         <div className="settings-block">
           <div className="settings-block-info">
             <h3>{t('settings.language')}</h3>

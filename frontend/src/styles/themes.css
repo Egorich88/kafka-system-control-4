@@ -27,6 +27,8 @@
     --panel-bg: #111827;
     --card-bg: #1b1f2a;
     --dropdown-bg: #182133;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #071226 0%, #08101d 100%);
     --sidebar-hover: rgba(255,255,255,0.06);
     --border-color: rgba(255,255,255,0.08);
@@ -48,6 +50,8 @@
     --panel-bg: #ffffff;
     --card-bg: #ffffff;
     --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
     --sidebar-hover: rgba(15,23,42,0.05);
     --border-color: rgba(15,23,42,0.08);
@@ -71,6 +75,8 @@
     --panel-bg: #111f18;
     --card-bg: #13261d;
     --dropdown-bg: #0f1a14;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #0a0f0d 0%, #0f1a14 100%);
     --sidebar-hover: rgba(34,197,94,0.08);
     --border-color: rgba(34,197,94,0.15);
@@ -93,6 +99,8 @@
     --panel-bg: #ffffff;
     --card-bg: #faf7ff;
     --dropdown-bg: #ffffff;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #e9e4f0 0%, #dcd4e8 100%);
     --sidebar-hover: rgba(128, 90, 190, 0.08);
     --border-color: rgba(128, 90, 190, 0.2);
@@ -115,6 +123,8 @@
     --panel-bg: #343746;
     --card-bg: #2b2d3a;
     --dropdown-bg: #21222c;
+    --tooltip-bg: #343746;
+    --tooltip-text: #f8f8f2;
     --sidebar-bg: linear-gradient(180deg, #1e1f29 0%, #282a36 100%);
     --sidebar-hover: rgba(255,255,255,0.06);
     --border-color: rgba(255,255,255,0.08);
@@ -137,6 +147,8 @@
     --panel-bg: #434c5e;
     --card-bg: #3b4252;
     --dropdown-bg: #2e3440;
+    --tooltip-bg: #434c5e;
+    --tooltip-text: #eceff4;
     --sidebar-bg: linear-gradient(180deg, #2e3440 0%, #3b4252 100%);
     --sidebar-hover: rgba(255,255,255,0.06);
     --border-color: rgba(255,255,255,0.08);
@@ -159,6 +171,8 @@
     --panel-bg: #fdf6e3;
     --card-bg: #ffffff;
     --dropdown-bg: #eee8d5;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
     --sidebar-bg: linear-gradient(180deg, #fdf6e3 0%, #eee8d5 100%);
     --sidebar-hover: rgba(0,0,0,0.05);
     --border-color: rgba(0,0,0,0.08);
@@ -181,6 +195,8 @@
     --panel-bg: #073642;
     --card-bg: #0a3a46;
     --dropdown-bg: #073642;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #002b36 0%, #073642 100%);
     --sidebar-hover: rgba(255,255,255,0.05);
     --border-color: rgba(255,255,255,0.08);
@@ -203,6 +219,8 @@
     --panel-bg: #2f241e;
     --card-bg: #3a2c24;
     --dropdown-bg: #2a211c;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #1c1612 0%, #2a211c 100%);
     --sidebar-hover: rgba(255,255,255,0.06);
     --border-color: rgba(255,255,255,0.08);
@@ -225,6 +243,8 @@
     --panel-bg: #1f2633;
     --card-bg: #232b3a;
     --dropdown-bg: #1a1f2e;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #0f111a 0%, #1a1f2e 100%);
     --sidebar-hover: rgba(255,255,255,0.06);
     --border-color: rgba(255,255,255,0.08);
@@ -247,6 +267,8 @@
     --panel-bg: #1f2335;
     --card-bg: #24283b;
     --dropdown-bg: #1a1b26;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #1a1b26 0%, #24283b 100%);
     --sidebar-hover: rgba(255,255,255,0.05);
     --border-color: rgba(255,255,255,0.08);
@@ -269,6 +291,8 @@
     --panel-bg: #222222;
     --card-bg: #2a2a2a;
     --dropdown-bg: #1a1a1a;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
     --sidebar-hover: rgba(255, 215, 0, 0.1);
     --border-color: rgba(255, 215, 0, 0.25);
@@ -291,6 +315,8 @@
     --panel-bg: #0f2340;
     --card-bg: #102a4a;
     --dropdown-bg: #0b1a2f;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #050b18 0%, #0b1a2f 100%);
     --sidebar-hover: rgba(255,255,255,0.05);
     --border-color: rgba(255,255,255,0.08);
@@ -313,6 +339,8 @@
     --panel-bg: #ffffff;
     --card-bg: #ffffff;
     --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f6f8fa 100%);
     --sidebar-hover: rgba(0,0,0,0.05);
     --border-color: #d0d7de;
@@ -335,6 +363,8 @@
     --panel-bg: #161b22;
     --card-bg: #1c2128;
     --dropdown-bg: #161b22;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
     --sidebar-hover: rgba(255,255,255,0.05);
     --border-color: #30363d;
@@ -357,6 +387,8 @@
     --panel-bg: #ffffff;
     --card-bg: #ffffff;
     --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;;
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f2f2f2 100%);
     --sidebar-hover: rgba(0,0,0,0.05);
     --border-color: rgba(0,0,0,0.08);
@@ -379,6 +411,8 @@
     --panel-bg: #1e293b;
     --card-bg: #1e293b;
     --dropdown-bg: #111827;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #111827 100%);
     --sidebar-hover: rgba(255,255,255,0.06);
     --border-color: rgba(255,255,255,0.08);
@@ -401,6 +435,8 @@
     --panel-bg: #181818;
     --card-bg: #1f1f1f;
     --dropdown-bg: #111;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
     --sidebar-hover: rgba(255,255,255,0.05);
     --border-color: rgba(255,255,255,0.08);
@@ -415,7 +451,14 @@
     --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
     --table-row-hover: rgba(255,255,255,0.03);
 }
-
+.react-tooltip {
+    background: var(--tooltip-bg) !important;
+    color: var(--tooltip-text) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    z-index: 99999 !important;
+}
 /* ============================================================
    Стили для скроллбара в выпадающих меню (Dropdown)
    ============================================================ */
