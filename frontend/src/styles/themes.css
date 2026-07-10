@@ -123,8 +123,8 @@
     --panel-bg: #343746;
     --card-bg: #2b2d3a;
     --dropdown-bg: #21222c;
-    --tooltip-bg: #343746;
-    --tooltip-text: #f8f8f2;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #1e1f29 0%, #282a36 100%);
     --sidebar-hover: rgba(255,255,255,0.06);
     --border-color: rgba(255,255,255,0.08);
@@ -147,8 +147,8 @@
     --panel-bg: #434c5e;
     --card-bg: #3b4252;
     --dropdown-bg: #2e3440;
-    --tooltip-bg: #434c5e;
-    --tooltip-text: #eceff4;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
     --sidebar-bg: linear-gradient(180deg, #2e3440 0%, #3b4252 100%);
     --sidebar-hover: rgba(255,255,255,0.06);
     --border-color: rgba(255,255,255,0.08);
