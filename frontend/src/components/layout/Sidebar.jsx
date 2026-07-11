@@ -191,7 +191,8 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
               target="_blank"
               rel="noopener noreferrer"
               className={`sidebar-version ${hasUpdate ? 'update-available' : ''} ${animateVersion ? 'animate' : ''}`}
-              title={
+              data-tooltip-id="sidebar-tooltip"
+              data-tooltip-content={
                   hasUpdate
                       ? `Доступна версия ${latestVersion}`
                       : localIsNewer
@@ -386,7 +387,8 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             target="_blank"
             rel="noopener noreferrer"
             className="footer-project-link"
-            title="Автор продукта"
+            data-tooltip-id="sidebar-tooltip"
+            data-tooltip-content="Автор продукта"
           >
             <FiGithub className="footer-github-icon" />
             {!collapsed && (
