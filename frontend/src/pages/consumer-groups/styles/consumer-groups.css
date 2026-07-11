@@ -36,26 +36,34 @@
 
     flex-direction: column;
 
+    gap: 12px;
+
     width: 100%;
 
     height: 100%;
 
 }
 
-.consumer-groups-placeholder {
+.consumer-bottom-layout {
 
-    display: flex;
+    display: grid;
 
-    align-items: center;
+    grid-template-columns: 420px 1fr;
 
-    justify-content: center;
+    gap: 12px;
 
-    flex: 1;
+    min-height: 340px;
 
-    font-size: 28px;
+    flex-shrink: 0;
 
-    font-weight: 600;
+}
 
-    color: var(--text-secondary);
+@media (max-width:1400px){
+
+    .consumer-bottom-layout{
+
+        grid-template-columns:1fr;
+
+    }
 
 }

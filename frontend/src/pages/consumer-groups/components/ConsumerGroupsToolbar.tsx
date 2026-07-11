@@ -34,7 +34,9 @@
  */
 
 export default function ConsumerGroupsToolbar() {
-
-    return null;
-
+    return (
+        <div className="dashboard-panel">
+            Toolbar
+        </div>
+    );
 }

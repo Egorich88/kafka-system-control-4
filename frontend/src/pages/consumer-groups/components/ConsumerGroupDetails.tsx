@@ -31,3 +31,16 @@
   *
   * =============================================================================
   */
+  export default function ConsumerGroupDetails() {
+
+      return (
+
+          <div className="dashboard-panel">
+
+              Details
+
+          </div>
+
+      );
+
+  }

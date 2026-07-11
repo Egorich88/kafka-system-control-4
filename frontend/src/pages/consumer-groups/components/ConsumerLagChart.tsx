@@ -28,3 +28,16 @@
   * Используется Recharts.
   * =============================================================================
   */
+  export default function ConsumerLagChart() {
+
+      return (
+
+          <div className="dashboard-panel">
+
+              Lag Chart
+
+          </div>
+
+      );
+
+  }

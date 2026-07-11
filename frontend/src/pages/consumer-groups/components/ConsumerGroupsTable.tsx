@@ -34,3 +34,11 @@
   * Является главным элементом страницы.
   * =============================================================================
   */
+
+export default function ConsumerGroupsTable() {
+    return (
+        <div className="dashboard-panel">
+            Table
+        </div>
+    );
+}
