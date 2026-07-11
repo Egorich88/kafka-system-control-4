@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export default function Groups() {
-  return (
-    <div>
-      <h1>Consumer Groups</h1>
-      <p>Здесь будет список групп</p>
-    </div>
-  );
-}
+/**
+ * =============================================================================
+ * lag.utils.ts
+ * =============================================================================
+ *
+ * Функции вычисления и форматирования Lag.
+ *
+ * Используются графиками
+ * и таблицей Consumer Groups.
+ *
+ * =============================================================================
+ */
+
+ export {};

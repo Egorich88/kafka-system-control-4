@@ -55,7 +55,7 @@ import Overview from './pages/Overview';
 import Brokers from './pages/Brokers';
 import Console from './pages/Console';
 import Topics from './pages/Topics';
-import Groups from './pages/Groups';
+import ConsumerGroupsPage from './pages/consumer-groups/ConsumerGroupsPage';
 import Acl from './pages/Acl';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
@@ -92,7 +92,7 @@ function App() {
             <Route path="topics" element={<Topics />} />
 
             {/* Управление группами консьюмеров */}
-            <Route path="groups" element={<Groups />} />
+            <Route path="groups" element={<ConsumerGroupsPage />} />
 
             {/* Управление ACL */}
             <Route path="acls" element={<Acl />} />
