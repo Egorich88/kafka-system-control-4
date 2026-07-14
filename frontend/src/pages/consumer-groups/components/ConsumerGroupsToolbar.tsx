@@ -36,7 +36,7 @@
 export default function ConsumerGroupsToolbar() {
     return (
         <div className="dashboard-panel">
-            Toolbar
+            Панель управления
         </div>
     );
 }

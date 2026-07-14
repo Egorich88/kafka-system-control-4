@@ -37,7 +37,7 @@
 
           <div className="dashboard-panel">
 
-              Details
+              Информация о группе
 
           </div>
 

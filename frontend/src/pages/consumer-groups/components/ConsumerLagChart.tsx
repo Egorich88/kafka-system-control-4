@@ -34,7 +34,7 @@
 
           <div className="dashboard-panel">
 
-              Lag Chart
+              График Consumer Lag
 
           </div>
 
