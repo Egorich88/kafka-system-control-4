@@ -31,9 +31,8 @@
  *
  * =============================================================================
  */
-
+import { useState } from 'react';
 import '../styles/consumer-table.css';
-
 import type { ConsumerGroup } from '../types/consumer-groups.types';
 
 /**
@@ -70,6 +69,18 @@ const mockGroups: ConsumerGroup[] = [
 ];
 
 export default function ConsumerGroupsTable() {
+    /*
+     * ============================================================================
+     * Выбранная группа.
+     *
+     * Пока используется только для подсветки выбранной строки.
+     *
+     * Позже именно выбранная группа будет передаваться
+     * в панель информации и график Consumer Lag.
+     * ============================================================================
+     */
+
+    const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
 
     return (
 
@@ -93,14 +104,60 @@ export default function ConsumerGroupsTable() {
 
                 {mockGroups.map(group => (
 
-                    <tr key={group.name}>
+                    <tr
+
+                        key={group.name}
+
+                        className={
+
+                            selectedGroup === group.name
+
+                                ? 'selected'
+
+                                : ''
+
+                        }
+
+                        onClick={() => setSelectedGroup(group.name)}
+
+                    >
 
                         <td>{group.name}</td>
 
-                        <td>{group.state}</td>
+                        <td>
 
-                        <td className="consumer-lag">
-                            {group.lag}
+                            <span className={`state-badge ${group.state.toLowerCase()}`}>
+
+                                {group.state}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <span
+
+                                className={
+
+                                    group.lag > 100
+
+                                        ? 'lag-high'
+
+                                        : group.lag > 0
+
+                                            ? 'lag-medium'
+
+                                            : 'lag-low'
+
+                                }
+
+                            >
+
+                                {group.lag}
+
+                            </span>
+
                         </td>
 
                         <td>{group.members}</td>

@@ -102,16 +102,19 @@
    ============================================================ */
 
 .consumer-groups-table tbody tr {
-
     cursor: pointer;
-
-    transition: background .15s ease;
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        transform .12s ease;
 
 }
 
 .consumer-groups-table tbody tr:hover {
 
     background: var(--hover-color);
+
+    transform: translateX(2px);
 
 }
 
@@ -126,6 +129,8 @@
 .consumer-group-selected {
 
     background: var(--selected-color);
+
+    border-left: 4px solid var(--accent-color);
 
 }
 
@@ -151,5 +156,92 @@
 .consumer-coordinator {
 
     color: var(--text-secondary);
+
+}
+/* ============================================================
+   Выбранная строка
+
+   Используется после клика по группе.
+   Позже именно выбранная группа будет
+   отображаться в панели информации.
+   ============================================================ */
+
+.consumer-groups-table tbody tr.selected {
+
+    background: var(--selected-color);
+
+}
+
+/* ============================================================
+   Цветовые индикаторы состояния группы
+   ============================================================ */
+
+.state-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 4px 10px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+.state-badge.stable {
+
+    color: #22c55e;
+
+    background: rgba(34,197,94,.12);
+
+}
+
+.state-badge.rebalancing {
+
+    color: #f59e0b;
+
+    background: rgba(245,158,11,.12);
+
+}
+
+.state-badge.empty {
+
+    color: #94a3b8;
+
+    background: rgba(148,163,184,.12);
+
+}
+
+/* ============================================================
+   Цветовая индикация Consumer Lag
+   ============================================================ */
+
+.lag-low {
+
+    color: #22c55e;
+
+    font-weight: 600;
+
+}
+
+.lag-medium {
+
+    color: #f59e0b;
+
+    font-weight: 600;
+
+}
+
+.lag-high {
+
+    color: #ef4444;
+
+    font-weight: 700;
 
 }

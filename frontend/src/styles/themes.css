@@ -29,6 +29,7 @@
     --dropdown-bg: #182133;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(59,130,246,.10);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #071226 0%, #08101d 100%);
@@ -54,6 +55,7 @@
     --dropdown-bg: #ffffff;
     --tooltip-bg: #1b2233;
     --tooltip-text: #f8fafc;
+    --selected-color: rgba(59,130,246,.14);
     --menu-active-bg: rgba(37,99,235,.10);
     --sidebar-divider-color: rgba(96, 165, 250, 0.45);
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
@@ -81,6 +83,7 @@
     --dropdown-bg: #0f1a14;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(34,197,94,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #0a0f0d 0%, #0f1a14 100%);
@@ -107,6 +110,7 @@
     --dropdown-bg: #ffffff;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(255,105,180,.18);
     --menu-active-bg: rgba(155,107,255,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.45);
     --sidebar-bg: linear-gradient(180deg, #e9e4f0 0%, #dcd4e8 100%);
@@ -133,6 +137,7 @@
     --dropdown-bg: #21222c;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(189,147,249,.18);
     --menu-active-bg: rgba(189,147,249,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #1e1f29 0%, #282a36 100%);
@@ -159,6 +164,7 @@
     --dropdown-bg: #2e3440;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(94,129,172,.18);
     --menu-active-bg: rgba(136,192,208,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #2e3440 0%, #3b4252 100%);
@@ -185,6 +191,7 @@
     --dropdown-bg: #eee8d5;
     --tooltip-bg: #1b2233;
     --tooltip-text: #f8fafc;
+    --selected-color: rgba(59,130,246,.14);
     --menu-active-bg: rgba(181,137,0,.14);
     --sidebar-divider-color: rgba(96, 165, 250, 0.45);
     --sidebar-bg: linear-gradient(180deg, #fdf6e3 0%, #eee8d5 100%);
@@ -211,6 +218,7 @@
     --dropdown-bg: #073642;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(38,139,210,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #002b36 0%, #073642 100%);
@@ -237,6 +245,7 @@
     --dropdown-bg: #2a211c;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(192,138,90,.14);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #1c1612 0%, #2a211c 100%);
@@ -263,6 +272,7 @@
     --dropdown-bg: #1a1f2e;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(130,170,255,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #0f111a 0%, #1a1f2e 100%);
@@ -289,6 +299,7 @@
     --dropdown-bg: #1a1b26;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(187,154,247,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #1a1b26 0%, #24283b 100%);
@@ -315,6 +326,7 @@
     --dropdown-bg: #1a1a1a;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(249,38,114,.18);
     --menu-active-bg: rgba(255,215,0,.14);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
@@ -341,6 +353,7 @@
     --dropdown-bg: #0b1a2f;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(56,189,248,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #050b18 0%, #0b1a2f 100%);
@@ -367,6 +380,7 @@
     --dropdown-bg: #ffffff;
     --tooltip-bg: #1b2233;
     --tooltip-text: #f8fafc;
+    --selected-color: rgba(59,130,246,.14);
     --menu-active-bg: rgba(9,105,218,.10);
     --sidebar-divider-color: rgba(96, 165, 250, 0.45);
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f6f8fa 100%);
@@ -393,6 +407,7 @@
     --dropdown-bg: #161b22;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(88,166,255,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
@@ -419,6 +434,7 @@
     --dropdown-bg: #ffffff;
     --tooltip-bg: #1b2233;
     --tooltip-text: #f8fafc;;
+    --selected-color: rgba(59,130,246,.14);
     --menu-active-bg: rgba(0,122,255,.10);
     --sidebar-divider-color: rgba(96, 165, 250, 0.45);
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f2f2f2 100%);
@@ -445,6 +461,7 @@
     --dropdown-bg: #111827;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(76,194,255,.12);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #111827 100%);
@@ -471,6 +488,7 @@
     --dropdown-bg: #111;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
+    --selected-color: rgba(59, 130, 246, 0.18);
     --menu-active-bg: rgba(255,255,255,.10);
     --sidebar-divider-color: rgba(96, 165, 250, 0.35);
     --sidebar-bg: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
