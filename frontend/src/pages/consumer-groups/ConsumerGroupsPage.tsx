@@ -32,6 +32,8 @@
  *
  * =============================================================================
  */
+import { useState } from 'react';
+import type { ConsumerGroup } from './types/consumer-groups.types';
 
 import './styles/consumer-groups.css';
 
@@ -41,6 +43,85 @@ import ConsumerGroupDetails from './components/ConsumerGroupDetails';
 import ConsumerLagChart from './components/ConsumerLagChart';
 
 export default function ConsumerGroupsPage() {
+    /*
+     * ============================================================================
+     * Выбранная Consumer Group.
+     *
+     * Является центральным состоянием страницы.
+     *
+     * Все дочерние компоненты получают выбранную группу отсюда.
+     *
+     * Позже именно это состояние будет использоваться:
+     *
+     * • Consumer Details
+     * • Members
+     * • Offsets
+     * • Offset Reset
+     * • Lag Chart
+     *
+     * ============================================================================
+     */
+
+    const [selectedGroup, setSelectedGroup] =
+        useState<ConsumerGroup | null>(null);
+
+    /**
+     * ============================================================================
+     * Временные данные.
+     *
+     * Используются исключительно до подключения backend.
+     *
+     * После реализации API будут заменены
+     * данными из useConsumerGroups().
+     *
+     * ============================================================================
+     */
+
+    const mockGroups: ConsumerGroup[] = [
+
+        {
+
+            name: 'payment-service',
+
+            state: 'Stable',
+
+            lag: 0,
+
+            members: 5,
+
+            coordinator: 'broker-1'
+
+        },
+
+        {
+
+            name: 'analytics',
+
+            state: 'Rebalancing',
+
+            lag: 184,
+
+            members: 3,
+
+            coordinator: 'broker-2'
+
+        },
+
+        {
+
+            name: 'notifications',
+
+            state: 'Empty',
+
+            lag: 0,
+
+            members: 0,
+
+            coordinator: 'broker-1'
+
+        }
+
+    ];
 
     return (
 
@@ -48,11 +129,23 @@ export default function ConsumerGroupsPage() {
 
             <ConsumerGroupsToolbar />
 
-            <ConsumerGroupsTable />
+            <ConsumerGroupsTable
+
+                groups={mockGroups}
+
+                selectedGroup={selectedGroup}
+
+                onSelectGroup={setSelectedGroup}
+
+            />
 
             <div className="consumer-bottom-layout">
 
-                <ConsumerGroupDetails />
+                <ConsumerGroupDetails
+
+                    group={selectedGroup}
+
+                />
 
                 <ConsumerLagChart />
 

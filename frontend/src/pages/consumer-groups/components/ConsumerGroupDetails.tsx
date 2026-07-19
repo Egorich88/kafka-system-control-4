@@ -13,34 +13,193 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-  * =============================================================================
-  * ConsumerGroupDetails.tsx
-  * =============================================================================
-  *
-  * Панель детальной информации
-  * выбранной Consumer Group.
-  *
-  * Отображает:
-  *
-  * - общую информацию;
-  * - состояние группы;
-  * - координатора;
-  * - назначенные топики;
-  * - статистику.
-  *
-  * =============================================================================
-  */
-  export default function ConsumerGroupDetails() {
 
-      return (
+/**
+ * =============================================================================
+ * ConsumerGroupDetails.tsx
+ * =============================================================================
+ *
+ * Правая информационная панель выбранной Consumer Group.
+ *
+ * Отображает:
+ *
+ * • основную информацию;
+ * • состояние;
+ * • Lag;
+ * • участников;
+ * • координатора.
+ *
+ * После подключения backend
+ * здесь появятся:
+ *
+ * • список топиков;
+ * • Offset Reset;
+ * • Members;
+ * • Offsets.
+ *
+ * =============================================================================
+ */
+import '../styles/consumer-details.css';
+import type { ConsumerGroup } from '../types/consumer-groups.types';
 
-          <div className="dashboard-panel">
+interface Props {
 
-              Информация о группе
+    group: ConsumerGroup | null;
 
-          </div>
+}
 
-      );
+export default function ConsumerGroupDetails({
 
-  }
+    group
+
+}: Props) {
+
+    if (!group) {
+
+        return (
+
+            <div className="consumer-details consumer-details-empty">
+
+                Выберите группу потребителей
+
+            </div>
+
+        );
+
+    }
+
+    return (
+
+        <div className="consumer-details">
+
+            <div className="consumer-details-header">
+
+                <div className="consumer-details-title">
+
+                    {group.name}
+
+                </div>
+
+                <span
+
+                    className={`state-badge ${group.state.toLowerCase()}`}
+
+                >
+
+                    {group.state}
+
+                </span>
+
+            </div>
+
+            <div className="consumer-details-section">
+
+                <div className="consumer-details-section-title">
+
+                    Общая информация
+
+                </div>
+
+                <div className="consumer-details-row">
+
+                    <span className="consumer-details-label">
+
+                        Отставание
+
+                    </span>
+
+                    <span className="consumer-details-value">
+
+                        {group.lag}
+
+                    </span>
+
+                </div>
+
+                <div className="consumer-details-row">
+
+                    <span className="consumer-details-label">
+
+                        Участники
+
+                    </span>
+
+                    <span className="consumer-details-value">
+
+                        {group.members}
+
+                    </span>
+
+                </div>
+
+                <div className="consumer-details-row">
+
+                    <span className="consumer-details-label">
+
+                        Координатор
+
+                    </span>
+
+                    <span className="consumer-details-value">
+
+                        {group.coordinator}
+
+                    </span>
+
+                </div>
+
+                <div className="consumer-details-row">
+
+                    <span className="consumer-details-label">
+
+                        Топики
+
+                    </span>
+
+                    <span className="consumer-details-value">
+
+                        —
+
+                    </span>
+
+                </div>
+
+                <div className="consumer-details-row">
+
+                    <span className="consumer-details-label">
+
+                        Партиции
+
+                    </span>
+
+                    <span className="consumer-details-value">
+
+                        —
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div className="consumer-details-section">
+
+                <div className="consumer-details-section-title">
+
+                    Действия
+
+                </div>
+
+                <button className="offset-reset-button">
+
+                    Сбросить offset
+
+                </button>
+
+            </div>
+
+        </div>
+
+    );
+
+}

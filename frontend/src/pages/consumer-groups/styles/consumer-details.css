@@ -1,0 +1,168 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+/* ============================================================
+   Карточка информации о группе
+   ============================================================ */
+
+.consumer-details {
+
+    height: 100%;
+
+    background: var(--panel-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+}
+
+
+/* ============================================================
+   Заголовок
+   ============================================================ */
+
+.consumer-details-header {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+
+}
+
+.consumer-details-title {
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ============================================================
+   Секции
+   ============================================================ */
+
+.consumer-details-section {
+
+    margin-top: 20px;
+
+}
+
+.consumer-details-section-title {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: var(--text-secondary);
+
+    text-transform: uppercase;
+
+    margin-bottom: 12px;
+
+}
+
+
+/* ============================================================
+   KPI строки
+   ============================================================ */
+
+.consumer-details-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid var(--border-color);
+
+}
+
+.consumer-details-row:last-child {
+
+    border-bottom: none;
+
+}
+
+.consumer-details-label {
+
+    color: var(--text-secondary);
+
+}
+
+.consumer-details-value {
+
+    color: var(--text-primary);
+
+    font-weight: 600;
+
+}
+
+
+/* ============================================================
+   Кнопка Offset Reset
+   ============================================================ */
+
+.offset-reset-button {
+
+    width: 100%;
+
+    margin-top: 10px;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: var(--accent-color);
+
+    color: white;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .15s;
+
+}
+
+.offset-reset-button:hover {
+
+    filter: brightness(1.1);
+
+}
+
+
+/* ============================================================
+   Нет выбранной группы
+   ============================================================ */
+
+.consumer-details-empty {
+
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: var(--text-secondary);
+
+}

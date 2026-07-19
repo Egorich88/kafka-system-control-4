@@ -31,9 +31,33 @@
  *
  * =============================================================================
  */
-import { useState } from 'react';
+
 import '../styles/consumer-table.css';
 import type { ConsumerGroup } from '../types/consumer-groups.types';
+/**
+ * ============================================================================
+ * Свойства таблицы Consumer Groups.
+ *
+ * groups
+ *     Список групп потребителей.
+ *
+ * selectedGroup
+ *     Текущая выбранная группа.
+ *
+ * onSelectGroup
+ *     Вызывается при выборе строки таблицы.
+ *
+ * ============================================================================
+ */
+interface Props {
+
+    groups: ConsumerGroup[];
+
+    selectedGroup: ConsumerGroup | null;
+
+    onSelectGroup: (group: ConsumerGroup) => void;
+
+}
 
 /**
  * ---------------------------------------------------------------------------
@@ -44,43 +68,16 @@ import type { ConsumerGroup } from '../types/consumer-groups.types';
  * После подключения backend будут удалены.
  * ---------------------------------------------------------------------------
  */
-const mockGroups: ConsumerGroup[] = [
-    {
-        name: 'payment-service',
-        state: 'Stable',
-        lag: 0,
-        members: 5,
-        coordinator: 'broker-1'
-    },
-    {
-        name: 'analytics',
-        state: 'Rebalancing',
-        lag: 184,
-        members: 3,
-        coordinator: 'broker-2'
-    },
-    {
-        name: 'notifications',
-        state: 'Empty',
-        lag: 0,
-        members: 0,
-        coordinator: 'broker-1'
-    }
-];
 
-export default function ConsumerGroupsTable() {
-    /*
-     * ============================================================================
-     * Выбранная группа.
-     *
-     * Пока используется только для подсветки выбранной строки.
-     *
-     * Позже именно выбранная группа будет передаваться
-     * в панель информации и график Consumer Lag.
-     * ============================================================================
-     */
+export default function ConsumerGroupsTable({
 
-    const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+    groups,
+
+    selectedGroup,
+
+    onSelectGroup
+
+}: Props) {
 
     return (
 
@@ -102,23 +99,23 @@ export default function ConsumerGroupsTable() {
 
             <tbody>
 
-                {mockGroups.map(group => (
+                {groups.map(group => (
 
                     <tr
 
                         key={group.name}
 
+                        onClick={() => onSelectGroup(group)}
+
                         className={
 
-                            selectedGroup === group.name
+                            selectedGroup?.name === group.name
 
-                                ? 'selected'
+                                ? 'consumer-group-selected'
 
                                 : ''
 
                         }
-
-                        onClick={() => setSelectedGroup(group.name)}
 
                     >
 
