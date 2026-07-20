@@ -1,0 +1,57 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+/* ============================================================
+   Карточка графика
+   ============================================================ */
+
+.consumer-chart {
+
+    height: 100%;
+
+    background: var(--panel-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+/* ============================================================
+   Заголовок
+   ============================================================ */
+
+.consumer-chart-title {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: var(--text-primary);
+
+    margin-bottom: 18px;
+
+}
+
+
+/* ============================================================
+   Контейнер графика
+   ============================================================ */
+
+.consumer-chart-body {
+
+    flex: 1;
+
+    min-height: 260px;
+
+}

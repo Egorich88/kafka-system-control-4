@@ -147,7 +147,11 @@ export default function ConsumerGroupsPage() {
 
                 />
 
-                <ConsumerLagChart />
+                <ConsumerLagChart
+
+                    group={selectedGroup}
+
+                />
 
             </div>
 

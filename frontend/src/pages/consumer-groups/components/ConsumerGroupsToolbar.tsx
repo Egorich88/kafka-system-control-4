@@ -14,29 +14,76 @@
  * limitations under the License.
  */
 
-/*
+/**
  * =============================================================================
  * ConsumerGroupsToolbar.tsx
  * =============================================================================
  *
- * Верхняя панель инструментов страницы Consumer Groups.
+ * Верхняя панель управления страницы Consumer Groups.
  *
- * Назначение:
- * - поиск групп потребителей;
- * - фильтрация;
- * - обновление данных;
- * - экспорт информации;
- * - запуск мастера сброса Offset.
+ * На текущем этапе реализуется только визуальный каркас.
  *
- * В дальнейшем именно этот компонент станет основной
- * рабочей панелью пользователя.
+ * Позже компонент будет использоваться для:
+ *
+ * • поиска Consumer Group;
+ * • фильтрации по состоянию;
+ * • отображения пустых групп;
+ * • обновления списка;
+ * • запуска Offset Reset Wizard;
+ * • отображения количества найденных групп.
+ *
  * =============================================================================
  */
 
+import '../styles/consumer-toolbar.css';
+
 export default function ConsumerGroupsToolbar() {
+
     return (
-        <div className="dashboard-panel">
-            Панель управления
+
+        <div className="consumer-toolbar">
+
+            <div className="consumer-toolbar-left">
+
+                <input
+                    className="consumer-toolbar-search"
+                    placeholder="Поиск группы..."
+                />
+
+                <select className="consumer-toolbar-select">
+
+                    <option>Все состояния</option>
+
+                    <option>Stable</option>
+
+                    <option>Rebalancing</option>
+
+                    <option>Empty</option>
+
+                    <option>Dead</option>
+
+                </select>
+
+            </div>
+
+            <div className="consumer-toolbar-right">
+
+                <button className="consumer-toolbar-button">
+
+                    Обновить
+
+                </button>
+
+                <div className="consumer-toolbar-counter">
+
+                    Всего групп: 3
+
+                </div>
+
+            </div>
+
         </div>
+
     );
+
 }
