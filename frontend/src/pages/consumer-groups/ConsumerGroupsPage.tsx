@@ -32,7 +32,7 @@
  *
  * =============================================================================
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ConsumerGroup } from './types/consumer-groups.types';
 
 import './styles/consumer-groups.css';
@@ -64,6 +64,101 @@ export default function ConsumerGroupsPage() {
 
     const [selectedGroup, setSelectedGroup] =
         useState<ConsumerGroup | null>(null);
+    /*
+     * ============================================================================
+     * Поисковая строка.
+     *
+     * Хранит текст поиска Consumer Group.
+     *
+     * Позже будет передаваться в Toolbar.
+     * ============================================================================
+     */
+
+    const [search, setSearch] = useState('');
+
+    /*
+     * ============================================================================
+     * Фильтр состояния группы.
+     *
+     * Возможные значения:
+     *
+     * Все
+     * Stable
+     * Rebalancing
+     * Empty
+     * Dead
+     *
+     * ============================================================================
+     */
+
+    const [stateFilter, setStateFilter] = useState('all');
+    /*
+     * ============================================================================
+     * Временный список групп.
+     *
+     * Пока используется локальный mock.
+     *
+     * После реализации backend
+     * будет приходить из useConsumerGroups().
+     * ============================================================================
+     */
+
+    const groups: ConsumerGroup[] = [
+
+        {
+            name: 'payment-service',
+            state: 'Stable',
+            lag: 0,
+            members: 5,
+            coordinator: 'broker-1'
+        },
+
+        {
+            name: 'analytics',
+            state: 'Rebalancing',
+            lag: 184,
+            members: 3,
+            coordinator: 'broker-2'
+        },
+
+        {
+            name: 'notifications',
+            state: 'Empty',
+            lag: 0,
+            members: 0,
+            coordinator: 'broker-1'
+        }
+
+    ];
+    /*
+     * ============================================================================
+     * Отфильтрованный список Consumer Groups.
+     *
+     * Пока фильтрация выполняется полностью на frontend.
+     *
+     * После реализации backend логика останется,
+     * но источник данных изменится.
+     * ============================================================================
+     */
+
+    const filteredGroups = useMemo(() => {
+
+        return groups.filter(group => {
+
+            const matchesSearch =
+                group.name
+                    .toLowerCase()
+                    .includes(search.toLowerCase());
+
+            const matchesState =
+                stateFilter === 'all'
+                    || group.state === stateFilter;
+
+            return matchesSearch && matchesState;
+
+        });
+
+    }, [groups, search, stateFilter]);
 
     /**
      * ============================================================================
@@ -77,61 +172,27 @@ export default function ConsumerGroupsPage() {
      * ============================================================================
      */
 
-    const mockGroups: ConsumerGroup[] = [
-
-        {
-
-            name: 'payment-service',
-
-            state: 'Stable',
-
-            lag: 0,
-
-            members: 5,
-
-            coordinator: 'broker-1'
-
-        },
-
-        {
-
-            name: 'analytics',
-
-            state: 'Rebalancing',
-
-            lag: 184,
-
-            members: 3,
-
-            coordinator: 'broker-2'
-
-        },
-
-        {
-
-            name: 'notifications',
-
-            state: 'Empty',
-
-            lag: 0,
-
-            members: 0,
-
-            coordinator: 'broker-1'
-
-        }
-
-    ];
-
     return (
 
         <div className="consumer-groups-page">
 
-            <ConsumerGroupsToolbar />
+            <ConsumerGroupsToolbar
+
+                search={search}
+
+                onSearchChange={setSearch}
+
+                stateFilter={stateFilter}
+
+                onStateFilterChange={setStateFilter}
+
+                totalGroups={filteredGroups.length}
+
+            />
 
             <ConsumerGroupsTable
 
-                groups={mockGroups}
+                groups={filteredGroups}
 
                 selectedGroup={selectedGroup}
 

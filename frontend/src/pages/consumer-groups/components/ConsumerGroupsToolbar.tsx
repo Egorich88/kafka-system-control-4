@@ -36,8 +36,57 @@
  */
 
 import '../styles/consumer-toolbar.css';
+import { ChangeEvent } from 'react';
 
-export default function ConsumerGroupsToolbar() {
+/**
+ * ============================================================================
+ * Свойства панели управления Consumer Groups.
+ *
+ * search
+ *      Текущее значение строки поиска.
+ *
+ * onSearchChange
+ *      Изменение строки поиска.
+ *
+ * stateFilter
+ *      Текущий выбранный фильтр состояния.
+ *
+ * onStateFilterChange
+ *      Изменение фильтра.
+ *
+ * totalGroups
+ *      Количество отображаемых групп.
+ *
+ * ============================================================================
+ */
+
+interface Props {
+
+    search: string;
+
+    onSearchChange: (value: string) => void;
+
+    stateFilter: string;
+
+    onStateFilterChange: (value: string) => void;
+
+    totalGroups: number;
+
+}
+
+export default function ConsumerGroupsToolbar({
+
+    search,
+
+    onSearchChange,
+
+    stateFilter,
+
+    onStateFilterChange,
+
+    totalGroups
+
+}: Props) {
 
     return (
 
@@ -46,21 +95,48 @@ export default function ConsumerGroupsToolbar() {
             <div className="consumer-toolbar-left">
 
                 <input
+
                     className="consumer-toolbar-search"
+
                     placeholder="Поиск группы..."
+
+                    value={search}
+
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+
+                        onSearchChange(event.target.value)
+
+                    }
+
                 />
 
-                <select className="consumer-toolbar-select">
+                <select
+                    className="consumer-toolbar-select"
+                    value={stateFilter}
+                    onChange={(event) =>
+                        onStateFilterChange(event.target.value)
+                    }
+                >
 
-                    <option>Все состояния</option>
+                    <option value="all">
+                        Все состояния
+                    </option>
 
-                    <option>Stable</option>
+                    <option value="Stable">
+                        Stable
+                    </option>
 
-                    <option>Rebalancing</option>
+                    <option value="Rebalancing">
+                        Rebalancing
+                    </option>
 
-                    <option>Empty</option>
+                    <option value="Empty">
+                        Empty
+                    </option>
 
-                    <option>Dead</option>
+                    <option value="Dead">
+                        Dead
+                    </option>
 
                 </select>
 
@@ -76,7 +152,7 @@ export default function ConsumerGroupsToolbar() {
 
                 <div className="consumer-toolbar-counter">
 
-                    Всего групп: 3
+                    Всего групп: {totalGroups}
 
                 </div>
 

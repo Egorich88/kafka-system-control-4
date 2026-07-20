@@ -34,6 +34,7 @@
 
 import '../styles/consumer-table.css';
 import type { ConsumerGroup } from '../types/consumer-groups.types';
+import ConsumerStateBadge from './ConsumerStateBadge';
 /**
  * ============================================================================
  * Свойства таблицы Consumer Groups.
@@ -123,11 +124,11 @@ export default function ConsumerGroupsTable({
 
                         <td>
 
-                            <span className={`state-badge ${group.state.toLowerCase()}`}>
+                            <ConsumerStateBadge
 
-                                {group.state}
+                                state={group.state}
 
-                            </span>
+                            />
 
                         </td>
 

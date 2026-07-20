@@ -245,3 +245,68 @@
     font-weight: 700;
 
 }
+/* ============================================================
+   Состояния Consumer Group
+   ============================================================ */
+
+.consumer-state-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 110px;
+
+    padding: 4px 10px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    border: 1px solid transparent;
+
+}
+
+.consumer-state-badge.stable {
+
+    color: #23b26d;
+
+    background: rgba(35,178,109,.12);
+
+    border-color: rgba(35,178,109,.25);
+
+}
+
+.consumer-state-badge.rebalancing {
+
+    color: #ff9800;
+
+    background: rgba(255,152,0,.12);
+
+    border-color: rgba(255,152,0,.25);
+
+}
+
+.consumer-state-badge.empty {
+
+    color: #9aa0a6;
+
+    background: rgba(154,160,166,.12);
+
+    border-color: rgba(154,160,166,.25);
+
+}
+
+.consumer-state-badge.dead {
+
+    color: #ef5350;
+
+    background: rgba(239,83,80,.12);
+
+    border-color: rgba(239,83,80,.25);
+
+}
