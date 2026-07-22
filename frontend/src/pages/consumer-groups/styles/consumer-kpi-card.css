@@ -1,0 +1,97 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ============================================================================
+   KPI карточка Consumer Groups
+   ============================================================================ */
+
+.consumer-kpi-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 20px;
+
+    background: var(--panel-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 16px;
+
+    transition: .2s;
+
+}
+
+.consumer-kpi-card:hover {
+
+    border-color: var(--border-color);
+
+}
+
+.consumer-kpi-icon {
+
+    width: 58px;
+
+    height: 58px;
+
+    border-radius: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+.consumer-kpi-content {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+}
+
+.consumer-kpi-title {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+}
+
+.consumer-kpi-value {
+
+    font-size: 34px;
+
+    font-weight: 700;
+
+    color: var(--text-primary);
+
+}
+
+.consumer-kpi-description {
+
+    font-size: 12px;
+
+    color: var(--text-secondary);
+
+}

@@ -85,5 +85,25 @@ Lag
 
 **styles/** - содержит стили css
 
+***Добавляется новый раздел***
+
+    components/
+
+    ConsumerGroupsToolbar.tsx - Верхняя панель страницы.
+
+    ConsumerGroupsTable.tsx - Таблица групп.
+
+    ConsumerLagChart.tsx - График Lag.
+
+    ConsumerGroupDetails.tsx - Панель информации.
+
+    ConsumerMembers.tsx - Участники группы.
+
+    ConsumerOffsets.tsx - Таблица Offset.
+
+    ConsumerGroupsKpi.tsx - KPI карточки Consumer Groups.
+
+    ConsumerKpiCard.tsx - Универсальная KPI карточка.
+
 
 

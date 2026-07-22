@@ -15,53 +15,49 @@
  */
 
 /* ============================================================
-   Карточка графика
+   Секция участников
    ============================================================ */
 
-.consumer-chart {
+.consumer-members {
 
-    height: 100%;
-
-    background: var(--panel-bg);
-
-    border: 1px solid var(--border-color);
-
-    border-radius: 16px;
-
-    padding: 20px;
-
-    display: flex;
-
-    flex-direction: column;
+    margin-top: 24px;
 
 }
 
+.consumer-members-title {
 
-/* ============================================================
-   Заголовок
-   ============================================================ */
-
-.consumer-chart-title {
-
-    font-size: 18px;
+    font-size: 13px;
 
     font-weight: 700;
 
-    color: var(--text-primary);
+    text-transform: uppercase;
 
-    margin-bottom: 18px;
+    color: var(--text-secondary);
+
+    margin-bottom: 12px;
 
 }
 
+.consumer-member-card {
 
-/* ============================================================
-   Контейнер графика
-   ============================================================ */
+    padding: 12px;
 
-.consumer-chart-body {
+    margin-bottom: 10px;
 
-    flex: 1;
+    border-radius: 10px;
 
-    min-height: 260px;
+    background: var(--table-row-hover);
+
+    border: 1px solid var(--border-color);
+
+}
+
+.consumer-member-name {
+
+    font-weight: 700;
+
+    margin-bottom: 6px;
+
+    color: var(--text-primary);
 
 }

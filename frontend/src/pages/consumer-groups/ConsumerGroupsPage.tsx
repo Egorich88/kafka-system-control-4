@@ -41,6 +41,7 @@ import ConsumerGroupsToolbar from './components/ConsumerGroupsToolbar';
 import ConsumerGroupsTable from './components/ConsumerGroupsTable';
 import ConsumerGroupDetails from './components/ConsumerGroupDetails';
 import ConsumerLagChart from './components/ConsumerLagChart';
+import ConsumerGroupsKpi from './components/ConsumerGroupsKpi';
 
 export default function ConsumerGroupsPage() {
     /*
@@ -175,6 +176,30 @@ export default function ConsumerGroupsPage() {
     return (
 
         <div className="consumer-groups-page">
+        {/*
+         * ============================================================================
+         * Заголовок страницы.
+         * ============================================================================
+         */}
+
+        <h1 className="page-title">
+
+            Группы потребителей
+
+        </h1>
+
+            {/*
+             * ========================================================================
+             * Верхняя KPI-панель.
+             *
+             * Пока отображает mock-данные.
+             *
+             * После подключения backend будет получать статистику
+             * напрямую из useConsumerGroups().
+             * ========================================================================
+             */}
+
+            <ConsumerGroupsKpi />
 
             <ConsumerGroupsToolbar
 

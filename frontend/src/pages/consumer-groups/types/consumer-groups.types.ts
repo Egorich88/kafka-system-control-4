@@ -44,3 +44,25 @@ export interface ConsumerGroup {
     coordinator: string;
 
 }
+/**
+ * ============================================================================
+ * Участник Consumer Group.
+ *
+ * Пока используется mock.
+ *
+ * После backend полностью совпадет
+ * со структурой API.
+ * ============================================================================
+ */
+
+export interface ConsumerMember {
+
+    id: string;
+
+    clientId: string;
+
+    host: string;
+
+    partitions: string[];
+
+}

@@ -41,6 +41,8 @@
  */
 import '../styles/consumer-details.css';
 import type { ConsumerGroup } from '../types/consumer-groups.types';
+import ConsumerMembers from './ConsumerMembers';
+import ConsumerOffsets from './ConsumerOffsets';
 
 interface Props {
 
@@ -76,6 +78,12 @@ export default function ConsumerGroupDetails({
 
                 <div className="consumer-details-title">
 
+                    Информация о группе
+
+                </div>
+
+                <div className="consumer-details-group">
+
                     {group.name}
 
                 </div>
@@ -93,12 +101,6 @@ export default function ConsumerGroupDetails({
             </div>
 
             <div className="consumer-details-section">
-
-                <div className="consumer-details-section-title">
-
-                    Общая информация
-
-                </div>
 
                 <div className="consumer-details-row">
 
@@ -180,6 +182,8 @@ export default function ConsumerGroupDetails({
 
                 </div>
 
+                
+
             </div>
 
             <div className="consumer-details-section">
@@ -190,13 +194,27 @@ export default function ConsumerGroupDetails({
 
                 </div>
 
+                <ConsumerMembers
+
+                    group={group}
+
+                />
+
                 <button className="offset-reset-button">
 
                     Сбросить offset
 
+
+
                 </button>
 
+
             </div>
+            <ConsumerOffsets
+
+                group={group}
+
+            />
 
         </div>
 

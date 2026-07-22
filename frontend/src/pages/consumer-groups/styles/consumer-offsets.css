@@ -1,0 +1,57 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0
+ */
+
+/* ============================================================
+   Панель Offset'ов
+   ============================================================ */
+
+.consumer-offsets {
+
+    margin-top: 20px;
+
+}
+
+.consumer-offsets-title {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: var(--text-secondary);
+
+    text-transform: uppercase;
+
+    margin-bottom: 10px;
+
+}
+
+.consumer-offsets-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+}
+
+.consumer-offsets-table th {
+
+    padding: 8px;
+
+    text-align: left;
+
+    color: var(--text-secondary);
+
+    border-bottom: 1px solid var(--border-color);
+
+}
+
+.consumer-offsets-table td {
+
+    padding: 8px;
+
+    border-bottom: 1px solid var(--border-color);
+
+}
