@@ -13,17 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * =============================================================================
  * lag.utils.ts
  * =============================================================================
  *
- * Функции вычисления и форматирования Lag.
+ * Утилиты форматирования и визуализации Consumer Lag.
  *
- * Используются графиками
- * и таблицей Consumer Groups.
- *
+ * Используется в таблице (полоски Grafana-стиля) и KPI.
  * =============================================================================
  */
 
- export {};
+/** Форматирует lag: 1240000 → "1.24M", 850 → "850" */
+export function formatLag(value: number): string {
+    if (value >= 1_000_000) {
+        return `${(value / 1_000_000).toFixed(2)}M`;
+    }
+    if (value >= 1_000) {
+        return `${(value / 1_000).toFixed(0)}K`;
+    }
+    return String(value);
+}
+
+export type LagLevel = 'none' | 'low' | 'medium' | 'high';
+
+/** Определяет уровень lag для цветовой индикации */
+export function getLagLevel(lag: number, maxLag: number): LagLevel {
+    if (lag === 0) return 'none';
+    const ratio = maxLag > 0 ? lag / maxLag : 0;
+    if (ratio >= 0.7) return 'high';
+    if (ratio >= 0.3) return 'medium';
+    return 'low';
+}
+
+/** Ширина полоски lag (0–100%) относительно maxLag в таблице */
+export function getLagBarWidth(lag: number, maxLag: number): number {
+    if (maxLag === 0 || lag === 0) return 0;
+    return Math.min(100, Math.round((lag / maxLag) * 100));
+}

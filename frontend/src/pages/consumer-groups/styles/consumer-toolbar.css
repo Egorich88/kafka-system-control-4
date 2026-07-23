@@ -232,7 +232,119 @@
 
     font-size: 16px;
 
-    color: var(--accent-color);
+    color: var(--text-secondary);
+
+}
+
+.consumer-toolbar-button.primary {
+
+    background: var(--accent-color);
+
+    border-color: var(--accent-color);
+
+    color: #fff;
+
+}
+
+.consumer-toolbar-button.primary:hover {
+
+    filter: brightness(1.08);
+
+    background: var(--accent-color);
+
+}
+
+.consumer-toolbar-button:disabled {
+
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+}
+
+.spinning {
+
+    animation: cg-spin 0.8s linear infinite;
+
+}
+
+@keyframes cg-spin {
+
+    from { transform: rotate(0deg); }
+
+    to { transform: rotate(360deg); }
+
+}
+
+/* ============================================================================
+   Экспорт — выпадающее меню
+============================================================================ */
+
+.consumer-export-wrapper {
+
+    position: relative;
+
+}
+
+.consumer-export-menu {
+
+    position: absolute;
+
+    top: calc(100% + 6px);
+
+    right: 0;
+
+    min-width: 140px;
+
+    background: var(--panel-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 10px;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+    z-index: 100;
+
+    overflow: hidden;
+
+}
+
+.consumer-export-menu button {
+
+    display: block;
+
+    width: 100%;
+
+    padding: 10px 16px;
+
+    text-align: left;
+
+    background: none;
+
+    border: none;
+
+    color: var(--text-primary);
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition: background 0.15s;
+
+}
+
+.consumer-export-menu button:hover {
+
+    background: var(--hover-bg);
+
+}
+
+.export-chevron {
+
+    font-size: 14px;
+
+    color: var(--text-secondary);
 
 }
 /* ============================================================================

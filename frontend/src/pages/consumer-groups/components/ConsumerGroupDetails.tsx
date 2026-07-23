@@ -19,205 +19,144 @@
  * ConsumerGroupDetails.tsx
  * =============================================================================
  *
- * Правая информационная панель выбранной Consumer Group.
+ * Пункт 9: Панель «Детали» с вкладками.
  *
- * Отображает:
- *
- * • основную информацию;
- * • состояние;
- * • Lag;
- * • участников;
- * • координатора.
- *
- * После подключения backend
- * здесь появятся:
- *
- * • список топиков;
- * • Offset Reset;
- * • Members;
- * • Offsets.
- *
+ * Вкладки: Детали | Members (N) | Offsets (N) | Topics (N) | Rebalance History
  * =============================================================================
  */
+
+import { useState } from 'react';
 import '../styles/consumer-details.css';
-import type { ConsumerGroup } from '../types/consumer-groups.types';
+import type { ConsumerGroup, RebalanceEvent } from '../types/consumer-groups.types';
 import ConsumerMembers from './ConsumerMembers';
 import ConsumerOffsets from './ConsumerOffsets';
+import ConsumerStateBadge from './ConsumerStateBadge';
+import { formatLag } from '../utils/lag.utils';
 
 interface Props {
-
     group: ConsumerGroup | null;
-
+    onResetOffsets: () => void;
 }
 
-export default function ConsumerGroupDetails({
+type TabId = 'details' | 'members' | 'offsets' | 'topics' | 'rebalance';
 
-    group
+const MOCK_REBALANCE: RebalanceEvent[] = [
+    { time: '2026-07-23 14:32', reason: 'Member joined', members: 12, duration: '1.2s' },
+    { time: '2026-07-23 12:15', reason: 'Member left', members: 11, duration: '0.8s' },
+    { time: '2026-07-22 18:40', reason: 'Subscription changed', members: 12, duration: '2.1s' }
+];
 
-}: Props) {
+export default function ConsumerGroupDetails({ group, onResetOffsets }: Props) {
+    const [activeTab, setActiveTab] = useState<TabId>('details');
 
     if (!group) {
-
         return (
-
             <div className="consumer-details consumer-details-empty">
-
                 Выберите группу потребителей
-
             </div>
-
         );
-
     }
 
+    const tabs: { id: TabId; label: string }[] = [
+        { id: 'details', label: 'Детали' },
+        { id: 'members', label: `Members (${group.members})` },
+        { id: 'offsets', label: `Offsets (${group.partitions ?? 0})` },
+        { id: 'topics', label: `Topics (${group.topics?.length ?? 0})` },
+        { id: 'rebalance', label: 'Rebalance History' }
+    ];
+
     return (
-
         <div className="consumer-details">
-
-            <div className="consumer-details-header">
-
-                <div className="consumer-details-title">
-
-                    Информация о группе
-
-                </div>
-
-                <div className="consumer-details-group">
-
-                    {group.name}
-
-                </div>
-
-                <span
-
-                    className={`state-badge ${group.state.toLowerCase()}`}
-
-                >
-
-                    {group.state}
-
-                </span>
-
+            <div className="consumer-details-tabs">
+                {tabs.map(tab => (
+                    <button
+                        key={tab.id}
+                        type="button"
+                        className={`consumer-details-tab ${activeTab === tab.id ? 'active' : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
             </div>
 
-            <div className="consumer-details-section">
+            {activeTab === 'details' && (
+                <>
+                    <div className="consumer-details-header">
+                        <div className="consumer-details-group">{group.name}</div>
+                        <ConsumerStateBadge state={group.state} />
+                    </div>
+                    <div className="consumer-details-section">
+                        <div className="consumer-details-row">
+                            <span className="consumer-details-label">Отставание</span>
+                            <span className="consumer-details-value">{formatLag(group.lag)}</span>
+                        </div>
+                        <div className="consumer-details-row">
+                            <span className="consumer-details-label">Участники</span>
+                            <span className="consumer-details-value">{group.members}</span>
+                        </div>
+                        <div className="consumer-details-row">
+                            <span className="consumer-details-label">Топики</span>
+                            <span className="consumer-details-value">{group.topics?.length ?? 0}</span>
+                        </div>
+                        <div className="consumer-details-row">
+                            <span className="consumer-details-label">Партиции</span>
+                            <span className="consumer-details-value">{group.partitions ?? '—'}</span>
+                        </div>
+                        <div className="consumer-details-row">
+                            <span className="consumer-details-label">Протокол</span>
+                            <span className="consumer-details-value">{group.protocol ?? '—'}</span>
+                        </div>
+                        <div className="consumer-details-row">
+                            <span className="consumer-details-label">Координатор</span>
+                            <span className="consumer-details-value">{group.coordinator}</span>
+                        </div>
+                    </div>
+                    <button type="button" className="offset-reset-button" onClick={onResetOffsets}>
+                        Сбросить оффсеты
+                    </button>
+                </>
+            )}
 
-                <div className="consumer-details-row">
+            {activeTab === 'members' && <ConsumerMembers group={group} />}
+            {activeTab === 'offsets' && <ConsumerOffsets group={group} />}
 
-                    <span className="consumer-details-label">
-
-                        Отставание
-
-                    </span>
-
-                    <span className="consumer-details-value">
-
-                        {group.lag}
-
-                    </span>
-
+            {activeTab === 'topics' && (
+                <div className="consumer-details-section">
+                    <div className="consumer-details-section-title">Топики группы</div>
+                    <ul className="consumer-topics-list">
+                        {(group.topics ?? []).map(topic => (
+                            <li key={topic}>{topic}</li>
+                        ))}
+                    </ul>
                 </div>
+            )}
 
-                <div className="consumer-details-row">
-
-                    <span className="consumer-details-label">
-
-                        Участники
-
-                    </span>
-
-                    <span className="consumer-details-value">
-
-                        {group.members}
-
-                    </span>
-
+            {activeTab === 'rebalance' && (
+                <div className="consumer-details-section">
+                    <div className="consumer-details-section-title">История ребалансировок</div>
+                    <table className="rebalance-table">
+                        <thead>
+                            <tr>
+                                <th>Время</th>
+                                <th>Причина</th>
+                                <th>Members</th>
+                                <th>Длительность</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {MOCK_REBALANCE.map((ev, i) => (
+                                <tr key={i}>
+                                    <td>{ev.time}</td>
+                                    <td>{ev.reason}</td>
+                                    <td>{ev.members}</td>
+                                    <td>{ev.duration}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-
-                <div className="consumer-details-row">
-
-                    <span className="consumer-details-label">
-
-                        Координатор
-
-                    </span>
-
-                    <span className="consumer-details-value">
-
-                        {group.coordinator}
-
-                    </span>
-
-                </div>
-
-                <div className="consumer-details-row">
-
-                    <span className="consumer-details-label">
-
-                        Топики
-
-                    </span>
-
-                    <span className="consumer-details-value">
-
-                        —
-
-                    </span>
-
-                </div>
-
-                <div className="consumer-details-row">
-
-                    <span className="consumer-details-label">
-
-                        Партиции
-
-                    </span>
-
-                    <span className="consumer-details-value">
-
-                        —
-
-                    </span>
-
-                </div>
-
-                
-
-            </div>
-
-            <div className="consumer-details-section">
-
-                <div className="consumer-details-section-title">
-
-                    Действия
-
-                </div>
-
-                <ConsumerMembers
-
-                    group={group}
-
-                />
-
-                <button className="offset-reset-button">
-
-                    Сбросить offset
-
-
-
-                </button>
-
-
-            </div>
-            <ConsumerOffsets
-
-                group={group}
-
-            />
-
+            )}
         </div>
-
     );
-
 }

@@ -103,19 +103,131 @@
 
 .consumer-groups-table tbody tr {
     cursor: pointer;
-    transition:
-        background .15s ease,
-        border-color .15s ease,
-        transform .12s ease;
-
+    transition: background 0.15s ease;
 }
 
 .consumer-groups-table tbody tr:hover {
-
     background: var(--hover-color);
+}
 
-    transform: translateX(2px);
 
+/* ============================================================
+   Lag — Grafana-стиль полоски
+   ============================================================ */
+
+.lag-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+}
+
+.lag-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.lag-bar-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(148, 163, 184, 0.15);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.lag-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.lag-none { color: #94a3b8; }
+.lag-bar-fill.lag-none { background: #94a3b8; width: 0 !important; }
+
+.lag-low { color: #22c55e; }
+.lag-bar-fill.lag-low { background: #22c55e; }
+
+.lag-medium { color: #f59e0b; }
+.lag-bar-fill.lag-medium { background: #f59e0b; }
+
+.lag-high { color: #ef4444; }
+.lag-bar-fill.lag-high { background: #ef4444; }
+
+
+/* ============================================================
+   Столбец действий
+   ============================================================ */
+
+.consumer-actions-cell {
+    display: flex;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.action-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.action-icon-btn:hover {
+    background: var(--hover-bg);
+    color: var(--accent-color);
+}
+
+.action-icon-btn.danger:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.12);
+}
+
+
+/* ============================================================
+   Топики в таблице
+   ============================================================ */
+
+.consumer-topics-cell {
+    color: var(--text-secondary);
+    font-size: 12px;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topics-more {
+    margin-left: 4px;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.consumer-group-name {
+    font-weight: 600;
+}
+
+.consumer-table-wrapper {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.consumer-table-empty {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
 }
 
 

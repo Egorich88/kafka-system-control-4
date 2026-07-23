@@ -31,17 +31,53 @@
  * ============================================================
  */
 
+export type ConsumerGroupState =
+    | 'Stable'
+    | 'Rebalancing'
+    | 'PreparingRebalance'
+    | 'CompletingRebalance'
+    | 'Dead'
+    | 'Empty';
+
 export interface ConsumerGroup {
 
     name: string;
 
-    state: 'Stable' | 'PreparingRebalance' | 'CompletingRebalance' | 'Dead' | 'Empty';
+    state: ConsumerGroupState;
 
     lag: number;
 
     members: number;
 
     coordinator: string;
+
+    topics?: string[];
+
+    partitions?: number;
+
+    protocol?: string;
+
+    /** Скрыта ли группа из таблицы (иконка «глаз») */
+    hidden?: boolean;
+
+}
+
+export type OffsetResetMethod =
+    | 'earliest'
+    | 'latest'
+    | 'datetime'
+    | 'offset'
+    | 'current';
+
+export interface RebalanceEvent {
+
+    time: string;
+
+    reason: string;
+
+    members: number;
+
+    duration: string;
 
 }
 /**

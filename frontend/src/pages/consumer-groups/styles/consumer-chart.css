@@ -41,16 +41,24 @@
    Заголовок
    ============================================================ */
 
-.consumer-chart-title {
+.consumer-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
 
-    font-size: 18px;
+.consumer-chart-header .ksc-select-label {
+    display: none;
+}
 
-    font-weight: 700;
-
-    color: var(--text-primary);
-
-    margin-bottom: 18px;
-
+.consumer-chart-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    min-height: 260px;
 }
 
 

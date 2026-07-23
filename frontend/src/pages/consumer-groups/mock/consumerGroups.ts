@@ -1,50 +1,95 @@
 /*
  * Copyright 2026 Egor Khomenko (Egorich88)
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-import { ConsumerGroup } from '../types/consumerGroup';
 
 /**
- * Временные данные.
+ * =============================================================================
+ * consumerGroups.ts
+ * =============================================================================
  *
- * После подключения backend
- * будут полностью удалены.
+ * Mock-данные Consumer Groups для разработки UI.
+ * =============================================================================
  */
 
-export const consumerGroupsMock: ConsumerGroup[] = [
+import type { ConsumerGroup } from '../types/consumer-groups.types';
 
+export const MOCK_CONSUMER_GROUPS: ConsumerGroup[] = [
     {
-        name: 'orders',
+        name: 'orders-service',
         state: 'Stable',
-        lag: 15,
-        members: 3,
-        coordinator: 'broker-1'
+        lag: 1_240_000,
+        members: 12,
+        coordinator: 'broker-1:9092',
+        topics: ['orders', 'payments', 'inventory', 'shipping', 'notifications', 'audit', 'events', 'metrics'],
+        partitions: 24,
+        protocol: 'range',
+        hidden: false
     },
-
     {
-        name: 'payments',
+        name: 'analytics-pipeline',
+        state: 'Rebalancing',
+        lag: 850_000,
+        members: 8,
+        coordinator: 'broker-2:9092',
+        topics: ['events', 'metrics', 'clicks'],
+        partitions: 16,
+        protocol: 'cooperative-sticky',
+        hidden: false
+    },
+    {
+        name: 'payment-service',
         state: 'Stable',
         lag: 0,
-        members: 2,
-        coordinator: 'broker-2'
-    },
-
-    {
-        name: 'analytics',
-        state: 'PreparingRebalance',
-        lag: 124,
         members: 5,
-        coordinator: 'broker-2'
+        coordinator: 'broker-1:9092',
+        topics: ['payments'],
+        partitions: 6,
+        protocol: 'range',
+        hidden: false
     },
-
     {
-        name: 'logs',
-        state: 'Dead',
+        name: 'notifications',
+        state: 'Empty',
         lag: 0,
         members: 0,
-        coordinator: 'broker-3'
+        coordinator: 'broker-3:9092',
+        topics: ['notifications'],
+        partitions: 3,
+        protocol: 'range',
+        hidden: false
+    },
+    {
+        name: 'legacy-import',
+        state: 'Dead',
+        lag: 42_000,
+        members: 0,
+        coordinator: 'broker-2:9092',
+        topics: ['legacy-data'],
+        partitions: 4,
+        protocol: 'range',
+        hidden: false
+    },
+    {
+        name: 'inventory-sync',
+        state: 'Stable',
+        lag: 12_400,
+        members: 4,
+        coordinator: 'broker-1:9092',
+        topics: ['inventory', 'stock-updates'],
+        partitions: 8,
+        protocol: 'range',
+        hidden: false
     }
-
 ];
