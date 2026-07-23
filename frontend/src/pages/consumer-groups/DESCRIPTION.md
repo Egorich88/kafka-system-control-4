@@ -89,7 +89,7 @@ Lag
 
     components/
 
-    ConsumerGroupsToolbar.tsx - Верхняя панель страницы.
+    ConsumerGroupsToolbar.tsx - верхняя панель страницы Consumer Groups (поиск, фильтрация, сортировка, экспорт, обновление, сброс offset'ов).
 
     ConsumerGroupsTable.tsx - Таблица групп.
 

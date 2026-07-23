@@ -1,0 +1,79 @@
+/*
+ * =============================================================================
+ * KSCSelect
+ * =============================================================================
+ */
+
+.ksc-select {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+.ksc-select-label {
+
+    font-size: 13px;
+
+    color: var(--text-secondary);
+
+    white-space: nowrap;
+
+}
+
+.ksc-select-input {
+
+    appearance: none;
+
+    min-width: 180px;
+
+    height: 40px;
+
+    padding: 0 36px 0 12px;
+
+    border-radius: 10px;
+
+    border: 1px solid var(--border-color);
+
+    background: var(--input-bg);
+
+    color: var(--text-primary);
+
+    cursor: pointer;
+
+    transition: .15s;
+
+}
+
+.ksc-select-input:hover {
+
+    border-color: var(--accent-color);
+
+}
+
+.ksc-select-input:focus {
+
+    outline: none;
+
+    border-color: var(--accent-color);
+
+    box-shadow: 0 0 0 3px rgba(59,130,246,.18);
+
+}
+
+.ksc-select-icon {
+
+    position: absolute;
+
+    right: 12px;
+
+    pointer-events: none;
+
+    color: var(--text-secondary);
+
+}

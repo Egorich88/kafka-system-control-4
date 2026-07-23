@@ -16,27 +16,30 @@
 
 /**
  * =============================================================================
- * ConsumerGroupsToolbar.tsx
- * =============================================================================
- *
- * Верхняя панель управления страницы Consumer Groups.
- *
- * На текущем этапе реализуется только визуальный каркас.
- *
- * Позже компонент будет использоваться для:
- *
- * • поиска Consumer Group;
- * • фильтрации по состоянию;
- * • отображения пустых групп;
- * • обновления списка;
- * • запуска Offset Reset Wizard;
- * • отображения количества найденных групп.
+ ConsumerGroupsToolbar.tsx
+
+ Отвечает исключительно за верхнюю панель управления.
+
+ Содержит:
+
+ • поиск
+ • фильтрацию
+ • сортировку
+ • обновление
+ • экспорт
+ • Offset Reset
+
+ Никакой бизнес-логики здесь нет.
+
+ Компонент только отображает элементы управления.
  *
  * =============================================================================
  */
-
+import KSCSelect from '../../../components/ui/select/KSCSelect';
 import '../styles/consumer-toolbar.css';
 import { ChangeEvent } from 'react';
+import { FiSearch } from 'react-icons/fi';
+import { FiRefreshCw } from 'react-icons/fi';
 
 /**
  * ============================================================================
@@ -94,59 +97,93 @@ export default function ConsumerGroupsToolbar({
 
             <div className="consumer-toolbar-left">
 
-                <input
+                <div className="consumer-toolbar-search-wrapper">
 
-                    className="consumer-toolbar-search"
+                    <FiSearch className="consumer-toolbar-search-icon" />
 
-                    placeholder="Поиск группы..."
+                    <input
 
-                    value={search}
+                        className="consumer-toolbar-search"
 
-                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                        placeholder="Поиск группы..."
 
-                        onSearchChange(event.target.value)
+                        value={search}
 
-                    }
+                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+
+                            onSearchChange(event.target.value)
+
+                        }
+
+                    />
+
+                </div>
+
+                <KSCSelect
+
+                    label="Статус:"
+
+                    value={stateFilter}
+
+                    onChange={onStateFilterChange}
+
+                    options={[
+
+                        {
+
+                            value: 'all',
+
+                            label: 'Все'
+
+                        },
+
+                        {
+
+                            value: 'Stable',
+
+                            label: 'Stable'
+
+                        },
+
+                        {
+
+                            value: 'Rebalancing',
+
+                            label: 'Rebalancing'
+
+                        },
+
+                        {
+
+                            value: 'Empty',
+
+                            label: 'Empty'
+
+                        },
+
+                        {
+
+                            value: 'Dead',
+
+                            label: 'Dead'
+
+                        }
+
+                    ]}
 
                 />
-
-                <select
-                    className="consumer-toolbar-select"
-                    value={stateFilter}
-                    onChange={(event) =>
-                        onStateFilterChange(event.target.value)
-                    }
-                >
-
-                    <option value="all">
-                        Все состояния
-                    </option>
-
-                    <option value="Stable">
-                        Stable
-                    </option>
-
-                    <option value="Rebalancing">
-                        Rebalancing
-                    </option>
-
-                    <option value="Empty">
-                        Empty
-                    </option>
-
-                    <option value="Dead">
-                        Dead
-                    </option>
-
-                </select>
 
             </div>
 
             <div className="consumer-toolbar-right">
 
-                <button className="consumer-toolbar-button">
+                <button
+                    className="consumer-toolbar-button secondary"
+                >
 
-                    Обновить
+                    <FiRefreshCw />
+
+                    <span>Обновить</span>
 
                 </button>
 
