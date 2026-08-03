@@ -50,7 +50,8 @@ import './styles/sidebar.css';
 import './i18n/index.js';
 
 /* Корневой компонент приложения */
-import App from './App';
+import LoadingDemo from "./components/loading/LoadingDemo";
+//import App from './App';
 
 /* Глобальные провайдеры */
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -60,7 +61,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
       <LanguageProvider>
-        <App />
+        <LoadingDemo />
+
       </LanguageProvider>
     </ThemeProvider>
   </React.StrictMode>

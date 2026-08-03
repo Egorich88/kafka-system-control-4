@@ -1,25 +1,50 @@
 /*
  * Copyright 2026 Egor Khomenko (Egorich88)
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /**
- * ============================================================================
- * LoadingLogo.tsx
- * ============================================================================
+ * =============================================================================
+ * @file LoadingLogo.tsx
+ * =============================================================================
  *
- * Компонент отображения логотипа.
+ * Логотип стартового экрана Kafka System Control.
  *
- * Позже будет содержать:
+ * Компонент отвечает исключительно за отображение логотипа
+ * во время первоначальной загрузки приложения.
  *
- * • SVG логотип Kafka;
- * • градиентный текст KSC;
- * • эффект приближения;
- * • свечение;
- * • масштабирование.
+ * Никакой логики здесь быть не должно.
+ * Только отображение.
+ * =============================================================================
  */
 
+import "./../styles/loading-screen.css";
+
 export default function LoadingLogo() {
-    return null;
+
+    return (
+
+        <div className="loading-logo">
+
+            <img
+                src="/kafka-system-logo.png"
+                alt="Kafka System Control"
+                draggable={false}
+            />
+
+        </div>
+
+    );
+
 }

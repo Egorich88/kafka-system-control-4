@@ -2,109 +2,97 @@
  * Copyright 2026 Egor Khomenko (Egorich88)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /**
- * ============================================================================
- * LoadingScreen.tsx
- * ============================================================================
+ * =============================================================================
+ * @file LoadingScreen.tsx
+ * =============================================================================
  *
- * Полноэкранный экран запуска Kafka System Control.
+ * Главный контейнер стартового экрана Kafka System Control.
  *
- * Отображается только во время первоначальной загрузки приложения.
+ * Назначение:
  *
- * Экран включает:
+ * • объединяет все компоненты экрана загрузки;
+ * • не содержит бизнес-логики;
+ * • не содержит useEffect;
+ * • не содержит запросов к API;
+ * • не управляет временем.
  *
- * • анимированный логотип
- * • название продукта
- * • процент загрузки
- * • статус выполнения
- * • индикатор прогресса
+ * Все данные поступают извне через props.
  *
- * После окончания загрузки полностью исчезает.
- * ============================================================================
+ * Архитектура:
+ *
+ * LoadingScreen
+ * ├── LoadingLogo
+ * ├── LoadingStatus
+ * └── LoadingProgress
+ *
+ * =============================================================================
  */
-
-import { FC } from "react";
 
 import "../styles/loading-screen.css";
 
+import LoadingLogo from "./LoadingLogo";
+import LoadingStatus from "./LoadingStatus";
 import LoadingProgress from "./LoadingProgress";
 
+/**
+ * =============================================================================
+ * Свойства LoadingScreen.
+ * =============================================================================
+ */
 interface LoadingScreenProps {
 
+    /**
+     * Процент выполнения.
+     */
     progress: number;
 
+    /**
+     * Текущее состояние.
+     */
     status: string;
 
 }
 
-const LoadingScreen: FC<LoadingScreenProps> = ({
+/**
+ * =============================================================================
+ * LoadingScreen
+ * =============================================================================
+ */
+export default function LoadingScreen({
+
     progress,
     status
-}) => {
+
+}: LoadingScreenProps) {
 
     return (
 
         <div className="loading-screen">
 
-            {/* ==========================================================
-                Фоновое свечение
-               ========================================================== */}
+            <div className="loading-container">
 
-            <div className="loading-background" />
+                <LoadingLogo />
 
-            {/* ==========================================================
-                Центральный блок
-               ========================================================== */}
-
-            <div className="loading-center">
-
-                {/* ------------------------------------------------------ */}
-                {/* Логотип                                                */}
-                {/* ------------------------------------------------------ */}
-
-                <img
-                    src="/logo_dark.svg"
-                    alt="Kafka System Control"
-                    className="loading-logo"
+                <LoadingStatus
+                    text={status}
                 />
 
-                {/* ------------------------------------------------------ */}
-                {/* Название                                               */}
-                {/* ------------------------------------------------------ */}
-
-                <h1 className="loading-title">
-
-                    KAFKA SYSTEM CONTROL
-
-                </h1>
-
-                {/* ------------------------------------------------------ */}
-                {/* Процент                                                */}
-                {/* ------------------------------------------------------ */}
-
-                <div className="loading-percent">
-
-                    {progress}%
-
-                </div>
-
-                {/* ------------------------------------------------------ */}
-                {/* Прогресс                                               */}
-                {/* ------------------------------------------------------ */}
-
-                <LoadingProgress progress={progress} />
-
-                {/* ------------------------------------------------------ */}
-                {/* Статус                                                 */}
-                {/* ------------------------------------------------------ */}
-
-                <div className="loading-status">
-
-                    {status}
-
-                </div>
+                <LoadingProgress
+                    progress={progress}
+                />
 
             </div>
 
@@ -112,6 +100,4 @@ const LoadingScreen: FC<LoadingScreenProps> = ({
 
     );
 
-};
-
-export default LoadingScreen;
+}

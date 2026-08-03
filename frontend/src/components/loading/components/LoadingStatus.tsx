@@ -1,27 +1,34 @@
 /*
  * Copyright 2026 Egor Khomenko (Egorich88)
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
  */
 
-/**
- * ============================================================================
- * LoadingStatus.tsx
- * ============================================================================
- *
- * Компонент отображения текущего состояния загрузки.
- *
- * Примеры:
- *
- * Инициализация...
- *
- * Загрузка темы...
- *
- * Подключение к кластеру...
- *
- * Готово.
- */
+import "../styles/loading-screen.css";
 
-export default function LoadingStatus() {
-    return null;
+interface LoadingStatusProps {
+
+    /**
+     * Текст текущего состояния загрузки.
+     */
+    text: string;
+
+}
+
+export default function LoadingStatus({
+
+    text
+
+}: LoadingStatusProps) {
+
+    return (
+
+        <div className="loading-status">
+
+            {text}
+
+        </div>
+
+    );
+
 }

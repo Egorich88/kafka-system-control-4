@@ -1,40 +1,150 @@
 /*
  * Copyright 2026 Egor Khomenko (Egorich88)
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-/* ==========================================================================
-   Loading Screen
+/**
+ * =============================================================================
+ * loading-screen.css
+ * =============================================================================
+ *
+ * Стили стартового экрана загрузки Kafka System Control.
+ *
+ * На данном этапе файл содержит только оформление компонентов.
+ * Логика полностью отсутствует.
+ *
+ * Используется:
+ *
+ * • LoadingScreen
+ * • LoadingLogo
+ * • LoadingTitle
+ * • LoadingSubtitle
+ * • LoadingProgress
+ * • LoadingStatus
+ *
+ * После завершения UI-макета сюда будут постепенно добавляться
+ * анимации появления, эффекты свечения, переходы и поддержка тем.
+ * =============================================================================
+*/
 
-   Данный файл содержит стили экрана загрузки.
-
-   На текущем этапе стили отсутствуют.
-
-   Они будут добавляться постепенно
-   по мере разработки загрузчика.
-   ========================================================================== */
 /* =============================================================================
-   Progress Bar
-   ============================================================================= */
+   Основной экран
+============================================================================= */
+
+.loading-screen {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: #0f1117;
+
+    z-index: 999999;
+}
+
+/* =============================================================================
+   Центральный контейнер
+============================================================================= */
+
+.loading-container {
+
+    width: 420px;
+    max-width: 90%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+/* =============================================================================
+   Логотип
+============================================================================= */
+
+.loading-logo {
+
+    width: 96px;
+    height: 96px;
+
+    margin-bottom: 28px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.loading-logo img {
+
+    width: 100%;
+    height: 100%;
+
+    user-select: none;
+    pointer-events: none;
+
+}
+
+/* =============================================================================
+   Название приложения
+============================================================================= */
+
+.loading-title {
+
+    font-size: 32px;
+    font-weight: 700;
+
+    letter-spacing: 3px;
+
+    color: #ffffff;
+
+    text-transform: uppercase;
+
+}
+
+/* =============================================================================
+   Подзаголовок
+============================================================================= */
+
+.loading-subtitle {
+
+    margin-top: 8px;
+    margin-bottom: 40px;
+
+    font-size: 14px;
+
+    color: #9ca3af;
+
+    text-align: center;
+
+}
+
+/* =============================================================================
+   Полоса прогресса
+============================================================================= */
 
 .loading-progress {
 
-    width: 620px;
-
-    max-width: 90%;
-
-    margin-top: 40px;
+    width: 100%;
 
 }
 
 .loading-progress-track {
 
-    position: relative;
-
     width: 100%;
-
-    height: 10px;
+    height: 8px;
 
     overflow: hidden;
 
@@ -42,14 +152,11 @@
 
     background: rgba(255,255,255,.08);
 
-    box-shadow:
-        inset 0 1px 2px rgba(0,0,0,.4);
-
 }
 
-/* Заполненная часть */
-
 .loading-progress-fill {
+
+    width: 0%;
 
     height: 100%;
 
@@ -57,222 +164,46 @@
 
     background: linear-gradient(
         90deg,
-        #7c3aed,
-        #8b5cf6,
-        #3b82f6
+        #00b4ff,
+        #00d4ff
     );
 
-    transition:
-        width .35s ease;
-
-    box-shadow:
-
-        0 0 12px rgba(124,58,237,.6),
-
-        0 0 24px rgba(59,130,246,.35);
+    transition: width .35s ease;
 
 }
 
-/* Процент */
+/* =============================================================================
+   Проценты
+============================================================================= */
 
-.loading-progress-percent {
+.loading-progress-value {
 
-    margin-top: 14px;
+    margin-top: 10px;
+
+    text-align: right;
+
+    font-size: 13px;
+
+    color: #8b949e;
+
+}
+
+/* =============================================================================
+   Статус
+============================================================================= */
+
+.loading-status {
+
+    margin-top: 22px;
+
+    min-height: 22px;
 
     text-align: center;
 
-    font-size: 18px;
+    font-size: 14px;
 
-    font-weight: 600;
+    color: #d0d7de;
 
-    letter-spacing: 2px;
-
-    color: #cfd7e6;
-
-}
-/* ===========================================================
-   Полноэкранный экран
-   =========================================================== */
-
-.loading-screen{
-
-    position:fixed;
-
-    inset:0;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    overflow:hidden;
-
-    background:var(--bg-primary);
-
-    z-index:999999;
-
-}
-
-/* ===========================================================
-   Центральный блок
-   =========================================================== */
-
-.loading-center{
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-    gap:22px;
-
-    z-index:2;
-
-}
-
-/* ===========================================================
-   Логотип
-   =========================================================== */
-
-.loading-logo{
-
-    width:150px;
-
-    height:150px;
-
-    animation:logoZoom 2.4s ease;
-
-}
-
-/* ===========================================================
-   Заголовок
-   =========================================================== */
-
-.loading-title{
-
-    font-family:'Orbitron',sans-serif;
-
-    font-size:46px;
-
-    font-weight:700;
-
-    letter-spacing:8px;
-
-    text-transform:uppercase;
-
-    background:linear-gradient(
-        90deg,
-        #FF8A00,
-        #FF4FD8,
-        #7A5CFF,
-        #00D4FF,
-        #FF8A00
-    );
-
-    background-size:300%;
-
-    -webkit-background-clip:text;
-
-    -webkit-text-fill-color:transparent;
-
-    animation:
-
-        versionGradientMove 8s linear infinite,
-
-        logoZoom 2.4s ease;
-
-}
-
-/* ===========================================================
-   Процент
-   =========================================================== */
-
-.loading-percent{
-
-    font-size:46px;
-
-    font-weight:700;
-
-    color:#4ea4ff;
-
-}
-
-/* ===========================================================
-   Статус
-   =========================================================== */
-
-.loading-status{
-
-    color:var(--text-secondary);
-
-    font-size:15px;
-
-}
-
-/* ===========================================================
-   Фон
-   =========================================================== */
-
-.loading-background{
-
-    position:absolute;
-
-    inset:0;
-
-    background:
-
-        radial-gradient(circle at center,
-        rgba(0,180,255,.15),
-        transparent 70%);
-
-    animation:backgroundPulse 4s infinite;
-
-}
-
-/* ===========================================================
-   Анимации
-   =========================================================== */
-
-@keyframes logoZoom{
-
-    from{
-
-        transform:scale(.35);
-
-        opacity:0;
-
-    }
-
-    to{
-
-        transform:scale(1);
-
-        opacity:1;
-
-    }
-
-}
-
-@keyframes backgroundPulse{
-
-    0%{
-
-        opacity:.4;
-
-    }
-
-    50%{
-
-        opacity:1;
-
-    }
-
-    100%{
-
-        opacity:.4;
-
-    }
+    letter-spacing: .3px;
 
 }
