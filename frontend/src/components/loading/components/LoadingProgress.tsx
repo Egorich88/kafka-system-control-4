@@ -1,46 +1,81 @@
 /*
  * Copyright 2026 Egor Khomenko (Egorich88)
  *
- * Licensed under the Apache License, Version 2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * =============================================================================
+ * @file LoadingProgress.tsx
+ * =============================================================================
+ *
+ * Визуальный световой индикатор стартового экрана Kafka System Control.
+ *
+ * =============================================================================
+ * Назначение
+ * =============================================================================
+ *
+ * Компонент больше НЕ отображает классическую полосу прогресса и процент
+ * выполнения загрузки.
+ *
+ * Вместо этого используется короткая светящаяся линия под логотипом.
+ *
+ * Линия выполняет исключительно декоративную функцию:
+ *
+ * • создаёт рассеянное голубое свечение;
+ * • содержит небольшой мятный световой акцент;
+ * • плавно изменяет интенсивность свечения;
+ * • визуально показывает, что приложение находится в процессе запуска.
+ *
+ * =============================================================================
+ * Архитектурные ограничения
+ * =============================================================================
+ *
+ * Компонент не содержит:
+ *
+ * • API-запросов;
+ * • бизнес-логики;
+ * • useEffect;
+ * • useState;
+ * • таймеров;
+ * • расчёта прогресса.
+ *
+ * В дальнейшем компонент можно оставить полностью независимым
+ * от реального механизма загрузки приложения.
+ *
+ * =============================================================================
  */
 
 import "../styles/loading-screen.css";
 
-interface LoadingProgressProps {
-
-    /**
-     * Процент выполнения загрузки.
-     */
-    progress: number;
-
-}
-
-export default function LoadingProgress({
-
-    progress
-
-}: LoadingProgressProps) {
+/**
+ * =============================================================================
+ * LoadingProgress
+ * =============================================================================
+ *
+ * Отображает декоративный световой индикатор загрузки.
+ * =============================================================================
+ */
+export default function LoadingProgress() {
 
     return (
 
-        <div className="loading-progress">
+        <div
+            className="loading-progress"
+            aria-hidden="true"
+        >
 
-            <div className="loading-progress-track">
-
-                <div
-                    className="loading-progress-fill"
-                    style={{
-                        width: `${progress}%`
-                    }}
-                />
-
-            </div>
-
-            <div className="loading-progress-value">
-
-                {progress}%
-
-            </div>
+            <div className="loading-progress-glow" />
 
         </div>
 
