@@ -61,7 +61,7 @@
 
 .loading-container {
 
-    width: 420px;
+    width: 540px;
     max-width: 90%;
 
     display: flex;
@@ -75,23 +75,19 @@
 ============================================================================= */
 
 .loading-logo {
-
-    width: 96px;
-    height: 96px;
-
-    margin-bottom: 28px;
-
+    width: 160px !important;
+    height: 160px !important;
+    margin-bottom: 36px;
     display: flex;
     justify-content: center;
     align-items: center;
-
 }
 
 .loading-logo img {
-
     width: 100%;
     height: 100%;
-
+    object-fit: contain;
+    display: block;
     user-select: none;
     pointer-events: none;
 
