@@ -19,71 +19,50 @@
  * @file LoadingDemo.tsx
  * =============================================================================
  *
- * Демонстрационный экран загрузки Kafka System Control.
+ * Контейнер стартовой загрузки Kafka System Control.
  *
- * Назначение:
- * • локальная проверка интерфейса;
- * • тестирование анимаций;
- * • проверка адаптивности;
- * • разработка Splash Screen без подключения App.jsx.
+ * Исторически компонент использовался как демонстрационный экран.
  *
- * После завершения разработки данный файл будет удален.
+ * На текущем этапе демонстрационный таймер полностью удалён.
+ * Состояние загрузки поступает из useLoading().
+ *
  * =============================================================================
  */
 
-import { useEffect, useState } from "react";
+import LoadingScreen from './components/LoadingScreen';
 
-import LoadingScreen from "./components/LoadingScreen";
+import { useLoading } from './hooks/useLoading';
 
+
+/**
+ * =============================================================================
+ * LoadingDemo
+ * =============================================================================
+ *
+ * Отображает стартовый экран на основании реального состояния
+ * первоначальной инициализации приложения.
+ * =============================================================================
+ */
 export default function LoadingDemo() {
 
-    const [progress, setProgress] = useState(0);
+    /*
+     * Получаем состояние реальной инициализации приложения.
+     */
+    const loading = useLoading();
 
-    const [status, setStatus] = useState("Initializing...");
-
-    useEffect(() => {
-
-        const timer = setInterval(() => {
-
-            setProgress(previous => {
-
-                const next = previous + 1;
-
-                if (next === 20)
-                    setStatus("Loading configuration...");
-
-                if (next === 45)
-                    setStatus("Connecting to Kafka...");
-
-                if (next === 70)
-                    setStatus("Starting services...");
-
-                if (next === 95)
-                    setStatus("Ready");
-
-                if (next >= 100) {
-
-                    clearInterval(timer);
-
-                    return 100;
-
-                }
-
-                return next;
-
-            });
-
-        }, 40);
-
-        return () => clearInterval(timer);
-
-    }, []);
 
     return (
 
         <LoadingScreen
-            progress={progress}
-            status={status}
+
+            /*
+             * Передаём только текст текущего этапа.
+             *
+             * LoadingProgress является полностью декоративным
+             * и больше не зависит от процента.
+             */
+            status={loading.message}
+
         />
 
     );

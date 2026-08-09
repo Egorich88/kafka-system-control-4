@@ -129,7 +129,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
  * После завершения разработки LoadingDemo будет заменён
  * на основной App.
  */
-import LoadingDemo from './components/loading/LoadingDemo';
+import LoadingBootstrap from './components/loading/LoadingBootstrap';
 
 /*
  * Основной App пока намеренно НЕ подключаем.
@@ -206,7 +206,7 @@ root.render(
 
       <LanguageProvider>
 
-        <LoadingDemo />
+        <LoadingBootstrap />
 
       </LanguageProvider>
 
