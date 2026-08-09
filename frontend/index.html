@@ -1,19 +1,238 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo_light.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!--
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!--
+ * ============================================================================
+ * @file index.html
+ * ============================================================================
+ *
+ * Главный HTML-документ frontend-приложения Kafka System Control.
+ *
+ * ----------------------------------------------------------------------------
+ * Назначение
+ * ----------------------------------------------------------------------------
+ *
+ * Этот файл является самым ранним этапом запуска frontend-приложения.
+ *
+ * Браузер загружает index.html до выполнения React и main.jsx.
+ *
+ * Файл отвечает только за:
+ *
+ * • базовую HTML-структуру страницы;
+ * • подключение шрифтов;
+ * • метаданные документа;
+ * • ранний статический Splash Screen;
+ * • DOM-контейнер для React;
+ * • подключение точки входа React-приложения.
+ *
+ * ----------------------------------------------------------------------------
+ * Что НЕ находится в index.html
+ * ----------------------------------------------------------------------------
+ *
+ * Здесь не должно быть:
+ *
+ * • React-логики;
+ * • Context Provider'ов;
+ * • API-запросов;
+ * • бизнес-логики;
+ * • состояния приложения;
+ * • логики загрузки Kafka;
+ * • анимации React-компонентов.
+ *
+ * ----------------------------------------------------------------------------
+ * Архитектура запуска
+ * ----------------------------------------------------------------------------
+ *
+ * Browser
+ *    ↓
+ * index.html
+ *    ↓
+ * Static Splash
+ *    ↓
+ * main.jsx
+ *    ↓
+ * React
+ *    ↓
+ * LoadingDemo / LoadingScreen
+ *    ↓
+ * App
+ *
+ * ----------------------------------------------------------------------------
+ * Важный принцип
+ * ----------------------------------------------------------------------------
+ *
+ * Static Splash здесь является только самым ранним визуальным экраном.
+ *
+ * Он нужен для того, чтобы пользователь не видел белый экран в момент,
+ * когда HTML уже загружен, но React ещё не начал отображать интерфейс.
+ *
+ * Полноценный Splash Screen находится в React-компонентах:
+ *
+ * src/components/loading/
+ *
+ * Его стили находятся в:
+ *
+ * src/components/loading/styles/loading-screen.css
+ *
+ * Поэтому сложные стили Loading Screen намеренно НЕ дублируются здесь.
+ *
+ * ============================================================================
+-->
+
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+    <!-- =====================================================================
+         Кодировка документа
+    ====================================================================== -->
+
+    <meta charset="UTF-8" />
+
+
+    <!-- =====================================================================
+         Адаптивность
+    ====================================================================== -->
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    />
+
+
+    <!-- =====================================================================
+         Цвет браузерного интерфейса
+    ====================================================================== -->
+
+    <meta
+            name="theme-color"
+            content="#0f1117"
+    />
+
+
+    <!-- =====================================================================
+         Заголовок приложения
+    ====================================================================== -->
+
     <title>Kafka System Control 4.0</title>
+
+
+    <!-- =====================================================================
+         Шрифты приложения
+    ======================================================================
+
+         Orbitron:
+         используется для фирменных элементов и заголовков.
+
+         Inter:
+         основной интерфейсный шрифт приложения.
+
+         JetBrains Mono:
+         техническая информация и Kafka-related данные.
+    ====================================================================== -->
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&display=swap"
+            rel="stylesheet"
+    />
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+            rel="stylesheet"
+    />
+
+    <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
+            rel="stylesheet"
+    />
+
+
+    <!-- =====================================================================
+         Минимальные стили самого раннего этапа запуска
+    ======================================================================
+
+         Эти стили находятся непосредственно в index.html намеренно.
+
+         Причина:
+         внешний CSS и React ещё могут быть не загружены в момент,
+         когда браузер уже начинает отображать HTML.
+
+         Здесь оставлены ТОЛЬКО стили, необходимые для Static Splash.
+
+         Все остальные стили Loading Screen находятся в:
+
+         src/components/loading/styles/loading-screen.css
+    ====================================================================== -->
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f1117;
+        }
+
+        #root {
+            width: 100%;
+            min-height: 100%;
+        }
+    </style>
+
 </head>
+
+
 <body>
+
+<!-- =====================================================================
+     Static Splash Screen
+======================================================================
+
+     Отображается непосредственно браузером до запуска React.
+
+     Логотип находится внутри этого контейнера намеренно.
+
+     После запуска React main.jsx удаляет #initial-splash.
+====================================================================== -->
+
+
+
+
+<!-- =====================================================================
+     React Root
+======================================================================
+
+     В этот элемент React монтирует приложение.
+====================================================================== -->
+
 <div id="root"></div>
-<script type="module" src="/src/main.jsx"></script>
+
+
+<!-- =====================================================================
+     React Entry Point
+====================================================================== -->
+
+<script
+        type="module"
+        src="/src/main.jsx"
+></script>
+
 </body>
+
 </html>
