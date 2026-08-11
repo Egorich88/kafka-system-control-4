@@ -388,7 +388,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             rel="noopener noreferrer"
             className="footer-project-link"
             data-tooltip-id="sidebar-tooltip"
-            data-tooltip-content="Автор продукта"
+            data-tooltip-content="Владелец продукта"
           >
             <FiGithub className="footer-github-icon" />
             {!collapsed && (

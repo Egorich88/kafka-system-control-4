@@ -14,13 +14,53 @@
  * limitations under the License.
  */
 
-/* ============================================================
-   Карточка информации о группе
-   ============================================================ */
+/**
+ * =============================================================================
+ * consumer-details.css
+ * =============================================================================
+ *
+ * Назначение
+ * ----------
+ * Стили нижней панели подробной информации о выбранной Consumer Group.
+ *
+ * Компонент:
+ * ----------
+ * ConsumerGroupDetails.tsx
+ *
+ * Отвечает за:
+ *
+ * • вкладки Details / Members / Offsets / Topics / Rebalance History;
+ * • информацию о выбранной Consumer Group;
+ * • KPI-параметры группы;
+ * • таблицы Offsets и Rebalance History;
+ * • список Topics;
+ * • кнопку Offset Reset.
+ *
+ * Здесь НЕ должно находиться:
+ *
+ * ✘ стили основной таблицы Consumer Groups;
+ * ✘ стили Toolbar;
+ * ✘ стили Consumer Lag Chart;
+ * ✘ стили KPI-карточек верхней панели;
+ * ✘ стили трёх нижних Donut Charts;
+ * ✘ стили Offset Reset Wizard.
+ *
+ * =============================================================================
+ */
 
+
+/* =============================================================================
+   Основная панель Details
+   ============================================================================= */
+
+/*
+ * Не используем height: 100%.
+ *
+ * Панель должна занимать только необходимую ей высоту.
+ * Это предотвращает растягивание блока и появление лишнего
+ * вертикального пространства между Details и нижней аналитической зоной.
+ */
 .consumer-details {
-
-    height: 100%;
 
     background: var(--panel-bg);
 
@@ -28,40 +68,158 @@
 
     border-radius: 16px;
 
-    padding: 20px;
+    padding: 16px;
 
+    min-width: 0;
+
+    overflow: hidden;
 }
 
 
-/* ============================================================
+/* =============================================================================
    Заголовок
-   ============================================================ */
+   ============================================================================= */
 
 .consumer-details-header {
+
     display: flex;
+
     justify-content: space-between;
+
     align-items: flex-start;
+
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+
+    gap: 8px;
+
+    margin-bottom: 16px;
 }
 
+
 .consumer-details-title {
+
     font-size: 20px;
+
     font-weight: 700;
+
     color: var(--text-primary);
 }
 
 
-/* ============================================================
-   Секции
-   ============================================================ */
+/* =============================================================================
+   Вкладки Details / Members / Offsets / Topics / Rebalance History
+   ============================================================================= */
 
-.consumer-details-section {
-    margin-top: 20px;
+/*
+ * Вкладки являются навигацией внутри панели.
+ *
+ * Важно:
+ *
+ * • горизонтальная прокрутка здесь НЕ нужна;
+ * • вертикальная прокрутка здесь НЕ нужна;
+ * • содержимое должно оставаться в пределах панели;
+ * • вкладки должны занимать одну строку.
+ *
+ * Если места недостаточно, размер текста и отступы немного
+ * уменьшаются через media query ниже.
+ */
+
+.consumer-details-tabs {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    width: 100%;
+
+    margin: 0 0 16px;
+
+    padding: 0;
+
+    border-bottom: 1px solid var(--border-color);
+
+    overflow: hidden;
+
+    white-space: nowrap;
 }
 
+
+/*
+ * Отдельная вкладка.
+ */
+
+.consumer-details-tab {
+
+    flex: 0 0 auto;
+
+    padding: 8px 12px;
+
+    margin: 0;
+
+    border: none;
+
+    border-bottom: 2px solid transparent;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    line-height: 1.4;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        color 0.15s ease,
+        border-color 0.15s ease;
+
+}
+
+
+/*
+ * Hover не должен двигать вкладку.
+ */
+
+.consumer-details-tab:hover {
+
+    color: var(--text-primary);
+}
+
+
+/*
+ * Активная вкладка.
+ */
+
+.consumer-details-tab.active {
+
+    color: var(--accent-color);
+
+    border-bottom-color: var(--accent-color);
+
+    font-weight: 600;
+}
+
+
+/* =============================================================================
+   Секции Details
+   ============================================================================= */
+
+.consumer-details-section {
+
+    margin-top: 16px;
+}
+
+
 .consumer-details-section-title {
+
+    margin-bottom: 10px;
 
     font-size: 13px;
 
@@ -70,15 +228,12 @@
     color: var(--text-secondary);
 
     text-transform: uppercase;
-
-    margin-bottom: 12px;
-
 }
 
 
-/* ============================================================
-   KPI строки
-   ============================================================ */
+/* =============================================================================
+   KPI-строки информации о группе
+   ============================================================================= */
 
 .consumer-details-row {
 
@@ -88,23 +243,27 @@
 
     align-items: center;
 
-    padding: 10px 0;
+    gap: 16px;
+
+    padding: 9px 0;
 
     border-bottom: 1px solid var(--border-color);
-
 }
+
 
 .consumer-details-row:last-child {
 
     border-bottom: none;
-
 }
+
 
 .consumer-details-label {
 
     color: var(--text-secondary);
 
+    min-width: 0;
 }
+
 
 .consumer-details-value {
 
@@ -112,64 +271,15 @@
 
     font-weight: 600;
 
+    text-align: right;
+
+    min-width: 0;
 }
 
 
-/* ============================================================
-   Кнопка Offset Reset
-   ============================================================ */
-
-.offset-reset-button {
-
-    width: 100%;
-
-    margin-top: 10px;
-
-    padding: 12px;
-
-    border: none;
-
-    border-radius: 10px;
-
-    background: var(--accent-color);
-
-    color: white;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: .15s;
-
-}
-
-.offset-reset-button:hover {
-
-    filter: brightness(1.1);
-
-}
-
-
-/* ============================================================
-   Нет выбранной группы
-   ============================================================ */
-
-.consumer-details-empty {
-
-    height: 100%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    color: var(--text-secondary);
-
-}
-/* ============================================================
-   Название выбранной группы
-   ============================================================ */
+/* =============================================================================
+   Название выбранной Consumer Group
+   ============================================================================= */
 
 .consumer-details-group {
 
@@ -179,17 +289,110 @@
 
     color: var(--accent-color);
 
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
 }
-/* ============================================================
+
+
+/* =============================================================================
+   Кнопка Offset Reset
+   ============================================================================= */
+
+.offset-reset-button {
+
+    width: 100%;
+
+    margin-top: 10px;
+
+    padding: 11px 12px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: var(--accent-color);
+
+    color: #ffffff;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        filter 0.15s ease,
+        opacity 0.15s ease;
+}
+
+
+.offset-reset-button:hover {
+
+    filter: brightness(1.08);
+}
+
+
+/* =============================================================================
+   Состояние без выбранной группы
+   ============================================================================= */
+
+.consumer-details-empty {
+
+    min-height: 180px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: var(--text-secondary);
+
+    text-align: center;
+}
+
+
+/* =============================================================================
+   Список Topics
+   ============================================================================= */
+
+.consumer-topics-list {
+
+    list-style: none;
+
+    margin: 0;
+
+    padding: 0;
+}
+
+
+.consumer-topics-list li {
+
+    padding: 8px 12px;
+
+    border-bottom: 1px solid var(--border-color);
+
+    font-size: 13px;
+
+    color: var(--text-primary);
+}
+
+
+.consumer-topics-list li:last-child {
+
+    border-bottom: none;
+}
+
+
+/* =============================================================================
    Таблица Offsets
+   ============================================================================= */
 
-   Используется для отображения текущих offset'ов
-   по каждой партиции выбранной Consumer Group.
-
-   После подключения backend таблица будет
-   заполняться реальными данными Kafka.
-
-   ============================================================ */
+/*
+ * Таблица используется для отображения текущих offset'ов
+ * выбранной Consumer Group по партициям.
+ */
 
 .offsets-table {
 
@@ -197,9 +400,9 @@
 
     border-collapse: collapse;
 
-    margin-top: 10px;
-
+    margin-top: 8px;
 }
+
 
 .offsets-table th {
 
@@ -209,73 +412,95 @@
 
     font-size: 12px;
 
-    color: var(--text-secondary);
-
-    border-bottom: 1px solid var(--border-color);
-
-}
-
-.consumer-details-tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0;
-    overflow-x: auto;
-}
-
-.consumer-details-tab {
-    padding: 8px 14px;
-    border: none;
-    background: none;
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    white-space: nowrap;
-    transition: color 0.15s, border-color 0.15s;
-}
-
-.consumer-details-tab:hover {
-    color: var(--text-primary);
-}
-
-.consumer-details-tab.active {
-    color: var(--accent-color);
-    border-bottom-color: var(--accent-color);
     font-weight: 600;
-}
 
-.consumer-topics-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
+    color: var(--text-secondary);
 
-.consumer-topics-list li {
-    padding: 8px 12px;
     border-bottom: 1px solid var(--border-color);
-    font-size: 13px;
-    color: var(--text-primary);
 }
+
+
+/* =============================================================================
+   Таблица Rebalance History
+   ============================================================================= */
 
 .rebalance-table {
+
     width: 100%;
+
     border-collapse: collapse;
+
     font-size: 12px;
 }
 
+
 .rebalance-table th {
-    text-align: left;
+
     padding: 8px;
+
+    text-align: left;
+
     color: var(--text-secondary);
+
     border-bottom: 1px solid var(--border-color);
 }
 
+
 .rebalance-table td {
+
     padding: 8px;
+
     border-bottom: 1px solid var(--border-color);
+
     color: var(--text-primary);
+}
+
+
+.rebalance-table tr:last-child td {
+
+    border-bottom: none;
+}
+
+
+/* =============================================================================
+   Адаптация вкладок для небольшой ширины
+   ============================================================================= */
+
+/*
+ * Мы не включаем scrollbar.
+ *
+ * Вместо этого уменьшаем внутренние отступы вкладок,
+ * чтобы вся навигация оставалась видимой.
+ */
+
+@media (max-width: 1100px) {
+
+    .consumer-details-tab {
+
+        padding-left: 9px;
+
+        padding-right: 9px;
+
+        font-size: 12px;
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .consumer-details-tabs {
+
+        gap: 2px;
+    }
+
+    .consumer-details-tab {
+
+        padding-left: 7px;
+
+        padding-right: 7px;
+
+        font-size: 11px;
+    }
+
 }

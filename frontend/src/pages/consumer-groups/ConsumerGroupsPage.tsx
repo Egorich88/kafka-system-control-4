@@ -32,8 +32,9 @@
  *
  * =============================================================================
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ConsumerGroup } from './types/consumer-groups.types';
+import { MOCK_CONSUMER_GROUPS } from './mock/consumerGroups';
 
 import './styles/consumer-groups.css';
 
@@ -42,29 +43,10 @@ import ConsumerGroupsTable from './components/ConsumerGroupsTable';
 import ConsumerGroupDetails from './components/ConsumerGroupDetails';
 import ConsumerLagChart from './components/ConsumerLagChart';
 import ConsumerGroupsKpi from './components/ConsumerGroupsKpi';
+import ConsumerDonutCharts from './components/ConsumerDonutCharts';
 
 export default function ConsumerGroupsPage() {
-    /*
-     * ============================================================================
-     * Выбранная Consumer Group.
-     *
-     * Является центральным состоянием страницы.
-     *
-     * Все дочерние компоненты получают выбранную группу отсюда.
-     *
-     * Позже именно это состояние будет использоваться:
-     *
-     * • Consumer Details
-     * • Members
-     * • Offsets
-     * • Offset Reset
-     * • Lag Chart
-     *
-     * ============================================================================
-     */
 
-    const [selectedGroup, setSelectedGroup] =
-        useState<ConsumerGroup | null>(null);
     /*
      * ============================================================================
      * Поисковая строка.
@@ -94,43 +76,46 @@ export default function ConsumerGroupsPage() {
 
     const [stateFilter, setStateFilter] = useState('all');
     /*
-     * ============================================================================
-     * Временный список групп.
+     * =============================================================================
+     * Mock-данные Consumer Groups.
      *
-     * Пока используется локальный mock.
+     * На frontend-этапе используем единый источник mock-данных.
      *
-     * После реализации backend
-     * будет приходить из useConsumerGroups().
-     * ============================================================================
+     * Это важно, чтобы:
+     *
+     * • таблица;
+     * • Details;
+     * • Lag Chart;
+     * • Donut Charts
+     *
+     * работали с одним и тем же набором групп.
+     *
+     * После подключения backend этот источник будет заменён
+     * на данные из useConsumerGroups().
+     * =============================================================================
      */
-
-    const groups: ConsumerGroup[] = [
-
-        {
-            name: 'payment-service',
-            state: 'Stable',
-            lag: 0,
-            members: 5,
-            coordinator: 'broker-1'
-        },
-
-        {
-            name: 'analytics',
-            state: 'Rebalancing',
-            lag: 184,
-            members: 3,
-            coordinator: 'broker-2'
-        },
-
-        {
-            name: 'notifications',
-            state: 'Empty',
-            lag: 0,
-            members: 0,
-            coordinator: 'broker-1'
-        }
-
-    ];
+    const groups: ConsumerGroup[] = MOCK_CONSUMER_GROUPS;
+    /*
+     * =============================================================================
+     * Выбранная Consumer Group.
+     *
+     * На первом рендере группа ещё не выбрана.
+     *
+     * После формирования filteredGroups ниже useEffect автоматически
+     * выберет первую доступную группу.
+     *
+     * Это важно, потому что:
+     *
+     * • Details сразу получит выбранную группу;
+     * • Consumer Lag сразу сможет построить график;
+     * • пользователю не требуется вручную нажимать первую строку таблицы.
+     *
+     * При подключении backend данный механизм сохраняется —
+     * изменится только источник массива groups.
+     * =============================================================================
+     */
+    const [selectedGroup, setSelectedGroup] =
+        useState<ConsumerGroup | null>(null);
     /*
      * ============================================================================
      * Отфильтрованный список Consumer Groups.
@@ -160,6 +145,48 @@ export default function ConsumerGroupsPage() {
         });
 
     }, [groups, search, stateFilter]);
+
+/*
+ * =============================================================================
+ * Автоматический выбор первой группы.
+ *
+ * Если пользователь впервые открыл страницу и группа ещё не выбрана,
+ * автоматически выбираем первую группу из текущего отображаемого списка.
+ *
+ * Это позволяет сразу показать:
+ *
+ * • информацию о группе;
+ * • Consumer Lag;
+ *
+ * без дополнительного клика по таблице.
+ *
+ * Если выбранная группа исчезла из текущего результата фильтрации,
+ * выбираем первую доступную группу.
+ * =============================================================================
+ */
+useEffect(() => {
+
+    if (filteredGroups.length === 0) {
+
+        setSelectedGroup(null);
+
+        return;
+
+    }
+
+    const selectedGroupStillExists =
+        selectedGroup &&
+        filteredGroups.some(
+            group => group.name === selectedGroup.name
+        );
+
+    if (!selectedGroupStillExists) {
+
+        setSelectedGroup(filteredGroups[0]);
+
+    }
+
+}, [filteredGroups, selectedGroup]);
 
     /**
      * ============================================================================
@@ -240,6 +267,23 @@ export default function ConsumerGroupsPage() {
                 />
 
             </div>
+            {/*
+             * =============================================================================
+             * Нижняя аналитическая зона.
+             *
+             * Три кольцевых графика строятся на основе того же массива groups,
+             * который используется таблицей.
+             *
+             * 1. Топики группы
+             * 2. Распределение Lag
+             * 3. Состояние групп
+             *
+             * Здесь намеренно не создаём отдельные mock-данные.
+             * =============================================================================
+             */}
+            <ConsumerDonutCharts
+                groups={groups}
+            />
 
         </div>
 

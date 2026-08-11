@@ -44,25 +44,56 @@
 
 }
 
+/* ============================================================================
+   Нижняя рабочая область Consumer Groups
+   ----------------------------------------------------------------------------
+   Содержит:
+   • панель вкладок Details / Members / Offsets / Topics / Rebalance History;
+   • подробную информацию о выбранной группе;
+   • график Consumer Lag.
+
+   Нижняя аналитическая область с donut-графиками располагается ниже.
+
+   Контейнер не должен иметь собственной прокрутки.
+============================================================================ */
+
 .consumer-bottom-layout {
 
     display: grid;
 
-    grid-template-columns: 420px 1fr;
+    grid-template-columns: 280px minmax(0, 1fr);
 
-    gap: 12px;
+    gap: 8px;
 
-    min-height: 340px;
+    width: 100%;
 
-    flex-shrink: 0;
+    margin-top: 8px;
+
+    margin-bottom: 8px;
+
+    min-width: 0;
 
 }
 
-@media (max-width:1400px){
+/* ============================================================
+   Адаптация нижней области
+   ============================================================ */
 
-    .consumer-bottom-layout{
+@media (max-width: 1400px) {
 
-        grid-template-columns:1fr;
+    .consumer-bottom-layout {
+
+        grid-template-columns: 1fr;
+
+        /*
+         * На узком экране две панели становятся вертикальными.
+         * Высота увеличивается автоматически.
+         */
+        height: auto;
+
+        min-height: 0;
+
+        max-height: none;
 
     }
 
