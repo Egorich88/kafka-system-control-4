@@ -1,0 +1,335 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * =============================================================================
+ * consumer-donut-charts.css
+ * =============================================================================
+ *
+ * Назначение
+ * ----------
+ * Стили нижней аналитической зоны Consumer Groups.
+ *
+ * Компонент:
+ * ----------
+ * ConsumerDonutCharts.tsx
+ *
+ * Отображает три аналитические панели:
+ *
+ * 1. Топики группы
+ * 2. Распределение Lag
+ * 3. Состояние групп
+ *
+ * Каждый блок содержит:
+ *
+ * • кольцевой график;
+ * • значение в центре;
+ * • подпись;
+ * • легенду справа.
+ *
+ * Здесь НЕ должно находиться:
+ *
+ * ✘ стили Details;
+ * ✘ стили Consumer Lag Chart;
+ * ✘ стили основной таблицы;
+ * ✘ стили Toolbar;
+ * ✘ стили Offset Reset Wizard.
+ *
+ * =============================================================================
+ */
+
+
+/* =============================================================================
+   Сетка трёх аналитических панелей
+   ============================================================================= */
+
+/*
+ * Небольшой профессиональный отступ от блока Details / Lag Chart.
+ *
+ * Не используем большие margin-bottom / padding,
+ * чтобы внизу страницы не появлялась огромная пустота.
+ */
+
+.consumer-donut-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-top: 12px;
+
+    min-width: 0;
+}
+
+
+/* =============================================================================
+   Панель одного Donut Chart
+   ============================================================================= */
+
+.donut-panel {
+
+    min-width: 0;
+
+    background: var(--panel-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 16px;
+
+    padding: 16px;
+
+    overflow: hidden;
+}
+
+
+/* =============================================================================
+   Заголовок панели
+   ============================================================================= */
+
+.donut-panel-title {
+
+    margin: 0 0 12px;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    color: var(--text-primary);
+}
+
+
+/* =============================================================================
+   Основное содержимое панели
+   ============================================================================= */
+
+.donut-panel-body {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    min-width: 0;
+}
+
+
+/* =============================================================================
+   Область кольцевого графика
+   ============================================================================= */
+
+.donut-chart-wrap {
+
+    position: relative;
+
+    width: 140px;
+
+    height: 140px;
+
+    flex: 0 0 140px;
+}
+
+
+/* =============================================================================
+   Значение внутри кольца
+   ============================================================================= */
+
+.donut-center {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    pointer-events: none;
+}
+
+
+.donut-center-value {
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: var(--text-primary);
+}
+
+
+.donut-center-label {
+
+    font-size: 11px;
+
+    color: var(--text-secondary);
+}
+
+
+/* =============================================================================
+   Легенда
+   ============================================================================= */
+
+.donut-legend {
+
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    margin: 0;
+
+    padding: 0;
+
+    list-style: none;
+}
+
+
+.donut-legend li {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-width: 0;
+
+    font-size: 12px;
+}
+
+
+/* =============================================================================
+   Точка легенды
+   ============================================================================= */
+
+.donut-legend-dot {
+
+    width: 10px;
+
+    height: 10px;
+
+    flex: 0 0 10px;
+
+    border-radius: 50%;
+}
+
+
+/* =============================================================================
+   Название элемента легенды
+   ============================================================================= */
+
+.donut-legend-name {
+
+    flex: 1;
+
+    min-width: 0;
+
+    color: var(--text-primary);
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+/* =============================================================================
+   Значение элемента легенды
+   ============================================================================= */
+
+.donut-legend-value {
+
+    flex: 0 0 auto;
+
+    color: var(--text-secondary);
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* =============================================================================
+   Адаптация
+   ============================================================================= */
+
+/*
+ * На ширине, где три панели уже не помещаются комфортно,
+ * перестраиваем сетку.
+ *
+ * Это лучше, чем позволять содержимому вызывать горизонтальный
+ * overflow всей страницы.
+ */
+
+@media (max-width: 1200px) {
+
+    .consumer-donut-grid {
+
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .consumer-donut-grid {
+
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+
+        margin-top: 10px;
+    }
+
+}
+
+
+@media (max-width: 520px) {
+
+    .donut-panel {
+
+        padding: 14px;
+    }
+
+    .donut-panel-body {
+
+        gap: 12px;
+    }
+
+    .donut-chart-wrap {
+
+        width: 120px;
+
+        height: 120px;
+
+        flex-basis: 120px;
+    }
+
+}
