@@ -21,122 +21,334 @@
  *
  * Основная таблица Consumer Groups.
  *
- * Пункт 7:
- *  • Grafana-стиль полоски lag (чем больше — тем краснее)
- *  • Без «дёргания» строк при hover
- *  • Столбец «Действия»: глаз, карандаш, обновить, корзина
+ * Отвечает за:
+ *
+ * • отображение групп;
+ * • выбор группы;
+ * • состояние группы;
+ * • отображение Lag;
+ * • действия над группой.
+ *
+ * В столбце «Действия» используются только реальные действия:
+ *
+ * • Eye       — скрыть / показать группу;
+ * • Refresh   — обновить данные группы;
+ * • Trash     — удалить группу.
+ *
+ * Карандаш удалён.
+ *
+ * Причина:
+ * текущая модель ConsumerGroup не содержит редактируемых пользовательских
+ * параметров. Поэтому показывать неработающую кнопку редактирования
+ * профессионально некорректно.
+ *
  * =============================================================================
  */
 
 import {
     FiEye,
     FiEyeOff,
-    FiEdit2,
     FiRefreshCw,
     FiTrash2
 } from 'react-icons/fi';
+
 import '../styles/consumer-table.css';
-import type { ConsumerGroup } from '../types/consumer-groups.types';
+
+import type {
+    ConsumerGroup
+} from '../types/consumer-groups.types';
+
 import ConsumerStateBadge from './ConsumerStateBadge';
+
 import {
     formatLag,
     getLagBarWidth,
     getLagLevel
 } from '../utils/lag.utils';
 
+
 interface Props {
+
     groups: ConsumerGroup[];
+
     selectedGroup: ConsumerGroup | null;
-    onSelectGroup: (group: ConsumerGroup) => void;
-    onToggleHidden: (name: string) => void;
-    onEditGroup: (group: ConsumerGroup) => void;
-    onRefreshGroup: (group: ConsumerGroup) => void;
-    onDeleteGroup: (group: ConsumerGroup) => void;
+
+    onSelectGroup: (
+        group: ConsumerGroup
+    ) => void;
+
+    onToggleHidden: (
+        name: string
+    ) => void;
+
+    onRefreshGroup: (
+        group: ConsumerGroup
+    ) => void;
+
+    onDeleteGroup: (
+        group: ConsumerGroup
+    ) => void;
+
 }
 
+
 export default function ConsumerGroupsTable({
+
     groups,
+
     selectedGroup,
+
     onSelectGroup,
+
     onToggleHidden,
-    onEditGroup,
+
     onRefreshGroup,
+
     onDeleteGroup
+
 }: Props) {
-    const maxLag = Math.max(...groups.map(g => g.lag), 1);
+
+    /*
+     * =========================================================================
+     * Максимальный Lag.
+     *
+     * Используется только для расчёта относительной длины полоски Lag.
+     * =========================================================================
+     */
+
+    const maxLag =
+        Math.max(
+            ...groups.map(
+                group => group.lag
+            ),
+            1
+        );
+
+
+    /*
+     * =========================================================================
+     * Пустое состояние.
+     * =========================================================================
+     */
 
     if (groups.length === 0) {
+
         return (
+
             <div className="consumer-table-empty">
+
                 Группы не найдены
+
             </div>
+
         );
+
     }
 
+
     return (
+
         <div className="consumer-table-wrapper">
+
             <table className="consumer-groups-table">
+
                 <thead>
+
                     <tr>
-                        <th>Группа</th>
-                        <th>Состояние</th>
-                        <th>Участники</th>
-                        <th>Топики</th>
-                        <th>Отставание (Lag)</th>
-                        <th>Координатор</th>
-                        <th>Действия</th>
+
+                        <th>
+                            Группа
+                        </th>
+
+                        <th>
+                            Состояние
+                        </th>
+
+                        <th>
+                            Участники
+                        </th>
+
+                        <th>
+                            Топики
+                        </th>
+
+                        <th>
+                            Отставание (Lag)
+                        </th>
+
+                        <th>
+                            Координатор
+                        </th>
+
+                        <th>
+                            Действия
+                        </th>
+
                     </tr>
+
                 </thead>
+
+
                 <tbody>
+
                     {groups.map(group => {
-                        const lagLevel = getLagLevel(group.lag, maxLag);
-                        const barWidth = getLagBarWidth(group.lag, maxLag);
+
+                        const lagLevel =
+                            getLagLevel(
+                                group.lag,
+                                maxLag
+                            );
+
+
+                        const barWidth =
+                            getLagBarWidth(
+                                group.lag,
+                                maxLag
+                            );
+
+
+                        const isSelected =
+                            selectedGroup?.name === group.name;
+
 
                         return (
+
                             <tr
                                 key={group.name}
-                                onClick={() => onSelectGroup(group)}
+                                onClick={() =>
+                                    onSelectGroup(group)
+                                }
                                 className={
-                                    selectedGroup?.name === group.name
+                                    isSelected
                                         ? 'consumer-group-selected'
                                         : ''
                                 }
                             >
+
+                                {/* =================================================
+                                    Группа
+                                   ================================================= */}
+
                                 <td className="consumer-group-name">
+
                                     {group.name}
+
                                 </td>
+
+
+                                {/* =================================================
+                                    Состояние
+                                   ================================================= */}
+
                                 <td>
-                                    <ConsumerStateBadge state={group.state} />
+
+                                    <ConsumerStateBadge
+                                        state={group.state}
+                                    />
+
                                 </td>
-                                <td>{group.members}</td>
+
+
+                                {/* =================================================
+                                    Участники
+                                   ================================================= */}
+
+                                <td>
+
+                                    {group.members}
+
+                                </td>
+
+
+                                {/* =================================================
+                                    Топики
+                                   ================================================= */}
+
                                 <td className="consumer-topics-cell">
-                                    {group.topics?.slice(0, 2).join(', ')}
+
+                                    {group.topics
+                                        ?.slice(0, 2)
+                                        .join(', ')
+                                    }
+
                                     {(group.topics?.length ?? 0) > 2 && (
+
                                         <span className="topics-more">
-                                            +{(group.topics?.length ?? 0) - 2}
+
+                                            +
+                                            {(group.topics?.length ?? 0) - 2}
+
                                         </span>
+
                                     )}
+
                                 </td>
+
+
+                                {/* =================================================
+                                    Lag
+                                   ================================================= */}
+
                                 <td>
+
                                     <div className="lag-cell">
-                                        <span className={`lag-value lag-${lagLevel}`}>
+
+                                        <span
+                                            className={
+                                                `lag-value lag-${lagLevel}`
+                                            }
+                                        >
+
                                             {formatLag(group.lag)}
+
                                         </span>
+
+
                                         <div className="lag-bar-track">
+
                                             <div
-                                                className={`lag-bar-fill lag-${lagLevel}`}
-                                                style={{ width: `${barWidth}%` }}
+                                                className={
+                                                    `lag-bar-fill lag-${lagLevel}`
+                                                }
+                                                style={{
+                                                    width:
+                                                        `${barWidth}%`
+                                                }}
                                             />
+
                                         </div>
+
                                     </div>
+
                                 </td>
+
+
+                                {/* =================================================
+                                    Координатор
+                                   ================================================= */}
+
                                 <td className="consumer-coordinator">
+
                                     {group.coordinator}
+
                                 </td>
+
+
+                                {/* =================================================
+                                    Actions
+                                   ================================================= */}
+
                                 <td
                                     className="consumer-actions-cell"
-                                    onClick={(e) => e.stopPropagation()}
+                                    onClick={event =>
+                                        event.stopPropagation()
+                                    }
                                 >
+
+                                    {/* -------------------------------------------------
+                                       Скрыть / показать группу
+                                       ------------------------------------------------- */}
+
                                     <button
                                         type="button"
                                         className="action-icon-btn"
@@ -145,43 +357,70 @@ export default function ConsumerGroupsTable({
                                                 ? 'Показать группу'
                                                 : 'Скрыть группу из списка'
                                         }
-                                        onClick={() => onToggleHidden(group.name)}
+                                        onClick={() =>
+                                            onToggleHidden(
+                                                group.name
+                                            )
+                                        }
                                     >
+
                                         {group.hidden
                                             ? <FiEyeOff />
                                             : <FiEye />
                                         }
+
                                     </button>
-                                    <button
-                                        type="button"
-                                        className="action-icon-btn"
-                                        title="Редактировать заметки группы"
-                                        onClick={() => onEditGroup(group)}
-                                    >
-                                        <FiEdit2 />
-                                    </button>
+
+
+                                    {/* -------------------------------------------------
+                                       Обновить группу
+                                       ------------------------------------------------- */}
+
                                     <button
                                         type="button"
                                         className="action-icon-btn"
                                         title="Обновить данные группы"
-                                        onClick={() => onRefreshGroup(group)}
+                                        onClick={() =>
+                                            onRefreshGroup(group)
+                                        }
                                     >
+
                                         <FiRefreshCw />
+
                                     </button>
+
+
+                                    {/* -------------------------------------------------
+                                       Удалить группу
+                                       ------------------------------------------------- */}
+
                                     <button
                                         type="button"
                                         className="action-icon-btn danger"
                                         title="Удалить группу"
-                                        onClick={() => onDeleteGroup(group)}
+                                        onClick={() =>
+                                            onDeleteGroup(group)
+                                        }
                                     >
+
                                         <FiTrash2 />
+
                                     </button>
+
                                 </td>
+
                             </tr>
+
                         );
+
                     })}
+
                 </tbody>
+
             </table>
+
         </div>
+
     );
+
 }

@@ -5,11 +5,40 @@
 
 ## Описание папок и файлов:
 **ConsumerGroupsPage.tsx** - главная страница
+ConsumerGroupsPage.tsx отвечает за композицию страницы и состояние интерфейса.
+
+На frontend-этапе он работает с mock-данными и связывает между собой:
+
+- ConsumerGroupsKpi;
+- ConsumerGroupsToolbar;
+- ConsumerGroupsTable;
+- ConsumerGroupDetails;
+- ConsumerLagChart;
+- ConsumerDonutCharts;
+- OffsetResetWizard.
+
+Здесь находится состояние:
+
+- выбранной Consumer Group;
+- поиска;
+- фильтра состояния;
+- сортировки;
+- состояния обновления;
+- открытия Offset Reset.
+
+Компоненты не должны самостоятельно управлять состоянием всей страницы.
+
+После подключения backend источник mock-данных будет заменён на `useConsumerGroups()`.
 
 ---
 
 **components/** - содержит только React-компоненты, никакой бизнес-логики, никаких axios, никаких запросов, только отображение.
+OffsetResetWizard.tsx
+отвечает исключительно за интерфейс пошагового сброса offset'ов.
 
+Компонент получает выбранную Consumer Group через props.
+
+Самостоятельно список Consumer Groups и другие данные страницы не загружает.
     ConsumerGroupsTable.tsx 
 отвечает исключительно за отображение таблицы.Не знает, откуда пришли данные.
 

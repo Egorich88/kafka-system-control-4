@@ -23,11 +23,11 @@
      * Высота определяется layout-строкой страницы,
      * а не содержимым самого графика.
      */
-    height: 340px;
+    height: 330px;
 
-    min-height: 340px;
+    min-height: 330px;
 
-    max-height: 340px;
+    max-height: 330px;
 
     box-sizing: border-box;
 

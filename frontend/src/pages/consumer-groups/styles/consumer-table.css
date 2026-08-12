@@ -14,77 +14,55 @@
  * limitations under the License.
  */
 
-/* ============================================================
-   consumer-table.css
-
-   Назначение файла:
-   -----------------
-   Содержит стили основной таблицы страницы Consumer Groups.
-
-   За что отвечает:
-   -----------------
-   • оформление таблицы;
-   • оформление заголовков;
-   • оформление строк;
-   • эффекты наведения;
-   • подготовка стилей для выбора строки.
-
-   Здесь НЕ должны находиться:
-
-   • стили панели инструментов;
-   • стили правой панели;
-   • стили графиков;
-   • стили пагинации.
-
-   Только таблица Consumer Groups.
-   ============================================================ */
+/**
+ * =============================================================================
+ * consumer-table.css
+ * =============================================================================
+ *
+ * Основная таблица Consumer Groups.
+ *
+ * Отвечает за:
+ *
+ * • таблицу;
+ * • заголовок;
+ * • строки;
+ * • hover;
+ * • выбранную строку;
+ * • Lag;
+ * • Actions;
+ * • прокрутку таблицы.
+ *
+ * =============================================================================
+ */
 
 
-/* ============================================================
-   Контейнер таблицы
-   ============================================================ */
-
-/* ============================================================
-   Основная таблица
-   ============================================================ */
+/* =============================================================================
+   ОСНОВНАЯ ТАБЛИЦА
+   ============================================================================= */
 
 .consumer-groups-table {
 
     width: 100%;
 
-    /*
-     * Отдельное схлопывание границ здесь не используем.
-     *
-     * Это позволяет корректно работать со sticky-заголовком
-     * внутри прокручиваемого контейнера.
-     */
     border-collapse: separate;
 
     border-spacing: 0;
 
-    /*
-     * Таблица не должна самопроизвольно менять ширину
-     * из-за содержимого отдельных ячеек.
-     */
     table-layout: fixed;
 
 }
 
 
-/* ============================================================
-   Заголовок таблицы
-   ============================================================
-
-   Заголовок остаётся закреплённым при прокрутке строк.
-   Пользователь всегда понимает, к какой колонке относится
-   отображаемое значение.
-   ============================================================ */
+/* =============================================================================
+   ЗАГОЛОВОК
+   ============================================================================= */
 
 .consumer-groups-table thead {
 
     background: var(--panel-bg);
 
 }
+
 
 .consumer-groups-table thead th {
 
@@ -98,13 +76,14 @@
 
 }
 
+
 .consumer-groups-table th {
 
-    padding: 14px 16px;
+    padding: 8px 12px;
 
     text-align: left;
 
-    font-size: 13px;
+    font-size: 12px;
 
     font-weight: 600;
 
@@ -113,9 +92,11 @@
     border-bottom: 1px solid var(--border-color);
 
 }
-/* ============================================================
-   Фиксированные размеры колонок
-   ============================================================ */
+
+
+/* =============================================================================
+   ШИРИНА КОЛОНОК
+   ============================================================================= */
 
 .consumer-groups-table th:nth-child(1),
 .consumer-groups-table td:nth-child(1) {
@@ -152,15 +133,27 @@
     width: 15%;
 }
 
-/* ============================================================
-   Строки таблицы
-   ============================================================ */
+
+/* =============================================================================
+   СТРОКИ
+   ============================================================================= */
+
+/*
+ * Строки сделаны компактнее.
+ *
+ * Раньше 14px сверху/снизу давали слишком большую высоту.
+ * 8px сохраняет читаемость, но позволяет показать больше групп.
+ */
 
 .consumer-groups-table td {
 
-    padding: 14px 16px;
+    padding: 6px 12px;
 
-    font-size: 13px;
+    height: 34px;
+
+    font-size: 12px;
+
+    line-height: 1.2;
 
     color: var(--text-primary);
 
@@ -169,302 +162,219 @@
 }
 
 
-/* ============================================================
-   Строки таблицы
-   ============================================================
-
-   Строка не изменяет размер и не получает визуальный
-   hover-сдвиг.
-   Выделение выполняется только через состояние выбранной
-   группы.
-   ============================================================ */
+/* =============================================================================
+   CURSOR
+   ============================================================================= */
 
 .consumer-groups-table tbody tr {
 
     cursor: pointer;
 
+    transition: background-color 0.12s ease;
+
 }
+
+
+/* =============================================================================
+   HOVER
+   ============================================================================= */
 
 /*
- * Hover специально не изменяет фон строки.
+ * Возвращаем нормальное выделение строки при наведении.
  *
- * Это предотвращает визуальное "дёрганье" таблицы
- * и сохраняет спокойный интерфейс.
+ * Это не изменяет размеры строки и поэтому не вызывает
+ * никакого "прыжка" таблицы.
  */
+
 .consumer-groups-table tbody tr:hover {
 
+    background: var(--table-row-hover);
+
+}
+
+
+/*
+ * Если в теме нет отдельной переменной table-row-hover,
+ * используем существующий hover-bg.
+ */
+
+.consumer-groups-table tbody tr:hover td {
+
+    background: var(--table-row-hover, var(--hover-bg));
+
+}
+
+
+/* =============================================================================
+   ВЫБРАННАЯ СТРОКА
+   ============================================================================= */
+
+/*
+ * Выбранная группа должна быть заметнее обычного hover.
+ */
+
+.consumer-groups-table tbody tr.selected,
+.consumer-groups-table tbody tr.consumer-group-selected {
+
+    background: var(--selected-color);
+
+}
+
+
+.consumer-groups-table tbody tr.selected td,
+.consumer-groups-table tbody tr.consumer-group-selected td {
+
+    background: var(--selected-color);
+
+}
+/*
+ * ============================================================================
+ * Actions внутри выбранной строки
+ * ============================================================================
+ *
+ * У кнопок Actions был собственный color,
+ * поэтому они визуально оставались светлее строки.
+ *
+ * Теперь выделение применяется ко всей строке,
+ * включая все иконки.
+ * ============================================================================
+ */
+
+.consumer-groups-table tbody tr.selected .action-icon-btn,
+.consumer-groups-table tbody tr.consumer-group-selected .action-icon-btn {
+
+    color: var(--text-primary);
+
     background: transparent;
 
 }
 
-/* ============================================================
-   Lag — Grafana-стиль полоски
-   ============================================================ */
 
-.lag-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 120px;
-}
+.consumer-groups-table tbody tr.selected .action-icon-btn:hover,
+.consumer-groups-table tbody tr.consumer-group-selected .action-icon-btn:hover {
 
-.lag-value {
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    font-size: 13px;
-}
+    color: var(--accent-color);
 
-.lag-bar-track {
-    width: 100%;
-    height: 6px;
-    background: rgba(148, 163, 184, 0.15);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.lag-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.3s ease;
-}
-
-.lag-none { color: #94a3b8; }
-.lag-bar-fill.lag-none { background: #94a3b8; width: 0 !important; }
-
-.lag-low { color: #22c55e; }
-.lag-bar-fill.lag-low { background: #22c55e; }
-
-.lag-medium { color: #f59e0b; }
-.lag-bar-fill.lag-medium { background: #f59e0b; }
-
-.lag-high { color: #ef4444; }
-.lag-bar-fill.lag-high { background: #ef4444; }
-
-
-/* ============================================================
-   Столбец действий
-   ============================================================ */
-
-.consumer-actions-cell {
-    display: flex;
-    gap: 4px;
-    white-space: nowrap;
-}
-
-.action-icon-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 15px;
-    transition: background 0.15s, color 0.15s;
-}
-
-.action-icon-btn:hover {
     background: var(--hover-bg);
-    color: var(--accent-color);
+
 }
 
-.action-icon-btn.danger:hover {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.12);
-}
-
-
-/* ============================================================
-   Топики в таблице
-   ============================================================ */
-
-.consumer-topics-cell {
-    color: var(--text-secondary);
-    font-size: 12px;
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.topics-more {
-    margin-left: 4px;
-    color: var(--accent-color);
-    font-weight: 600;
-}
+/* =============================================================================
+   НАЗВАНИЕ ГРУППЫ
+   ============================================================================= */
 
 .consumer-group-name {
+
     font-weight: 600;
-}
-
-/* ============================================================
-   Контейнер таблицы
-   ============================================================
-
-   Таблица намеренно имеет фиксированную высоту.
-
-   На странице одновременно отображается примерно 5 строк.
-   Если групп становится больше — прокрутка появляется
-   внутри самой таблицы.
-
-   Это предотвращает ситуацию, когда большое количество
-   Consumer Groups сдвигает вниз Details, Lag Chart
-   и три аналитических Donut-графика.
-   ============================================================ */
-
-.consumer-table-wrapper {
-
-    /*
-     * Фиксированная высота области таблицы.
-     *
-     * Значение подобрано под:
-     *
-     * • заголовок таблицы;
-     * • примерно 5 строк групп;
-     * • нормальные внутренние отступы.
-     */
-    height: 320px;
-
-    /*
-     * Если групп больше доступной высоты,
-     * прокручивается только содержимое таблицы.
-     */
-    overflow-y: auto;
-
-    /*
-     * Горизонтальная прокрутка здесь не нужна.
-     */
-    overflow-x: hidden;
-
-    background: var(--panel-bg);
-
-    border: 1px solid var(--border-color);
-
-    border-radius: 16px;
-
-    /*
-     * Сохраняем место под scrollbar,
-     * чтобы ширина таблицы не менялась
-     * при появлении большого количества строк.
-     */
-    scrollbar-gutter: stable;
-}
-
-.consumer-table-empty {
-    padding: 40px;
-    text-align: center;
-    color: var(--text-secondary);
-    background: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-}
-
-
-/* ============================================================
-   Активная строка
-
-   Позже будет использоваться
-   при выборе группы.
-   ============================================================ */
-
-.consumer-group-selected {
-
-    background: var(--selected-color);
-
-    border-left: 4px solid var(--accent-color);
 
 }
 
 
-/* ============================================================
-   Колонка Lag
+/* =============================================================================
+   TOPICS
+   ============================================================================= */
 
-   Позже сюда добавим цветовую
-   индикацию большого Lag.
-   ============================================================ */
+.consumer-topics-cell {
 
-.consumer-lag {
+    max-width: 180px;
 
-    font-variant-numeric: tabular-nums;
+    overflow: hidden;
 
-}
+    text-overflow: ellipsis;
 
-
-/* ============================================================
-   Coordinator
-   ============================================================ */
-
-.consumer-coordinator {
+    white-space: nowrap;
 
     color: var(--text-secondary);
-
-}
-/* ============================================================
-   Выбранная строка
-
-   Используется после клика по группе.
-   Позже именно выбранная группа будет
-   отображаться в панели информации.
-   ============================================================ */
-
-.consumer-groups-table tbody tr.selected {
-
-    background: var(--selected-color);
-
-}
-
-/* ============================================================
-   Цветовые индикаторы состояния группы
-   ============================================================ */
-
-.state-badge {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 4px 10px;
-
-    border-radius: 999px;
 
     font-size: 12px;
 
+}
+
+
+.topics-more {
+
+    margin-left: 4px;
+
+    color: var(--accent-color);
+
     font-weight: 600;
 
 }
 
-.state-badge.stable {
 
-    color: #22c55e;
+/* =============================================================================
+   LAG
+   ============================================================================= */
 
-    background: rgba(34,197,94,.12);
+.lag-cell {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    min-width: 100px;
 
 }
 
-.state-badge.rebalancing {
 
-    color: #f59e0b;
+.lag-value {
 
-    background: rgba(245,158,11,.12);
+    font-variant-numeric: tabular-nums;
+
+    font-weight: 600;
+
+    font-size: 12px;
 
 }
 
-.state-badge.empty {
+
+.lag-bar-track {
+
+    width: 100%;
+
+    height: 5px;
+
+    background: rgba(148, 163, 184, 0.15);
+
+    border-radius: 3px;
+
+    overflow: hidden;
+
+}
+
+
+.lag-bar-fill {
+
+    height: 100%;
+
+    border-radius: 3px;
+
+    transition: width 0.3s ease;
+
+}
+
+
+/* =============================================================================
+   ЦВЕТА LAG
+   ============================================================================= */
+
+.lag-none {
 
     color: #94a3b8;
 
-    background: rgba(148,163,184,.12);
+}
+
+
+.lag-bar-fill.lag-none {
+
+    background: #94a3b8;
+
+    width: 0 !important;
 
 }
 
-/* ============================================================
-   Цветовая индикация Consumer Lag
-   ============================================================ */
 
 .lag-low {
 
@@ -474,6 +384,14 @@
 
 }
 
+
+.lag-bar-fill.lag-low {
+
+    background: #22c55e;
+
+}
+
+
 .lag-medium {
 
     color: #f59e0b;
@@ -482,6 +400,14 @@
 
 }
 
+
+.lag-bar-fill.lag-medium {
+
+    background: #f59e0b;
+
+}
+
+
 .lag-high {
 
     color: #ef4444;
@@ -489,9 +415,208 @@
     font-weight: 700;
 
 }
-/* ============================================================
-   Состояния Consumer Group
-   ============================================================ */
+
+
+.lag-bar-fill.lag-high {
+
+    background: #ef4444;
+
+}
+
+
+/*
+ * Нормальное расстояние между рабочими иконками.
+ *
+ * Сейчас в Actions остаются только реальные операции:
+ *
+ * • скрыть / показать;
+ * • обновить;
+ * • удалить.
+ */
+
+.consumer-actions-cell {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    white-space: nowrap;
+
+}
+
+
+.action-icon-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 28px;
+
+    width: 28px;
+
+    height: 28px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    transition:
+        background-color 0.12s ease,
+        color 0.12s ease;
+
+}
+
+
+.action-icon-btn:hover {
+
+    background: var(--hover-bg);
+
+    color: var(--accent-color);
+
+}
+
+
+.action-icon-btn.danger:hover {
+
+    color: #ef4444;
+
+    background: rgba(239, 68, 68, 0.12);
+
+}
+
+
+/* =============================================================================
+   COORDINATOR
+   ============================================================================= */
+
+.consumer-coordinator {
+
+    color: var(--text-secondary);
+
+}
+
+
+/* =============================================================================
+   ОБЁРТКА ТАБЛИЦЫ
+   ============================================================================= */
+
+/*
+ * Таблица имеет ограниченную высоту.
+ *
+ * Большое количество групп не должно сдвигать
+ * Details, Consumer Lag и Donut Charts вниз.
+ */
+
+.consumer-table-wrapper {
+
+    height: 300px;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    background: var(--panel-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 16px;
+
+    scrollbar-gutter: stable;
+
+}
+
+
+/* =============================================================================
+   EMPTY STATE
+   ============================================================================= */
+
+.consumer-table-empty {
+
+    padding: 40px;
+
+    text-align: center;
+
+    color: var(--text-secondary);
+
+    background: var(--panel-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 16px;
+
+}
+
+
+/* =============================================================================
+   STATE BADGE
+   ============================================================================= */
+
+.state-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 3px 9px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+.state-badge.stable {
+
+    color: #22c55e;
+
+    background: rgba(34, 197, 94, .12);
+
+}
+
+
+.state-badge.rebalancing {
+
+    color: #f59e0b;
+
+    background: rgba(245, 158, 11, .12);
+
+}
+
+
+.state-badge.empty {
+
+    color: #94a3b8;
+
+    background: rgba(148, 163, 184, .12);
+
+}
+
+
+/* =============================================================================
+   CONSUMER STATE BADGE
+   ============================================================================= */
 
 .consumer-state-badge {
 
@@ -501,13 +626,13 @@
 
     justify-content: center;
 
-    min-width: 110px;
+    min-width: 92px;
 
-    padding: 4px 10px;
+    padding: 3px 9px;
 
     border-radius: 999px;
 
-    font-size: 12px;
+    font-size: 11px;
 
     font-weight: 600;
 
@@ -515,42 +640,81 @@
 
 }
 
+
 .consumer-state-badge.stable {
 
     color: #23b26d;
 
-    background: rgba(35,178,109,.12);
+    background: rgba(35, 178, 109, .12);
 
-    border-color: rgba(35,178,109,.25);
+    border-color: rgba(35, 178, 109, .25);
 
 }
+
 
 .consumer-state-badge.rebalancing {
 
     color: #ff9800;
 
-    background: rgba(255,152,0,.12);
+    background: rgba(255, 152, 0, .12);
 
-    border-color: rgba(255,152,0,.25);
+    border-color: rgba(255, 152, 0, .25);
 
 }
+
 
 .consumer-state-badge.empty {
 
     color: #9aa0a6;
 
-    background: rgba(154,160,166,.12);
+    background: rgba(154, 160, 166, .12);
 
-    border-color: rgba(154,160,166,.25);
+    border-color: rgba(154, 160, 166, .25);
 
 }
+
 
 .consumer-state-badge.dead {
 
     color: #ef5350;
 
-    background: rgba(239,83,80,.12);
+    background: rgba(239, 83, 80, .12);
 
-    border-color: rgba(239,83,80,.25);
+    border-color: rgba(239, 83, 80, .25);
+
+}
+
+
+/* =============================================================================
+   АДАПТИВНОСТЬ
+   ============================================================================= */
+
+@media (max-width: 1100px) {
+
+    .consumer-groups-table th,
+    .consumer-groups-table td {
+
+        padding-left: 9px;
+
+        padding-right: 9px;
+
+    }
+
+    .consumer-actions-cell {
+
+        gap: 4px;
+
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .consumer-table-wrapper {
+
+        height: 280px;
+
+    }
 
 }
