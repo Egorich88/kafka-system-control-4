@@ -91,14 +91,6 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
   // Состояние боковой панели
   const [collapsed, setCollapsed] = useState(false);
 
-  // Логотип в зависимости от темы
-  const isLightTheme =
-    document.documentElement.getAttribute('data-theme') === 'light';
-
-  const sidebarLogo = isLightTheme
-    ? '/logo_light.svg'
-    : '/logo_dark.svg';
-
   // ----- Проверка наличия обновлений (не чаще раза в час) -----
   useEffect(() => {
     const lastCheck = localStorage.getItem('lastVersionCheck');
@@ -168,7 +160,8 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             {/* Логотип */}
             <div className="sidebar-logo-brand">
               <img
-                  src={collapsed ? "/logo.svg" : sidebarLogo}
+                  src="/logo.svg"
+                  alt="Kafka System Control"
                   className="sidebar-logo-image"
               />
             </div>

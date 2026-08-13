@@ -38,7 +38,7 @@ export default function LoadingLogo() {
         <div className="loading-logo">
 
             <img
-                src="/logo.png"
+                src="/logo.svg"
                 alt="Kafka System Control"
                 draggable={false}
             />

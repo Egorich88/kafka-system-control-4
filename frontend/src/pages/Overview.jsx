@@ -84,12 +84,7 @@ export default function Overview() {
   // Логотип приветственной страницы
   // ============================================================
 
-  const isLightTheme =
-    document.documentElement.getAttribute('data-theme') === 'light';
-
-  const welcomeLogo = isLightTheme
-    ? '/logo_light.png'
-    : '/logo_dark.png';
+  const welcomeLogo = '/logo.svg';
 
   const clearDashboardData = () => {
     setOverview(null);
@@ -172,7 +167,7 @@ export default function Overview() {
           </div>
 
           <p className="welcome-subtitle">
-              Monitor  •  Control  •  Analyze
+              KAFKA SYSTEM CONTROL
           </p>
           <div className="welcome-divider-small" />
           <div className="welcome-feature">
