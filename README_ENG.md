@@ -1,3 +1,4 @@
+![img_4.png](img_4.png)
 # Kafka System Control
 
 <p align="left">
@@ -13,7 +14,7 @@
 </p>
 
 **Kafka System Control** is a modern web UI for Apache Kafka administration. Built from scratch with **Go** and **React**, it evolved from console scripts into a production-ready microservice featuring CI/CD, containerization, and Kubernetes deployment.
-![img_2.png](img_2.png)
+
 ## ✨ Key Features
 
 - **Intuitive UI** – Dark theme, sidebar navigation, multi‑cluster switching.
