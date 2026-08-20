@@ -1,44 +1,60 @@
-# СТЕЙДЖ 1: СБОРКА
-FROM golang:1.25-alpine AS builder
+# ==========================================
+# СТЕЙДЖ 1: СБОРКА ПРИЛОЖЕНИЯ
+# ==========================================
+# Фиксируем стабильную мажорную версию Go. Компилятор сам подтянет минорные патчи безопасности.
+FROM golang:1.27-alpine AS builder
+
+# Устанавливаем git (необходим Go для скачивания некоторых внешних библиотек)
+RUN apk add --no-cache git
 
 WORKDIR /app
 
-# Копируем файлы зависимостей (для кеширования)
+# Сначала копируем только файлы зависимостей.
+# Это критически важно для эффективного кэширования слоев Docker.
 COPY go.mod go.sum ./
 
-# Скачиваем зависимости
+# Скачиваем строго зафиксированные в go.sum зависимости
 RUN go mod download
 
-# ПРИНУДИТЕЛЬНО ОБНОВЛЯЕМ SARAMA ДО ПОСЛЕДНЕЙ ВЕРСИИ
-RUN go get -u github.com/IBM/sarama@latest && go mod tidy
-
-# Копируем остальной код
+# Копируем весь остальной исходный код проекта
 COPY . .
 
-# Собираем статический бинарник без CGO
-RUN CGO_ENABLED=0 GOOS=linux go build -o kafka-backend .
+# Собираем статический бинарный файл:
+# - CGO_ENABLED=0: отключает зависимости от C-библиотек (гарантирует переносимость)
+# - GOOS=linux: целевая ОС — Linux
+# - -trimpath: удаляет пути к файлам вашей локальной машины из бинарника (безопасность)
+# - -ldflags="-s -w": вырезает отладочную информацию (уменьшает размер файла на ~40%)
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -trimpath \
+    -ldflags="-s -w" \
+    -o kafka-backend .
 
-# СТЕЙДЖ 2: ФИНАЛЬНЫЙ ОБРАЗ
-FROM alpine:latest
+# ==========================================
+# СТЕЙДЖ 2: МИНИМАЛЬНЫЙ ФИНАЛЬНЫЙ ОБРАЗ
+# ==========================================
+# Фиксируем стабильную ветку Alpine. Не используем :latest, чтобы избежать внезапных поломок.
+FROM alpine:3.20
 
-# Обновляем системные пакеты и устанавливаем ca-certificates
-RUN apk update && apk upgrade --no-cache && \
-    apk add --no-cache ca-certificates && \
-    rm -rf /var/cache/apk/*
+# Устанавливаем корневые сертификаты (для HTTPS/TLS) и данные временных зон
+RUN apk add --no-cache ca-certificates tzdata
 
-# Создаём непривилегированного пользователя
+# Создаем выделенную группу и пользователя с UID/GID 1001 без прав администратора
 RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
+    adduser -u 1001 -S appuser -G appgroup -h /home/appuser
 
-# Копируем бинарник из сборщика
-COPY --from=builder /app/kafka-backend /usr/local/bin/
+# Копируем скомпилированный бинарник из первого стейджа в системную директорию выполнения
+COPY --from=builder /app/kafka-backend /usr/local/bin/kafka-backend
 
-# Переключаемся на непривилегированного пользователя
+# Переключаемся на созданного безопасного пользователя.
+# Теперь процесс внутри контейнера не имеет прав root на хост-машине.
 USER appuser
 
+# Документируем порт, который слушает приложение
 EXPOSE 8080
 
-LABEL org.opencontainers.image.licenses="Apache-2.0"
-LABEL org.opencontainers.image.source="https://github.com/Egorich88/kafka-system-control-4"
+# Метаданные образа согласно спецификации OpenContainers
+LABEL org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.source="https://github.com"
 
+# Запуск приложения
 CMD ["kafka-backend"]

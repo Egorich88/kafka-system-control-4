@@ -40,7 +40,7 @@
  *   - Название: группа (топик)
  *   - Текущее значение lag справа
  */
-
+import PanelInfo from '../../components/common/PanelInfo';
 import { useState, useEffect, useMemo } from 'react';
 import {
   ResponsiveContainer,
@@ -324,7 +324,16 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
     return (
       <div className="dashboard-panel">
         <div className="panel-header">
-          <div className="topics-panel-title">Отставание групп потребителей</div>
+            <div className="topics-panel-title">
+                <PanelInfo
+                    title="Отставание групп потребителей"
+                    description="Показывает consumer lag — разницу между последним доступным сообщением в Kafka и текущей позицией consumer group. Значение помогает определить, успевают ли потребители обрабатывать поток сообщений и где возникает накопление необработанных данных."
+                />
+
+                <span>
+                    Отставание групп потребителей
+                </span>
+            </div>
         </div>
         <div className="panel-body topics-placeholder">⏳ Загрузка данных...</div>
       </div>
@@ -335,8 +344,18 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
     return (
       <div className="dashboard-panel">
         <div className="panel-header">
-          <div className="topics-panel-title">Отставание групп потребителей</div>
+          <div className="topics-panel-title">
+            <PanelInfo
+              title="Отставание групп потребителей"
+              description="Показывает consumer lag — разницу между последним доступным сообщением в Kafka и текущей позицией consumer group. Значение помогает определить, успевают ли потребители обрабатывать поток сообщений и где возникает накопление необработанных данных."
+            />
+
+            <span>
+              Отставание групп потребителей
+            </span>
+          </div>
         </div>
+
         <div className="panel-body topics-placeholder">
           Нет данных о группах и топиках за выбранный период
         </div>
@@ -349,7 +368,14 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
     <div className="dashboard-panel">
       <div className="panel-header">
         <div className="topics-panel-title">
-          Отставание групп потребителей
+          <PanelInfo
+            title="Отставание групп потребителей"
+            description="Показывает consumer lag — разницу между последним доступным сообщением в Kafka и текущей позицией consumer group. Значение помогает определить, успевают ли потребители обрабатывать поток сообщений и где возникает накопление необработанных данных."
+          />
+
+          <span>
+            Отставание групп потребителей
+          </span>
         </div>
       </div>
 

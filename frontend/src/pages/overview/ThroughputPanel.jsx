@@ -20,7 +20,7 @@
  * Управление линиями: клик по линии – оставить только её,
  * клик по фону графика – показать обе линии.
  */
-
+import PanelInfo from '../../components/common/PanelInfo';
 import { useState } from 'react';
 import {
   ResponsiveContainer,
@@ -89,10 +89,18 @@ export default function ThroughputPanel({ data }) {
   return (
     <div className="dashboard-panel">
       <div className="panel-header throughput-header">
-        <div className="throughput-title">
-          Пропускная способность кластера
-        </div>
-        <div className="throughput-current-values">
+          <div className="throughput-title">
+              <PanelInfo
+                  title="Пропускная способность кластера"
+                  description="Показывает скорость обработки сообщений Kafka-кластером во времени. Входящие значения отражают поток сообщений, поступающих в кластер, исходящие — поток сообщений, покидающих его. Используется для оценки текущей нагрузки и динамики трафика."
+              />
+
+              <span>
+                  Пропускная способность кластера
+              </span>
+          </div>
+
+          <div className="throughput-current-values">
           <span className="incoming-value">
             Входящие: {latestPoint?.incoming?.toFixed(1) ?? 0} msg/s
           </span>

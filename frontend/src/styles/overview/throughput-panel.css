@@ -71,7 +71,11 @@
     color: var(--text-primary);
     font-size: 13px;
 }
-
+.throughput-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 .throughput-tooltip-row {
     display: flex;
     justify-content: space-between;

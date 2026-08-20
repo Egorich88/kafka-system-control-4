@@ -21,12 +21,17 @@
  * Данные приходят с бэкенда через API.
  */
 
+import PanelInfo from '../../components/common/PanelInfo';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCluster } from '../../contexts/ClusterContext';
 
-export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
+export default function BrokersPanel({
+  brokers: initialBrokers,
+  refreshKey
+}) {
   const { currentCluster } = useCluster();
+
   const [brokers, setBrokers] = useState(initialBrokers || []);
   const [loading, setLoading] = useState(false);
 
@@ -34,12 +39,21 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
   useEffect(() => {
     const loadBrokers = async () => {
       if (!currentCluster) return;
+
       setLoading(true);
+
       try {
         const headers = {
-          'X-Kafka-Bootstrap': currentCluster.brokers || currentCluster.bootstrapServers
+          'X-Kafka-Bootstrap':
+            currentCluster.brokers ||
+            currentCluster.bootstrapServers
         };
-        const response = await axios.get('/api/overview/brokers-detailed', { headers });
+
+        const response = await axios.get(
+          '/api/overview/brokers-detailed',
+          { headers }
+        );
+
         setBrokers(response.data.brokers || []);
       } catch (err) {
         console.error('Ошибка загрузки брокеров:', err);
@@ -52,12 +66,24 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
     loadBrokers();
   }, [currentCluster, refreshKey]);
 
+  // ============================================================
+  // Загрузка
+  // ============================================================
+
   if (loading && brokers.length === 0) {
     return (
       <div className="dashboard-panel">
         <div className="panel-header">
-          <div className="brokers-panel-title">Брокеры</div>
+          <div className="brokers-panel-title">
+            <PanelInfo
+              title="Брокеры"
+              description="Показывает состояние брокеров Kafka-кластера и основные эксплуатационные показатели: доступность, роль контроллера, количество лидеров и реплик, использование CPU, памяти и дискового пространства, а также версию Kafka."
+            />
+
+            <span>Брокеры</span>
+          </div>
         </div>
+
         <div className="panel-body brokers-placeholder">
           Загрузка брокеров...
         </div>
@@ -65,12 +91,24 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
     );
   }
 
+  // ============================================================
+  // Нет брокеров
+  // ============================================================
+
   if (brokers.length === 0 && !loading) {
     return (
       <div className="dashboard-panel">
         <div className="panel-header">
-          <div className="brokers-panel-title">Брокеры</div>
+          <div className="brokers-panel-title">
+            <PanelInfo
+              title="Брокеры"
+              description="Показывает состояние брокеров Kafka-кластера и основные эксплуатационные показатели: доступность, роль контроллера, количество лидеров и реплик, использование CPU, памяти и дискового пространства, а также версию Kafka."
+            />
+
+            <span>Брокеры</span>
+          </div>
         </div>
+
         <div className="panel-body brokers-placeholder">
           Нет доступных брокеров
         </div>
@@ -78,17 +116,35 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
     );
   }
 
+  // ============================================================
+  // Основной интерфейс
+  // ============================================================
+
   return (
     <div className="dashboard-panel">
       <div className="panel-header">
-        <div className="brokers-panel-title">Брокеры</div>
+        <div className="brokers-panel-title">
+          <PanelInfo
+            title="Брокеры"
+            description="Показывает состояние брокеров Kafka-кластера и основные эксплуатационные показатели: доступность, роль контроллера, количество лидеров и реплик, использование CPU, памяти и дискового пространства, а также версию Kafka."
+          />
+
+          <span>Брокеры</span>
+        </div>
+
         <div className="brokers-panel-count">
-          {brokers.length} {brokers.length === 1 ? 'брокер' : brokers.length < 5 ? 'брокера' : 'брокеров'}
+          {brokers.length}{' '}
+          {brokers.length === 1
+            ? 'брокер'
+            : brokers.length < 5
+              ? 'брокера'
+              : 'брокеров'}
         </div>
       </div>
 
       <div className="panel-body">
         <div className="broker-table">
+
           {/* Заголовок таблицы - 10 колонок */}
           <div className="broker-table-header">
             <div className="col-id">ID</div>
@@ -105,47 +161,74 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
 
           {/* Список брокеров */}
           {brokers.map((broker) => (
-            <div key={broker.id} className="broker-table-row">
-              <div className="col-id broker-id">{broker.id}</div>
-              <div className="col-address broker-address">{broker.address}</div>
+            <div
+              key={broker.id}
+              className="broker-table-row"
+            >
+              <div className="col-id broker-id">
+                {broker.id}
+              </div>
+
+              <div className="col-address broker-address">
+                {broker.address}
+              </div>
+
               <div className="col-status">
                 <span className="broker-status">
                   <span className="broker-status-dot" />
                   Онлайн
                 </span>
               </div>
+
               <div className="col-controller">
                 {broker.controller ? (
-                  <span className="broker-controller-badge">Контроллер</span>
+                  <span className="broker-controller-badge">
+                    Контроллер
+                  </span>
                 ) : (
-                  <span className="broker-no-controller">—</span>
+                  <span className="broker-no-controller">
+                    —
+                  </span>
                 )}
               </div>
+
               <div className="col-leaders">
                 <span className="broker-leaders">
                   {broker.leaderCount || 0}
                 </span>
               </div>
+
               <div className="col-replicas">
                 <span className="broker-replicas">
                   {broker.replicaCount || 0}
                 </span>
               </div>
+
               <div className="col-cpu">
                 <span className="broker-cpu">
-                  {broker.cpu ? `${broker.cpu.toFixed(1)}%` : '—'}
+                  {broker.cpu
+                    ? `${broker.cpu.toFixed(1)}%`
+                    : '—'}
                 </span>
               </div>
+
               <div className="col-memory">
                 <span className="broker-memory">
-                  {broker.memory ? `${broker.memory.toFixed(0)} MB` : '—'}
+                  {broker.memory
+                    ? `${broker.memory.toFixed(0)} MB`
+                    : '—'}
                 </span>
               </div>
+
               <div className="col-disk">
                 <span className="broker-disk">
-                  {broker.diskUsage && broker.diskTotal ? `${broker.diskUsage.toFixed(1)}/${broker.diskTotal.toFixed(0)} GB` : '—'}
+                  {broker.diskUsage &&
+                  broker.diskTotal
+                    ? `${broker.diskUsage.toFixed(1)}/${broker.diskTotal.toFixed(0)} GB`
+                    : '—'}
                 </span>
               </div>
+
               <div className="col-version">
                 <span className="broker-version">
                   {broker.version || '2.8.0'}
@@ -153,6 +236,7 @@ export default function BrokersPanel({ brokers: initialBrokers, refreshKey }) {
               </div>
             </div>
           ))}
+
         </div>
       </div>
     </div>

@@ -42,6 +42,7 @@ import {
 import axios from 'axios';
 import '../../styles/overview/topics-panel.css';
 import { useCluster } from '../../contexts/ClusterContext';
+import PanelInfo from '../../components/common/PanelInfo';
 
 // =========================================================================
 // Кастомный тултип – показывает только положительные значения
@@ -193,11 +194,20 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
   if (!currentCluster) return null;
 
   if (loading && rawData.length === 0) {
-    return (
-      <div className="dashboard-panel">
-        <div className="panel-header">
-          <div className="topics-panel-title">Пропускная способность по топикам</div>
-        </div>
+      return (
+          <div className="dashboard-panel">
+              <div className="panel-header">
+                  <div className="topics-panel-title">
+                      <PanelInfo
+                          title="Пропускная способность по топикам"
+                          description="Показывает скорость обработки сообщений для отдельных Kafka-топиков за выбранный период. Позволяет определить наиболее активные топики, сравнить их нагрузку и быстро увидеть изменения интенсивности трафика."
+                      />
+
+                      <span>
+                          Пропускная способность по топикам
+                      </span>
+                  </div>
+              </div>
         <div className="panel-body topics-placeholder">Загрузка данных...</div>
       </div>
     );
@@ -207,9 +217,21 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
     return (
       <div className="dashboard-panel">
         <div className="panel-header">
-          <div className="topics-panel-title">Пропускная способность по топикам</div>
+          <div className="topics-panel-title">
+            <PanelInfo
+              title="Пропускная способность по топикам"
+              description="Показывает скорость обработки сообщений для отдельных Kafka-топиков за выбранный период. Позволяет определить наиболее активные топики, сравнить их нагрузку и быстро увидеть изменения интенсивности трафика."
+            />
+
+            <span>
+              Пропускная способность по топикам
+            </span>
+          </div>
         </div>
-        <div className="panel-body topics-placeholder">Нет данных о топиках за выбранный период</div>
+
+        <div className="panel-body topics-placeholder">
+          Нет данных о топиках за выбранный период
+        </div>
       </div>
     );
   }
@@ -220,7 +242,16 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
   return (
     <div className="dashboard-panel">
       <div className="panel-header">
-        <div className="topics-panel-title">Пропускная способность по топикам</div>
+        <div className="topics-panel-title">
+          <PanelInfo
+            title="Пропускная способность по топикам"
+            description="Показывает скорость обработки сообщений для отдельных Kafka-топиков за выбранный период. Позволяет определить наиболее активные топики, сравнить их нагрузку и быстро увидеть изменения интенсивности трафика."
+          />
+
+          <span>
+            Пропускная способность по топикам
+          </span>
+        </div>
       </div>
 
       <div className="panel-body">

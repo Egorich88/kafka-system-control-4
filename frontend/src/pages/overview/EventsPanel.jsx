@@ -27,6 +27,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../../styles/overview/events-panel.css';
+import PanelInfo from '../../components/common/PanelInfo';
 
 export default function EventsPanel() {
   const [events, setEvents] = useState([]);
@@ -70,7 +71,16 @@ export default function EventsPanel() {
   return (
     <div className="events-panel">
       <div className="events-panel-header">
-        <div className="events-title">Последние события</div>
+          <div className="events-title">
+              <PanelInfo
+                  title="Последние события"
+                  description="Отображает последние зарегистрированные события кластера: информационные сообщения, предупреждения и ошибки. Панель предназначена для оперативного контроля изменений и потенциальных проблем в работе Kafka."
+              />
+
+              <span>
+                  Последние события
+              </span>
+          </div>
       </div>
 
       <div className="events-table">
