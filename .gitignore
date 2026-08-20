@@ -43,5 +43,3 @@ tls.crt
 # key
 key.json
 
-#test
-docker-compose.yml

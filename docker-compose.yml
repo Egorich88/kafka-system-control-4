@@ -1,0 +1,67 @@
+version: '3.8'
+
+networks:
+  kafka-net:
+    driver: bridge
+
+services:
+  # 1. СЛУЖБА БЭКЕНДА (GO)
+  backend-service:
+    build:
+      context: ./backend # Путь к папке с Go проектом и его Dockerfile
+      dockerfile: Dockerfile
+    container_name: kafka-backend
+    restart: unless-stopped
+    ports:
+      - "8081:8080" # Внешний порт 8081 (чтобы не конфликтовать с фронтендом), внутренний 8080
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+      - APP_PORT=8080
+    depends_on:
+      kafka:
+        condition: service_healthy # Ждем, пока Kafka полностью запустится и пройдет проверку
+    networks:
+      - kafka-net
+
+  # 2. СЛУЖБА ФРОНТЕНДА (NGINX ROOTLESS)
+  frontend-service:
+    build:
+      context: ./frontend # Путь к папке с Фронтендом и его Dockerfile
+      dockerfile: Dockerfile
+    container_name: kafka-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:8080" # Открываем наружу порт 8080 для пользователей
+    depends_on:
+      - backend-service
+    networks:
+      - kafka-net
+
+  # 3. АКТУАЛЬНАЯ KAFKA (РЕЖИМ KRAFT - БЕЗ ZOOKEEPER)
+  kafka:
+    image: apache/kafka:3.7.0 # Используем стабильный официальный образ Apache [1, 2]
+    container_name: kafka-broker
+    restart: unless-stopped
+    ports:
+      - "9094:9094" # Порт для подключения с вашей локальной машины (если нужно)
+    environment:
+      # Настройки кластера и узла
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      # Настройка слушателей (внутренний для Go, внешний для хоста)
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      # Автоматическое создание топиков для удобства разработки
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+    healthcheck: # Проверка здоровья Kafka, чтобы бэкенд не падал при старте
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kafka-net
