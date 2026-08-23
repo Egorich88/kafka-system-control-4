@@ -14,178 +14,71 @@
  * limitations under the License.
  */
 
-/**
- * =============================================================================
+/*
  * consumer-members.css
- * =============================================================================
  *
- * Список участников выбранной Consumer Group.
- *
- * Важно:
- *
- * • список прокручивается только внутри панели Details;
- * • большое количество consumers не увеличивает страницу;
- * • заголовок «Участники группы» остаётся видимым;
- * • горизонтальная прокрутка отсутствует.
- *
- * =============================================================================
+ * Внутренняя прокрутка Members. Количество карточек не влияет
+ * на высоту всей панели Details.
  */
 
-
-/* =============================================================================
-   ОСНОВНАЯ ОБЛАСТЬ MEMBERS
-   ============================================================================= */
-
 .consumer-members {
-
     display: flex;
-
     flex-direction: column;
-
     flex: 1 1 auto;
-
     width: 100%;
-
     min-width: 0;
-
     min-height: 0;
-
     height: 100%;
-
-    margin: 0;
-
-    /*
-     * Основная прокрутка находится именно здесь.
-     */
-    overflow-y: auto;
-
-    overflow-x: hidden;
-
-    /*
-     * Резервируем место под scrollbar,
-     * чтобы текст не прыгал при его появлении.
-     */
-    scrollbar-gutter: stable;
-
-    padding-right: 6px;
-
+    overflow: hidden;
 }
-
-
-/* =============================================================================
-   ЗАГОЛОВОК MEMBERS
-   ============================================================================= */
 
 .consumer-members-title {
-
-    /*
-     * Заголовок остаётся сверху при прокрутке.
-     */
-    position: sticky;
-
-    top: 0;
-
-    z-index: 2;
-
     flex: 0 0 auto;
-
-    margin: 0 0 10px;
-
-    padding: 8px 0 7px;
-
+    margin: 0 0 9px;
+    padding: 3px 0 7px;
     font-size: 12px;
-
     font-weight: 700;
-
     line-height: 1.2;
-
     text-transform: uppercase;
-
     color: var(--text-secondary);
-
-    /*
-     * Нужен фон, чтобы карточки не просвечивали
-     * через заголовок во время прокрутки.
-     */
     background: var(--panel-bg);
-
 }
 
-
-/* =============================================================================
-   КАРТОЧКА CONSUMER
-   ============================================================================= */
+.consumer-members-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 6px 0 0;
+    scrollbar-gutter: stable;
+}
 
 .consumer-member-card {
-
     flex: 0 0 auto;
-
-    padding: 10px 11px;
-
-    margin: 0 0 8px;
-
+    padding: 9px 10px;
+    margin: 0 0 7px;
     border-radius: 10px;
-
     background: var(--table-row-hover);
-
     border: 1px solid var(--border-color);
-
     color: var(--text-primary);
-
     font-size: 12px;
-
-    line-height: 1.45;
-
+    line-height: 1.4;
 }
-
-
-/* =============================================================================
-   ПОСЛЕДНЯЯ КАРТОЧКА
-   ============================================================================= */
 
 .consumer-member-card:last-child {
-
     margin-bottom: 2px;
-
 }
-
-
-/* =============================================================================
-   ИМЯ CONSUMER
-   ============================================================================= */
 
 .consumer-member-name {
-
-    margin-bottom: 5px;
-
+    margin-bottom: 4px;
     color: var(--text-primary);
-
     font-size: 13px;
-
     font-weight: 700;
-
 }
 
-
-/* =============================================================================
-   АДАПТИВНОСТЬ
-   ============================================================================= */
-
-@media (max-width: 900px) {
-
-    .consumer-member-card {
-
-        padding: 9px 10px;
-
-        font-size: 11px;
-
-    }
-
-
-    .consumer-member-name {
-
-        font-size: 12px;
-
-    }
-
+.consumer-members-empty {
+    padding: 20px 8px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-align: center;
 }

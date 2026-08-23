@@ -18,12 +18,56 @@
  * consumer-groups.api.ts
  * =============================================================================
  *
- * Все HTTP-запросы страницы Consumer Groups.
+ * Единая точка HTTP-взаимодействия страницы Consumer Groups.
  *
- * Здесь будет находиться взаимодействие
- * исключительно с Backend API.
- *
+ * Все запросы передают X-Kafka-Bootstrap, поэтому backend работает
+ * с тем Kafka-кластером, который выбран в ClusterContext.
  * =============================================================================
  */
 
- export {};
+import type {
+    ConsumerGroup,
+    ConsumerGroupDetails
+} from '../types/consumer-groups.types';
+
+export async function fetchConsumerGroups(
+    bootstrap: string
+): Promise<ConsumerGroup[]> {
+
+    const response = await fetch('/api/consumer-groups', {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Kafka-Bootstrap': bootstrap
+        }
+    });
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Ошибка загрузки групп: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+export async function fetchConsumerGroupDetails(
+    bootstrap: string,
+    groupName: string
+): Promise<ConsumerGroupDetails> {
+
+    const response = await fetch(
+        `/api/consumer-groups/${encodeURIComponent(groupName)}`,
+        {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Kafka-Bootstrap': bootstrap
+            }
+        }
+    );
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Ошибка загрузки группы: ${response.status}`);
+    }
+
+    return response.json();
+}

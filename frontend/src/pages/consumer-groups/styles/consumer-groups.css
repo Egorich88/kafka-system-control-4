@@ -100,7 +100,7 @@
      * Consumer Lag получает всё остальное.
      */
     grid-template-columns:
-        480px
+        500px
         minmax(0, 1fr);
 
     gap: 10px;
@@ -190,7 +190,7 @@
     .consumer-bottom-layout {
 
         grid-template-columns:
-            450px
+            470px
             minmax(0, 1fr);
 
     }
@@ -203,7 +203,7 @@
     .consumer-bottom-layout {
 
         grid-template-columns:
-            420px
+            440px
             minmax(0, 1fr);
 
     }

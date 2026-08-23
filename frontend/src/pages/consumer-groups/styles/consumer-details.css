@@ -14,661 +14,305 @@
  * limitations under the License.
  */
 
-/**
+/*
  * =============================================================================
  * consumer-details.css
  * =============================================================================
  *
- * Панель подробной информации выбранной Consumer Group.
+ * Геометрия панели Details и её вкладок.
  *
- * Отвечает за:
- *
- * • Details;
- * • вкладки;
- * • информационные строки;
- * • Topics;
- * • Offsets;
- * • Rebalance History.
- *
+ * Ключевые правила:
+ * • панель имеет фиксированную высоту родительского блока;
+ * • вкладки всегда помещаются целиком;
+ * • активная вкладка выделяется только тонкой линией;
+ * • Members / Offsets прокручиваются внутри собственного содержимого;
+ * • переключение вкладок не меняет высоту панели и не двигает график.
  * =============================================================================
  */
 
-
-/* =============================================================================
-   ОСНОВНАЯ ПАНЕЛЬ
-   ============================================================================= */
-
 .consumer-details {
-
     display: flex;
-
     flex-direction: column;
-
     width: 100%;
-
     height: 100%;
-
     min-width: 0;
-
     min-height: 0;
-
     box-sizing: border-box;
-
     padding: 14px;
-
     overflow: hidden;
-
     background: var(--panel-bg);
-
     border: 1px solid var(--border-color);
-
     border-radius: 16px;
-
 }
 
-
-/* =============================================================================
-   ВКЛАДКИ
-   ============================================================================= */
-
-/*
- * Вкладки выполнены в стиле современных browser-like tabs.
- *
- * Нет отдельных прямоугольных кнопок.
- * Нет горизонтальной прокрутки.
- *
- * Последняя вкладка получает больше места,
- * потому что её название длиннее остальных.
- */
+/* -----------------------------------------------------------------------------
+   Вкладки
+   ----------------------------------------------------------------------------- */
 
 .consumer-details-tabs {
-
     display: grid;
-
     grid-template-columns:
-        0.82fr
-        1.12fr
-        1fr
-        0.92fr
-        1.55fr;
-
+        minmax(0, .75fr)
+        minmax(0, 1.18fr)
+        minmax(0, 1.05fr)
+        minmax(0, .92fr)
+        minmax(0, 1.55fr);
     align-items: stretch;
-
     gap: 0;
-
     width: 100%;
-
     min-width: 0;
-
     flex: 0 0 40px;
-
     margin: 0 0 12px;
-
     padding: 0;
-
-    background: transparent;
-
     border-bottom: 1px solid var(--border-color);
-
     overflow: hidden;
-
 }
-
-
-/* =============================================================================
-   ВКЛАДКА
-   ============================================================================= */
 
 .consumer-details-tab {
-
     position: relative;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     min-width: 0;
-
     width: 100%;
-
     height: 39px;
-
-    padding: 5px 7px;
-
+    padding: 5px 8px;
     margin: 0;
-
-    border: none;
-
+    border: 0;
     border-radius: 0;
-
     background: transparent;
-
     color: var(--text-secondary);
-
-    font-size: 12px;
-
+    font-size: 13px;
     font-weight: 500;
-
     line-height: 1.1;
-
     white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
+    overflow: visible;
+    text-overflow: clip;
     cursor: pointer;
-
-    transition:
-        color 0.15s ease,
-        background-color 0.15s ease;
-
+    transition: color .15s ease, background-color .15s ease;
 }
-
-
-/* =============================================================================
-   HOVER
-   ============================================================================= */
 
 .consumer-details-tab:hover {
-
     color: var(--text-primary);
-
     background: var(--hover-bg);
-
 }
-
-
-/* =============================================================================
-   АКТИВНАЯ ВКЛАДКА
-   ============================================================================= */
 
 .consumer-details-tab.active {
-
     color: var(--accent-color);
-
     background: transparent;
-
     font-weight: 600;
-
 }
 
-
-/*
- * Тонкий индикатор активной вкладки.
- *
- * Никаких рамок и прямоугольников.
- */
-
+/* Активная вкладка — только аккуратный underline без рамки-карточки. */
 .consumer-details-tab.active::after {
-
     content: "";
-
     position: absolute;
-
     left: 12px;
-
     right: 12px;
-
     bottom: -1px;
-
     height: 2px;
-
     border-radius: 2px 2px 0 0;
-
     background: var(--accent-color);
-
 }
 
+/* -----------------------------------------------------------------------------
+   Общая область содержимого
+   ----------------------------------------------------------------------------- */
 
-/* =============================================================================
-   КОНТЕНТ ВКЛАДКИ
-   ============================================================================= */
-
-.consumer-details > :not(.consumer-details-tabs) {
-
+.consumer-details-content,
+.consumer-details > .consumer-members,
+.consumer-details > .consumer-offsets,
+.consumer-details > .consumer-details-section {
     min-width: 0;
-
     min-height: 0;
-
+    flex: 1 1 auto;
 }
 
+.consumer-details-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
-/* =============================================================================
-   ИНФОРМАЦИЯ О ГРУППЕ
-   ============================================================================= */
+.consumer-details-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* -----------------------------------------------------------------------------
+   Информация о группе
+   ----------------------------------------------------------------------------- */
 
 .consumer-details-info-title {
-
     flex-shrink: 0;
-
-    margin: 0 0 7px;
-
+    margin: 2px 0 10px;
     font-size: 12px;
-
     font-weight: 700;
-
     line-height: 1.2;
-
     color: var(--text-secondary);
-
     text-transform: uppercase;
-
-    letter-spacing: 0.02em;
-
+    letter-spacing: .025em;
 }
-
-
-/* =============================================================================
-   HEADER
-   ============================================================================= */
 
 .consumer-details-header {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
-    gap: 10px;
-
+    gap: 12px;
     min-width: 0;
-
     flex-shrink: 0;
-
-    margin-bottom: 7px;
-
+    margin-bottom: 9px;
 }
-
-
-/* =============================================================================
-   НАЗВАНИЕ ГРУППЫ
-   ============================================================================= */
 
 .consumer-details-group {
-
     min-width: 0;
-
     overflow: hidden;
-
     text-overflow: ellipsis;
-
     white-space: nowrap;
-
-    font-size: 17px;
-
-    font-weight: 700;
-
+    font-size: 15px;
+    font-weight: 650;
     color: var(--accent-color);
-
 }
-
-
-/* =============================================================================
-   СЕКЦИИ
-   ============================================================================= */
 
 .consumer-details-section {
-
     min-width: 0;
-
     min-height: 0;
-
     margin-top: 7px;
-
 }
-
-
-/* =============================================================================
-   ЗАГОЛОВОК СЕКЦИИ
-   ============================================================================= */
 
 .consumer-details-section-title {
-
     margin-bottom: 7px;
-
     font-size: 12px;
-
     font-weight: 700;
-
     color: var(--text-secondary);
-
     text-transform: uppercase;
-
 }
-
-
-/* =============================================================================
-   СТРОКА ИНФОРМАЦИИ
-   ============================================================================= */
 
 .consumer-details-row {
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     gap: 12px;
-
     min-height: 29px;
-
     padding: 4px 10px 4px 0;
-
     border-bottom: 1px solid var(--border-color);
-
 }
-
 
 .consumer-details-row:last-child {
-
-    border-bottom: none;
-
+    border-bottom: 0;
 }
-
-
-/* =============================================================================
-   LABEL
-   ============================================================================= */
 
 .consumer-details-label {
-
     min-width: 0;
-
     color: var(--text-secondary);
-
     font-size: 12px;
-
 }
-
-
-/* =============================================================================
-   VALUE
-   ============================================================================= */
 
 .consumer-details-value {
-
     min-width: 0;
-
-    max-width: 60%;
-
-    margin-right: 7px;
-
+    max-width: 62%;
+    margin-right: 9px;
     overflow: hidden;
-
     text-overflow: ellipsis;
-
     white-space: nowrap;
-
     color: var(--text-primary);
-
     font-size: 12px;
-
     font-weight: 600;
-
     text-align: right;
-
 }
 
-
-/* =============================================================================
-   OFFSET RESET
-   ============================================================================= */
-
-.offset-reset-button {
-
-    width: 100%;
-
-    flex-shrink: 0;
-
-    margin-top: 8px;
-
-    padding: 9px 12px;
-
-    border: none;
-
-    border-radius: 9px;
-
-    background: var(--accent-color);
-
-    color: #ffffff;
-
-    font-size: 12px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        filter 0.15s ease,
-        opacity 0.15s ease;
-
-}
-
-
-.offset-reset-button:hover {
-
-    filter: brightness(1.08);
-
-}
-
-
-/* =============================================================================
-   EMPTY STATE
-   ============================================================================= */
-
-.consumer-details-empty {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    min-height: 0;
-
-    color: var(--text-secondary);
-
-    text-align: center;
-
-}
-
-
-/* =============================================================================
-   TOPICS
-   ============================================================================= */
+/* -----------------------------------------------------------------------------
+   Topics
+   ----------------------------------------------------------------------------- */
 
 .consumer-topics-list {
-
-    max-height: 230px;
-
+    height: 100%;
+    max-height: 100%;
     margin: 0;
-
-    padding: 0;
-
+    padding: 0 6px 0 0;
     overflow-y: auto;
-
+    overflow-x: hidden;
     list-style: none;
-
+    scrollbar-gutter: stable;
 }
-
 
 .consumer-topics-list li {
-
     padding: 7px 10px;
-
     border-bottom: 1px solid var(--border-color);
-
     color: var(--text-primary);
-
     font-size: 12px;
-
 }
-
 
 .consumer-topics-list li:last-child {
-
-    border-bottom: none;
-
+    border-bottom: 0;
 }
 
-
-/* =============================================================================
-   OFFSETS
-   ============================================================================= */
-
-.offsets-table {
-
-    width: 100%;
-
-    border-collapse: collapse;
-
-    margin-top: 6px;
-
-    font-size: 11px;
-
-}
-
-
-.offsets-table th {
-
-    padding: 6px;
-
-    text-align: left;
-
-    color: var(--text-secondary);
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-    border-bottom: 1px solid var(--border-color);
-
-}
-
-
-/* =============================================================================
-   REBALANCE HISTORY
-   ============================================================================= */
+/* -----------------------------------------------------------------------------
+   Rebalance History
+   ----------------------------------------------------------------------------- */
 
 .rebalance-table {
-
     width: 100%;
-
     border-collapse: collapse;
-
     font-size: 11px;
-
 }
-
 
 .rebalance-table th {
-
-    padding: 6px;
-
+    padding: 6px 5px;
     text-align: left;
-
     color: var(--text-secondary);
-
     font-weight: 600;
-
     border-bottom: 1px solid var(--border-color);
-
 }
-
 
 .rebalance-table td {
-
-    padding: 6px;
-
+    padding: 6px 5px;
     color: var(--text-primary);
-
     border-bottom: 1px solid var(--border-color);
-
 }
-
 
 .rebalance-table tr:last-child td {
-
-    border-bottom: none;
-
+    border-bottom: 0;
 }
 
+/* -----------------------------------------------------------------------------
+   Общие состояния
+   ----------------------------------------------------------------------------- */
 
-/* =============================================================================
-   АДАПТИВНОСТЬ
-   ============================================================================= */
+.consumer-details-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-align: center;
+}
 
-@media (max-width: 1200px) {
+.offset-reset-button {
+    width: 100%;
+    flex-shrink: 0;
+    margin-top: 8px;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
 
-    .consumer-details-tabs {
+.offset-reset-button:hover {
+    filter: brightness(1.08);
+}
 
-        grid-template-columns:
-            0.78fr
-            1.08fr
-            0.96fr
-            0.9fr
-            1.48fr;
-
-    }
-
+@media (max-width: 1100px) {
     .consumer-details-tab {
-
-        font-size: 11px;
-
+        font-size: 12px;
         padding-left: 5px;
-
         padding-right: 5px;
-
     }
-
-}
-
-
-@media (max-width: 900px) {
-
-    .consumer-details-tabs {
-
-        grid-template-columns:
-            0.8fr
-            1.08fr
-            0.96fr
-            0.9fr
-            1.5fr;
-
-    }
-
-}
-
-
-@media (max-width: 520px) {
-
-    .consumer-details {
-
-        padding: 12px;
-
-    }
-
-    .consumer-details-tab {
-
-        font-size: 10px;
-
-        padding-left: 3px;
-
-        padding-right: 3px;
-
-    }
-
-    .consumer-details-value {
-
-        max-width: 55%;
-
-        margin-right: 4px;
-
-    }
-
 }

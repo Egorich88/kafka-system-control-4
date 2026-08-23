@@ -100,7 +100,89 @@ func main() {
 			w.WriteHeader(http.StatusNotFound)
 		}
 	})
+        // =============================================================================
+        // Маршруты Consumer Groups
+        // =============================================================================
+        //
+        // Эти маршруты используются отдельной страницей:
+        //
+        //     frontend/src/pages/consumer-groups/
+        //
+        // GET /api/consumer-groups
+        //     Возвращает список Consumer Groups текущего Kafka-кластера.
+        //
+        // GET /api/consumer-groups/{group}
+        //     Возвращает подробную информацию выбранной Consumer Group:
+        //
+        //     • состояние группы;
+        //     • участников;
+        //     • offsets;
+        //     • topics;
+        //     • lag;
+        //     • дополнительную информацию для панели Details.
+        //
+        // В дальнейшем здесь же будут добавлены:
+        //
+        //     POST   /api/consumer-groups/{group}/offsets/reset
+        //     DELETE /api/consumer-groups/{group}
+        //     POST   /api/consumer-groups/{group}/pause
+        //     POST   /api/consumer-groups/{group}/resume
+        //
+        // ВАЖНО:
+        // Consumer Groups используют тот же механизм выбора Kafka-кластера,
+        // что и остальные API — заголовок X-Kafka-Bootstrap.
+        // =============================================================================
 
+        http.HandleFunc("/api/consumer-groups", func(w http.ResponseWriter, r *http.Request) {
+
+            switch r.Method {
+
+            case http.MethodGet:
+
+                getConsumerGroupsHandler(w, r)
+
+            default:
+
+                w.WriteHeader(http.StatusMethodNotAllowed)
+
+            }
+
+        })
+
+        http.HandleFunc("/api/consumer-groups/", func(w http.ResponseWriter, r *http.Request) {
+
+            // Убираем начальную часть:
+            //
+            // /api/consumer-groups/
+            //
+            // чтобы получить имя Consumer Group.
+
+            groupName := strings.TrimPrefix(
+                r.URL.Path,
+                "/api/consumer-groups/",
+            )
+
+            if groupName == "" {
+
+                w.WriteHeader(http.StatusNotFound)
+
+                return
+
+            }
+
+            switch r.Method {
+
+            case http.MethodGet:
+
+                getConsumerGroupDetailsHandler(w, r)
+
+            default:
+
+                w.WriteHeader(http.StatusMethodNotAllowed)
+
+            }
+
+        })
 	// ----- Маршруты для Overview (метрики кластера) -----
 	http.HandleFunc("/api/overview", getDashboardOverviewHandler)
 	http.HandleFunc("/api/overview/brokers", getDashboardBrokersHandler)

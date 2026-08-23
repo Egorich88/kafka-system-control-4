@@ -217,9 +217,7 @@
 .consumer-groups-table tbody tr.consumer-group-selected {
 
     background: var(--selected-color);
-
 }
-
 
 .consumer-groups-table tbody tr.selected td,
 .consumer-groups-table tbody tr.consumer-group-selected td {
@@ -240,6 +238,15 @@
  * ============================================================================
  */
 
+.consumer-groups-table tbody tr:hover td,
+.consumer-groups-table tbody tr.consumer-group-selected td {
+    background: var(--table-row-hover, var(--hover-bg)) !important;
+}
+
+.consumer-groups-table tbody tr.consumer-group-selected td {
+    background: var(--selected-color) !important;
+}
+
 .consumer-groups-table tbody tr.selected .action-icon-btn,
 .consumer-groups-table tbody tr.consumer-group-selected .action-icon-btn {
 
@@ -255,7 +262,7 @@
 
     color: var(--accent-color);
 
-    background: var(--hover-bg);
+    background: transparent;
 
 }
 
@@ -435,15 +442,17 @@
  */
 
 .consumer-actions-cell {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 6px;
-
+    padding-left: 10px !important;
+    padding-right: 10px !important;
     white-space: nowrap;
+    text-align: left;
+}
 
+.consumer-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: max-content;
 }
 
 
@@ -700,10 +709,8 @@
 
     }
 
-    .consumer-actions-cell {
-
+    .consumer-actions {
         gap: 4px;
-
     }
 
 }

@@ -44,6 +44,7 @@ import '../styles/consumer-details.css';
 
 import type {
     ConsumerGroup,
+    ConsumerGroupDetails as ConsumerGroupDetailsData,
     RebalanceEvent
 } from '../types/consumer-groups.types';
 
@@ -64,6 +65,8 @@ import {
 interface Props {
 
     group: ConsumerGroup | null;
+
+    details: ConsumerGroupDetailsData | null;
 
 }
 
@@ -104,7 +107,9 @@ const MOCK_REBALANCE: RebalanceEvent[] = [
 
 export default function ConsumerGroupDetails({
 
-    group
+    group,
+
+    details
 
 }: Props) {
 
@@ -160,13 +165,13 @@ export default function ConsumerGroupDetails({
         {
             id: 'members',
             label:
-                `Members (${group.members})`
+                `Members (${details?.membersDetail.length ?? group.members})`
         },
 
         {
             id: 'offsets',
             label:
-                `Offsets (${group.partitions ?? 0})`
+                `Offsets (${details?.offsets.length ?? group.partitions ?? 0})`
         },
 
         {
@@ -225,7 +230,7 @@ export default function ConsumerGroupDetails({
 
             {activeTab === 'details' && (
 
-                <>
+                <div className="consumer-details-content">
 
                     <div className="consumer-details-section-title consumer-details-info-title">
 
@@ -331,7 +336,7 @@ export default function ConsumerGroupDetails({
 
                     </div>
 
-                </>
+                </div>
 
             )}
 
@@ -342,9 +347,13 @@ export default function ConsumerGroupDetails({
 
             {activeTab === 'members' && (
 
-                <ConsumerMembers
-                    group={group}
-                />
+                details ? (
+                    <ConsumerMembers group={details} />
+                ) : (
+                    <div className="consumer-details-loading">
+                        Загрузка участников...
+                    </div>
+                )
 
             )}
 
@@ -355,9 +364,13 @@ export default function ConsumerGroupDetails({
 
             {activeTab === 'offsets' && (
 
-                <ConsumerOffsets
-                    group={group}
-                />
+                details ? (
+                    <ConsumerOffsets group={details} />
+                ) : (
+                    <div className="consumer-details-loading">
+                        Загрузка offsets...
+                    </div>
+                )
 
             )}
 

@@ -9,118 +9,84 @@
  * ConsumerOffsets.tsx
  * =============================================================================
  *
- * Панель отображения оффсетов выбранной Consumer Group.
+ * Таблица реальных offsets выбранной Consumer Group.
  *
- * Пока используются mock-данные.
- *
- * После подключения backend здесь будет отображаться:
- *
- * • Topic
- * • Partition
- * • Current Offset
- * • End Offset
- * • Lag
- *
- * Эта панель станет основой мастера Offset Reset.
+ * В отличие от старой версии здесь больше нет двух тестовых строк.
+ * Backend возвращает каждую topic/partition отдельно.
  * =============================================================================
  */
 
 import '../styles/consumer-offsets.css';
 
-import type { ConsumerGroup } from '../types/consumer-groups.types';
+import type {
+    ConsumerGroupDetails
+} from '../types/consumer-groups.types';
 
 interface Props {
-
-    group: ConsumerGroup | null;
-
+    group: ConsumerGroupDetails | null;
 }
 
-export default function ConsumerOffsets({
-
-    group
-
-}: Props) {
+export default function ConsumerOffsets({ group }: Props) {
 
     if (!group) {
-
-        return (
-
-            <div className="consumer-offsets">
-
-                Выберите группу
-
-            </div>
-
-        );
-
+        return null;
     }
 
     return (
-
         <div className="consumer-offsets">
 
             <div className="consumer-offsets-title">
+                Offsets по партициям
+            </div>
 
-                Offset'ы
+            <div className="consumer-offsets-scroll">
+
+                {group.offsets.length === 0 ? (
+                    <div className="consumer-offsets-empty">
+                        Для группы пока нет committed offsets
+                    </div>
+                ) : (
+                    <table className="consumer-offsets-table">
+
+                        <thead>
+                            <tr>
+                                <th>Топик</th>
+                                <th>Партиция</th>
+                                <th>Offset</th>
+                                <th>Конец</th>
+                                <th>Lag</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {group.offsets.map(offset => (
+                                <tr
+                                    key={`${offset.topic}-${offset.partition}`}
+                                >
+                                    <td>{offset.topic}</td>
+                                    <td>{offset.partition}</td>
+                                    <td>{offset.currentOffset}</td>
+                                    <td>
+                                        {offset.endOffset >= 0
+                                            ? offset.endOffset
+                                            : '—'}
+                                    </td>
+                                    <td className={
+                                        offset.lag > 0
+                                            ? 'consumer-offset-lag'
+                                            : ''
+                                    }>
+                                        {offset.lag}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+
+                    </table>
+                )}
 
             </div>
 
-            <table className="consumer-offsets-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>Топик</th>
-
-                        <th>Партиция</th>
-
-                        <th>Offset</th>
-
-                        <th>Конец</th>
-
-                        <th>Lag</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    <tr>
-
-                        <td>payments</td>
-
-                        <td>0</td>
-
-                        <td>1200</td>
-
-                        <td>1200</td>
-
-                        <td>0</td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>payments</td>
-
-                        <td>1</td>
-
-                        <td>1188</td>
-
-                        <td>1200</td>
-
-                        <td>12</td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
         </div>
-
     );
-
 }

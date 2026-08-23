@@ -345,6 +345,8 @@ export default function ConsumerGroupsTable({
                                     }
                                 >
 
+                                    <div className="consumer-actions">
+
                                     {/* -------------------------------------------------
                                        Скрыть / показать группу
                                        ------------------------------------------------- */}
@@ -406,6 +408,8 @@ export default function ConsumerGroupsTable({
                                         <FiTrash2 />
 
                                     </button>
+
+                                    </div>
 
                                 </td>
 
