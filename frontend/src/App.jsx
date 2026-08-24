@@ -59,6 +59,7 @@ import ConsumerGroupsPage from './pages/consumer-groups/ConsumerGroupsPage';
 import Acl from './pages/Acl';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
+import AuditPage from './pages/audit/AuditPage';
 
 // Contexts
 import { ClusterProvider } from './contexts/ClusterContext';
@@ -99,6 +100,9 @@ function App() {
 
             {/* Поиск сообщений */}
             <Route path="search" element={<Search />} />
+
+            {/* Аудит действий пользователей и системы */}
+            <Route path="logs" element={<AuditPage />} />
 
             {/* Консоль Kafka */}
             <Route path="console" element={<Console />} />

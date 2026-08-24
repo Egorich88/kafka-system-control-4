@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/*
+/**
  * =============================================================================
  * ConsumerGroupsPage.tsx
  * =============================================================================
@@ -440,6 +440,17 @@ export default function ConsumerGroupsPage() {
 
             <ConsumerGroupsKpi groups={groups} />
 
+            {/* =================================================================
+                Верхняя аналитика.
+
+                Три диаграммы располагаются сразу под KPI.
+                Так пользователь сначала видит состояние групп и основные
+                показатели, а уже затем переходит к поиску и таблице.
+               ================================================================= */}
+            <ConsumerDonutCharts
+                groups={groups}
+            />
+
             <ConsumerGroupsToolbar
                 search={search}
                 onSearchChange={setSearch}
@@ -463,6 +474,12 @@ export default function ConsumerGroupsPage() {
                 onDeleteGroup={handleDeleteGroup}
             />
 
+            {/* =================================================================
+                Подробности выбранной группы и график Consumer Lag.
+
+                Оставляем этот блок после таблицы: он относится к конкретной
+                выбранной группе и не должен конкурировать с общей аналитикой.
+               ================================================================= */}
             <div className="consumer-bottom-layout">
 
                 <ConsumerGroupDetails
@@ -475,10 +492,6 @@ export default function ConsumerGroupsPage() {
                 />
 
             </div>
-
-            <ConsumerDonutCharts
-                groups={groups}
-            />
 
             <OffsetResetWizard
                 group={selectedGroup}

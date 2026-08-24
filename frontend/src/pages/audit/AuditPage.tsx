@@ -70,8 +70,6 @@ import {
 import AuditKpi
     from './components/AuditKpi';
 
-import AuditRecentEvents
-    from './components/AuditRecentEvents';
 
 import AuditOverviewCharts
     from './components/AuditOverviewCharts';
@@ -273,30 +271,13 @@ export default function AuditPage() {
 
 
                 {/* =========================================================
-                    Последние события + основной график
+                    Аналитика
+
+                    ВАЖНО: отдельного блока «Последние события» здесь нет.
+                    Источником событий является единственный журнал ниже.
                    ========================================================= */}
 
-                <div className="audit-top-grid">
-
-                    <AuditRecentEvents
-
-                        events={
-                            filteredEvents
-                        }
-
-                        onSelect={
-                            handleSelectEvent
-                        }
-
-                    />
-
-                    <div className="audit-main-chart-wrapper">
-
-                        <AuditOverviewCharts />
-
-                    </div>
-
-                </div>
+                <AuditOverviewCharts />
 
 
                 {/* =========================================================

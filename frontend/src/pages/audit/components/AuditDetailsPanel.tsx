@@ -6,9 +6,8 @@
 
 import {
     FiX,
-    FiCheckCircle,
+    FiCheck,
     FiAlertTriangle,
-    FiXCircle,
     FiCopy
 } from 'react-icons/fi';
 
@@ -42,10 +41,10 @@ export default function AuditDetailsPanel({
 
     const resultIcon =
         event.result === 'success'
-            ? <FiCheckCircle />
+            ? <FiCheck />
             : event.result === 'warning'
                 ? <FiAlertTriangle />
-                : <FiXCircle />;
+                : <FiX />;
 
 
     const resultLabel =
@@ -96,22 +95,14 @@ export default function AuditDetailsPanel({
             </div>
 
 
-            <div className="audit-details-result">
-
-                <span>
+            <div className={`audit-details-result ${event.result}`}>
+                <span className="audit-details-result-icon">
                     {resultIcon}
                 </span>
 
                 <strong>
-                    {event.message}
-                </strong>
-
-                <em
-                    className={`audit-result ${event.result}`}
-                >
                     {resultLabel}
-                </em>
-
+                </strong>
             </div>
 
 

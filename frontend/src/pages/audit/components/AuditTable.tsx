@@ -6,9 +6,9 @@
 
 import {
     FiChevronRight,
-    FiCheckCircle,
+    FiCheck,
     FiAlertTriangle,
-    FiXCircle
+    FiX
 } from 'react-icons/fi';
 
 import type {
@@ -204,10 +204,10 @@ export default function AuditTable({
                                         >
 
                                             {event.result === 'success'
-                                                ? <FiCheckCircle />
+                                                ? <FiCheck />
                                                 : event.result === 'warning'
                                                     ? <FiAlertTriangle />
-                                                    : <FiXCircle />
+                                                    : <FiX />
                                             }
 
                                             {event.result === 'success'
@@ -226,7 +226,7 @@ export default function AuditTable({
                                     </td>
 
                                     <td>
-                                        <FiChevronRight />
+                                        <FiChevronRight className="audit-table-chevron" />
                                     </td>
 
                                 </tr>
