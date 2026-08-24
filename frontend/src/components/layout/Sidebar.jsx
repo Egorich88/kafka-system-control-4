@@ -159,11 +159,19 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
             {/* Логотип */}
             <div className="sidebar-logo-brand">
+
               <img
                   src="/logo.svg"
                   alt="Kafka System Control"
                   className="sidebar-logo-image"
               />
+
+              {!collapsed && (
+                  <span className="sidebar-brand-name">
+                      KSC
+                  </span>
+              )}
+
             </div>
 
             {/* Кнопка сворачивания боковой панели */}

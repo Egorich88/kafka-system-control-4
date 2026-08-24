@@ -59,7 +59,7 @@
     overflow: visible;
 
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
 
     width: 100%;
@@ -78,7 +78,7 @@
    ============================================================ */
 
 .sidebar-logo-image {
-    width: 68px;
+    width: 64px;
     height: auto;
 
     display: block;
@@ -92,12 +92,77 @@
         opacity .25s ease,
         transform .25s ease;
 }
+/* ============================================================
+   Название продукта KSC
+   ============================================================
 
+   KSC крупнее обычного текста Sidebar,
+   но визуально не выше самого графического знака.
+   ============================================================ */
 
-/* Контейнер бренда */
+.sidebar-brand-name {
+    display: inline-flex;
+    align-items: center;
+
+    /*
+     * Размер специально выбран средним:
+     * он заметный, но не конкурирует с логотипом.
+     */
+    font-family: 'Orbitron', sans-serif;
+
+    font-size: 22px;
+    font-weight: 600;
+
+    /*
+     * Небольшое расстояние между буквами.
+     * Даёт технологичный характер без эффекта "киберпанка".
+     */
+    letter-spacing: 2px;
+
+    /*
+     * Самое важное:
+     *
+     * Dark       → #f8fafc
+     * Light      → #0f172a
+     * Другие темы → их основной цвет текста
+     *
+     * Это уже определено в themes.css.
+     */
+    color: var(--text-primary);
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+    transition:
+        color .25s ease,
+        opacity .25s ease;
+}
+
+/* ============================================================
+   Фирменный блок KSC
+   Структура:
+   [ LOGO ]   KSC
+   Логотип находится слева.
+   Название продукта находится справа.
+   ============================================================ */
 .sidebar-logo-brand {
-    justify-content: center;
-    width: 100%;
+    display: flex;
+    align-items: center;
+    /*
+     * Логотип и KSC располагаются горизонтально.
+     */
+    flex-direction: row;
+    /*
+     * Расстояние между знаком и буквами.
+     */
+    gap: 18px;
+    /*
+     * Блок занимает доступное место до кнопки Sidebar.
+     */
+    flex: 1;
+    width: auto;
+    min-width: 0;
 }
 
 
@@ -117,11 +182,18 @@
 }
 
 
-/* Центрирование бренда */
+/* ============================================================
+   Брендинг свернутого Sidebar
+   ============================================================ */
 .sidebar.collapsed .sidebar-logo-brand {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
+    /*
+     * В свернутом состоянии KSC скрывается через JSX,
+     * поэтому здесь остаётся только знак.
+     */
 }
 
 
