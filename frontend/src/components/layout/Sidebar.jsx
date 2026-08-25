@@ -158,6 +158,20 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
           <div className="sidebar-header">
 
             {/* Логотип */}
+            {/* ==========================================================
+                Брендинг Kafka System Control
+
+                Слева:
+                фирменный графический знак.
+
+                Справа:
+                короткий wordmark KSC.
+
+                Полное название Kafka System Control
+                в Sidebar не используется — здесь нужен
+                компактный фирменный идентификатор.
+               ========================================================== */}
+
             <div className="sidebar-logo-brand">
 
               <img
@@ -167,9 +181,9 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
               />
 
               {!collapsed && (
-                  <span className="sidebar-brand-name">
-                      KSC
-                  </span>
+                <span className="sidebar-brand-name">
+                  KSC
+                </span>
               )}
 
             </div>

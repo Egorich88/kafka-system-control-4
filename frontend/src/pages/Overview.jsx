@@ -169,7 +169,7 @@ export default function Overview() {
           <p className="welcome-subtitle">
               KAFKA SYSTEM CONTROL
           </p>
-          <div className="welcome-divider-small" />
+
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiInfo /></div>
             <div className="welcome-feature-text">
