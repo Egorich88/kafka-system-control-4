@@ -1,0 +1,246 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* ============================================================
+   Специализированный dropdown выбора темы.
+   Используется ТОЛЬКО на странице Settings.
+   ============================================================ */
+
+.theme-dropdown {
+    position: relative;
+    flex: 0 0 auto;
+    width: 220px;
+    min-width: 220px;
+}
+
+/* Кнопка выбранной темы */
+.theme-dropdown-selected {
+    width: 100%;
+    height: 46px;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding: 0 14px;
+
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+
+    background: var(--sidebar-bg);
+    color: var(--text-primary);
+
+    cursor: pointer;
+    transition:
+        border-color .18s ease,
+        background .18s ease,
+        box-shadow .18s ease;
+}
+
+.theme-dropdown-selected:hover {
+    background: var(--sidebar-hover);
+}
+
+.theme-dropdown-selected.open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-color: var(--accent-color);
+}
+
+/* Название текущей темы */
+.theme-dropdown-selected-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* Стрелка */
+.theme-dropdown-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    color: var(--text-secondary);
+    font-size: 17px;
+}
+
+/* ============================================================
+   Выпадающее меню тем
+   ============================================================ */
+
+/*
+ * Меню должно иметь ТОЧНО такую же ширину, как кнопка.
+ *
+ * Раньше здесь использовался width: max-content.
+ * Из-за этого список становился уже кнопки, когда
+ * содержимое не требовало всей ширины.
+ *
+ * Теперь кнопка и меню образуют единый визуальный компонент.
+ */
+
+.theme-dropdown-menu {
+    position: absolute;
+    top: calc(100% - 1px);
+    right: 0;
+
+    /* Меню всегда совпадает по ширине с кнопкой */
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+
+    padding: 6px;
+
+    box-sizing: border-box;
+
+    background: var(--dropdown-bg);
+
+    border: 1px solid var(--accent-color);
+    border-top: none;
+
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+
+    box-shadow: 0 16px 38px rgba(0, 0, 0, .20);
+
+    z-index: 1000;
+
+    overflow-y: auto;
+    max-height: min(560px, calc(100vh - 140px));
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+/* Пункт темы */
+.theme-dropdown-item {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 1fr 20px;
+    align-items: center;
+    gap: 12px;
+
+    padding: 9px 10px;
+
+    box-sizing: border-box;
+
+    border: 0;
+    border-radius: 9px;
+
+    background: transparent;
+    color: var(--text-primary);
+
+    font: inherit;
+    font-size: 15px;
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background .14s ease,
+        color .14s ease;
+}
+
+/* Hover — лёгкий, без кислотной подсветки */
+.theme-dropdown-item:hover {
+    background: var(--sidebar-hover);
+}
+
+/* Текущая тема */
+.theme-dropdown-item.selected {
+    background: var(--menu-active-bg, rgba(96, 165, 250, .12));
+    color: var(--text-primary);
+}
+
+/* Галочка */
+.theme-dropdown-check {
+    width: 20px;
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--accent-hover, #60a5fa);
+    font-size: 16px;
+}
+
+/* ============================================================
+   Небесно-голубая линия между наборами тем.
+   ============================================================ */
+
+.theme-dropdown-divider {
+    height: 1px;
+
+    margin: 6px 8px;
+
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(96, 165, 250, .55) 18%,
+        rgba(125, 211, 252, .80) 50%,
+        rgba(96, 165, 250, .55) 82%,
+        transparent 100%
+    );
+}
+
+/* ============================================================
+   Планшеты / небольшие экраны
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    .theme-dropdown {
+        width: 220px;
+        min-width: 220px;
+    }
+
+    .theme-dropdown-menu {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        right: 0;
+    }
+}
+
+/* ============================================================
+   Мобильные устройства
+   ============================================================ */
+
+@media (max-width: 680px) {
+
+    .theme-dropdown {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .theme-dropdown-menu {
+        left: 0;
+        right: auto;
+
+        /* На мобильном меню равно ширине кнопки */
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+}

@@ -15,38 +15,37 @@
  */
 
 /* ============================================================
-   ТЕМЫ ОФОРМЛЕНИЯ KAFKA SYSTEM CONTROL
-   Цветовые названия отображаются в интерфейсе,
-   ключи (data-theme) используются в коде.
-============================================================ */
+   KSC THEMES — BASE / DEVELOPER / SYSTEM / STUDIO / EXPERIMENTAL
+   ============================================================ */
 
-/* Базовые темы */
+/* ========================= DARK ========================= */
 :root[data-theme='dark'] {
     --bg-primary: #0b1220;
     --bg-secondary: #0f172a;
     --panel-bg: #111827;
     --card-bg: #1b1f2a;
-    --dropdown-bg: #182133;
+    --dropdown-bg: #0f172a;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(59,130,246,.10);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
     --sidebar-bg: linear-gradient(180deg, #071226 0%, #08101d 100%);
-    --sidebar-hover: rgba(255,255,255,0.06);
-    --border-color: rgba(255,255,255,0.08);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
     --text-primary: #f8fafc;
-    --text-secondary: rgba(255,255,255,0.65);
+    --text-secondary: rgba(255,255,255,.65);
     --accent-color: #3b82f6;
     --accent-hover: #60a5fa;
     --input-bg: #1b1f2a;
-    --input-focus: rgba(59,130,246,0.15);
+    --input-focus: rgba(96,165,250,.12);
     --success-color: #22c55e;
     --danger-color: #ef4444;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.45);
-    --table-row-hover: rgba(255,255,255,0.03);
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
 }
 
+/* ========================= LIGHT ========================= */
 :root[data-theme='light'] {
     --bg-primary: #f3f6fb;
     --bg-secondary: #ffffff;
@@ -55,351 +54,26 @@
     --dropdown-bg: #ffffff;
     --tooltip-bg: #1b2233;
     --tooltip-text: #f8fafc;
-    --selected-color: rgba(59,130,246,.14);
-    --menu-active-bg: rgba(37,99,235,.10);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.45);
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
-    --sidebar-hover: rgba(15,23,42,0.05);
-    --border-color: rgba(15,23,42,0.08);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
     --text-primary: #0f172a;
-    --text-secondary: rgba(15,23,42,0.65);
+    --text-secondary: rgba(15,23,42,.65);
     --accent-color: #2563eb;
     --accent-hover: #3b82f6;
     --input-bg: #ffffff;
-    --input-focus: rgba(37,99,235,0.12);
+    --input-focus: rgba(37,99,235,.12);
     --success-color: #16a34a;
     --danger-color: #dc2626;
-    --shadow-primary: 0 10px 40px rgba(15,23,42,0.08);
-    --table-row-hover: rgba(15,23,42,0.03);
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
 }
 
-/* Цветовые темы (ключи используются в коде) */
-:root[data-theme='linux'] {
-    /* Forest — тёмно-зелёный, в стиле терминала */
-    --bg-primary: #0a0f0d;
-    --bg-secondary: #0f1a14;
-    --panel-bg: #111f18;
-    --card-bg: #13261d;
-    --dropdown-bg: #0f1a14;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(34,197,94,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #0a0f0d 0%, #0f1a14 100%);
-    --sidebar-hover: rgba(34,197,94,0.08);
-    --border-color: rgba(34,197,94,0.15);
-    --text-primary: #d1fae5;
-    --text-secondary: rgba(209,250,229,0.65);
-    --accent-color: #22c55e;
-    --accent-hover: #4ade80;
-    --input-bg: #111f18;
-    --input-focus: rgba(34,197,94,0.15);
-    --success-color: #22c55e;
-    --danger-color: #ef4444;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.6);
-    --table-row-hover: rgba(34,197,94,0.05);
-}
-
-:root[data-theme='kitty'] {
-    /* Lavender — лавандовый, мягкий фиолетовый оттенок */
-    --bg-primary: #e9e4f0;
-    --bg-secondary: #f3eef9;
-    --panel-bg: #ffffff;
-    --card-bg: #faf7ff;
-    --dropdown-bg: #ffffff;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(255,105,180,.18);
-    --menu-active-bg: rgba(155,107,255,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.45);
-    --sidebar-bg: linear-gradient(180deg, #e9e4f0 0%, #dcd4e8 100%);
-    --sidebar-hover: rgba(128, 90, 190, 0.08);
-    --border-color: rgba(128, 90, 190, 0.2);
-    --text-primary: #2c1f4a;
-    --text-secondary: #5a4a7a;
-    --accent-color: #9b6bff;
-    --accent-hover: #b48cff;
-    --input-bg: #ffffff;
-    --input-focus: rgba(155, 107, 255, 0.2);
-    --success-color: #6fbf4c;
-    --danger-color: #e54b4b;
-    --shadow-primary: 0 10px 30px rgba(0,0,0,0.08);
-    --table-row-hover: rgba(128, 90, 190, 0.05);
-}
-
-:root[data-theme='dracula'] {
-    /* Purple — насыщенный пурпурный, как в теме Dracula */
-    --bg-primary: #282a36;
-    --bg-secondary: #21222c;
-    --panel-bg: #343746;
-    --card-bg: #2b2d3a;
-    --dropdown-bg: #21222c;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(189,147,249,.18);
-    --menu-active-bg: rgba(189,147,249,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #1e1f29 0%, #282a36 100%);
-    --sidebar-hover: rgba(255,255,255,0.06);
-    --border-color: rgba(255,255,255,0.08);
-    --text-primary: #f8f8f2;
-    --text-secondary: rgba(248,248,242,0.65);
-    --accent-color: #bd93f9;
-    --accent-hover: #d6acff;
-    --input-bg: #21222c;
-    --input-focus: rgba(189,147,249,0.15);
-    --success-color: #50fa7b;
-    --danger-color: #ff5555;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.04);
-}
-
-:root[data-theme='nord'] {
-    /* Ice Blue — ледяной голубой, холодная гамма Nord */
-    --bg-primary: #2e3440;
-    --bg-secondary: #3b4252;
-    --panel-bg: #434c5e;
-    --card-bg: #3b4252;
-    --dropdown-bg: #2e3440;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(94,129,172,.18);
-    --menu-active-bg: rgba(136,192,208,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #2e3440 0%, #3b4252 100%);
-    --sidebar-hover: rgba(255,255,255,0.06);
-    --border-color: rgba(255,255,255,0.08);
-    --text-primary: #eceff4;
-    --text-secondary: #d8dee9;
-    --accent-color: #88c0d0;
-    --accent-hover: #8fbcbb;
-    --input-bg: #3b4252;
-    --input-focus: rgba(136,192,208,0.15);
-    --success-color: #a3be8c;
-    --danger-color: #bf616a;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.04);
-}
-
-:root[data-theme='solarized-light'] {
-    /* Amber Light — светло-янтарный, тёплая светлая гамма */
-    --bg-primary: #fdf6e3;
-    --bg-secondary: #eee8d5;
-    --panel-bg: #fdf6e3;
-    --card-bg: #ffffff;
-    --dropdown-bg: #eee8d5;
-    --tooltip-bg: #1b2233;
-    --tooltip-text: #f8fafc;
-    --selected-color: rgba(59,130,246,.14);
-    --menu-active-bg: rgba(181,137,0,.14);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.45);
-    --sidebar-bg: linear-gradient(180deg, #fdf6e3 0%, #eee8d5 100%);
-    --sidebar-hover: rgba(0,0,0,0.05);
-    --border-color: rgba(0,0,0,0.08);
-    --text-primary: #073642;
-    --text-secondary: rgba(7,54,66,0.65);
-    --accent-color: #b58900;
-    --accent-hover: #2aa198;
-    --input-bg: #ffffff;
-    --input-focus: rgba(38,139,210,0.15);
-    --success-color: #859900;
-    --danger-color: #dc322f;
-    --shadow-primary: 0 10px 40px rgba(0,0,0,0.08);
-    --table-row-hover: rgba(0,0,0,0.03);
-}
-
-:root[data-theme='solarized-dark'] {
-    /* Amber Dark — тёмно-янтарный, тёплая тёмная гамма */
-    --bg-primary: #002b36;
-    --bg-secondary: #073642;
-    --panel-bg: #073642;
-    --card-bg: #0a3a46;
-    --dropdown-bg: #073642;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(38,139,210,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #002b36 0%, #073642 100%);
-    --sidebar-hover: rgba(255,255,255,0.05);
-    --border-color: rgba(255,255,255,0.08);
-    --text-primary: #eee8d5;
-    --text-secondary: rgba(238,232,213,0.65);
-    --accent-color: #268bd2;
-    --accent-hover: #cb4b16;
-    --input-bg: #073642;
-    --input-focus: rgba(181,137,0,0.15);
-    --success-color: #859900;
-    --danger-color: #dc322f;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.03);
-}
-
-:root[data-theme='coffee'] {
-    /* Brown — коричневый, оттенки кофе */
-    --bg-primary: #1c1612;
-    --bg-secondary: #2a211c;
-    --panel-bg: #2f241e;
-    --card-bg: #3a2c24;
-    --dropdown-bg: #2a211c;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(192,138,90,.14);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #1c1612 0%, #2a211c 100%);
-    --sidebar-hover: rgba(255,255,255,0.06);
-    --border-color: rgba(255,255,255,0.08);
-    --text-primary: #f5e6d3;
-    --text-secondary: rgba(245,230,211,0.7);
-    --accent-color: #c08a5a;
-    --accent-hover: #d6a06c;
-    --input-bg: #2a211c;
-    --input-focus: rgba(192,138,90,0.15);
-    --success-color: #7bd389;
-    --danger-color: #ff6b6b;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.03);
-}
-
-:root[data-theme='material'] {
-    /* Indigo — глубокий индиго, Material Theme UI */
-    --bg-primary: #0f111a;
-    --bg-secondary: #1a1f2e;
-    --panel-bg: #1f2633;
-    --card-bg: #232b3a;
-    --dropdown-bg: #1a1f2e;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(130,170,255,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #0f111a 0%, #1a1f2e 100%);
-    --sidebar-hover: rgba(255,255,255,0.06);
-    --border-color: rgba(255,255,255,0.08);
-    --text-primary: #e6e6e6;
-    --text-secondary: rgba(230,230,230,0.65);
-    --accent-color: #82aaff;
-    --accent-hover: #a6c1ff;
-    --input-bg: #1a1f2e;
-    --input-focus: rgba(130,170,255,0.15);
-    --success-color: #c3e88d;
-    --danger-color: #ff5370;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.04);
-}
-
-:root[data-theme='monocai'] {
-    /* Violet — фиолетовый, тёплый оттенок */
-    --bg-primary: #1a1b26;
-    --bg-secondary: #24283b;
-    --panel-bg: #1f2335;
-    --card-bg: #24283b;
-    --dropdown-bg: #1a1b26;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(187,154,247,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #1a1b26 0%, #24283b 100%);
-    --sidebar-hover: rgba(255,255,255,0.05);
-    --border-color: rgba(255,255,255,0.08);
-    --text-primary: #c0caf5;
-    --text-secondary: rgba(192,202,245,0.65);
-    --accent-color: #bb9af7;
-    --accent-hover: #d0b3ff;
-    --input-bg: #24283b;
-    --input-focus: rgba(187,154,247,0.15);
-    --success-color: #9ece6a;
-    --danger-color: #f7768e;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.03);
-}
-
-:root[data-theme='monokai-pro'] {
-    /* Golden — тёмно-серо-чёрный фон с благородным золотом */
-    --bg-primary: #0f0f0f;
-    --bg-secondary: #1a1a1a;
-    --panel-bg: #222222;
-    --card-bg: #2a2a2a;
-    --dropdown-bg: #1a1a1a;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(249,38,114,.18);
-    --menu-active-bg: rgba(255,215,0,.14);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
-    --sidebar-hover: rgba(255, 215, 0, 0.1);
-    --border-color: rgba(255, 215, 0, 0.25);
-    --text-primary: #f5f5f5;
-    --text-secondary: #bbbbbb;
-    --accent-color: #ffd700;
-    --accent-hover: #ffe44d;
-    --input-bg: #2a2a2a;
-    --input-focus: rgba(255, 215, 0, 0.2);
-    --success-color: #9bcd6c;
-    --danger-color: #ff6b6b;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255, 215, 0, 0.05);
-}
-
-:root[data-theme='deep-ocean'] {
-    /* Navy — тёмно-синий, как глубокий океан */
-    --bg-primary: #050b18;
-    --bg-secondary: #0b1a2f;
-    --panel-bg: #0f2340;
-    --card-bg: #102a4a;
-    --dropdown-bg: #0b1a2f;
-    --tooltip-bg: #ffffff;
-    --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(56,189,248,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #050b18 0%, #0b1a2f 100%);
-    --sidebar-hover: rgba(255,255,255,0.05);
-    --border-color: rgba(255,255,255,0.08);
-    --text-primary: #dbeafe;
-    --text-secondary: rgba(219,234,254,0.65);
-    --accent-color: #38bdf8;
-    --accent-hover: #7dd3fc;
-    --input-bg: #0b1a2f;
-    --input-focus: rgba(56,189,248,0.15);
-    --success-color: #22c55e;
-    --danger-color: #ef4444;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.03);
-}
-
-:root[data-theme='github-light'] {
-    /* Graphite Light — светло-серый, как GitHub светлая */
-    --bg-primary: #f6f8fa;
-    --bg-secondary: #ffffff;
-    --panel-bg: #ffffff;
-    --card-bg: #ffffff;
-    --dropdown-bg: #ffffff;
-    --tooltip-bg: #1b2233;
-    --tooltip-text: #f8fafc;
-    --selected-color: rgba(59,130,246,.14);
-    --menu-active-bg: rgba(9,105,218,.10);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.45);
-    --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f6f8fa 100%);
-    --sidebar-hover: rgba(0,0,0,0.05);
-    --border-color: #d0d7de;
-    --text-primary: #24292f;
-    --text-secondary: #57606a;
-    --accent-color: #0969da;
-    --accent-hover: #218bff;
-    --input-bg: #ffffff;
-    --input-focus: rgba(9,105,218,0.15);
-    --success-color: #1a7f37;
-    --danger-color: #cf222e;
-    --shadow-primary: 0 10px 40px rgba(0,0,0,0.08);
-    --table-row-hover: rgba(0,0,0,0.03);
-}
-
+/* ========================= GITHUB-DARK ========================= */
 :root[data-theme='github-dark'] {
-    /* Graphite Dark — тёмно-серый, как GitHub тёмная */
     --bg-primary: #0d1117;
     --bg-secondary: #161b22;
     --panel-bg: #161b22;
@@ -407,104 +81,676 @@
     --dropdown-bg: #161b22;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(88,166,255,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
     --sidebar-bg: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
-    --sidebar-hover: rgba(255,255,255,0.05);
-    --border-color: #30363d;
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
     --text-primary: #e6edf3;
     --text-secondary: #7d8590;
     --accent-color: #58a6ff;
     --accent-hover: #79c0ff;
     --input-bg: #161b22;
-    --input-focus: rgba(88,166,255,0.15);
+    --input-focus: rgba(96,165,250,.12);
     --success-color: #3fb950;
     --danger-color: #f85149;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.04);
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
 }
 
+/* ========================= GITHUB-LIGHT ========================= */
+:root[data-theme='github-light'] {
+    --bg-primary: #f6f8fa;
+    --bg-secondary: #ffffff;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #24292f;
+    --text-secondary: #57606a;
+    --accent-color: #0969da;
+    --accent-hover: #218bff;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #1a7f37;
+    --danger-color: #cf222e;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= DRACULA ========================= */
+:root[data-theme='dracula'] {
+    --bg-primary: #282a36;
+    --bg-secondary: #21222c;
+    --panel-bg: #343746;
+    --card-bg: #2b2d3a;
+    --dropdown-bg: #21222c;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #1e1f29 0%, #282a36 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --text-primary: #f8f8f2;
+    --text-secondary: rgba(248,248,242,.65);
+    --accent-color: #bd93f9;
+    --accent-hover: #d6acff;
+    --input-bg: #21222c;
+    --input-focus: rgba(96,165,250,.12);
+    --success-color: #50fa7b;
+    --danger-color: #ff5555;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
+}
+
+/* ========================= NORD ========================= */
+:root[data-theme='nord'] {
+    --bg-primary: #2e3440;
+    --bg-secondary: #3b4252;
+    --panel-bg: #434c5e;
+    --card-bg: #3b4252;
+    --dropdown-bg: #3b4252;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #2e3440 0%, #3b4252 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --text-primary: #eceff4;
+    --text-secondary: #d8dee9;
+    --accent-color: #88c0d0;
+    --accent-hover: #8fbcbb;
+    --input-bg: #3b4252;
+    --input-focus: rgba(96,165,250,.12);
+    --success-color: #a3be8c;
+    --danger-color: #bf616a;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
+}
+
+/* ========================= MATERIAL ========================= */
+:root[data-theme='material'] {
+    --bg-primary: #0f111a;
+    --bg-secondary: #1a1f2e;
+    --panel-bg: #1f2633;
+    --card-bg: #232b3a;
+    --dropdown-bg: #1a1f2e;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #0f111a 0%, #1a1f2e 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --text-primary: #e6e6e6;
+    --text-secondary: rgba(230,230,230,.65);
+    --accent-color: #82aaff;
+    --accent-hover: #a6c1ff;
+    --input-bg: #1a1f2e;
+    --input-focus: rgba(96,165,250,.12);
+    --success-color: #c3e88d;
+    --danger-color: #ff5370;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
+}
+
+/* ========================= MONOKAI-PRO ========================= */
+:root[data-theme='monokai-pro'] {
+    --bg-primary: #2d2a2e;
+    --bg-secondary: #221f22;
+    --panel-bg: #3c3836;
+    --card-bg: #403c3f;
+    --dropdown-bg: #221f22;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #221f22 0%, #2d2a2e 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --text-primary: #fcfcfa;
+    --text-secondary: rgba(252,252,250,.7);
+    --accent-color: #ffd866;
+    --accent-hover: #ffe8a1;
+    --input-bg: #221f22;
+    --input-focus: rgba(96,165,250,.12);
+    --success-color: #a9dc76;
+    --danger-color: #ff6188;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
+}
+
+/* ========================= SOLARIZED-DARK ========================= */
+:root[data-theme='solarized-dark'] {
+    --bg-primary: #002b36;
+    --bg-secondary: #073642;
+    --panel-bg: #073642;
+    --card-bg: #0a3a46;
+    --dropdown-bg: #073642;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #002b36 0%, #073642 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --text-primary: #eee8d5;
+    --text-secondary: rgba(238,232,213,.65);
+    --accent-color: #268bd2;
+    --accent-hover: #2aa198;
+    --input-bg: #073642;
+    --input-focus: rgba(96,165,250,.12);
+    --success-color: #859900;
+    --danger-color: #dc322f;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
+}
+
+/* ========================= SOLARIZED-LIGHT ========================= */
+:root[data-theme='solarized-light'] {
+    --bg-primary: #fdf6e3;
+    --bg-secondary: #eee8d5;
+    --panel-bg: #fdf6e3;
+    --card-bg: #ffffff;
+    --dropdown-bg: #eee8d5;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #fdf6e3 0%, #eee8d5 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #073642;
+    --text-secondary: rgba(7,54,66,.65);
+    --accent-color: #b58900;
+    --accent-hover: #2aa198;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #859900;
+    --danger-color: #dc322f;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= DEEP-OCEAN ========================= */
+:root[data-theme='deep-ocean'] {
+    --bg-primary: #050b18;
+    --bg-secondary: #0b1a2f;
+    --panel-bg: #0f2340;
+    --card-bg: #102a4a;
+    --dropdown-bg: #0b1a2f;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #050b18 0%, #0b1a2f 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --text-primary: #dbeafe;
+    --text-secondary: rgba(219,234,254,.65);
+    --accent-color: #38bdf8;
+    --accent-hover: #7dd3fc;
+    --input-bg: #0b1a2f;
+    --input-focus: rgba(96,165,250,.12);
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
+}
+
+/* ========================= MAC ========================= */
 :root[data-theme='mac'] {
-    /* Silver — серебристый, стиль macOS */
     --bg-primary: #f5f5f7;
     --bg-secondary: #ffffff;
     --panel-bg: #ffffff;
     --card-bg: #ffffff;
     --dropdown-bg: #ffffff;
     --tooltip-bg: #1b2233;
-    --tooltip-text: #f8fafc;;
-    --selected-color: rgba(59,130,246,.14);
-    --menu-active-bg: rgba(0,122,255,.10);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.45);
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
     --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f2f2f2 100%);
-    --sidebar-hover: rgba(0,0,0,0.05);
-    --border-color: rgba(0,0,0,0.08);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
     --text-primary: #1d1d1f;
-    --text-secondary: rgba(29,29,31,0.65);
+    --text-secondary: rgba(29,29,31,.65);
     --accent-color: #007aff;
     --accent-hover: #3395ff;
     --input-bg: #ffffff;
-    --input-focus: rgba(0,122,255,0.15);
+    --input-focus: rgba(37,99,235,.12);
     --success-color: #34c759;
     --danger-color: #ff3b30;
-    --shadow-primary: 0 10px 30px rgba(0,0,0,0.08);
-    --table-row-hover: rgba(0,0,0,0.03);
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
 }
 
-:root[data-theme='windows-dark'] {
-    /* Charcoal — угольно-серый, стиль Windows тёмная */
-    --bg-primary: #0f172a;
-    --bg-secondary: #111827;
-    --panel-bg: #1e293b;
-    --card-bg: #1e293b;
-    --dropdown-bg: #111827;
+/* ========================= LINUX ========================= */
+:root[data-theme='linux'] {
+    --bg-primary: #0a0f0d;
+    --bg-secondary: #0f1a14;
+    --panel-bg: #111f18;
+    --card-bg: #13261d;
+    --dropdown-bg: #0f1a14;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(76,194,255,.12);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #0f172a 0%, #111827 100%);
-    --sidebar-hover: rgba(255,255,255,0.06);
-    --border-color: rgba(255,255,255,0.08);
-    --text-primary: #f8fafc;
-    --text-secondary: rgba(248,250,252,0.65);
-    --accent-color: #4cc2ff;
-    --accent-hover: #7dd3fc;
-    --input-bg: #1e293b;
-    --input-focus: rgba(76,194,255,0.15);
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #0a0f0d 0%, #0f1a14 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --text-primary: #d1fae5;
+    --text-secondary: rgba(209,250,229,.65);
+    --accent-color: #22c55e;
+    --accent-hover: #4ade80;
+    --input-bg: #111f18;
+    --input-focus: rgba(96,165,250,.12);
     --success-color: #22c55e;
     --danger-color: #ef4444;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.03);
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
 }
 
+/* ========================= COFFEE ========================= */
+:root[data-theme='coffee'] {
+    --bg-primary: #1c1612;
+    --bg-secondary: #2a211c;
+    --panel-bg: #2f241e;
+    --card-bg: #3a2c24;
+    --dropdown-bg: #2a211c;
+    --tooltip-bg: #ffffff;
+    --tooltip-text: #0f172a;
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #1c1612 0%, #2a211c 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
+    --text-primary: #f5e6d3;
+    --text-secondary: rgba(245,230,211,.7);
+    --accent-color: #c08a5a;
+    --accent-hover: #d6a06c;
+    --input-bg: #2a211c;
+    --input-focus: rgba(96,165,250,.12);
+    --success-color: #7bd389;
+    --danger-color: #ff6b6b;
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
+}
+
+/* ========================= KITTY ========================= */
+:root[data-theme='kitty'] {
+    --bg-primary: #e9e4f0;
+    --bg-secondary: #f3eef9;
+    --panel-bg: #ffffff;
+    --card-bg: #faf7ff;
+    --dropdown-bg: #f3eef9;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #e9e4f0 0%, #dcd4e8 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #2c1f4a;
+    --text-secondary: #5a4a7a;
+    --accent-color: #9b6bff;
+    --accent-hover: #b48cff;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #6fbf4c;
+    --danger-color: #e54b4b;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= RAINBOW ========================= */
 :root[data-theme='rainbow'] {
-    /* Rainbow — радужный, градиентный акцент */
     --bg-primary: #0a0a0a;
-    --bg-secondary: #111;
+    --bg-secondary: #111111;
     --panel-bg: #181818;
     --card-bg: #1f1f1f;
-    --dropdown-bg: #111;
+    --dropdown-bg: #111111;
     --tooltip-bg: #ffffff;
     --tooltip-text: #0f172a;
-    --selected-color: rgba(59, 130, 246, 0.18);
-    --menu-active-bg: rgba(255,255,255,.10);
-    --sidebar-divider-color: rgba(96, 165, 250, 0.35);
-    --sidebar-bg: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
-    --sidebar-hover: rgba(255,255,255,0.05);
-    --border-color: rgba(255,255,255,0.08);
+    --selected-color: rgba(96,165,250,.12);
+    --menu-active-bg: rgba(96,165,250,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #0a0a0a 0%, #111111 100%);
+    --sidebar-hover: rgba(255,255,255,.06);
+    --border-color: rgba(255,255,255,.08);
     --text-primary: #ffffff;
-    --text-secondary: rgba(255,255,255,0.65);
-    --accent-color: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
-    --accent-hover: #ffffff;
+    --text-secondary: rgba(255,255,255,.65);
+    --accent-color: #60a5fa;
+    --accent-hover: #93c5fd;
     --input-bg: #1f1f1f;
-    --input-focus: rgba(255,255,255,0.1);
+    --input-focus: rgba(96,165,250,.12);
     --success-color: #22c55e;
     --danger-color: #ef4444;
-    --shadow-primary: 0 20px 60px rgba(0,0,0,0.5);
-    --table-row-hover: rgba(255,255,255,0.03);
+    --shadow-primary: 0 20px 60px rgba(0,0,0,.45);
+    --table-row-hover: rgba(255,255,255,.03);
 }
+
+/* ========================= MILKY MANTIS ========================= */
+:root[data-theme='milky-mantis'] {
+    --bg-primary: #FFFFF1;
+    --bg-secondary: #ffffff;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #FFFFF1 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #59C749;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= MINT LAGOON ========================= */
+:root[data-theme='mint-lagoon'] {
+    --bg-primary: #DFF6F0;
+    --bg-secondary: #ffffff;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #DFF6F0 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #6DD5C4;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= DREAMY PERIWINKLE ========================= */
+:root[data-theme='dreamy-periwinkle'] {
+    --bg-primary: #E7D8FF;
+    --bg-secondary: #B8C0FF;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #B8C0FF;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #E7D8FF 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #B8C0FF;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= OCEAN BREEZE ========================= */
+:root[data-theme='ocean-breeze'] {
+    --bg-primary: #DFF7FF;
+    --bg-secondary: #7FCFFF;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #7FCFFF;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #DFF7FF 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #7FCFFF;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= PEARL MAUVE ========================= */
+:root[data-theme='pearl-mauve'] {
+    --bg-primary: #FDFCFB;
+    --bg-secondary: #D8BFD8;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #D8BFD8;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #FDFCFB 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #D8BFD8;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= EUCALYPTUS GLOW ========================= */
+:root[data-theme='eucalyptus-glow'] {
+    --bg-primary: #F4EFE6;
+    --bg-secondary: #ffffff;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #F4EFE6 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #A7C4A0;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= PEACH WHISPER ========================= */
+:root[data-theme='peach-whisper'] {
+    --bg-primary: #FFF1E3;
+    --bg-secondary: #FFDCC2;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #FFDCC2;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #FFF1E3 0%, #FFDCC2 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #FFF1E3;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= SAGE DEW ========================= */
+:root[data-theme='sage-dew'] {
+    --bg-primary: #F6F1D6;
+    --bg-secondary: #D8EAD7;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #D8EAD7;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #F6F1D6 0%, #D8EAD7 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #F6F1D6;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= TWILIGHT HAZE ========================= */
+:root[data-theme='twilight-haze'] {
+    --bg-primary: #D8E2FF;
+    --bg-secondary: #ffffff;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #D8E2FF 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #A7B7E7;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= MORNING MIST ========================= */
+:root[data-theme='morning-mist'] {
+    --bg-primary: #F8FBFF;
+    --bg-secondary: #B7D7E8;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #B7D7E8;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #F8FBFF 0%, #B7D7E8 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #B7D7E8;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+/* ========================= ROSE CLOUD ========================= */
+:root[data-theme='rose-cloud'] {
+    --bg-primary: #FFF5F7;
+    --bg-secondary: #ffffff;
+    --panel-bg: #ffffff;
+    --card-bg: #ffffff;
+    --dropdown-bg: #ffffff;
+    --tooltip-bg: #1b2233;
+    --tooltip-text: #f8fafc;
+    --selected-color: rgba(37,99,235,.12);
+    --menu-active-bg: rgba(37,99,235,.12);
+    --sidebar-divider-color: rgba(96,165,250,.55);
+    --sidebar-bg: linear-gradient(180deg, #FFF5F7 0%, #f6f8fa 100%);
+    --sidebar-hover: rgba(15,23,42,.05);
+    --border-color: rgba(15,23,42,.08);
+    --text-primary: #1f2937;
+    --text-secondary: rgba(31,41,55,.68);
+    --accent-color: #FF5D7D;
+    --accent-hover: #60a5fa;
+    --input-bg: #ffffff;
+    --input-focus: rgba(37,99,235,.12);
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --shadow-primary: 0 10px 35px rgba(15,23,42,.10);
+    --table-row-hover: rgba(15,23,42,.03);
+}
+
+
+/* ============================================================
+   Tooltips
+   ============================================================ */
 .react-tooltip {
     background: var(--tooltip-bg) !important;
     color: var(--tooltip-text) !important;
@@ -512,27 +758,4 @@
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0,0,0,.25);
     z-index: 99999 !important;
-}
-/* ============================================================
-   Стили для скроллбара в выпадающих меню (Dropdown)
-   ============================================================ */
-.dropdown-menu::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.dropdown-menu::-webkit-scrollbar-track {
-  background: var(--dropdown-bg);
-  border-radius: 3px;
-}
-.dropdown-menu::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
-}
-.dropdown-menu::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
-}
-/* Для Firefox */
-.dropdown-menu {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-color) var(--dropdown-bg);
 }

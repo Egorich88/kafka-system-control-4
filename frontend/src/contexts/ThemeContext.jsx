@@ -15,66 +15,136 @@
  */
 
 /**
- * @fileoverview Контекст для управления темами оформления.
- * Хранит текущую тему, позволяет её менять,
- * синхронизирует тему с атрибутом data-theme и localStorage.
- * Ключи тем соответствуют значениям data-theme в theme.css.
+ * @fileoverview Контекст управления темами оформления.
+ *
+ * ВАЖНО:
+ * Каждый id из ALLOWED_THEMES должен существовать как
+ * :root[data-theme='...'] в themes.css.
  */
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
-/** Белый список допустимых тем (ключи из theme.css) */
+/**
+ * Белый список всех поддерживаемых тем.
+ *
+ * ВАЖНО:
+ * Каждый ключ здесь должен иметь соответствующую
+ * тему :root[data-theme='...'] в themes.css.
+ *
+ * Если тема удаляется из приложения, её необходимо
+ * удалить и отсюда.
+ */
 const ALLOWED_THEMES = [
-  'dark', 'light',
-  'linux', 'kitty', 'dracula', 'nord',
-  'solarized-light', 'solarized-dark', 'coffee',
-  'material', 'monocai', 'monokai-pro', 'deep-ocean',
-  'github-light', 'github-dark', 'mac', 'windows-dark',
+
+  // ==========================================================
+  // BASE
+  // ==========================================================
+
+  'dark',
+  'light',
+
+
+  // ==========================================================
+  // DEVELOPER
+  // ==========================================================
+
+  'github-dark',
+  'github-light',
+  'dracula',
+  'nord',
+  'material',
+  'monokai-pro',
+  'solarized-dark',
+  'solarized-light',
+  'deep-ocean',
+
+
+  // ==========================================================
+  // SYSTEM
+  // ==========================================================
+
+  'mac',
+  'linux',
+
+
+  // ==========================================================
+  // MODERN / SOFT
+  // ==========================================================
+
+  'mint-lagoon',
+  'dreamy-periwinkle',
+  'ocean-breeze',
+  'pearl-mauve',
+  'eucalyptus-glow',
+  'peach-whisper',
+  'sage-dew',
+  'twilight-haze',
+  'morning-mist',
+  'rose-cloud',
+
+
+  // ==========================================================
+  // EXPERIMENTAL
+  // ==========================================================
+
+  'coffee',
+  'kitty',
   'rainbow'
 ];
 
 const ThemeContext = createContext(null);
 
-/**
- * Провайдер темы для всего приложения.
- * @param {Object} props
- * @param {React.ReactNode} props.children
- */
 export function ThemeProvider({ children }) {
-  /** Возвращает начальную тему из localStorage или 'dark', если сохранённой нет в белом списке */
   const getInitialTheme = () => {
     const saved = localStorage.getItem('ksc_theme');
-    return ALLOWED_THEMES.includes(saved) ? saved : 'dark';
+
+    return ALLOWED_THEMES.includes(saved)
+      ? saved
+      : 'dark';
   };
 
   const [theme, setTheme] = useState(getInitialTheme());
 
-  /** Применяем тему к корневому элементу и сохраняем при каждом изменении */
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('ksc_theme', theme);
+    document.documentElement.setAttribute(
+      'data-theme',
+      theme
+    );
+
+    localStorage.setItem(
+      'ksc_theme',
+      theme
+    );
   }, [theme]);
 
-  /** Безопасная смена темы (проверка на допустимость) */
+  /**
+   * Безопасная смена темы.
+   * Не позволяет записать в data-theme неизвестный ключ.
+   */
   const safeSetTheme = (newTheme) => {
     if (!ALLOWED_THEMES.includes(newTheme)) {
-      console.warn('[ThemeContext] Unknown theme:', newTheme);
+      console.warn(
+        '[ThemeContext] Unknown theme:',
+        newTheme
+      );
       return;
     }
+
     setTheme(newTheme);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: safeSetTheme }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme: safeSetTheme
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
 }
 
-/**
- * Хук для доступа к текущей теме и функции смены темы.
- * @returns {Object} { theme, setTheme }
- */
 export function useTheme() {
   return useContext(ThemeContext);
 }

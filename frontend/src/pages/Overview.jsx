@@ -180,8 +180,8 @@ export default function Overview() {
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiPlus /></div>
             <div className="welcome-feature-text">
-              Чтобы начать работу — нажмите кнопку{' '}
-              <span className="welcome-highlight">+ Добавить кластер</span> в боковом меню
+              Чтобы начать работу — нажмите{' '}
+              <span className="welcome-highlight">+ Добавить кластер</span>
             </div>
           </div>
           <div className="welcome-feature">

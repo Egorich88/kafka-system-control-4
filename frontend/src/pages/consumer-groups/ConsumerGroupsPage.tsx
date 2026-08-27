@@ -21,14 +21,16 @@
  *
  * Главная страница Consumer Groups.
  *
- * На этом этапе mock-источник полностью заменён реальным backend API.
+ * Порядок блоков:
  *
- * Страница получает:
- * • список Consumer Groups;
- * • состояние, lag, topics, partitions и coordinator;
- * • подробные Members;
- * • реальные Offsets;
- * • реальный Consumer Lag через отдельный компонент графика.
+ * 1. Заголовок.
+ * 2. KPI-карточки.
+ * 3. Аналитические диаграммы.
+ * 4. Toolbar.
+ * 5. Таблица Consumer Groups.
+ * 6. Details + Consumer Lag.
+ * 7. Offset Reset Wizard.
+ *
  * =============================================================================
  */
 
@@ -59,8 +61,6 @@ import {
     type SortOption
 } from './utils/consumer-groups.utils';
 
-import './styles/consumer-groups.css';
-
 import ConsumerGroupsKpi
     from './components/ConsumerGroupsKpi';
 
@@ -81,6 +81,8 @@ import ConsumerDonutCharts
 
 import OffsetResetWizard
     from './components/OffsetResetWizard';
+
+import './styles/consumer-groups.css';
 
 
 export default function ConsumerGroupsPage() {
@@ -118,16 +120,20 @@ export default function ConsumerGroupsPage() {
         useState(false);
 
 
-    /* =========================================================================
-       Загрузка списка групп
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Загрузка списка Consumer Groups.
+     * =========================================================================
+     */
 
     const loadGroups = async (showToast = false) => {
 
         if (!currentCluster?.brokers) {
+
             setGroups([]);
             setSelectedGroup(null);
             setSelectedDetails(null);
+
             return;
         }
 
@@ -135,14 +141,18 @@ export default function ConsumerGroupsPage() {
 
         try {
 
-            const data = await fetchConsumerGroups(
-                currentCluster.brokers
-            );
+            const data =
+                await fetchConsumerGroups(
+                    currentCluster.brokers
+                );
 
             setGroups(data);
 
             if (showToast) {
-                toast.success('Список Consumer Groups обновлён');
+
+                toast.success(
+                    'Список Consumer Groups обновлён'
+                );
             }
 
         } catch (error) {
@@ -153,37 +163,49 @@ export default function ConsumerGroupsPage() {
                     : 'Не удалось загрузить Consumer Groups';
 
             toast.error(message);
+
             setGroups([]);
             setSelectedGroup(null);
             setSelectedDetails(null);
 
         } finally {
+
             setLoading(false);
         }
     };
 
 
-    /* =========================================================================
-       При смене Kafka-кластера загружаем его реальные Consumer Groups.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Загрузка групп при смене Kafka-кластера.
+     * =========================================================================
+     */
 
     useEffect(() => {
+
         void loadGroups();
+
+        // Зависимость намеренно ограничена адресом Kafka-кластера.
         // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [currentCluster?.brokers]);
 
 
-    /* =========================================================================
-       Загрузка подробностей выбранной группы.
-
-       Важное отличие от старой версии:
-       Details больше не использует mock Members/Offsets.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Загрузка подробностей выбранной Consumer Group.
+     * =========================================================================
+     */
 
     useEffect(() => {
 
-        if (!selectedGroup || !currentCluster?.brokers) {
+        if (
+            !selectedGroup ||
+            !currentCluster?.brokers
+        ) {
+
             setSelectedDetails(null);
+
             return;
         }
 
@@ -202,6 +224,7 @@ export default function ConsumerGroupsPage() {
                     );
 
                 if (!cancelled) {
+
                     setSelectedDetails(details);
                 }
 
@@ -221,6 +244,7 @@ export default function ConsumerGroupsPage() {
             } finally {
 
                 if (!cancelled) {
+
                     setDetailsLoading(false);
                 }
             }
@@ -229,35 +253,55 @@ export default function ConsumerGroupsPage() {
         void loadDetails();
 
         return () => {
+
             cancelled = true;
         };
 
-    }, [selectedGroup?.name, currentCluster?.brokers]);
+    }, [
+        selectedGroup?.name,
+        currentCluster?.brokers
+    ]);
 
 
-    /* =========================================================================
-       Фильтрация и сортировка таблицы.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Фильтрация и сортировка групп.
+     *
+     * Скрытые группы исключаются из основной таблицы.
+     * =========================================================================
+     */
 
     const filteredGroups = useMemo(() => {
 
-        const result = groups.filter(group => {
+        const normalizedSearch =
+            search.trim().toLowerCase();
 
-            const matchesSearch =
-                group.name
-                    .toLowerCase()
-                    .includes(search.toLowerCase());
+        const result =
+            groups.filter(group => {
 
-            const matchesState =
-                stateFilter === 'all' ||
-                group.state === stateFilter;
+                const matchesSearch =
+                    group.name
+                        .toLowerCase()
+                        .includes(normalizedSearch);
 
-            return matchesSearch &&
-                matchesState &&
-                !group.hidden;
-        });
+                const matchesState =
+                    stateFilter === 'all' ||
+                    group.state === stateFilter;
 
-        return sortGroups(result, sortBy);
+                const isVisible =
+                    !group.hidden;
+
+                return (
+                    matchesSearch &&
+                    matchesState &&
+                    isVisible
+                );
+            });
+
+        return sortGroups(
+            result,
+            sortBy
+        );
 
     }, [
         groups,
@@ -267,62 +311,90 @@ export default function ConsumerGroupsPage() {
     ]);
 
 
-    /* =========================================================================
-       Если выбранная группа исчезла из результата — выбираем первую.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Синхронизация выбранной группы с текущим результатом фильтрации.
+     * =========================================================================
+     */
 
     useEffect(() => {
 
         if (filteredGroups.length === 0) {
+
             setSelectedGroup(null);
+
             return;
         }
 
-        const exists =
+        const selectedStillExists =
             selectedGroup !== null &&
             filteredGroups.some(
-                group => group.name === selectedGroup.name
+                group =>
+                    group.name === selectedGroup.name
             );
 
-        if (!exists) {
-            setSelectedGroup(filteredGroups[0]);
+        if (!selectedStillExists) {
+
+            setSelectedGroup(
+                filteredGroups[0]
+            );
         }
 
-    }, [filteredGroups, selectedGroup]);
+    }, [
+        filteredGroups,
+        selectedGroup
+    ]);
 
 
-    /* =========================================================================
-       Обновление списка.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Обновление списка Consumer Groups.
+     * =========================================================================
+     */
 
     const handleRefresh = async () => {
 
         if (refreshing) {
+
             return;
         }
 
         setRefreshing(true);
 
         try {
+
             await loadGroups(true);
+
         } finally {
+
             setRefreshing(false);
         }
     };
 
 
-    /* =========================================================================
-       Экспорт реальных данных.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Экспорт отфильтрованных групп.
+     * =========================================================================
+     */
 
-    const handleExport = (format: ExportFormat) => {
+    const handleExport = (
+        format: ExportFormat
+    ) => {
 
         if (filteredGroups.length === 0) {
-            toast.error('Нет групп для экспорта');
+
+            toast.error(
+                'Нет групп для экспорта'
+            );
+
             return;
         }
 
-        exportGroups(filteredGroups, format);
+        exportGroups(
+            filteredGroups,
+            format
+        );
 
         toast.success(
             `Экспорт ${format.toUpperCase()} выполнен`
@@ -330,14 +402,20 @@ export default function ConsumerGroupsPage() {
     };
 
 
-    /* =========================================================================
-       Offset Reset.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Открытие Offset Reset Wizard.
+     * =========================================================================
+     */
 
     const handleOpenOffsetReset = () => {
 
         if (!selectedGroup) {
-            toast.error('Сначала выберите Consumer Group');
+
+            toast.error(
+                'Сначала выберите Consumer Group'
+            );
+
             return;
         }
 
@@ -345,59 +423,82 @@ export default function ConsumerGroupsPage() {
     };
 
 
-    /* =========================================================================
-       Скрытие группы.
-       Это пользовательское состояние интерфейса и пока хранится локально.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Скрытие / восстановление Consumer Group.
+     *
+     * Фактическое состояние hidden хранится в frontend state.
+     * =========================================================================
+     */
 
-    const handleToggleHidden = (name: string) => {
+    const handleToggleHidden = (
+        name: string
+    ) => {
 
         setGroups(currentGroups =>
-            currentGroups.map(group =>
-                group.name === name
-                    ? {
-                        ...group,
-                        hidden: !group.hidden
-                    }
-                    : group
-            )
+            currentGroups.map(group => {
+
+                if (group.name !== name) {
+
+                    return group;
+                }
+
+                return {
+                    ...group,
+                    hidden: !group.hidden
+                };
+            })
         );
     };
 
 
-    /* =========================================================================
-       Обновление конкретной группы.
-       ========================================================================= */
+    /**
+     * =========================================================================
+     * Обновление конкретной Consumer Group.
+     * =========================================================================
+     */
 
     const handleRefreshGroup = async (
         group: ConsumerGroup
     ) => {
 
         if (!currentCluster?.brokers) {
+
             return;
         }
 
         try {
 
-            const [groupsData, details] =
-                await Promise.all([
-                    fetchConsumerGroups(currentCluster.brokers),
-                    fetchConsumerGroupDetails(
-                        currentCluster.brokers,
-                        group.name
-                    )
-                ]);
+            const [
+                groupsData,
+                details
+            ] = await Promise.all([
+
+                fetchConsumerGroups(
+                    currentCluster.brokers
+                ),
+
+                fetchConsumerGroupDetails(
+                    currentCluster.brokers,
+                    group.name
+                )
+            ]);
 
             setGroups(groupsData);
+
             setSelectedDetails(details);
 
             const updatedGroup =
                 groupsData.find(
-                    item => item.name === group.name
+                    item =>
+                        item.name === group.name
                 );
 
             if (updatedGroup) {
-                setSelectedGroup(updatedGroup);
+
+                setSelectedGroup(
+                    updatedGroup
+                );
             }
 
             toast.success(
@@ -415,15 +516,18 @@ export default function ConsumerGroupsPage() {
     };
 
 
-    /* =========================================================================
-       Удаление.
+    /**
+     * =========================================================================
+     * Удаление Consumer Group.
+     *
+     * Пока операция не подключена к Kafka API.
+     * =========================================================================
+     */
 
-       Пока backend API удаления Consumer Group отдельно не добавляем:
-       удаление здесь не должно создавать ложное ощущение удаления Kafka group.
-       Поэтому действие отключаем через понятное уведомление.
-       ========================================================================= */
+    const handleDeleteGroup = (
+        group: ConsumerGroup
+    ) => {
 
-    const handleDeleteGroup = (group: ConsumerGroup) => {
         toast(
             `Удаление Kafka Consumer Group «${group.name}» пока не подключено`
         );
@@ -431,60 +535,102 @@ export default function ConsumerGroupsPage() {
 
 
     return (
-
         <div className="consumer-groups-page">
 
             <h1 className="page-title">
                 Группы потребителей
             </h1>
 
-            <ConsumerGroupsKpi groups={groups} />
 
-            {/* =================================================================
-                Верхняя аналитика.
+            {/*
+             * KPI-карточки.
+             */}
+            <ConsumerGroupsKpi
+                groups={groups}
+            />
 
-                Три диаграммы располагаются сразу под KPI.
-                Так пользователь сначала видит состояние групп и основные
-                показатели, а уже затем переходит к поиску и таблице.
-               ================================================================= */}
+
+            {/*
+             * Аналитические диаграммы.
+             *
+             * Они располагаются сразу после KPI,
+             * чтобы верхняя часть страницы давала
+             * быстрый обзор состояния Kafka Consumer Groups.
+             */}
             <ConsumerDonutCharts
                 groups={groups}
             />
 
+
+            {/*
+             * Toolbar.
+             */}
             <ConsumerGroupsToolbar
                 search={search}
                 onSearchChange={setSearch}
                 stateFilter={stateFilter}
-                onStateFilterChange={setStateFilter}
+                onStateFilterChange={
+                    setStateFilter
+                }
                 sortBy={sortBy}
                 onSortChange={setSortBy}
-                totalGroups={filteredGroups.length}
+                totalGroups={
+                    filteredGroups.length
+                }
                 onRefresh={handleRefresh}
                 onExport={handleExport}
-                onResetOffsets={handleOpenOffsetReset}
-                refreshing={refreshing || loading}
+                onResetOffsets={
+                    handleOpenOffsetReset
+                }
+                refreshing={
+                    refreshing || loading
+                }
             />
 
+
+            {/*
+             * Основная таблица Consumer Groups.
+             */}
             <ConsumerGroupsTable
                 groups={filteredGroups}
                 selectedGroup={selectedGroup}
-                onSelectGroup={setSelectedGroup}
-                onToggleHidden={handleToggleHidden}
-                onRefreshGroup={handleRefreshGroup}
-                onDeleteGroup={handleDeleteGroup}
+                onSelectGroup={
+                    setSelectedGroup
+                }
+                onToggleHidden={
+                    handleToggleHidden
+                }
+                onRefreshGroup={
+                    handleRefreshGroup
+                }
+                onDeleteGroup={
+                    handleDeleteGroup
+                }
             />
 
-            {/* =================================================================
-                Подробности выбранной группы и график Consumer Lag.
 
-                Оставляем этот блок после таблицы: он относится к конкретной
-                выбранной группе и не должен конкурировать с общей аналитикой.
-               ================================================================= */}
+            {/*
+             * Нижняя рабочая область.
+             *
+             * Слева:
+             *   информация о выбранной группе.
+             *
+             * Справа:
+             *   график Consumer Lag.
+             *
+             * Высота обоих блоков регулируется CSS,
+             * поэтому переключение вкладок Details
+             * не должно менять геометрию страницы.
+             */}
             <div className="consumer-bottom-layout">
 
                 <ConsumerGroupDetails
                     group={selectedGroup}
-                    details={detailsLoading ? null : selectedDetails}
+                    details={
+                        detailsLoading
+                            ? null
+                            : selectedDetails
+                    }
                 />
 
                 <ConsumerLagChart
@@ -493,6 +639,13 @@ export default function ConsumerGroupsPage() {
 
             </div>
 
+
+            {/*
+             * Wizard сброса offsets.
+             *
+             * Это единственная точка рендера
+             * модального окна Offset Reset.
+             */}
             <OffsetResetWizard
                 group={selectedGroup}
                 open={offsetResetOpen}

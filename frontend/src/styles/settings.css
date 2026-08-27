@@ -54,10 +54,24 @@
     color: var(--text-secondary);
     font-size: 14px;
 }
+/* ============================================================
+   Dropdown-контролы страницы Settings
+   ============================================================ */
+
+/*
+ * Все селекторы настроек имеют единую ширину.
+ *
+ * Это относится к:
+ * - выбору языка;
+ * - кластерным/прочим стандартным dropdown;
+ *
+ * ThemeDropdown использует такое же значение напрямую
+ * в theme-dropdown.css.
+ */
 .settings-block .dropdown-wrapper {
-    flex: 0 0 auto;      /* не растягивается */
-    width: auto;         /* по содержимому */
-    min-width: 220px;    /* но не меньше комфортной ширины */
+    flex: 0 0 auto;
+    width: 220px;
+    min-width: 220px;
 }
 .settings-theme-select:focus {
   border-color: var(--accent-color);
