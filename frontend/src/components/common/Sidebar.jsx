@@ -36,12 +36,15 @@ import {
   FiTerminal,
   FiSettings,
   FiGithub,
+  FiFeather,
+  FiUser,
   FiSidebar
 } from 'react-icons/fi';
 import packageJson from '../../../package.json';
 import Dropdown from '../common/Dropdown';
 import { getLatestVersion } from '../../services/versionService';
 import { useCluster } from '../../contexts/ClusterContext';
+import ThemeToggle from '../common/ThemeToggle';
 
 // =============================================================================
 // Вспомогательные функции для работы с версиями
@@ -200,31 +203,6 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
           </div>
 
-          {/* Ссылка на релизы */}
-          <a
-              href="https://github.com/Egorich88/kafka-system-control-4/releases"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`sidebar-version ${hasUpdate ? 'update-available' : ''} ${animateVersion ? 'animate' : ''}`}
-              data-tooltip-id="sidebar-tooltip"
-              data-tooltip-content={
-                  hasUpdate
-                      ? `Доступна версия ${latestVersion}`
-                      : localIsNewer
-                          ? `Локальная версия новее GitHub`
-                          : `Актуальная версия`
-              }
-          >
-
-              <span className="version-label">
-
-                  {collapsed
-                      ? version
-                      : `Version ${version}`}
-
-              </span>
-
-          </a>
         </div>
 
         {/* Блок выбора / добавления кластера */}
@@ -381,45 +359,83 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
         )}
       </div>
 
-      {/* -------------------- Нижняя область (настройки + футер) -------------------- */}
+      {/* -------------------- Нижняя область -------------------- */}
       <div className="sidebar-bottom">
-        {/* Настройки */}
-        <nav className="sidebar-nav">
-          <NavLink to="/settings" className="sidebar-link"
-              data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-              data-tooltip-content={collapsed ? "Настройки" : undefined}>
+        {/* Настройки + профиль администратора */}
+        <nav className="sidebar-bottom-nav">
+          <NavLink
+            to="/settings"
+            className="sidebar-link"
+            data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+            data-tooltip-content={collapsed ? "Настройки" : undefined}
+          >
             <FiSettings />
-            {!collapsed && (
-            <span>Настройки</span>
-            )}
+            {!collapsed && <span>Настройки</span>}
           </NavLink>
+
+          <div
+            className="sidebar-user-link"
+            data-tooltip-id="sidebar-tooltip"
+            data-tooltip-content="Профиль пользователя"
+          >
+            <FiUser />
+            {!collapsed && <span>Пользователь</span>}
+          </div>
         </nav>
 
-        {/* Футер: ссылка на GitHub и лицензия */}
+        <div className="sidebar-divider sidebar-divider-bottom" />
+
+        {/* Быстрый переключатель Light / Dark */}
+        <div className="sidebar-theme-control">
+          <ThemeToggle />
+        </div>
+
+        {/* Футер: GitHub + Apache License и версия */}
         <div className="sidebar-footer">
+          <div className="footer-links-row">
+            <a
+              href="https://github.com/Egorich88/kafka-system-control-4"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-icon-link"
+              data-tooltip-id="sidebar-tooltip"
+              data-tooltip-content="GitHub проекта — Egorich88"
+              aria-label="GitHub проекта — Egorich88"
+            >
+              <FiGithub className="footer-github-icon" />
+            </a>
+
+            <a
+              href="https://www.apache.org/licenses/LICENSE-2.0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-icon-link"
+              data-tooltip-id="sidebar-tooltip"
+              data-tooltip-content="Apache License 2.0"
+              aria-label="Apache License 2.0"
+            >
+              <FiFeather className="footer-license-icon" />
+            </a>
+          </div>
+
           <a
-            href="https://github.com/Egorich88/kafka-system-control-4"
+            href="https://github.com/Egorich88/kafka-system-control-4/releases"
             target="_blank"
             rel="noopener noreferrer"
-            className="footer-project-link"
+            className={`sidebar-version ${hasUpdate ? 'update-available' : ''} ${animateVersion ? 'animate' : ''}`}
             data-tooltip-id="sidebar-tooltip"
-            data-tooltip-content="Владелец продукта"
+            data-tooltip-content={
+              hasUpdate
+                ? `Доступна версия ${latestVersion}`
+                : localIsNewer
+                  ? `Локальная версия новее GitHub`
+                  : `Актуальная версия ${version}`
+            }
           >
-            <FiGithub className="footer-github-icon" />
-            {!collapsed && (
-            <span>Egorich88</span>
-            )}
+            <span className="version-label">
+              {`ver. ${version}`}
+            </span>
           </a>
-          {!collapsed && (
-              <a
-                  href="https://www.apache.org/licenses/LICENSE-2.0"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-license"
-              >
-                  Apache License 2.0
-              </a>
-          )}
         </div>
       </div>
       <Tooltip id="sidebar-tooltip" place="right" offset={12} />

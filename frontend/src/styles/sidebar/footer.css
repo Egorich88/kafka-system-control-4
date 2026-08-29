@@ -15,137 +15,93 @@
  */
 
 /* ============================================================
-   footer.css
-
-   Назначение:
-   Стили нижней части Sidebar.
-
-   Отвечает за:
-   • ссылки на GitHub проекта
-   • отображение лицензии
-   • отображение версии продукта
-   • анимацию версии
-   • нижний контейнер Sidebar
-
-   Используется:
-   Sidebar.jsx
-   ============================================================ */
-
-
-/* ============================================================
-   Нижняя часть Sidebar
+   KSC PROJECT FOOTER
    ============================================================ */
 
 .sidebar-footer {
-    margin-top: auto;
-    padding: 14px 24px;
-    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px 2px;
     color: var(--text-secondary);
     font-size: 13px;
 }
 
-
-/* ============================================================
-   Ссылка на GitHub проекта
-   ============================================================ */
-
-.footer-project-link {
-
+/* GitHub + Apache — одна компактная центрированная строка. */
+.footer-links-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+    min-height: 30px;
+}
+
+.footer-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 28px;
+    padding: 0;
     text-decoration: none;
     color: var(--text-secondary);
-    font-weight: 500;
-    transition: .2s ease;
+    transition:
+        color .18s ease,
+        transform .18s ease,
+        opacity .18s ease;
 }
 
-.footer-project-link:hover {
-    color: #3b82f6;
-}
-
-
-/* ============================================================
-   Иконка GitHub
-   ============================================================ */
-
-.footer-github-icon {
-    font-size: 22px;
-    flex-shrink: 0;
-    opacity: .95;
-}
-
-
-/* ============================================================
-   Ссылка на лицензию
-   ============================================================ */
-
-.footer-license {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 12px;
-    text-decoration: none;
-    color: var(--text-secondary);
-    transition: .2s ease;
-}
-
-.footer-license:hover {
+.footer-icon-link:hover {
     color: var(--text-primary);
+    transform: translateY(-1px);
 }
 
-
-/* ============================================================
-   Версия продукта
-   ============================================================ */
+.footer-github-icon,
+.footer-license-icon {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 19px;
+    stroke-width: 1.8;
+}
 
 .sidebar-version {
     display: flex;
+    align-items: center;
     justify-content: center;
-    width: 100%;
-    margin-top: 8px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
+    min-height: 22px;
+    margin: 0;
     text-decoration: none;
-    color: #60a5fa;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .15px;
+    color: var(--text-secondary);
+    opacity: .9;
+    transition: color .18s ease, opacity .18s ease;
 }
 
 .sidebar-version:hover {
-    color: #93c5fd !important;
+    color: var(--accent-hover) !important;
+    opacity: 1;
 }
-
-
-/* ============================================================
-   Контейнер текста версии
-   ============================================================ */
 
 .version-label {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
 }
 
-
-/* ============================================================
-   Анимация перелива версии
-   ============================================================ */
-
+/* Анимация обновления версии сохраняется. */
 @keyframes versionGradientMove {
-    0% {
-        background-position: 0% 50%;
-    }
-    100% {
-        background-position: 100% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
 
 @keyframes versionGradientFlow {
-    0% {
-        background-position: 0% 50%;
-    }
-    100% {
-        background-position: 100% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
 
 .sidebar-version.animate {
@@ -164,4 +120,24 @@
     animation:
         versionGradientMove 8s linear infinite,
         versionGradientFlow 2s linear;
+}
+
+/* Collapsed: только иконки GitHub/Apache и компактная версия. */
+.sidebar.collapsed .sidebar-footer {
+    align-items: center;
+    padding: 7px 0 1px;
+}
+
+.sidebar.collapsed .footer-links-row {
+    justify-content: center;
+    gap: 10px;
+}
+
+.sidebar.collapsed .footer-icon-link {
+    width: 22px;
+}
+
+.sidebar.collapsed .sidebar-version {
+    font-size: 9px;
+    min-height: 20px;
 }

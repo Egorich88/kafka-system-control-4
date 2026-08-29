@@ -54,7 +54,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useCluster } from '../../contexts/ClusterContext';
 
 // Компоненты
-import Sidebar from './Sidebar';
+import Sidebar from "../common/Sidebar";
 import CreateClusterPanel from '../CreateClusterPanel';
 import ClusterSettingsPanel from '../ClusterSettingsPanel';
 

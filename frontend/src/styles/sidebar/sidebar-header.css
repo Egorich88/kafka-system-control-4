@@ -13,198 +13,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* ============================================================
-   sidebar-header.css
-
-   Назначение:
-   Верхняя часть Sidebar.
-
-   Файл отвечает за:
-
-   • отображение логотипа;
-   • расположение логотипа;
-   • контейнер шапки Sidebar;
-   • поведение логотипа при сворачивании Sidebar.
-
-   Здесь НЕ находятся:
-
-   • кнопка сворачивания Sidebar;
-   • выбор кластера;
-   • навигационное меню.
-
-   ============================================================ */
-
-
-/* ============================================================
-   Контейнер логотипа
-   ============================================================ */
-
-/* Основной контейнер логотипа */
 .sidebar-logo {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-
-    padding: 18px 18px;
-
-    border-bottom: 1px solid var(--border-color);
+    padding: 16px 18px 14px;
+    /* Разделительная линия под логотипом намеренно отсутствует. */
 }
 
-
-/* Верхняя строка Sidebar */
 .sidebar-header {
     position: relative;
-    overflow: visible;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     width: 100%;
+    min-height: 32px;
 }
 
-
-/* ============================================================
-   Основной логотип Sidebar
-   ============================================================
-
-   Логотип является единым фирменным знаком KSC и не зависит
-   от выбранной темы интерфейса.
-
-   88px даёт более аккуратную визуальную пропорцию:
-   Sidebar остаётся компактным, а знак сохраняет узнаваемость.
-   ============================================================ */
+.sidebar-logo-brand {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
 
 .sidebar-logo-image {
-    width: 60px;
-    height: auto;
-
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
     display: block;
-
+    flex: 0 0 42px;
     filter:
-            drop-shadow(0 8px 12px rgba(16, 185, 129, 0.16))
-            drop-shadow(0 14px 24px rgba(45, 212, 191, 0.08));
-
-    transition:
-        width .25s ease,
-        opacity .25s ease,
-        transform .25s ease;
+        drop-shadow(0 6px 10px rgba(16, 185, 129, .14))
+        drop-shadow(0 10px 20px rgba(45, 212, 191, .07));
+    transition: width .25s ease, height .25s ease, opacity .2s ease, transform .2s ease;
 }
-/* ============================================================
-   KSC — фирменное текстовое обозначение
-   ============================================================ */
 
 .sidebar-brand-name {
     display: inline-flex;
     align-items: center;
-
-    /*
-     * Основной интерфейсный шрифт.
-     *
-     * Inter уже подключён в index.html.
-     */
     font-family: 'Inter', sans-serif;
-
-    /*
-     * SemiBold.
-     *
-     * Достаточно массивный, чтобы KSC было видно,
-     * но не конкурировал с самим знаком.
-     */
     font-size: 22px;
     font-weight: 600;
-
-    /*
-     * Немного воздуха между буквами.
-     */
     letter-spacing: 1.8px;
-
-    /*
-     * Цвет автоматически зависит от темы.
-     *
-     * Dark  → светлый
-     * Light → тёмный
-     */
     color: var(--text-primary);
-
     line-height: 1;
-
     white-space: nowrap;
-
-    transition:
-        color .25s ease,
-        opacity .25s ease;
 }
 
-/* ============================================================
-   Фирменный блок KSC
-   Структура:
-   [ LOGO ]   KSC
-   Логотип находится слева.
-   Название продукта находится справа.
-   ============================================================ */
-.sidebar-logo-brand {
-    display: flex;
-    align-items: center;
-    /*
-     * Логотип и KSC располагаются горизонтально.
-     */
-    flex-direction: row;
-    /*
-     * Расстояние между знаком и буквами.
-     */
-    gap: 18px;
-    /*
-     * Блок занимает доступное место до кнопки Sidebar.
-     */
-    flex: 1;
-    width: auto;
-    min-width: 0;
-}
-
-
-/* ============================================================
-   Свернутый Sidebar
-   ============================================================ */
-
-/* Центрирование логотипа */
 .sidebar.collapsed .sidebar-logo {
     align-items: center;
+    padding-left: 0;
+    padding-right: 0;
 }
 
-
-/* Центрирование header */
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
 }
 
-
-/* ============================================================
-   Брендинг свернутого Sidebar
-   ============================================================ */
 .sidebar.collapsed .sidebar-logo-brand {
-    display: flex;
     justify-content: center;
-    align-items: center;
     width: 100%;
-    /*
-     * В свернутом состоянии KSC скрывается через JSX,
-     * поэтому здесь остаётся только знак.
-     */
 }
 
-
-/* Уменьшенный логотип */
+/* В свернутом состоянии логотип совпадает по визуальному размеру с иконками. */
 .sidebar.collapsed .sidebar-logo-image {
-    width: 54px;
-
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
     margin: 0 auto;
-
-    opacity: 1;
-
-    transition:
-        opacity .18s ease,
-        transform .18s ease;
 }

@@ -14,150 +14,119 @@
  * limitations under the License.
  */
 
-/* ============================================================
-   navigation.css
-
-   Назначение:
-   Стили основного навигационного меню Sidebar.
-
-   Отвечает за:
-   • список разделов
-   • ссылки меню
-   • активный пункт
-   • hover-эффекты
-   • разделители
-   • поведение при свернутом Sidebar
-
-   Используется:
-   Sidebar.jsx
-   ============================================================ */
-
-
-/* ============================================================
-   Контейнер навигации
-   ============================================================ */
-
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 0;
+    gap: 4px;
+    padding: 8px 0;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
 
+.sidebar-nav::-webkit-scrollbar {
+    display: none;
+}
 
-/* ============================================================
-   Элемент навигации
-   ============================================================ */
-
-.sidebar-link {
+.sidebar-link,
+.sidebar-user-link {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 13px;
-    padding: 14px 16px 14px 27px;
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 11px 20px 11px 27px;
     text-decoration: none;
     color: var(--text-secondary);
-    border-radius: 12px;
-    transition:
-        background-color .18s ease,
-        color .18s ease,
-        transform .18s ease;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color .18s ease, color .18s ease;
 }
 
-
-/* ============================================================
-   Иконки пунктов меню
-   ============================================================ */
-
-.sidebar-link svg {
+.sidebar-link svg,
+.sidebar-user-link svg {
     width: 20px;
     height: 20px;
-    flex-shrink: 0;
+    flex: 0 0 20px;
+    stroke-width: 1.8;
 }
 
-
-/* ============================================================
-   Hover
-   ============================================================ */
-
-.sidebar-link:hover {
+.sidebar-link:hover,
+.sidebar-user-link:hover {
     background: var(--sidebar-hover);
     color: var(--text-primary);
-    border-radius: 0;
 }
-
-
-/* ============================================================
-   Активный пункт
-   ============================================================ */
 
 .sidebar-link.active {
-    position: relative;
     background: var(--menu-active-bg);
     color: var(--text-primary);
-    border-radius: 0;
 }
 
-
-/* ============================================================
-   Левая цветная полоска активного раздела
-   ============================================================ */
-
-.sidebar-link.active::before {
+/* Активная страница отмечается справа — как в референсе.
+   Цвет и свечение автоматически берутся из текущей темы. */
+.sidebar-link.active::after {
     content: "";
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: var(--menu-active-border);
+    top: 7px;
+    right: 0;
+    bottom: 7px;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+    background: var(--accent-color);
+    box-shadow:
+        0 0 8px color-mix(in srgb, var(--accent-color) 75%, transparent),
+        0 0 18px color-mix(in srgb, var(--accent-color) 45%, transparent);
 }
 
-
-/* ============================================================
-   Текст пунктов меню
-   ============================================================ */
-
-.sidebar-link span {
+.sidebar-link span,
+.sidebar-user-link span {
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
-    transition:
-        opacity .18s ease,
-        width .18s ease;
+    text-overflow: ellipsis;
 }
-
-
-/* ============================================================
-   Разделители между группами меню
-   ============================================================ */
 
 .sidebar-divider {
     width: calc(100% - 32px);
     height: 1px;
-    margin: 4px auto;
+    margin: 5px auto;
     background: linear-gradient(
         90deg,
-        transparent,
-        var(--sidebar-divider-color),
-        transparent
+        transparent 0%,
+        rgba(96, 165, 250, .55) 18%,
+        rgba(125, 211, 252, .80) 50%,
+        rgba(96, 165, 250, .55) 82%,
+        transparent 100%
     );
+    box-shadow: 0 0 8px rgba(96, 165, 250, .18);
 }
 
 .sidebar-divider-bottom {
-    margin-top: 14px;
+    margin-top: 5px;
+    margin-bottom: 2px;
+    background: var(--border-color);
+    box-shadow: none;
 }
 
-
-/* ============================================================
-   Свернутый Sidebar
-   ============================================================ */
-
-.sidebar.collapsed .sidebar-link {
+.sidebar.collapsed .sidebar-link,
+.sidebar.collapsed .sidebar-user-link {
     justify-content: center;
-    padding: 14px 0;
+    padding: 11px 0;
     gap: 0;
 }
 
-.sidebar.collapsed .sidebar-link span {
-    width: 0;
-    opacity: 0;
+.sidebar.collapsed .sidebar-link span,
+.sidebar.collapsed .sidebar-user-link span {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-link.active::after {
+    top: 7px;
+    bottom: 7px;
 }
