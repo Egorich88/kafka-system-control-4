@@ -60,6 +60,7 @@ import Acl from './pages/Acl';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 import AuditPage from './pages/audit/AuditPage';
+import IntegrationPlaceholder from './pages/IntegrationPlaceholder';
 
 // Contexts
 import { ClusterProvider } from './contexts/ClusterContext';
@@ -102,10 +103,15 @@ function App() {
             <Route path="search" element={<Search />} />
 
             {/* Аудит действий пользователей и системы */}
-            <Route path="logs" element={<AuditPage />} />
+            <Route path="audit" element={<AuditPage />} />
 
             {/* Консоль Kafka */}
             <Route path="console" element={<Console />} />
+
+            {/* Будущие Kafka-интеграции */}
+            <Route path="connect" element={<IntegrationPlaceholder titleKey="kafkaConnect" />} />
+            <Route path="ksqldb" element={<IntegrationPlaceholder titleKey="ksqlDb" />} />
+            <Route path="schema-registry" element={<IntegrationPlaceholder titleKey="schemaRegistry" />} />
 
              {/* Настройки приложения */}
             <Route path="/settings" element={<Settings />} />

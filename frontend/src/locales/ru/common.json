@@ -4,7 +4,42 @@
   "topics": "Топики",
   "consumerGroups": "Группы потребителей",
   "searchMessages": "Поиск сообщений",
+  "acl": "ACL",
+  "alerts": "Оповещения",
+  "audit": "Аудит",
+  "console": "Консоль",
+  "kafkaConnect": "Kafka Connect",
+  "ksqlDb": "ksqlDB",
+  "schemaRegistry": "Schema Registry",
   "healthy": "Стабильно",
   "cluster": "Кластер",
-  "settings": { "title": "Настройки", "subtitle": "Персонализация интерфейса", "theme": "Темы", "themeDescription": "Настройка внешнего вида интерфейса", "language": "Язык", "languageDescription": "Выбор языка интерфейса" }
+  "settings": {
+    "title": "Настройки",
+    "subtitle": "Персонализация интерфейса",
+    "theme": "Темы",
+    "themeDescription": "Настройка внешнего вида интерфейса",
+    "language": "Язык",
+    "languageDescription": "Выбор языка интерфейса",
+    "metricsSource": "Источник метрик",
+    "metricsSourceDescription": "Источник метрик для мониторинга Kafka"
+  },
+  "sidebar": {
+    "collapse": "Свернуть панель",
+    "expand": "Развернуть панель",
+    "clusterSettings": "Настройки кластера",
+    "user": "Пользователь",
+    "userTooltip": "Профиль пользователя",
+    "github": "GitHub — автор продукта",
+    "apache": "Apache License 2.0",
+    "updateAvailable": "Доступна версия",
+    "localVersionNewer": "Локальная версия новее GitHub",
+    "currentVersion": "Актуальная версия",
+    "addCluster": "+ Добавить кластер",
+    "switchToDark": "Переключить на тёмную тему",
+    "switchToLight": "Переключить на светлую тему"
+  },
+  "integration": {
+    "comingSoon": "В разработке",
+    "description": "Раздел подготовлен в интерфейсе. Функциональность интеграции будет добавлена позже."
+  }
 }

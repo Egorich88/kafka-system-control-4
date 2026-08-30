@@ -13,149 +13,74 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* ============================================================
-   SIDEBAR THEME TOGGLE
-   Expanded:
-        ☼   [  ●──── ]   ☾
-   Collapsed:
-            [  ●──── ]
-   ============================================================ */
-
 .theme-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 150px;
-    height: 28px;
-}
-
-/* Light / Dark icons sit on the two sides of the switch. */
-.theme-toggle-icon {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
     padding: 0;
+    margin: 0;
     border: 0;
     outline: 0;
+    border-radius: 0;
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    transition:
-        color .18s ease,
-        transform .18s ease,
-        opacity .18s ease;
+    transition: color .18s ease, transform .18s ease;
+}
+
+.theme-toggle:hover {
+    color: var(--accent-hover);
+}
+
+.theme-toggle:active {
+    transform: scale(.9);
+}
+
+.theme-toggle-icon {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle-icon-current {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity .16s ease, transform .16s ease;
+}
+
+.theme-toggle-icon-hover {
+    opacity: 0;
+    transform: scale(.78);
+    transition: opacity .16s ease, transform .16s ease;
+}
+
+.theme-toggle:hover .theme-toggle-icon-current {
+    opacity: 0;
+    transform: scale(.78);
+}
+
+.theme-toggle:hover .theme-toggle-icon-hover {
+    opacity: 1;
+    transform: scale(1);
 }
 
 .theme-toggle-icon svg {
-    width: 17px;
-    height: 17px;
+    width: 18px;
+    height: 18px;
     stroke-width: 1.7;
 }
 
-.theme-toggle-icon:hover,
-.theme-toggle-icon.active {
-    color: var(--text-primary);
-}
-
-.theme-toggle-icon:active {
-    transform: scale(.92);
-}
-
-/* Central pill switch. */
-.theme-toggle-switch {
-    position: relative;
-    flex: 0 0 58px;
-    width: 28px;
-    height: 24px;
-    padding: 2px;
-    border: 1px solid color-mix(
-        in srgb,
-        var(--accent-color) 62%,
-        var(--border-color)
-    );
-    border-radius: 999px;
-    background: color-mix(
-        in srgb,
-        var(--accent-color) 14%,
-        var(--panel-bg)
-    );
-    cursor: pointer;
-    outline: 0;
-    box-shadow:
-        0 0 0 1px color-mix(
-            in srgb,
-            var(--accent-color) 8%,
-            transparent
-        ),
-        0 3px 10px color-mix(
-            in srgb,
-            var(--accent-color) 16%,
-            transparent
-        );
-    transition:
-        background-color .2s ease,
-        border-color .2s ease,
-        box-shadow .2s ease;
-}
-
-.theme-toggle-switch:hover {
-    border-color: color-mix(
-        in srgb,
-        var(--accent-color) 82%,
-        var(--border-color)
-    );
-    box-shadow:
-        0 0 0 1px color-mix(
-            in srgb,
-            var(--accent-color) 16%,
-            transparent
-        ),
-        0 4px 14px color-mix(
-            in srgb,
-            var(--accent-color) 24%,
-            transparent
-        );
-}
-
-.theme-toggle-thumb {
-    display: block;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--text-primary);
-    box-shadow:
-        0 2px 7px rgba(0, 0, 0, .24);
-    transform: translateX(0);
-    transition:
-        transform .2s ease,
-        background-color .2s ease;
-}
-
-.theme-toggle-switch.dark .theme-toggle-thumb {
-    transform: translateX(28px);
-}
-
-.theme-toggle-switch.light .theme-toggle-thumb {
-    transform: translateX(0);
-}
-
-/* Collapsed Sidebar: only the central switch remains. */
-.sidebar.collapsed .theme-toggle {
-    width: 58px;
-}
-
-.sidebar.collapsed .theme-toggle-icon {
-    display: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .theme-toggle-icon,
-    .theme-toggle-switch,
-    .theme-toggle-thumb {
+    .theme-toggle,
+    .theme-toggle-icon-current,
+    .theme-toggle-icon-hover {
         transition: none;
     }
 }

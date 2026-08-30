@@ -4,16 +4,42 @@
   "topics": "Topics",
   "consumerGroups": "Consumer Groups",
   "searchMessages": "Search Messages",
+  "acl": "ACL",
+  "alerts": "Alerts",
+  "audit": "Audit",
+  "console": "Console",
+  "kafkaConnect": "Kafka Connect",
+  "ksqlDb": "ksqlDB",
+  "schemaRegistry": "Schema Registry",
+  "healthy": "Healthy",
+  "cluster": "Cluster",
   "settings": {
     "title": "Settings",
     "subtitle": "Interface personalization",
-
     "theme": "Themes",
     "themeDescription": "Customize the application appearance",
-
     "language": "Language",
-    "languageDescription": "Select application language"
+    "languageDescription": "Select application language",
+    "metricsSource": "Metrics source",
+    "metricsSourceDescription": "Source of metrics used for Kafka monitoring"
   },
-  "healthy": "Healthy",
-  "cluster": "Cluster"
+  "sidebar": {
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "clusterSettings": "Cluster settings",
+    "user": "User",
+    "userTooltip": "User profile",
+    "github": "GitHub — product author",
+    "apache": "Apache License 2.0",
+    "updateAvailable": "Version available",
+    "localVersionNewer": "Local version is newer than GitHub",
+    "currentVersion": "Current version",
+    "addCluster": "+ Add cluster",
+    "switchToDark": "Switch to dark theme",
+    "switchToLight": "Switch to light theme"
+  },
+  "integration": {
+    "comingSoon": "Coming soon",
+    "description": "This section is already prepared in the interface. Integration functionality will be added later."
+  }
 }

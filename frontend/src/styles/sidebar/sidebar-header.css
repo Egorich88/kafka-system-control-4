@@ -3,23 +3,13 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
+
 .sidebar-logo {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    padding: 16px 18px 14px;
-    /* Разделительная линия под логотипом намеренно отсутствует. */
+    padding: 14px 18px 12px;
 }
 
 .sidebar-header {
@@ -35,37 +25,86 @@
     display: flex;
     align-items: center;
     flex-direction: row;
-    gap: 14px;
-    flex: 1;
+    gap: 12px;
     min-width: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
 }
 
 .sidebar-logo-image {
-    width: 42px;
-    height: 42px;
+    width: 30px;
+    height: 30px;
     object-fit: contain;
     display: block;
-    flex: 0 0 42px;
+    flex: 0 0 30px;
     filter:
-        drop-shadow(0 6px 10px rgba(16, 185, 129, .14))
-        drop-shadow(0 10px 20px rgba(45, 212, 191, .07));
-    transition: width .25s ease, height .25s ease, opacity .2s ease, transform .2s ease;
+        drop-shadow(0 5px 9px rgba(16, 185, 129, .14))
+        drop-shadow(0 8px 18px rgba(45, 212, 191, .07));
 }
 
 .sidebar-brand-name {
     display: inline-flex;
     align-items: center;
     font-family: 'Inter', sans-serif;
-    font-size: 22px;
+    font-size: 21px;
     font-weight: 600;
-    letter-spacing: 1.8px;
+    letter-spacing: 1.6px;
     color: var(--text-primary);
     line-height: 1;
     white-space: nowrap;
 }
 
-.sidebar.collapsed .sidebar-logo {
+/*
+ * Кнопка сворачивания — только иконка.
+ * Старую рамку/фон убираем полностью.
+ */
+.sidebar-collapse-button {
+    position: absolute;
+    top: 50%;
+    right: -2px;
+    width: 24px;
+    height: 24px;
+    transform: translateY(-50%);
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    outline: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color .18s ease, transform .18s ease;
+}
+
+.sidebar-collapse-button:hover {
+    color: var(--text-primary);
+}
+
+.sidebar-collapse-button:active {
+    transform: translateY(-50%) scale(.92);
+}
+
+.sidebar-collapse-button svg {
+    width: 17px;
+    height: 17px;
+    stroke-width: 1.7;
+}
+
+/*
+ * В collapsed режиме кнопка сворачивания исчезает.
+ * Сам логотип становится кликабельным и служит кнопкой разворачивания.
+ * Размер немного уменьшается, чтобы знак визуально совпадал с колонкой иконок.
+ */
+.sidebar.collapsed .sidebar-logo {
     padding-left: 0;
     padding-right: 0;
 }
@@ -77,12 +116,16 @@
 .sidebar.collapsed .sidebar-logo-brand {
     justify-content: center;
     width: 100%;
+    gap: 0;
+    cursor: pointer;
 }
 
-/* В свернутом состоянии логотип совпадает по визуальному размеру с иконками. */
 .sidebar.collapsed .sidebar-logo-image {
-    width: 24px;
-    height: 24px;
-    flex-basis: 24px;
-    margin: 0 auto;
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
+}
+
+.sidebar.collapsed .sidebar-collapse-button {
+    display: none;
 }

@@ -1,0 +1,47 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ */
+
+.integration-placeholder {
+    min-height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+    box-sizing: border-box;
+}
+
+.integration-placeholder-card {
+    width: min(720px, 100%);
+    padding: 42px;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-primary);
+}
+
+.integration-placeholder-kicker {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: var(--accent-color);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.integration-placeholder-card h1 {
+    margin: 0 0 10px;
+    color: var(--text-primary);
+    font-size: 32px;
+}
+
+.integration-placeholder-card p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.6;
+}

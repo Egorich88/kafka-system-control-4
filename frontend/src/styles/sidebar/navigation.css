@@ -3,22 +3,13 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 8px 0;
+    gap: 2px;
+    padding: 6px 0 8px;
     overflow-y: auto;
     scrollbar-width: none;
 }
@@ -32,11 +23,11 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 13px;
+    gap: 12px;
     width: 100%;
-    min-height: 44px;
+    min-height: 43px;
     box-sizing: border-box;
-    padding: 11px 20px 11px 27px;
+    padding: 10px 20px 10px 25px;
     text-decoration: none;
     color: var(--text-secondary);
     border: 0;
@@ -68,8 +59,6 @@
     color: var(--text-primary);
 }
 
-/* Активная страница отмечается справа — как в референсе.
-   Цвет и свечение автоматически берутся из текущей темы. */
 .sidebar-link.active::after {
     content: "";
     position: absolute;
@@ -83,6 +72,23 @@
         0 0 8px color-mix(in srgb, var(--accent-color) 75%, transparent),
         0 0 18px color-mix(in srgb, var(--accent-color) 45%, transparent);
 }
+
+/* Настройки — намеренно без active-background и без правой полосы. */
+.sidebar-settings-link:hover,
+.sidebar-settings-link.active {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.sidebar-settings-link:hover span,
+.sidebar-settings-link:hover svg {
+    color: var(--accent-hover);
+}
+
+.sidebar-settings-link.active::after {
+    display: none;
+}
+
 
 .sidebar-link span,
 .sidebar-user-link span {
@@ -106,6 +112,7 @@
     );
     box-shadow: 0 0 8px rgba(96, 165, 250, .18);
 }
+
 
 .sidebar-divider-bottom {
     margin-top: 5px;

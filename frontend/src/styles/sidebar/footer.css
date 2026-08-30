@@ -14,43 +14,35 @@
  * limitations under the License.
  */
 
-/* ============================================================
-   KSC PROJECT FOOTER
-   ============================================================ */
-
 .sidebar-footer {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 8px 16px 2px;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 20px 0;
+    border-top: 1px solid var(--border-color);
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: 12px;
 }
 
-/* GitHub + Apache — одна компактная центрированная строка. */
 .footer-links-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 18px;
-    width: 100%;
-    min-height: 30px;
+    justify-content: flex-end;
+    gap: 8px;
+    min-height: 26px;
+    order: 2;
 }
 
 .footer-icon-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 28px;
-    padding: 0;
+    width: 22px;
+    height: 24px;
     text-decoration: none;
     color: var(--text-secondary);
-    transition:
-        color .18s ease,
-        transform .18s ease,
-        opacity .18s ease;
+    transition: color .18s ease, transform .18s ease;
 }
 
 .footer-icon-link:hover {
@@ -60,40 +52,37 @@
 
 .footer-github-icon,
 .footer-license-icon {
-    width: 19px;
-    height: 19px;
-    flex: 0 0 19px;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
     stroke-width: 1.8;
 }
 
 .sidebar-version {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    min-height: 22px;
+    justify-content: flex-start;
+    min-height: 26px;
     margin: 0;
+    order: 1;
     text-decoration: none;
     font-family: 'Inter', sans-serif;
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 500;
-    letter-spacing: .15px;
     color: var(--text-secondary);
-    opacity: .9;
     transition: color .18s ease, opacity .18s ease;
 }
 
 .sidebar-version:hover {
     color: var(--accent-hover) !important;
-    opacity: 1;
 }
 
 .version-label {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    white-space: nowrap;
 }
 
-/* Анимация обновления версии сохраняется. */
 @keyframes versionGradientMove {
     0% { background-position: 0% 50%; }
     100% { background-position: 100% 50%; }
@@ -122,15 +111,13 @@
         versionGradientFlow 2s linear;
 }
 
-/* Collapsed: только иконки GitHub/Apache и компактная версия. */
 .sidebar.collapsed .sidebar-footer {
-    align-items: center;
-    padding: 7px 0 1px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 .sidebar.collapsed .footer-links-row {
-    justify-content: center;
-    gap: 10px;
+    gap: 5px;
 }
 
 .sidebar.collapsed .footer-icon-link {
@@ -139,5 +126,21 @@
 
 .sidebar.collapsed .sidebar-version {
     font-size: 9px;
-    min-height: 20px;
+}
+
+/* В узком Sidebar три элемента в одну строку не помещаются —
+   сохраняем чистую вертикальную композицию. */
+.sidebar.collapsed .sidebar-footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.sidebar.collapsed .footer-links-row {
+    order: 1;
+}
+
+.sidebar.collapsed .sidebar-version {
+    order: 2;
+    justify-content: center;
 }

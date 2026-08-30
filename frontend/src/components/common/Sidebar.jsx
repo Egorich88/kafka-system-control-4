@@ -21,6 +21,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 import { NavLink } from 'react-router-dom';
 import {
@@ -36,10 +37,13 @@ import {
   FiTerminal,
   FiSettings,
   FiGithub,
-  FiFeather,
   FiUser,
-  FiSidebar
+  FiSidebar,
+  FiLink,
+  FiDatabase,
+  FiCode
 } from 'react-icons/fi';
+import { SiApache } from 'react-icons/si';
 import packageJson from '../../../package.json';
 import Dropdown from '../common/Dropdown';
 import { getLatestVersion } from '../../services/versionService';
@@ -87,6 +91,7 @@ function compareVersions(local, remote) {
  */
 export default function Sidebar({ onAddCluster, onEditCluster }) {
   const { clusters, currentCluster, changeCluster } = useCluster();
+  const { t } = useTranslation();
   const version = packageJson.version;
   const [latestVersion, setLatestVersion] = useState(null);
   const [animateVersion, setAnimateVersion] = useState(false);
@@ -175,8 +180,13 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
                 компактный фирменный идентификатор.
                ========================================================== */}
 
-            <div className="sidebar-logo-brand">
-
+            <button
+              type="button"
+              className="sidebar-logo-brand"
+              onClick={() => collapsed && setCollapsed(false)}
+              aria-label={collapsed ? t('sidebar.expand') : 'Kafka System Control'}
+              disabled={!collapsed}
+            >
               <img
                   src="/logo.svg"
                   alt="Kafka System Control"
@@ -188,15 +198,14 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
                   KSC
                 </span>
               )}
-
-            </div>
+            </button>
 
             {/* Кнопка сворачивания боковой панели */}
             <button
                 className="sidebar-collapse-button"
                 onClick={() => setCollapsed(!collapsed)}
                 data-tooltip-id="sidebar-tooltip"
-                data-tooltip-content={collapsed ? "Открыть боковую панель" : "Закрыть боковую панель"}
+                data-tooltip-content={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
             >
               <FiSidebar />
             </button>
@@ -207,11 +216,6 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
         {/* Блок выбора / добавления кластера */}
         <div className="sidebar-cluster">
-          {!collapsed && (
-              <div className="cluster-top">
-                  <span>КЛАСТЕР</span>
-              </div>
-          )}
           {hasCluster ? (
               <div className={`cluster-row ${collapsed ? 'collapsed' : ''}`}>
                   {!collapsed && (
@@ -219,7 +223,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
                           selectedItem={currentCluster}
                           items={clusters.filter(cluster => cluster.id !== currentCluster.id)}
                           onSelect={changeCluster}
-                          addLabel="+ Добавить кластер"
+                          addLabel={t('sidebar.addCluster')}
                           onAdd={onAddCluster}
                           statusResolver={(cluster) => cluster?.connectionStatus || 'unknown'}
                       />
@@ -229,7 +233,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
                       className="cluster-settings-icon"
                       onClick={onEditCluster}
                       data-tooltip-id="sidebar-tooltip"
-                      data-tooltip-content="Настройки кластера"
+                      data-tooltip-content={t('sidebar.clusterSettings')}
                   />
               </div>
           ) : (
@@ -238,7 +242,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
                       className="cluster-add-collapsed"
                       onClick={onAddCluster}
                       data-tooltip-id="sidebar-tooltip"
-                      data-tooltip-content="Добавить кластер"
+                      data-tooltip-content={t('sidebar.addCluster')}
                   >
                       +
                   </button>
@@ -247,7 +251,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
                       className="cluster-add-link"
                       onClick={onAddCluster}
                   >
-                      + Добавить кластер
+                      {t('sidebar.addCluster')}
                   </div>
               )
           )}
@@ -259,10 +263,10 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             {/* Обзор */}
             <NavLink to="/" end className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "Обзор" : undefined}>
+                data-tooltip-content={collapsed ? t('overview') : undefined}>
               <FiHome />
               {!collapsed && (
-                <span>Обзор</span>
+                <span>{t('overview')}</span>
               )}
             </NavLink>
 
@@ -274,85 +278,113 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             {/* Брокеры */}
             <NavLink to="/brokers" className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "Брокеры" : undefined}>
+                data-tooltip-content={collapsed ? t('brokers') : undefined}>
               <FiServer />
               {!collapsed && (
-                <span>Брокеры</span>
+                <span>{t('brokers')}</span>
               )}
             </NavLink>
 
             {/* Топики */}
             <NavLink to="/topics" className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "Топики" : undefined}>
+                data-tooltip-content={collapsed ? t('topics') : undefined}>
               <FiLayers />
               {!collapsed && (
-                <span>Топики</span>
+                <span>{t('topics')}</span>
               )}
             </NavLink>
 
             {/* Группы потребителей */}
             <NavLink to="/groups" className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "Группы потребителей" : undefined}>
+                data-tooltip-content={collapsed ? t('consumerGroups') : undefined}>
               <FiUsers />
               {!collapsed && (
-              <span>Группы потребителей</span>
+              <span>{t('consumerGroups')}</span>
               )}
             </NavLink>
 
             {/* Поиск сообщений */}
             <NavLink to="/search" className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "Поиск сообщений" : undefined}>
+                data-tooltip-content={collapsed ? t('searchMessages') : undefined}>
               <FiSearch />
               {!collapsed && (
-              <span>Поиск сообщений</span>
+              <span>{t('searchMessages')}</span>
               )}
             </NavLink>
 
             {/* ACL */}
             <NavLink to="/acls" className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "ACL" : undefined}>
+                data-tooltip-content={collapsed ? t('acl') : undefined}>
               <FiShield />
               {!collapsed && (
-              <span>ACL</span>
+              <span>{t('acl')}</span>
               )}
             </NavLink>
 
-            {/* ----------------------------------------------------------
-                Разделитель навигации
-            ----------------------------------------------------------- */}
+            {/* Будущие Kafka-интеграции */}
+            <div className="sidebar-divider sidebar-divider-integrations" />
+
+            <NavLink to="/connect" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? t('kafkaConnect') : undefined}>
+              <FiLink />
+              {!collapsed && (
+              <span>{t('kafkaConnect')}</span>
+              )}
+            </NavLink>
+
+            <NavLink to="/ksqldb" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? t('ksqlDb') : undefined}>
+              <FiCode />
+              {!collapsed && (
+              <span>{t('ksqlDb')}</span>
+              )}
+            </NavLink>
+
+            <NavLink to="/schema-registry" className="sidebar-link"
+                data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+                data-tooltip-content={collapsed ? t('schemaRegistry') : undefined}>
+              <FiDatabase />
+              {!collapsed && (
+              <span>{t('schemaRegistry')}</span>
+              )}
+            </NavLink>
+
+            {/* Операционные разделы */}
             <div className="sidebar-divider" />
 
             {/* Оповещения */}
             <NavLink to="/alerts" className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "Оповещения" : undefined}>
+                data-tooltip-content={collapsed ? t('alerts') : undefined}>
               <FiAlertTriangle />
               {!collapsed && (
-              <span>Оповещения</span>
+              <span>{t('alerts')}</span>
               )}
             </NavLink>
 
             {/* Аудит */}
-            <NavLink to="/logs" className="sidebar-link"
+            <NavLink to="/audit" className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "Аудит" : undefined}>
+                data-tooltip-content={collapsed ? t('audit') : undefined}>
               <FiFileText />
               {!collapsed && (
-              <span>Аудит</span>
+              <span>{t('audit')}</span>
               )}
             </NavLink>
 
             {/* Консоль Kafka */}
             <NavLink to="/console" className="sidebar-link"
                 data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-                data-tooltip-content={collapsed ? "Консоль" : undefined}>
+                data-tooltip-content={collapsed ? t('console') : undefined}>
               <FiTerminal />
               {!collapsed && (
-              <span>Консоль</span>
+              <span>{t('console')}</span>
               )}
             </NavLink>
           </nav>
@@ -361,34 +393,33 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
       {/* -------------------- Нижняя область -------------------- */}
       <div className="sidebar-bottom">
-        {/* Настройки + профиль администратора */}
+        {/* Настройки + быстрый переключатель темы */}
         <nav className="sidebar-bottom-nav">
-          <NavLink
-            to="/settings"
-            className="sidebar-link"
-            data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
-            data-tooltip-content={collapsed ? "Настройки" : undefined}
-          >
-            <FiSettings />
-            {!collapsed && <span>Настройки</span>}
-          </NavLink>
+          <div className="sidebar-settings-row">
+            <NavLink
+              to="/settings"
+              className="sidebar-link sidebar-settings-link"
+              data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+              data-tooltip-content={collapsed ? t('settings.title') : undefined}
+            >
+              <FiSettings />
+              {!collapsed && <span>{t('settings.title')}</span>}
+            </NavLink>
+
+            <ThemeToggle />
+          </div>
 
           <div
             className="sidebar-user-link"
             data-tooltip-id="sidebar-tooltip"
-            data-tooltip-content="Профиль пользователя"
+            data-tooltip-content={t('sidebar.userTooltip')}
           >
             <FiUser />
-            {!collapsed && <span>Пользователь</span>}
+            {!collapsed && <span>{t('sidebar.user')}</span>}
           </div>
         </nav>
 
         <div className="sidebar-divider sidebar-divider-bottom" />
-
-        {/* Быстрый переключатель Light / Dark */}
-        <div className="sidebar-theme-control">
-          <ThemeToggle />
-        </div>
 
         {/* Футер: GitHub + Apache License и версия */}
         <div className="sidebar-footer">
@@ -399,8 +430,8 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
               rel="noopener noreferrer"
               className="footer-icon-link"
               data-tooltip-id="sidebar-tooltip"
-              data-tooltip-content="GitHub проекта — Egorich88"
-              aria-label="GitHub проекта — Egorich88"
+              data-tooltip-content={t('sidebar.github')}
+              aria-label={t('sidebar.github')}
             >
               <FiGithub className="footer-github-icon" />
             </a>
@@ -411,10 +442,10 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
               rel="noopener noreferrer"
               className="footer-icon-link"
               data-tooltip-id="sidebar-tooltip"
-              data-tooltip-content="Apache License 2.0"
-              aria-label="Apache License 2.0"
+              data-tooltip-content={t('sidebar.apache')}
+              aria-label={t('sidebar.apache')}
             >
-              <FiFeather className="footer-license-icon" />
+              <SiApache className="footer-license-icon" />
             </a>
           </div>
 
@@ -426,10 +457,10 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             data-tooltip-id="sidebar-tooltip"
             data-tooltip-content={
               hasUpdate
-                ? `Доступна версия ${latestVersion}`
+                ? `${t('sidebar.updateAvailable')} ${latestVersion}`
                 : localIsNewer
-                  ? `Локальная версия новее GitHub`
-                  : `Актуальная версия ${version}`
+                  ? t('sidebar.localVersionNewer')
+                  : `${t('sidebar.currentVersion')} ${version}`
             }
           >
             <span className="version-label">

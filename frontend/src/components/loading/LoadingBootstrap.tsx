@@ -57,39 +57,11 @@ import App from '../../App';
  * =============================================================================
  */
 export default function LoadingBootstrap() {
-
-    /*
-     * Получаем реальное состояние первоначальной инициализации.
-     */
     const loading = useLoading();
 
-
-    /*
-     * Пока приложение не завершило первоначальную инициализацию,
-     * отображаем Splash Screen.
-     */
     if (!loading.completed) {
-
-        return (
-
-            <LoadingScreen
-
-                status={loading.message}
-
-            />
-
-        );
-
+        return <LoadingScreen status={loading.message} />;
     }
 
-
-    /*
-     * Все обязательные первоначальные проверки завершены.
-     *
-     * Теперь Splash больше не нужен.
-     *
-     * Передаём управление полноценному приложению.
-     */
     return <App />;
-
 }

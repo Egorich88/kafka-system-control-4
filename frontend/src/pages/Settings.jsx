@@ -20,7 +20,7 @@
  * требуется более информативное меню: разделители, отметка
  * текущей темы и компактная ширина по содержимому.
  */
-
+import { useEffect, useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import Dropdown from '../components/common/Dropdown';
 import ThemeDropdown from '../components/common/ThemeDropdown';
@@ -78,33 +78,8 @@ const THEMES_LIST = [
   { id: 'mac', name: 'Mac' },
   { id: 'linux', name: 'Linux' },
 
-  // Windows удалён:
-  // Light уже выполняет роль основной светлой темы.
-
-
   // Небесно-голубой разделитель
   { type: 'divider' },
-
-
-  // ==========================================================
-  // MODERN / SOFT THEMES
-  // Современная спокойная палитра
-  // ==========================================================
-
-  { id: 'mint-lagoon', name: 'Mint Lagoon' },
-  { id: 'dreamy-periwinkle', name: 'Dreamy Periwinkle' },
-  { id: 'ocean-breeze', name: 'Ocean Breeze' },
-  { id: 'pearl-mauve', name: 'Pearl Mauve' },
-  { id: 'eucalyptus-glow', name: 'Eucalyptus Glow' },
-  { id: 'peach-whisper', name: 'Peach Whisper' },
-  { id: 'sage-dew', name: 'Sage Dew' },
-  { id: 'twilight-haze', name: 'Twilight Haze' },
-  { id: 'morning-mist', name: 'Morning Mist' },
-  { id: 'rose-cloud', name: 'Rose Cloud' },
-
-  // Небесно-голубой разделитель
-  { type: 'divider' },
-
 
   // ==========================================================
   // EXPERIMENTAL
@@ -121,15 +96,32 @@ const LANGUAGES = [
   { id: 'en', name: 'English' }
 ];
 
+const METRIC_SOURCES = [
+  { id: 'default', name: 'default' }
+  // Будущие источники: Prometheus, Zabbix, VictoriaMetrics.
+];
+
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { t, i18n } = useTranslation();
+
+  const [metricSource, setMetricSource] = useState(() => {
+    const saved = localStorage.getItem('ksc_metrics_source');
+    return saved === 'default' ? saved : 'default';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('ksc_metrics_source', metricSource);
+  }, [metricSource]);
 
   const currentThemeObj =
     THEMES_LIST.find(item => item.id === theme) || THEMES_LIST[0];
 
   const currentLanguageObj =
     LANGUAGES.find(lang => lang.id === i18n.language) || LANGUAGES[0];
+
+  const currentMetricSourceObj =
+    METRIC_SOURCES.find(item => item.id === metricSource) || METRIC_SOURCES[0];
 
   const handleLanguageSelect = (selected) => {
     i18n.changeLanguage(selected.id);
@@ -138,6 +130,10 @@ export default function Settings() {
 
   const handleThemeSelect = (selected) => {
     setTheme(selected.id);
+  };
+
+  const handleMetricSourceSelect = (selected) => {
+    setMetricSource(selected.id);
   };
 
   return (
@@ -186,6 +182,18 @@ export default function Settings() {
           />
         </div>
 
+        <div className="settings-block">
+          <div className="settings-block-info">
+            <h3>{t('settings.metricsSource')}</h3>
+            <p>{t('settings.metricsSourceDescription')}</p>
+          </div>
+
+          <Dropdown
+            selectedItem={currentMetricSourceObj}
+            items={METRIC_SOURCES.filter(item => item.id !== metricSource)}
+            onSelect={handleMetricSourceSelect}
+          />
+        </div>
       </div>
     </div>
   );

@@ -14,54 +14,13 @@
  * limitations under the License.
  */
 
-.sidebar-collapse-button {
-    position: absolute;
-    top: 0;
-    right: -1px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--panel-bg) 82%, transparent);
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: background-color .18s ease, color .18s ease, transform .18s ease;
-}
-
-.sidebar-collapse-button:hover {
-    background: var(--sidebar-hover);
-    color: var(--text-primary);
-    transform: scale(1.05);
-}
-
-.sidebar-collapse-button:active {
-    transform: scale(.94);
-}
-
-.sidebar-collapse-button svg {
-    width: 17px;
-    height: 17px;
-}
-
+/* The collapse control is styled by sidebar-header.css.
+   This file only contains collapsed-state behavior. */
 .sidebar.collapsed .sidebar-collapse-button {
-    top: 50%;
-    left: 50%;
-    right: auto;
-    opacity: 0;
-    pointer-events: none;
-    transform: translate(-50%, -50%) scale(.9);
+    right: 7px;
 }
 
 .sidebar.collapsed .sidebar-logo:hover .sidebar-logo-image {
-    opacity: 0;
-    transform: scale(.86);
-}
-
-.sidebar.collapsed .sidebar-logo:hover .sidebar-collapse-button {
     opacity: 1;
-    pointer-events: auto;
-    transform: translate(-50%, -50%) scale(1);
+    transform: none;
 }
