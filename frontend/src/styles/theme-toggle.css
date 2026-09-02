@@ -32,8 +32,13 @@
     transition: color .18s ease, transform .18s ease;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
     color: var(--accent-hover);
+    background: var(--sidebar-hover);
+    border-radius: 9px;
+    box-shadow: 0 0 0 5px var(--sidebar-hover);
+    outline: none;
 }
 
 .theme-toggle:active {

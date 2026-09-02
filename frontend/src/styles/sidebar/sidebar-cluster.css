@@ -160,11 +160,21 @@
     font-size: 20px;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: color 0.18s ease;
     flex-shrink: 0;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+    box-sizing: content-box;
+    border-radius: 9px;
+    transition: color .18s ease, background-color .18s ease, box-shadow .18s ease;
 }
-.cluster-settings-icon:hover {
-    color: var(--text-primary);
+
+.cluster-settings-icon:hover,
+.cluster-settings-icon:focus-visible {
+    color: var(--accent-hover);
+    background: var(--sidebar-hover);
+    box-shadow: 0 0 0 5px var(--sidebar-hover);
+    outline: none;
 }
 
 /* Отображение при отсутствии кластера */

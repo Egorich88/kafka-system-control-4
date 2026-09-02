@@ -61,6 +61,8 @@ import Search from './pages/Search';
 import Settings from './pages/Settings';
 import AuditPage from './pages/audit/AuditPage';
 import IntegrationPlaceholder from './pages/IntegrationPlaceholder';
+import Alerts from './pages/Alerts';
+import User from './pages/User';
 
 // Contexts
 import { ClusterProvider } from './contexts/ClusterContext';
@@ -107,6 +109,12 @@ function App() {
 
             {/* Консоль Kafka */}
             <Route path="console" element={<Console />} />
+
+            {/* Оповещения */}
+            <Route path="alerts" element={<Alerts />} />
+
+            {/* Пользователь */}
+            <Route path="user" element={<User />} />
 
             {/* Будущие Kafka-интеграции */}
             <Route path="connect" element={<IntegrationPlaceholder titleKey="kafkaConnect" />} />

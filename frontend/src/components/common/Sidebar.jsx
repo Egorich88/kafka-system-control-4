@@ -98,6 +98,7 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
   // Состояние боковой панели
   const [collapsed, setCollapsed] = useState(false);
+  const [logoHovered, setLogoHovered] = useState(false);
 
   // ----- Проверка наличия обновлений (не чаще раза в час) -----
   useEffect(() => {
@@ -182,16 +183,23 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
             <button
               type="button"
-              className="sidebar-logo-brand"
+              className={`sidebar-logo-brand ${collapsed && logoHovered ? 'is-expand-hover' : ''}`}
               onClick={() => collapsed && setCollapsed(false)}
+              onMouseEnter={() => setLogoHovered(true)}
+              onMouseLeave={() => setLogoHovered(false)}
               aria-label={collapsed ? t('sidebar.expand') : 'Kafka System Control'}
-              disabled={!collapsed}
+              data-tooltip-id={collapsed ? 'sidebar-tooltip' : undefined}
+              data-tooltip-content={collapsed ? t('sidebar.expand') : undefined}
             >
-              <img
+              {collapsed && logoHovered ? (
+                <FiSidebar className="sidebar-logo-expand-icon" aria-hidden="true" />
+              ) : (
+                <img
                   src="/logo.svg"
                   alt="Kafka System Control"
                   className="sidebar-logo-image"
-              />
+                />
+              )}
 
               {!collapsed && (
                 <span className="sidebar-brand-name">
@@ -409,17 +417,19 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
             <ThemeToggle />
           </div>
 
-          <div
+          <NavLink
+            to="/user"
             className="sidebar-user-link"
-            data-tooltip-id="sidebar-tooltip"
-            data-tooltip-content={t('sidebar.userTooltip')}
+            data-tooltip-id={collapsed ? "sidebar-tooltip" : undefined}
+            data-tooltip-content={collapsed ? t('sidebar.userTooltip') : undefined}
           >
             <FiUser />
             {!collapsed && <span>{t('sidebar.user')}</span>}
-          </div>
+          </NavLink>
         </nav>
 
-        <div className="sidebar-divider sidebar-divider-bottom" />
+        {/* Полная разделительная линия находится в .sidebar-footer.
+            Дополнительную короткую линию здесь не используем. */}
 
         {/* Футер: GitHub + Apache License и версия */}
         <div className="sidebar-footer">

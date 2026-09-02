@@ -54,6 +54,11 @@
     color: var(--text-primary);
 }
 
+.sidebar-settings-link:hover,
+.sidebar-settings-link:focus-visible {
+    background: transparent;
+}
+
 .sidebar-link.active {
     background: var(--menu-active-bg);
     color: var(--text-primary);

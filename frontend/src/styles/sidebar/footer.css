@@ -46,8 +46,13 @@
 }
 
 .footer-icon-link:hover {
-    color: var(--text-primary);
+    color: var(--accent-hover);
     transform: translateY(-1px);
+}
+
+.footer-icon-link:focus-visible {
+    outline: none;
+    color: var(--accent-hover);
 }
 
 .footer-github-icon,
@@ -67,7 +72,7 @@
     order: 1;
     text-decoration: none;
     font-family: 'Inter', sans-serif;
-    font-size: 10.5px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-secondary);
     transition: color .18s ease, opacity .18s ease;

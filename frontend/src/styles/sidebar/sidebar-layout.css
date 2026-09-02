@@ -71,17 +71,20 @@
 }
 
 .sidebar.collapsed .sidebar-settings-row {
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    gap: 1px;
 }
 
 .sidebar.collapsed .sidebar-settings-row .sidebar-link {
-    flex: 0 0 100%;
+    flex: 0 0 auto;
+    width: 100%;
 }
 
 .sidebar.collapsed .sidebar-settings-row .theme-toggle {
-    position: absolute;
-    right: 10px;
-    margin: 0;
+    position: static;
+    margin: 0 auto;
 }
 
 .sidebar-settings-row {

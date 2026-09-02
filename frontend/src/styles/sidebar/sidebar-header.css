@@ -120,6 +120,26 @@
     cursor: pointer;
 }
 
+.sidebar.collapsed .sidebar-logo-brand {
+    position: relative;
+}
+
+.sidebar.collapsed .sidebar-logo-brand.is-expand-hover {
+    color: var(--accent-hover);
+}
+
+.sidebar-logo-expand-icon {
+    width: 26px;
+    height: 26px;
+    stroke-width: 1.7;
+    transition: color .18s ease, transform .18s ease;
+}
+
+.sidebar.collapsed .sidebar-logo-brand:hover .sidebar-logo-expand-icon {
+    color: var(--accent-hover);
+    transform: scale(1.04);
+}
+
 .sidebar.collapsed .sidebar-logo-image {
     width: 26px;
     height: 26px;
@@ -128,4 +148,15 @@
 
 .sidebar.collapsed .sidebar-collapse-button {
     display: none;
+}
+
+
+/* Единый мягкий hover для служебных кнопок — без контурной рамки. */
+.sidebar-collapse-button:hover,
+.sidebar-collapse-button:focus-visible {
+    color: var(--accent-hover);
+    background: var(--sidebar-hover);
+    border-radius: 9px;
+    box-shadow: 0 0 0 5px var(--sidebar-hover);
+    outline: none;
 }
