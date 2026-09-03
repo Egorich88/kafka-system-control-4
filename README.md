@@ -1,4 +1,5 @@
-![img_3.png](img_3.png)
+<img width="439" height="316" alt="image" src="https://github.com/user-attachments/assets/f8c22bbd-8ac6-4826-8dc4-fa5f40221ff4" />
+
 # Kafka System Control 
 
 <p align="left">
