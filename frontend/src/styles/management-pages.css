@@ -1,0 +1,139 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ * Licensed under the Apache License, Version 2.0.
+ */
+
+.management-page {
+  min-height: 100%;
+  padding: 30px 34px 40px;
+  color: var(--text-primary);
+}
+
+.management-header {
+  margin-bottom: 22px;
+}
+
+.management-kicker {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--accent-color);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.management-header h1 {
+  margin: 0 0 7px;
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.management-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.management-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.management-card {
+  padding: 18px 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-primary);
+}
+
+.management-card-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.management-card-value {
+  color: var(--text-primary);
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.management-panel {
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-primary);
+}
+
+.management-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.management-panel-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.management-table th,
+.management-table td {
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  font-size: 13px;
+}
+
+.management-table th {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.management-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.management-table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--success-color) 12%, transparent);
+  color: var(--success-color);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+  .management-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .management-page { padding: 22px 18px 30px; }
+  .management-grid { grid-template-columns: 1fr; }
+}
