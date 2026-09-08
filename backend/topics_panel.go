@@ -118,13 +118,13 @@ func (s *topicsMetricsStorage) getAllPoints() []TopicsPanelPoint {
 }
 
 type TopicsPanelCollector struct {
-	storage      *topicsMetricsStorage
-	bootstrap    string
-	lastOffsets  map[string]int64
-	lastTime     time.Time
-	mu           sync.Mutex
-	stopChan     chan struct{}
-	interval     time.Duration
+	storage     *topicsMetricsStorage
+	bootstrap   string
+	lastOffsets map[string]int64
+	lastTime    time.Time
+	mu          sync.Mutex
+	stopChan    chan struct{}
+	interval    time.Duration
 }
 
 func NewTopicsPanelCollector(bootstrap string, bufferSize int, interval time.Duration) *TopicsPanelCollector {

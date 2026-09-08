@@ -22,10 +22,10 @@
  * Поддерживается автообновление с выбираемым интервалом (как в Grafana).
  *
  * Структура страницы:
- *   - Ряд 1: KPI-карточки (7 штук)
- *   - Ряд 2: Throughput (40%) | Topics (60%)
- *   - Ряд 3 + Ряд 4: Consumer Lag (60%) | Events (40%)
- *                    Brokers (60%)   |
+ *   - Ряд 1: KPI-карточки;
+ *   - Ряд 2: состояние кластера | распределение партиций | Consumer rate | Producer rate;
+ *   - Ряд 3: пропускная способность кластера | пропускная способность по топикам;
+ *   - Ряд 4: Consumer Lag + таблица Group/Topic/Status/Lag | последние события.
  */
 
 import { useEffect, useState, useRef } from 'react';
@@ -37,10 +37,12 @@ import { useCluster } from '../contexts/ClusterContext';
 
 import ThroughputPanel from './overview/ThroughputPanel';
 import KpiCards from './overview/KpiCards';
-import BrokersPanel from './overview/BrokersPanel';
 import TopicsPanel from './overview/TopicsPanel';
 import ConsumerLagPanel from './overview/ConsumerLagPanel';
 import EventsPanel from './overview/EventsPanel';
+import ClusterHealthPanel from './overview/ClusterHealthPanel';
+import PartitionDistributionPanel from './overview/PartitionDistributionPanel';
+import RatePanels from './overview/RatePanels';
 
 const TIME_RANGES = [
   { id: '15m', name: 'Последние 15 минут' },
@@ -72,6 +74,7 @@ export default function Overview() {
   const [messagesOut, setMessagesOut] = useState(0);
   const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
   const [loading, setLoading] = useState(false);
+  const [clusterHealth, setClusterHealth] = useState(null);
 
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -93,6 +96,7 @@ export default function Overview() {
     setThroughputData([]);
     setMessagesIn(0);
     setMessagesOut(0);
+    setClusterHealth(null);
   };
 
   const loadDashboard = async () => {
@@ -240,7 +244,17 @@ export default function Overview() {
         underReplicated={overview?.underReplicated ?? 0}
       />
 
-      {/* Ряд 2: Throughput (40%) | Topics (60%) */}
+      {/* Ряд 2: фактическое состояние Kafka | распределение партиций | rates */}
+      <div className="dashboard-row dashboard-row-status">
+        <ClusterHealthPanel
+          refreshKey={refreshKey}
+          onData={setClusterHealth}
+        />
+        <PartitionDistributionPanel data={clusterHealth} />
+        <RatePanels data={throughputData} />
+      </div>
+
+      {/* Ряд 3: существующие панели throughput — без изменения назначения */}
       <div className="dashboard-row dashboard-row-top">
         <div className="panel-throughput">
           <ThroughputPanel data={throughputData} />
@@ -250,18 +264,16 @@ export default function Overview() {
         </div>
       </div>
 
-      {/* Ряд 3 + Ряд 4: Consumer Lag + Brokers (60%) | Events (40%) */}
+      {/* Ряд 4: Consumer Lag + таблица | Последние события */}
       <div className="dashboard-row dashboard-row-main">
-        <div className="dashboard-main-left">
-          <div className="panel-lag">
-            <ConsumerLagPanel timeRange={timeRange.id} refreshKey={refreshKey} />
-          </div>
-          <div className="panel-brokers">
-            <BrokersPanel brokers={brokers} refreshKey={refreshKey} />
-          </div>
+        <div className="panel-lag">
+          <ConsumerLagPanel
+            timeRange={timeRange.id}
+            refreshKey={refreshKey}
+          />
         </div>
         <div className="panel-events">
-          <EventsPanel />
+          <EventsPanel refreshKey={refreshKey} />
         </div>
       </div>
     </div>

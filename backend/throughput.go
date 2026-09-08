@@ -100,15 +100,15 @@ type TopicPartitionKey struct {
 }
 
 type ThroughputCollector struct {
-	buffer               *ThroughputRingBuffer
-	bootstrap            string
-	lastTime             time.Time
-	mu                   sync.Mutex
-	stopChan             chan struct{}
+	buffer    *ThroughputRingBuffer
+	bootstrap string
+	lastTime  time.Time
+	mu        sync.Mutex
+	stopChan  chan struct{}
 	// предыдущие значения оффсетов для входящих (latest offset)
-	lastMessagesOffsets  map[TopicPartitionKey]int64
+	lastMessagesOffsets map[TopicPartitionKey]int64
 	// предыдущие значения оффсетов для исходящих (committed offsets по группам)
-	lastConsumedOffsets  map[string]map[TopicPartitionKey]int64 // group -> partition -> offset
+	lastConsumedOffsets map[string]map[TopicPartitionKey]int64 // group -> partition -> offset
 }
 
 func NewThroughputCollector(bootstrap string, bufferSize int) *ThroughputCollector {
@@ -142,7 +142,7 @@ func (tc *ThroughputCollector) Stop() {
 }
 
 func (tc *ThroughputCollector) collect() {
-    tc.mu.Lock()
+	tc.mu.Lock()
 	defer tc.mu.Unlock()
 
 	// Получаем текущие оффсеты: latest offsets (входящие) и committed offsets (исходящие)
@@ -221,15 +221,15 @@ func (tc *ThroughputCollector) collect() {
 	tc.lastConsumedOffsets = consumedOffsets
 	tc.lastTime = now
 
-    if incomingRate < 0 {
-        incomingRate = 0
-    }
+	if incomingRate < 0 {
+		incomingRate = 0
+	}
 
-    if outgoingRate < 0 {
-        outgoingRate = 0
-    }
+	if outgoingRate < 0 {
+		outgoingRate = 0
+	}
 
-    // Добавляем точку в буфер
+	// Добавляем точку в буфер
 	point := DashboardThroughputPoint{
 		Time:     now.Format("15:04:05"),
 		Incoming: incomingRate,

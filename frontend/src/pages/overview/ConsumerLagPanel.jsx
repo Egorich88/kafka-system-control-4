@@ -15,31 +15,14 @@
  */
 
 /**
- * @fileoverview Панель отставания групп потребителей (Consumer Lag).
+ * @fileoverview Панель Consumer Lag на странице Overview.
  *
- * КЛЮЧЕВОЕ ОТЛИЧИЕ: каждая линия на графике = группа + топик.
- * Это позволяет видеть lag по каждому топику в отдельности,
- * а не суммарный lag по всей группе.
- *
- * Пример: если группа consumer-group-1 читает топики A, B, C,
- * то на графике будет 3 линии:
- *   - consumer-group-1 (topic-A)
- *   - consumer-group-1 (topic-B)
- *   - consumer-group-1 (topic-C)
- *
- * Это даёт максимальную прозрачность и упрощает отладку.
- *
- * Управление видимостью линий:
- *   - Клик по строке легенды → оставить только эту линию.
- *   - Повторный клик на единственной линии → вернуть все активные линии.
- *   - Клик по пустому месту графика → вернуть все активные линии.
- *   - Ctrl + клик → добавить/удалить линию из текущего набора (мультивыбор).
- *
- * Структура легенды:
- *   - Цветной кружок (индикатор линии графика)
- *   - Название: группа (топик)
- *   - Текущее значение lag справа
+ * Содержит единый график lag и таблицу Group + Topic.
+ * Статус Kafka Consumer Group показывается непосредственно рядом
+ * с топиком, поэтому рост lag можно сразу сопоставить с состоянием
+ * группы: Stable, Rebalancing, Empty или Dead.
  */
+
 import PanelInfo from '../../components/common/PanelInfo';
 import { useState, useEffect, useMemo } from 'react';
 import {
@@ -54,21 +37,53 @@ import {
 import axios from 'axios';
 import { useCluster } from '../../contexts/ClusterContext';
 
-// =========================================================================
-// 1. КАСТОМНЫЙ ТУЛТИП ДЛЯ ГРАФИКА
-// =========================================================================
+const TOPIC_COLORS = [
+  '#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444',
+  '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#a855f7',
+  '#14b8a6', '#f472b6'
+];
 
-/**
- * Тултип отображается при наведении на график.
- * Показывает время и значения lag для каждой линии.
- * Фильтрует нулевые значения для чистоты отображения.
- */
-const LagTooltip = ({ active, payload, label }) => {
-  if (!active || !payload || !payload.length) return null;
+const STATUS_META = {
+  Stable: {
+    label: 'Stable',
+    className: 'consumer-status-stable',
+    short: 'группа работает'
+  },
+  Rebalancing: {
+    label: 'Rebalancing',
+    className: 'consumer-status-rebalancing',
+    short: 'идёт перераспределение'
+  },
+  Empty: {
+    label: 'Empty',
+    className: 'consumer-status-empty',
+    short: 'нет активных консьюмеров'
+  },
+  Dead: {
+    label: 'Dead',
+    className: 'consumer-status-dead',
+    short: 'группа удаляется'
+  }
+};
 
-  // Отфильтровываем нулевые значения
-  const filtered = payload.filter(entry => entry.value > 0);
-  if (filtered.length === 0) return null;
+const getTopicColor = (topic, topics) =>
+  TOPIC_COLORS[Math.max(0, topics.indexOf(topic)) % TOPIC_COLORS.length];
+
+const formatLag = (value) =>
+  new Intl.NumberFormat('ru-RU').format(Number(value || 0));
+
+const formatChange = (value) => {
+  const change = Number(value || 0);
+  if (change > 0) return `↑ +${formatLag(change)}`;
+  if (change < 0) return `↓ ${formatLag(change)}`;
+  return '→ 0';
+};
+
+function LagTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+
+  const filtered = payload.filter((entry) => Number(entry.value) > 0);
+  if (!filtered.length) return null;
 
   return (
     <div className="topics-tooltip">
@@ -79,64 +94,31 @@ const LagTooltip = ({ active, payload, label }) => {
           className="topics-tooltip-row"
           style={{ color: entry.color || 'var(--text-primary)' }}
         >
-          {entry.name}: <strong>{entry.value.toFixed(1)} lag</strong>
+          {entry.name}: <strong>{formatLag(entry.value)} lag</strong>
         </div>
       ))}
     </div>
   );
-};
-
-// =========================================================================
-// 2. ГЕНЕРАЦИЯ ЦВЕТОВ ДЛЯ ЛИНИЙ
-// =========================================================================
-
-/**
- * Генерирует цвет для линии на основе индекса.
- * Используется предопределённая палитра для консистентности.
- *
- * @param {string} key - Ключ линии (группа + топик)
- * @param {number} index - Порядковый номер в списке
- * @returns {string} HEX-цвет
- */
-const getLineColor = (key, index) => {
-  const colors = [
-    '#3b82f6', // Синий
-    '#8b5cf6', // Фиолетовый
-    '#22c55e', // Зелёный
-    '#f59e0b', // Жёлтый
-    '#ef4444', // Красный
-    '#06b6d4', // Бирюзовый
-    '#ec4899', // Розовый
-    '#84cc16', // Салатовый
-    '#f97316', // Оранжевый
-    '#a855f7', // Пурпурный
-    '#14b8a6', // Изумрудный
-    '#f472b6', // Светло-розовый
-  ];
-  return colors[index % colors.length];
-};
-
-// =========================================================================
-// 3. ОСНОВНОЙ КОМПОНЕНТ
-// =========================================================================
+}
 
 export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
   const { currentCluster } = useCluster();
 
-  // ===== Состояния компонента =====
-  const [visibleLines, setVisibleLines] = useState([]); // Активные линии (группа+топик)
-  const [allLines, setAllLines] = useState([]); // Все доступные линии
-  const [rawData, setRawData] = useState([]); // Сырые данные с бэкенда
+  const [visibleLines, setVisibleLines] = useState([]);
+  const [allLines, setAllLines] = useState([]);
+  const [rawData, setRawData] = useState([]);
+  const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ===== Загрузка данных с бэкенда =====
   const loadConsumerLagData = async () => {
     if (!currentCluster) return;
+
     setLoading(true);
 
     try {
       const headers = {
-        'X-Kafka-Bootstrap': currentCluster.brokers || currentCluster.bootstrapServers
+        'X-Kafka-Bootstrap':
+          currentCluster.brokers || currentCluster.bootstrapServers
       };
 
       const response = await axios.get(
@@ -144,81 +126,45 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
         { headers }
       );
 
-      const points = response.data.points || [];
-
-      // Обезопашиваем данные (убираем отрицательные значения)
-      const safePoints = points.map(p => ({
-        ...p,
-        value: Math.max(0, p.value || 0)
+      const points = (response.data.points || []).map((point) => ({
+        ...point,
+        value: Math.max(0, point.value || 0)
       }));
 
-      setRawData(safePoints);
+      const nextRows = response.data.rows || [];
 
-      // ===== КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: формируем линии =====
-      // Каждая линия = группа (топик)
-      // Собираем все уникальные комбинации группа+топик
+      setRawData(points);
+      setRows(nextRows);
+
       const lineSet = new Set();
-      const lineTopicsMap = {}; // Для хранения топиков по группам (для отображения)
 
-      for (const point of safePoints) {
-        if (point.topics && typeof point.topics === 'object') {
-          // Для каждой точки данных перебираем топики
-          Object.keys(point.topics).forEach(topic => {
-            // Формируем ключ: группа (топик)
-            const lineKey = `${point.group} (${topic})`;
-            lineSet.add(lineKey);
+      points.forEach((point) => {
+        if (!point.topics || typeof point.topics !== 'object') return;
 
-            // Сохраняем информацию о группе и топике
-            if (!lineTopicsMap[lineKey]) {
-              lineTopicsMap[lineKey] = {
-                group: point.group,
-                topic: topic,
-                displayName: lineKey
-              };
-            }
-          });
-        }
-      }
+        Object.keys(point.topics).forEach((topic) => {
+          lineSet.add(`${point.group} (${topic})`);
+        });
+      });
 
-      // Преобразуем Set в массив и сортируем для стабильности
       const uniqueLines = Array.from(lineSet).sort();
       setAllLines(uniqueLines);
 
-      // Определяем активные линии (с положительным lag в последней точке)
-      const activeSet = new Set();
+      const lastPoint = points[points.length - 1];
+      const active = new Set();
 
-      // Находим последнюю точку времени
-      const lastTime = safePoints.length > 0
-        ? safePoints[safePoints.length - 1].time
-        : null;
-
-      if (lastTime) {
-        // Берём только последние данные
-        const lastPoints = safePoints.filter(p => p.time === lastTime);
-
-        for (const point of lastPoints) {
-          if (point.topics && typeof point.topics === 'object') {
-            Object.keys(point.topics).forEach(topic => {
-              const value = point.topics[topic] || 0;
-              if (value > 0) {
-                const lineKey = `${point.group} (${topic})`;
-                activeSet.add(lineKey);
-              }
-            });
+      if (lastPoint?.topics) {
+        Object.entries(lastPoint.topics).forEach(([topic, value]) => {
+          if (Number(value) > 0) {
+            active.add(`${lastPoint.group} (${topic})`);
           }
-        }
+        });
       }
 
-      // Если есть активные линии - показываем их, иначе все
-      const initialVisible = activeSet.size > 0
-        ? Array.from(activeSet).sort()
-        : uniqueLines;
-
-      setVisibleLines(initialVisible);
-
-    } catch (err) {
-      console.error('Ошибка загрузки данных consumer lag:', err);
+      setVisibleLines(active.size ? Array.from(active).sort() : uniqueLines);
+    } catch (error) {
+      console.error('Ошибка загрузки данных consumer lag:', error);
       setRawData([]);
+      setRows([]);
       setAllLines([]);
       setVisibleLines([]);
     } finally {
@@ -226,179 +172,117 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
     }
   };
 
-  // Перезагружаем при смене кластера, периода или обновлении
   useEffect(() => {
     loadConsumerLagData();
   }, [currentCluster, timeRange, refreshKey]);
 
-  // ===== Подготовка данных для Recharts =====
-  // Группируем данные по времени, создавая объект { time, lineKey1: value, lineKey2: value, ... }
-  const prepareChartData = useMemo(() => {
+  const chartData = useMemo(() => {
     const timeMap = new Map();
 
-    for (const point of rawData) {
-      if (!point.topics || typeof point.topics !== 'object') continue;
+    rawData.forEach((point) => {
+      if (!point.topics || typeof point.topics !== 'object') return;
 
-      // Для каждой точки времени
       if (!timeMap.has(point.time)) {
         timeMap.set(point.time, { time: point.time });
       }
 
       const entry = timeMap.get(point.time);
 
-      // Для каждого топика в точке
-      Object.keys(point.topics).forEach(topic => {
-        const lineKey = `${point.group} (${topic})`;
-        const value = Math.max(0, point.topics[topic] || 0);
-        entry[lineKey] = value;
+      Object.entries(point.topics).forEach(([topic, value]) => {
+        entry[`${point.group} (${topic})`] = Math.max(0, Number(value || 0));
       });
-    }
+    });
 
-    // Сортируем по времени
-    return Array.from(timeMap.values())
-      .sort((a, b) => a.time.localeCompare(b.time));
+    return Array.from(timeMap.values()).sort((a, b) =>
+      a.time.localeCompare(b.time)
+    );
   }, [rawData]);
 
-  // Получаем последнюю точку для отображения значений в легенде
-  const lastPoint = prepareChartData.length > 0
-    ? prepareChartData[prepareChartData.length - 1]
+  const lastPoint = chartData.length
+    ? chartData[chartData.length - 1]
     : {};
 
-  // ===== Обработчики кликов =====
+  const topicNames = useMemo(() => {
+    const names = new Set();
 
-  /**
-   * Обработчик клика по строке легенды
-   * - Обычный клик: оставить только эту линию
-   * - Ctrl+клик: добавить/удалить линию из набора
-   * - Повторный клик на единственной линии: вернуть все активные
-   */
+    rows.forEach((row) => names.add(row.topic));
+    allLines.forEach((line) => {
+      const match = line.match(/\((.*)\)$/);
+      if (match) names.add(match[1]);
+    });
+
+    return Array.from(names).sort();
+  }, [rows, allLines]);
+
   const handleLineSelect = (lineKey, event) => {
-    if (event && event.stopPropagation) event.stopPropagation();
+    event?.stopPropagation();
 
-    // Ctrl + клик: мультивыбор
-    if (event && event.ctrlKey) {
-      setVisibleLines(prev =>
-        prev.includes(lineKey)
-          ? prev.filter(key => key !== lineKey)
-          : [...prev, lineKey]
+    if (event?.ctrlKey) {
+      setVisibleLines((current) =>
+        current.includes(lineKey)
+          ? current.filter((key) => key !== lineKey)
+          : [...current, lineKey]
       );
       return;
     }
 
-    // Если линия уже одна и кликаем по ней - возвращаем все активные
     if (visibleLines.length === 1 && visibleLines[0] === lineKey) {
-      // Находим все линии с положительным lag в последней точке
-      const activeSet = new Set();
-      for (const key of allLines) {
-        const value = lastPoint[key] || 0;
-        if (value > 0) {
-          activeSet.add(key);
-        }
-      }
-      setVisibleLines(activeSet.size > 0 ? Array.from(activeSet).sort() : allLines);
-    } else {
-      // Обычный клик: оставляем только эту линию
-      setVisibleLines([lineKey]);
+      const active = allLines.filter((key) => Number(lastPoint[key] || 0) > 0);
+      setVisibleLines(active.length ? active : allLines);
+      return;
     }
+
+    setVisibleLines([lineKey]);
   };
 
-  /**
-   * Обработчик клика по фону графика
-   * Возвращает все активные линии
-   */
-  const handleChartClick = () => {
-    const activeSet = new Set();
-    for (const key of allLines) {
-      const value = lastPoint[key] || 0;
-      if (value > 0) {
-        activeSet.add(key);
-      }
-    }
-    setVisibleLines(activeSet.size > 0 ? Array.from(activeSet).sort() : allLines);
+  const resetVisibleLines = () => {
+    const active = allLines.filter((key) => Number(lastPoint[key] || 0) > 0);
+    setVisibleLines(active.length ? active : allLines);
   };
 
-  // ===== Состояния загрузки =====
   if (!currentCluster) return null;
 
-  if (loading && rawData.length === 0) {
-    return (
-      <div className="dashboard-panel">
-        <div className="panel-header">
-            <div className="topics-panel-title">
-                <PanelInfo
-                    title="Отставание групп потребителей"
-                    description="Показывает consumer lag — разницу между последним доступным сообщением в Kafka и текущей позицией consumer group. Значение помогает определить, успевают ли потребители обрабатывать поток сообщений и где возникает накопление необработанных данных."
-                />
-
-                <span>
-                    Отставание групп потребителей
-                </span>
-            </div>
-        </div>
-        <div className="panel-body topics-placeholder">⏳ Загрузка данных...</div>
-      </div>
-    );
-  }
-
-  if (allLines.length === 0 && !loading) {
-    return (
-      <div className="dashboard-panel">
-        <div className="panel-header">
-          <div className="topics-panel-title">
+  return (
+    <div className="dashboard-panel consumer-lag-panel">
+      <div className="panel-header consumer-lag-header">
+        <div className="consumer-lag-heading">
+          <div className="panel-title-with-info">
             <PanelInfo
-              title="Отставание групп потребителей"
-              description="Показывает consumer lag — разницу между последним доступным сообщением в Kafka и текущей позицией consumer group. Значение помогает определить, успевают ли потребители обрабатывать поток сообщений и где возникает накопление необработанных данных."
+              title="Группы потребителей"
+              description="Показывает историю consumer lag по связке Consumer Group + Topic. Статус группы помогает сразу определить причину проблемы: Stable — группа работает; Rebalancing — идёт перераспределение; Empty — нет активных консьюмеров; Dead — группа удаляется."
             />
+            <span>Группы потребителей</span>
+          </div>
 
-            <span>
-              Отставание групп потребителей
-            </span>
+          <div className="consumer-status-help" aria-label="Обозначения статусов">
+            {Object.values(STATUS_META).map((status) => (
+              <span
+                key={status.label}
+                className={`consumer-status-help-item ${status.className}`}
+                title={status.short}
+              >
+                <i />
+                {status.label}
+              </span>
+            ))}
           </div>
         </div>
-
-        <div className="panel-body topics-placeholder">
-          Нет данных о группах и топиках за выбранный период
-        </div>
-      </div>
-    );
-  }
-
-  // ===== Рендер компонента =====
-  return (
-    <div className="dashboard-panel">
-      <div className="panel-header">
-        <div className="topics-panel-title">
-          <PanelInfo
-            title="Отставание групп потребителей"
-            description="Показывает consumer lag — разницу между последним доступным сообщением в Kafka и текущей позицией consumer group. Значение помогает определить, успевают ли потребители обрабатывать поток сообщений и где возникает накопление необработанных данных."
-          />
-
-          <span>
-            Отставание групп потребителей
-          </span>
-        </div>
       </div>
 
-      <div className="panel-body">
-        <div className="topics-layout">
-
-          {/* ===== ГРАФИК ===== */}
-          <div className="topics-chart">
+      <div className="consumer-lag-content">
+        <div className="consumer-lag-chart">
+          {loading && chartData.length === 0 ? (
+            <div className="consumer-lag-placeholder">Загрузка данных...</div>
+          ) : allLines.length === 0 ? (
+            <div className="consumer-lag-placeholder">
+              Нет данных о группах и топиках за выбранный период
+            </div>
+          ) : (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={prepareChartData}
-                margin={{
-                  top: 10,
-                  right: 10,
-                  left: 0,
-                  bottom: 30
-                }}
-                onClick={handleChartClick}
-                cursor={{
-                  stroke: '#3b82f6',
-                  strokeWidth: 1,
-                  strokeDasharray: '4 4'
-                }}
+                data={chartData}
+                margin={{ top: 8, right: 10, left: 0, bottom: 26 }}
+                onClick={resetVisibleLines}
               >
                 <CartesianGrid
                   stroke="var(--border-color)"
@@ -407,105 +291,114 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
 
                 <XAxis
                   dataKey="time"
-                  height={45}
-                  tickMargin={10}
-                  tick={{
-                    fill: 'var(--text-secondary)',
-                    fontSize: 12
-                  }}
+                  height={35}
+                  tickMargin={8}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
                 />
 
                 <YAxis
                   domain={[0, 'auto']}
-                  padding={{ top: 20 }}
-                  tick={{
-                    fill: 'var(--text-secondary)',
-                    fontSize: 12
-                  }}
+                  padding={{ top: 12 }}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                   tickLine={false}
                   axisLine={false}
                 />
 
                 <Tooltip content={<LagTooltip />} />
 
-                {/* ===== ОТРИСОВКА ЛИНИЙ ===== */}
-                {/* Каждая линия = группа (топик) */}
-                {allLines
-                  .filter(lineKey => visibleLines.includes(lineKey))
-                  .map((lineKey, idx) => {
-                    const color = getLineColor(lineKey, idx);
-                    return (
-                      <Line
-                        key={lineKey}
-                        type="monotone"
-                        dataKey={lineKey}
-                        stroke={color}
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{
-                          r: 5,
-                          stroke: '#fff',
-                          strokeWidth: 2,
-                          fill: color
-                        }}
-                        onMouseDown={(e) => handleLineSelect(lineKey, e)}
-                        style={{ cursor: 'pointer' }}
-                      />
-                    );
-                  })}
+                {visibleLines.map((lineKey) => {
+                  const match = lineKey.match(/\((.*)\)$/);
+                  const topic = match ? match[1] : lineKey;
+                  const color = getTopicColor(topic, topicNames);
+
+                  return (
+                    <Line
+                      key={lineKey}
+                      type="monotone"
+                      dataKey={lineKey}
+                      name={lineKey}
+                      stroke={color}
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 4, stroke: '#fff', strokeWidth: 1, fill: color }}
+                      onMouseDown={(event) => handleLineSelect(lineKey, event)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  );
+                })}
               </LineChart>
             </ResponsiveContainer>
-          </div>
+          )}
+        </div>
 
-          {/* ===== ЛЕГЕНДА ===== */}
-          <div className="topics-legend">
-            <div className="topics-legend-header">
-              <span>Группа (топик)</span>
-              <span>Отставание</span>
+        <div className="consumer-lag-table-wrap">
+          <div className="consumer-lag-table">
+            <div className="consumer-lag-table-header">
+              <span>Группа потребителей</span>
+              <span>Топик</span>
+              <span>Статус</span>
+              <span>Лаг</span>
+              <span>Изменение</span>
+              <span>Последняя активность</span>
             </div>
 
-            {visibleLines.length === 0 ? (
-              <div className="topics-legend-placeholder">
-                Нет активных линий для отображения
-              </div>
-            ) : (
-              visibleLines.map((lineKey, idx) => {
-                const color = getLineColor(lineKey, idx);
-                const value = lastPoint[lineKey] || 0;
+            {rows.length ? (
+              rows.map((row) => {
+                const status = STATUS_META[row.status] || {
+                  label: row.status || 'Unknown',
+                  className: 'consumer-status-unknown',
+                  short: 'состояние не определено'
+                };
+
+                const topicColor = getTopicColor(row.topic, topicNames);
 
                 return (
                   <div
-                    key={lineKey}
-                    className={`topics-legend-row ${
-                      visibleLines.length === 1 && visibleLines[0] === lineKey
-                        ? 'active'
-                        : ''
-                    }`}
-                    onClick={(e) => handleLineSelect(lineKey, e)}
+                    className="consumer-lag-table-row"
+                    key={`${row.group}-${row.topic}`}
                   >
-                    <div className="topics-legend-left">
-                      {/* Цветной индикатор */}
-                      <span
-                        className="topics-legend-color-dot"
-                        style={{
-                          background: color,
-                          boxShadow: `0 0 6px ${color}40`
-                        }}
-                      />
-                      {/* Название: группа (топик) */}
-                      <span className="topics-legend-line-name">
-                        {lineKey}
-                      </span>
-                    </div>
-                    {/* Значение lag */}
-                    <span className="topics-legend-value">
-                      {value.toFixed(1)}
+                    <span className="consumer-group-name">{row.group}</span>
+
+                    <span
+                      className="consumer-topic-name"
+                      style={{ '--topic-color': topicColor }}
+                    >
+                      <i />
+                      {row.topic}
+                    </span>
+
+                    <span className={`consumer-status-badge ${status.className}`}>
+                      {status.label}
+                    </span>
+
+                    <span className="consumer-lag-value">
+                      {formatLag(row.lag)}
+                    </span>
+
+                    <span
+                      className={`consumer-lag-change ${
+                        row.change > 0
+                          ? 'lag-change-up'
+                          : row.change < 0
+                            ? 'lag-change-down'
+                            : 'lag-change-flat'
+                      }`}
+                    >
+                      {formatChange(row.change)}
+                    </span>
+
+                    <span className="consumer-last-activity">
+                      {row.lastActivity || '—'}
                     </span>
                   </div>
                 );
               })
+            ) : (
+              <div className="consumer-lag-table-empty">
+                Нет данных для таблицы
+              </div>
             )}
           </div>
         </div>

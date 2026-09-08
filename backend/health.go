@@ -44,9 +44,9 @@ import (
 // ClusterHealthResponse представляет ответ API с результатом проверки.
 // Поле Status принимает значения: "connected", "disconnected", "error".
 // Поле Error опционально, содержит текст ошибки при её возникновении.
-type ClusterHealthResponse struct {
-	Status string `json:"status"`            // "connected", "disconnected", "error"
-	Error  string `json:"error,omitempty"`  // детали ошибки (если есть)
+type KafkaConnectionHealthResponse struct {
+	Status string `json:"status"`          // "connected", "disconnected", "error"
+	Error  string `json:"error,omitempty"` // детали ошибки (если есть)
 }
 
 // getClusterHealthHandler – HTTP-обработчик для проверки доступности Kafka.
@@ -54,11 +54,11 @@ type ClusterHealthResponse struct {
 // Заголовок: X-Kafka-Bootstrap: <адрес брокера>
 //
 // Логика работы:
-//   1. Извлекает bootstrap из заголовка запроса.
-//   2. Создаёт конфигурацию Sarama с короткими таймаутами.
-//   3. Пытается создать клиент и подключиться к Kafka.
-//   4. Запрашивает список топиков (дополнительная проверка).
-//   5. Возвращает JSON со статусом "connected" или "disconnected".
+//  1. Извлекает bootstrap из заголовка запроса.
+//  2. Создаёт конфигурацию Sarama с короткими таймаутами.
+//  3. Пытается создать клиент и подключиться к Kafka.
+//  4. Запрашивает список топиков (дополнительная проверка).
+//  5. Возвращает JSON со статусом "connected" или "disconnected".
 func getClusterHealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -73,7 +73,7 @@ func getClusterHealthHandler(w http.ResponseWriter, r *http.Request) {
 	// Конфигурация с агрессивными таймаутами для быстрой проверки
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_8_0_0
-	config.Net.DialTimeout = 3 * time.Second   // время ожидания подключения
+	config.Net.DialTimeout = 3 * time.Second // время ожидания подключения
 	config.Net.ReadTimeout = 2 * time.Second
 	config.Net.WriteTimeout = 2 * time.Second
 
@@ -81,7 +81,7 @@ func getClusterHealthHandler(w http.ResponseWriter, r *http.Request) {
 	client, err := sarama.NewClient([]string{bootstrap}, config)
 	if err != nil {
 		// Не удалось подключиться — кластер недоступен
-		response := ClusterHealthResponse{
+		response := KafkaConnectionHealthResponse{
 			Status: "disconnected",
 			Error:  err.Error(),
 		}
@@ -93,7 +93,7 @@ func getClusterHealthHandler(w http.ResponseWriter, r *http.Request) {
 	// Дополнительная проверка: запрашиваем список топиков,
 	// чтобы удостовериться, что брокер отвечает на запросы.
 	if _, err := client.Topics(); err != nil {
-		response := ClusterHealthResponse{
+		response := KafkaConnectionHealthResponse{
 			Status: "disconnected",
 			Error:  err.Error(),
 		}
@@ -102,6 +102,6 @@ func getClusterHealthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Все проверки пройдены — кластер доступен
-	response := ClusterHealthResponse{Status: "connected"}
+	response := KafkaConnectionHealthResponse{Status: "connected"}
 	_ = json.NewEncoder(w).Encode(response)
 }

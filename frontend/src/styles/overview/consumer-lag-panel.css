@@ -14,256 +14,241 @@
  * limitations under the License.
  */
 
-/* ============================================================
-   consumer-lag-panel.css - ОПТИМИЗИРОВАННАЯ ВЕРСИЯ
+/* Стили панели Consumer Lag: график сверху, таблица снизу. */
 
-   НАЗНАЧЕНИЕ:
-   Стили для панели отставания групп потребителей (Consumer Lag).
-   Оптимизированы для экономии места при сохранении читаемости.
+.consumer-lag-panel {
+    min-width: 0;
+    min-height: 0;
+}
 
-   ОСОБЕННОСТИ:
-   - Каждая линия на графике = группа (топик)
-   - Компактные отступы как в Grafana
-   - Названия отображаются полностью
-   - Автоматическое масштабирование
-   ============================================================ */
+.consumer-lag-header {
+    padding: 9px 14px 7px !important;
+}
 
-/* ============================================================
-   1. ЗАГОЛОВОК ПАНЕЛИ И ПЛЕЙСХОЛДЕРЫ
-   ============================================================ */
+.consumer-lag-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+}
 
-.topics-panel-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-primary);
+.panel-title-with-info {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
 }
 
-.topics-placeholder {
-    height: 260px;
+.consumer-status-help {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    font-size: 14px;
+    gap: 9px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
-/* ============================================================
-   2. КОНТЕЙНЕР ГРАФИКА И ЛЕГЕНДЫ - ОПТИМИЗИРОВАН
-   ============================================================ */
+.consumer-status-help-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: help;
+}
 
-.topics-layout {
+.consumer-status-help-item i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.consumer-status-stable {
+    color: #22c55e;
+}
+
+.consumer-status-rebalancing {
+    color: #f59e0b;
+}
+
+.consumer-status-empty {
+    color: #ef4444;
+}
+
+.consumer-status-dead {
+    color: #ef4444;
+}
+
+.consumer-status-unknown {
+    color: #3b82f6;
+}
+
+.consumer-lag-content {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
-    display: flex;
-    gap: 12px;
-    height: 100%;
+    padding: 7px 12px 10px;
+    gap: 6px;
+}
+
+.consumer-lag-chart {
+    flex: 0 0 47%;
+    min-height: 180px;
     width: 100%;
 }
 
-.topics-chart {
-    flex: 1;
-    min-width: 0;
+.consumer-lag-placeholder {
     height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--text-secondary);
+    font-size: 12px;
 }
 
-/* Легенда - компактная, но с запасом для длинных названий */
-.topics-legend {
-    flex: 0 0 auto;
-    min-width: 160px;
-    max-width: 35%;
-    max-height: 100%;
+.consumer-lag-table-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    border-top: 1px solid var(--border-color);
+    padding-top: 5px;
+    scrollbar-width: thin;
+}
+
+.consumer-lag-table {
+    min-width: 760px;
     display: flex;
     flex-direction: column;
-    gap: 1px;
-    overflow-y: auto;
-    padding-right: 4px;
+    gap: 2px;
 }
 
-/* ============================================================
-   3. СТРОКА ЛЕГЕНДЫ - КОМПАКТНАЯ
-   ============================================================ */
-
-.topics-legend-row {
-    outline: none;
-    display: flex;
-    justify-content: space-between;
+.consumer-lag-table-header,
+.consumer-lag-table-row {
+    display: grid;
+    grid-template-columns: 1.25fr 1.15fr 118px 70px 90px 112px;
+    gap: 8px;
     align-items: center;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 400;
-    padding: 3px 8px;
-    border-radius: 6px;
-    flex-shrink: 0;
-    transition: background 0.15s ease;
-    min-height: 26px;
-    gap: 10px;
 }
 
-.topics-legend-row:hover {
-    background: var(--hover-color);
-}
-
-.topics-legend-row.active {
-    background: var(--hover-color);
-}
-
-.topics-legend-row:focus,
-.topics-legend-row:focus-visible {
-    outline: none;
-}
-
-.topics-legend-left {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    min-width: 0;
-    flex: 1;
-}
-
-/* ============================================================
-   4. ЦВЕТНОЙ ИНДИКАТОР
-   ============================================================ */
-
-.topics-legend-color-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    display: inline-block;
-    flex-shrink: 0;
-    transition: box-shadow 0.2s ease;
-}
-
-.topics-legend-row:hover .topics-legend-color-dot {
-    box-shadow: 0 0 12px var(--accent-color) !important;
-}
-
-/* ============================================================
-   5. НАЗВАНИЕ ЛИНИИ
-   ============================================================ */
-
-.topics-legend-line-name {
-    font-weight: 500;
-    color: var(--text-primary);
-    font-size: 12px;
-    white-space: nowrap;
-    flex: 0 1 auto;
-    min-width: 0;
-    max-width: 100%;
-    overflow: visible;
-    text-overflow: clip;
-    word-break: keep-all;
-}
-
-/* ============================================================
-   6. ЗНАЧЕНИЕ ОТСТАВАНИЯ
-   ============================================================ */
-
-.topics-legend-value {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-primary);
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
-    min-width: 40px;
-    text-align: right;
-}
-
-/* ============================================================
-   7. ЗАГОЛОВОК ЛЕГЕНДЫ
-   ============================================================ */
-
-/* Заголовок легенды - "Группа (топик)" и "Отставание" */
-.topics-legend-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px; /* Размер как у строк */
-    font-weight: 500;
+.consumer-lag-table-header {
+    padding: 0 7px 4px;
     color: var(--text-secondary);
-    margin-bottom: 4px;
-    padding: 2px 8px 4px 8px;
-    border-bottom: 1px solid var(--border-color);
-    gap: 10px;
-}
-
-/* "Группа (топик)" - жирный, но того же размера */
-.topics-legend-header span:first-child {
+    font-size: 12px;
     font-weight: 600;
-    flex: 1;
-    font-size: 12px; /* Тот же размер что и у строк */
 }
 
-/* "Отставание" - того же размера */
-.topics-legend-header span:last-child {
-    font-weight: 500;
-    flex-shrink: 0;
-    min-width: 40px;
-    text-align: right;
-    font-size: 12px; /* Тот же размер что и у строк */
-    opacity: 0.7;
+.consumer-lag-table-row {
+    min-height: 25px;
+    padding: 4px 7px;
+    border-radius: 5px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
 }
 
-.topics-legend-placeholder {
-    padding: 12px;
+.consumer-lag-table-row:hover {
+    background: var(--table-row-hover);
+}
+
+.consumer-lag-table-row > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.consumer-group-name {
+    color: var(--text-primary);
+}
+
+.consumer-topic-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-primary);
+}
+
+.consumer-topic-name i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--topic-color);
+    box-shadow: 0 0 7px color-mix(in srgb, var(--topic-color) 45%, transparent);
+    flex: 0 0 auto;
+}
+
+.consumer-status-badge,
+.event-status-badge {
+    width: fit-content;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: color-mix(in srgb, currentColor 14%, transparent);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+
+.consumer-lag-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.consumer-lag-change {
+    font-weight: 600;
+}
+
+.lag-change-up {
+    color: #ef4444;
+}
+
+.lag-change-down {
+    color: #22c55e;
+}
+
+.lag-change-flat {
+    color: var(--text-secondary);
+}
+
+.consumer-last-activity {
+    color: var(--text-secondary);
+}
+
+.consumer-lag-table-empty {
+    padding: 14px;
     text-align: center;
     color: var(--text-secondary);
     font-size: 12px;
-    font-weight: 400;
 }
-
-/* ============================================================
-   8. СБРОС ФОКУСА RECHARTS
-   ============================================================ */
-
-.recharts-wrapper:focus,
-.recharts-surface:focus,
-.recharts-responsive-container:focus {
-    outline: none !important;
-}
-
-.recharts-wrapper *,
-.recharts-surface *,
-.recharts-layer * {
-    outline: none !important;
-}
-
-.recharts-wrapper:focus,
-.recharts-surface:focus,
-.recharts-layer:focus,
-svg:focus,
-path:focus {
-    outline: none !important;
-}
-
-/* ============================================================
-   9. КАСТОМНЫЙ ТУЛТИП
-   ============================================================ */
 
 .topics-tooltip {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 10px 14px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    min-width: 180px;
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-width: 160px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
 }
 
 .topics-tooltip-title {
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: var(--text-primary);
     font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-primary);
 }
 
 .topics-tooltip-row {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
-    color: var(--text-secondary);
-    margin-bottom: 3px;
+    gap: 12px;
+    margin-bottom: 2px;
     font-size: 12px;
 }
 
@@ -271,159 +256,55 @@ path:focus {
     color: var(--text-primary);
 }
 
-/* ============================================================
-   10. ВЕРТИКАЛЬНЫЙ КУРСОР
-   ============================================================ */
-
-.recharts-cursor {
-    stroke: #3b82f6 !important;
-    stroke-width: 1px !important;
-    stroke-dasharray: 4 4 !important;
-    opacity: 1 !important;
+.consumer-lag-table-wrap::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
 }
 
-.recharts-tooltip-cursor {
-    stroke: #3b82f6 !important;
-    stroke-width: 1px !important;
-    stroke-dasharray: 4 4 !important;
+.consumer-lag-table-wrap::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-/* ============================================================
-   11. ПОДПИСИ ОСЕЙ
-   ============================================================ */
+.consumer-lag-table-wrap::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-responsive-container:focus,
+.recharts-wrapper *,
+.recharts-surface *,
+.recharts-layer * {
+    outline: none !important;
+}
 
 .recharts-cartesian-axis-tick text,
 .recharts-xAxis .recharts-cartesian-axis-tick text,
 .recharts-yAxis .recharts-cartesian-axis-tick text,
 .recharts-cartesian-axis-tick tspan {
-    font-size: 11px !important;
+    font-size: 12px !important;
     fill: var(--text-secondary) !important;
 }
 
-/* ============================================================
-   12. СКРОЛЛБАР
-   ============================================================ */
-
-.topics-legend::-webkit-scrollbar {
-    width: 4px;
-}
-
-.topics-legend::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.topics-legend::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
-}
-
-.topics-legend::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
-}
-
-/* ============================================================
-   13. АДАПТИВНОСТЬ
-   ============================================================ */
-
 @media (max-width: 1200px) {
-    .topics-legend {
-        min-width: 140px;
-        max-width: 30%;
+    .consumer-lag-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
     }
 
-    .topics-legend-row {
-        font-size: 11px;
-        padding: 2px 6px;
-        min-height: 22px;
-        gap: 8px;
-    }
-
-    .topics-legend-line-name {
-        font-size: 11px;
-    }
-
-    .topics-legend-value {
-        font-size: 11px;
-        min-width: 35px;
-    }
-
-    .topics-legend-header {
-        font-size: 10px;
-        padding: 2px 6px 4px 6px;
-        gap: 8px;
-    }
-
-    .topics-legend-header span:last-child {
-        min-width: 35px;
+    .consumer-status-help {
+        justify-content: flex-start;
     }
 }
 
 @media (max-width: 768px) {
-    .topics-layout {
-        flex-direction: column;
-        gap: 10px;
+    .consumer-lag-chart {
+        flex-basis: 42%;
     }
 
-    .topics-legend {
-        flex: 1 1 auto;
-        min-width: 100%;
-        max-width: 100%;
-        max-height: 180px;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 3px;
-        padding: 4px 0;
-        overflow-y: auto;
-    }
-
-    .topics-legend-header {
-        display: none;
-    }
-
-    .topics-legend-row {
-        flex: 0 0 auto;
-        padding: 3px 8px;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        background: var(--card-bg);
-        min-height: 22px;
-        gap: 6px;
-    }
-
-    .topics-legend-left {
-        gap: 4px;
-    }
-
-    .topics-legend-line-name {
-        font-size: 10px;
-        white-space: nowrap;
-    }
-
-    .topics-legend-value {
-        font-size: 10px;
-        min-width: 30px;
-    }
-
-    .topics-legend-color-dot {
-        width: 7px;
-        height: 7px;
-    }
-}
-
-@media (max-width: 480px) {
-    .topics-legend-row {
-        font-size: 9px;
-        padding: 2px 6px;
-        min-height: 18px;
-        gap: 4px;
-    }
-
-    .topics-legend-line-name {
-        font-size: 9px;
-    }
-
-    .topics-legend-value {
-        font-size: 9px;
-        min-width: 25px;
+    .consumer-lag-table {
+        min-width: 700px;
     }
 }

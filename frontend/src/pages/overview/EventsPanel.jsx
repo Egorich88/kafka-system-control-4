@@ -14,32 +14,41 @@
  * limitations under the License.
  */
 
-/* =====================================================
-           ПОСЛЕДНИЕ СОБЫТИЯ KAFKA-КЛАСТЕРА.
+/**
+ * @fileoverview Панель последних событий Kafka-кластера.
+ *
+ * События Consumer Groups уже содержат группу, топик и состояние внутри
+ * текстового сообщения. Поэтому таблица остаётся компактной: Время,
+ * Сообщение, Источник.
+ */
 
-    В будущем здесь будут отображаться:
-      - создание топиков
-      - удаление топиков
-      - подключение брокеров
-      - смена контроллера
-      - ошибки кластера
-======================================================== */
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../../styles/overview/events-panel.css';
 import PanelInfo from '../../components/common/PanelInfo';
+import { useCluster } from '../../contexts/ClusterContext';
 
-export default function EventsPanel() {
+export default function EventsPanel({ refreshKey }) {
+  const { currentCluster } = useCluster();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const loadEvents = async () => {
+    if (!currentCluster) return;
+
     setLoading(true);
+
     try {
-      const res = await axios.get('/api/overview/events');
-      setEvents(res.data.events || []);
-    } catch (e) {
-      console.error('Failed to load events', e);
+      const bootstrap =
+        currentCluster.brokers || currentCluster.bootstrapServers;
+
+      const response = await axios.get('/api/overview/events', {
+        headers: { 'X-Kafka-Bootstrap': bootstrap }
+      });
+
+      setEvents(response.data.events || []);
+    } catch (error) {
+      console.error('Ошибка загрузки событий:', error);
     } finally {
       setLoading(false);
     }
@@ -47,13 +56,7 @@ export default function EventsPanel() {
 
   useEffect(() => {
     loadEvents();
-
-    const interval = setInterval(() => {
-      loadEvents();
-    }, 10000); // автообновление 10 сек
-
-    return () => clearInterval(interval);
-  }, []);
+  }, [currentCluster, refreshKey]);
 
   const getLevelClass = (level) => {
     switch (level) {
@@ -71,43 +74,44 @@ export default function EventsPanel() {
   return (
     <div className="events-panel">
       <div className="events-panel-header">
-          <div className="events-title">
-              <PanelInfo
-                  title="Последние события"
-                  description="Отображает последние зарегистрированные события кластера: информационные сообщения, предупреждения и ошибки. Панель предназначена для оперативного контроля изменений и потенциальных проблем в работе Kafka."
-              />
-
-              <span>
-                  Последние события
-              </span>
-          </div>
+        <div className="events-title">
+          <PanelInfo
+            title="Последние события"
+            description="Показывает последние изменения и проблемы кластера. Для событий Consumer Groups дополнительно отображаются группа, топик и актуальное состояние: Stable, Rebalancing, Empty или Dead."
+          />
+          <span>Последние события</span>
+        </div>
       </div>
 
       <div className="events-table">
         <div className="events-table-header">
           <div>Время</div>
-          <div>Уровень</div>
           <div>Сообщение</div>
           <div>Источник</div>
         </div>
 
-        {events.map((e, idx) => (
-          <div className="events-row" key={idx}>
-            <div className="events-cell">{e.time}</div>
+        {events.map((event, index) => (
+          <div className="events-row" key={`${event.time}-${index}`}>
+            <div className="events-cell event-time">{event.time}</div>
 
-            <div className={`events-cell level ${getLevelClass(e.level)}`}>
-              {e.level}
+            <div className="events-cell event-message">
+              <span className={`event-level-badge ${getLevelClass(event.level)}`}>
+                {event.level}
+              </span>
+              <span className="event-message-text">{event.message}</span>
             </div>
 
-            <div className="events-cell">{e.message}</div>
-
-            <div className="events-cell source">{e.source}</div>
+            <div className="events-cell source">
+              {event.source}
+            </div>
           </div>
         ))}
 
-        {loading && (
-          <div className="events-loading">Загрузка...</div>
+        {!loading && events.length === 0 && (
+          <div className="events-loading">Событий пока нет</div>
         )}
+
+        {loading && <div className="events-loading">Загрузка...</div>}
       </div>
     </div>
   );

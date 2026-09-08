@@ -295,14 +295,14 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                       key={topic}
                       type="monotone"
                       dataKey={topic}
-                      stroke={getTopicColor(topic, idx)}
+                      stroke={getTopicColor(topic, allTopics.indexOf(topic))}
                       strokeWidth={2}
                       dot={false}
                       activeDot={{
                         r: 5,
                         stroke: '#fff',
                         strokeWidth: 2,
-                        fill: getTopicColor(topic, idx)
+                        fill: getTopicColor(topic, allTopics.indexOf(topic))
                       }}
                       onMouseDown={(e) => handleTopicSelect(topic, e)}
                       style={{ cursor: 'pointer' }}

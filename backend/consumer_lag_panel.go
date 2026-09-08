@@ -18,22 +18,15 @@
 // Файл: consumer_lag_panel.go
 // =============================================================================
 // Назначение:
-//   Предоставляет REST API для получения данных об отставании (lag)
-//   групп потребителей Kafka. Включает сбор метрик в фоновом режиме,
-//   хранение в кольцевом буфере и выдачу через HTTP-эндпоинт.
+//   REST API и фоновый сборщик данных для панели Consumer Lag на странице
+//   Overview. График хранит историю lag, а таблица дополнительно показывает
+//   связку Consumer Group + Topic, текущее состояние группы, изменение lag
+//   и время последней активности.
 //
-// Структура данных:
-//   LagPoint      - точка графика с информацией о группе, времени, общем lag
-//                   и разбивке по топикам
-//   LagResponse   - ответ API
-//
-// Сборщик:
-//   LagCollector  - фоновый сборщик, опрашивающий Kafka каждые 10 секунд
-//   Хранит историю в кольцевом буфере (288 точек = 48 минут)
-//
-// Маршрут API:
-//   GET /api/overview/consumer-lag?range=15m|1h|6h|24h
-//   Заголовок: X-Kafka-Bootstrap: <адрес брокера>
+// Важно:
+//   Kafka предоставляет состояние Consumer Group на уровне группы, а не
+//   отдельного топика. Поэтому статус в строке Group + Topic отражает
+//   фактическое состояние всей Consumer Group.
 // =============================================================================
 
 package main
@@ -42,6 +35,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sort"
 	"sync"
 	"time"
 
@@ -52,26 +46,35 @@ import (
 // Модели данных
 // =============================================================================
 
-// LagPoint – точка графика для одной consumer группы с информацией о топиках.
-// Используется для построения графиков на фронтенде.
+// LagPoint — точка графика одной Consumer Group с разбивкой lag по топикам.
 type LagPoint struct {
-	Time   string            `json:"time"`   // время в формате HH:MM:SS
-	Group  string            `json:"group"`  // название группы потребителей
-	Value  int64             `json:"value"`  // общее отставание (lag) в сообщениях
-	Topics map[string]int64  `json:"topics"` // отставание по каждому топику (ключ — название топика, значение — lag)
+	Time   string           `json:"time"`
+	Group  string           `json:"group"`
+	Value  int64            `json:"value"`
+	Topics map[string]int64 `json:"topics"`
 }
 
-// LagResponse – ответ API с массивом точек для построения графиков.
+// ConsumerLagRow — текущая строка таблицы Group + Topic.
+type ConsumerLagRow struct {
+	Group        string `json:"group"`
+	Topic        string `json:"topic"`
+	Status       string `json:"status"`
+	Lag          int64  `json:"lag"`
+	Change       int64  `json:"change"`
+	LastActivity string `json:"lastActivity,omitempty"`
+	Members      int    `json:"members"`
+}
+
+// LagResponse — ответ API графика и таблицы.
 type LagResponse struct {
-	Points []LagPoint `json:"points"`
+	Points []LagPoint       `json:"points"`
+	Rows   []ConsumerLagRow `json:"rows"`
 }
 
 // =============================================================================
-// Кольцевой буфер для хранения lag точек по группам
+// Кольцевой буфер истории
 // =============================================================================
 
-// lagRingBuffer – кольцевой буфер для хранения истории одной группы.
-// Используется для хранения до 288 точек (при интервале 10 сек = 48 минут).
 type lagRingBuffer struct {
 	points []LagPoint
 	idx    int
@@ -79,15 +82,12 @@ type lagRingBuffer struct {
 	mu     sync.RWMutex
 }
 
-// lagMetricsStorage – хранилище кольцевых буферов для всех групп потребителей.
-// Обеспечивает потокобезопасный доступ и создание буферов по требованию.
 type lagMetricsStorage struct {
 	mu   sync.RWMutex
 	data map[string]*lagRingBuffer
 	size int
 }
 
-// newLagMetricsStorage создаёт новое хранилище с указанным размером буфера.
 func newLagMetricsStorage(bufferSize int) *lagMetricsStorage {
 	return &lagMetricsStorage{
 		data: make(map[string]*lagRingBuffer),
@@ -95,7 +95,6 @@ func newLagMetricsStorage(bufferSize int) *lagMetricsStorage {
 	}
 }
 
-// getOrCreateBuffer возвращает буфер для группы, создавая его при необходимости.
 func (s *lagMetricsStorage) getOrCreateBuffer(group string) *lagRingBuffer {
 	s.mu.RLock()
 	buf, exists := s.data[group]
@@ -103,25 +102,26 @@ func (s *lagMetricsStorage) getOrCreateBuffer(group string) *lagRingBuffer {
 	if exists {
 		return buf
 	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
 	if buf, exists = s.data[group]; exists {
 		return buf
 	}
+
 	buf = &lagRingBuffer{
 		points: make([]LagPoint, s.size),
-		idx:    0,
-		full:   false,
 	}
 	s.data[group] = buf
 	return buf
 }
 
-// addPoint добавляет новую точку в хранилище для указанной группы.
 func (s *lagMetricsStorage) addPoint(group string, point LagPoint) {
 	buf := s.getOrCreateBuffer(group)
 	buf.mu.Lock()
 	defer buf.mu.Unlock()
+
 	buf.points[buf.idx] = point
 	buf.idx = (buf.idx + 1) % s.size
 	if buf.idx == 0 {
@@ -129,41 +129,45 @@ func (s *lagMetricsStorage) addPoint(group string, point LagPoint) {
 	}
 }
 
-// getAllPoints собирает все точки из всех буферов в единый массив.
 func (s *lagMetricsStorage) getAllPoints() []LagPoint {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+
 	result := make([]LagPoint, 0)
+
 	for group, buf := range s.data {
 		buf.mu.RLock()
+
 		n := s.size
 		if !buf.full {
 			n = buf.idx
 		}
+
 		start := buf.idx - n
 		if start < 0 {
 			start += s.size
 		}
+
 		for i := 0; i < n; i++ {
-			pt := buf.points[(start+i)%s.size]
-			if pt.Time != "" {
-				if pt.Group == "" {
-					pt.Group = group
+			point := buf.points[(start+i)%s.size]
+			if point.Time != "" {
+				if point.Group == "" {
+					point.Group = group
 				}
-				result = append(result, pt)
+				result = append(result, point)
 			}
 		}
+
 		buf.mu.RUnlock()
 	}
+
 	return result
 }
 
 // =============================================================================
-// Сборщик метрик lag с топиками
+// Сборщик истории lag
 // =============================================================================
 
-// LagCollector – фоновый сборщик, опрашивающий Kafka каждые 10 секунд.
-// Сохраняет историю lag для всех групп с разбивкой по топикам.
 type LagCollector struct {
 	storage   *lagMetricsStorage
 	bootstrap string
@@ -172,9 +176,6 @@ type LagCollector struct {
 	interval  time.Duration
 }
 
-// NewLagCollector создаёт новый сборщик для указанного кластера.
-// bufferSize — количество точек в кольцевом буфере (рекомендуется 288).
-// interval — частота опроса Kafka (рекомендуется 10 секунд).
 func NewLagCollector(bootstrap string, bufferSize int, interval time.Duration) *LagCollector {
 	return &LagCollector{
 		storage:   newLagMetricsStorage(bufferSize),
@@ -184,11 +185,11 @@ func NewLagCollector(bootstrap string, bufferSize int, interval time.Duration) *
 	}
 }
 
-// Start запускает фоновую горутину для сбора метрик.
 func (lc *LagCollector) Start() {
 	go func() {
 		ticker := time.NewTicker(lc.interval)
 		defer ticker.Stop()
+
 		for {
 			select {
 			case <-ticker.C:
@@ -201,13 +202,10 @@ func (lc *LagCollector) Start() {
 	}()
 }
 
-// Stop останавливает фоновый сбор метрик.
 func (lc *LagCollector) Stop() {
 	close(lc.stopChan)
 }
 
-// collect — основной метод сбора данных.
-// Опрашивает Kafka и сохраняет точки в кольцевом буфере.
 func (lc *LagCollector) collect() {
 	lc.mu.Lock()
 	defer lc.mu.Unlock()
@@ -219,24 +217,26 @@ func (lc *LagCollector) collect() {
 	}
 
 	now := time.Now()
+
 	for group, totalLag := range lagMap {
 		if totalLag < 0 {
 			totalLag = 0
 		}
-		point := LagPoint{
+
+		lc.storage.addPoint(group, LagPoint{
 			Time:   now.Format("15:04:05"),
 			Group:  group,
 			Value:  totalLag,
 			Topics: topicsMap[group],
-		}
-		lc.storage.addPoint(group, point)
+		})
 	}
-	log.Printf("[LagCollector] собрано lag для %d групп", len(lagMap))
 }
 
-// fetchConsumerLagsWithTopics возвращает текущий lag для каждой группы с разбивкой по топикам.
-// Использует AdminClient для получения offsets и Client для latest offsets.
-func (lc *LagCollector) fetchConsumerLagsWithTopics() (map[string]int64, map[string]map[string]int64, error) {
+func (lc *LagCollector) fetchConsumerLagsWithTopics() (
+	map[string]int64,
+	map[string]map[string]int64,
+	error,
+) {
 	admin, err := createAdminClient(lc.bootstrap)
 	if err != nil {
 		return nil, nil, err
@@ -245,6 +245,7 @@ func (lc *LagCollector) fetchConsumerLagsWithTopics() (map[string]int64, map[str
 
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_8_0_0
+
 	client, err := sarama.NewClient([]string{lc.bootstrap}, config)
 	if err != nil {
 		return nil, nil, err
@@ -270,69 +271,216 @@ func (lc *LagCollector) fetchConsumerLagsWithTopics() (map[string]int64, map[str
 
 		for topic, partitions := range offsets.Blocks {
 			var topicLag int64
+
 			for partition, block := range partitions {
+				if block == nil || block.Offset < 0 {
+					continue
+				}
+
 				latestOffset, err := client.GetOffset(topic, partition, sarama.OffsetNewest)
 				if err != nil {
 					continue
 				}
+
 				lag := latestOffset - block.Offset
 				if lag > 0 {
 					topicLag += lag
+					totalLag += lag
 				}
 			}
-			if topicLag > 0 {
-				groupTopics[topic] = topicLag
-				totalLag += topicLag
-			}
+
+			groupTopics[topic] = topicLag
 		}
 
-		if totalLag > 0 {
-			result[groupName] = totalLag
-			topicsResult[groupName] = groupTopics
-		}
+		result[groupName] = totalLag
+		topicsResult[groupName] = groupTopics
 	}
 
 	return result, topicsResult, nil
 }
 
-// GetPoints возвращает все собранные точки из хранилища.
-func (lc *LagCollector) GetPoints() []LagPoint {
-	return lc.storage.getAllPoints()
+// =============================================================================
+// Текущие строки таблицы Group + Topic
+// =============================================================================
+
+type consumerLagSnapshot struct {
+	Lag          int64
+	Status       string
+	LastActiveAt time.Time
 }
 
-// =============================================================================
-// Глобальное управление сборщиками для разных кластеров
-// =============================================================================
+var (
+	consumerLagStateMu sync.Mutex
+	consumerLagState   = make(map[string]map[string]consumerLagSnapshot)
+)
 
+func getConsumerLagState(bootstrap string) map[string]consumerLagSnapshot {
+	state, ok := consumerLagState[bootstrap]
+	if !ok {
+		state = make(map[string]consumerLagSnapshot)
+		consumerLagState[bootstrap] = state
+	}
+	return state
+}
+
+// collectConsumerLagRows получает актуальные state, lag и метаданные
+// Consumer Groups одним проходом по Admin API.
+func collectConsumerLagRows(bootstrap string) ([]ConsumerLagRow, error) {
+	admin, err := createAdminClient(bootstrap)
+	if err != nil {
+		return nil, err
+	}
+	defer admin.Close()
+
+	config := sarama.NewConfig()
+	config.Version = sarama.V2_8_0_0
+
+	client, err := sarama.NewClient([]string{bootstrap}, config)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+
+	groupsMap, err := admin.ListConsumerGroups()
+	if err != nil {
+		return nil, err
+	}
+
+	consumerLagStateMu.Lock()
+	defer consumerLagStateMu.Unlock()
+
+	stateCache := getConsumerLagState(bootstrap)
+	now := time.Now()
+
+	rows := make([]ConsumerLagRow, 0)
+
+	for groupName := range groupsMap {
+		descriptions, err := admin.DescribeConsumerGroups([]string{groupName})
+		if err != nil || len(descriptions) == 0 || descriptions[0] == nil {
+			continue
+		}
+
+		description := descriptions[0]
+		status := normalizeConsumerGroupState(description.State)
+		members := len(description.Members)
+
+		offsets, err := admin.ListConsumerGroupOffsets(groupName, nil)
+		if err != nil {
+			continue
+		}
+
+		topics := make(map[string]int64)
+
+		for topic, partitions := range offsets.Blocks {
+			var topicLag int64
+
+			for partition, block := range partitions {
+				if block == nil || block.Offset < 0 {
+					continue
+				}
+
+				endOffset, err := client.GetOffset(topic, partition, sarama.OffsetNewest)
+				if err != nil {
+					continue
+				}
+
+				lag := endOffset - block.Offset
+				if lag > 0 {
+					topicLag += lag
+				}
+			}
+
+			topics[topic] = topicLag
+		}
+
+		for topic, lag := range topics {
+			key := groupName + "\x00" + topic
+			previous, exists := stateCache[key]
+
+			lastActiveAt := previous.LastActiveAt
+			if members > 0 && status == "Stable" {
+				lastActiveAt = now
+			}
+
+			change := int64(0)
+			if exists {
+				change = lag - previous.Lag
+			}
+
+			stateCache[key] = consumerLagSnapshot{
+				Lag:          lag,
+				Status:       status,
+				LastActiveAt: lastActiveAt,
+			}
+
+			lastActivity := ""
+			if !lastActiveAt.IsZero() {
+				lastActivity = lastActiveAt.Format("15:04:05")
+			}
+
+			rows = append(rows, ConsumerLagRow{
+				Group:        groupName,
+				Topic:        topic,
+				Status:       status,
+				Lag:          lag,
+				Change:       change,
+				LastActivity: lastActivity,
+				Members:      members,
+			})
+		}
+	}
+
+	sort.Slice(rows, func(i, j int) bool {
+		if rows[i].Group == rows[j].Group {
+			return rows[i].Topic < rows[j].Topic
+		}
+		return rows[i].Group < rows[j].Group
+	})
+
+	return rows, nil
+}
+
+// Глобальный сборщик истории lag.
+// Один активный сборщик соответствует текущему выбранному Kafka bootstrap.
 var (
 	currentLagCollector *LagCollector
 	lagCollectorMu      sync.RWMutex
 )
 
 // ensureLagCollectorForBootstrap создаёт или переключает сборщик для указанного кластера.
-// Поддерживает несколько кластеров за счёт пересоздания сборщика при смене bootstrap.
+// При смене кластера старый сборщик останавливается, чтобы не продолжать опрашивать
+// предыдущую Kafka-инсталляцию.
 func ensureLagCollectorForBootstrap(bootstrap string) {
 	lagCollectorMu.Lock()
 	defer lagCollectorMu.Unlock()
+
 	if currentLagCollector != nil && currentLagCollector.bootstrap == bootstrap {
 		return
 	}
+
 	if currentLagCollector != nil {
 		currentLagCollector.Stop()
 	}
+
 	log.Printf("[LagCollector] создаём сборщик для bootstrap: %s", bootstrap)
-	// Буфер на 288 точек (48 минут при интервале 10 секунд)
 	currentLagCollector = NewLagCollector(bootstrap, 288, 10*time.Second)
 	currentLagCollector.Start()
 }
 
-// GetConsumerLagHandler – HTTP-обработчик для получения данных об отставании.
-// Поддерживает параметр range для фильтрации по времени.
-// Возвращает JSON с массивом точек (LagResponse).
+// =============================================================================
+// HTTP API
+// =============================================================================
+
+// GetConsumerLagHandler — график lag + текущая таблица Group + Topic.
 //
-// Пример запроса:
-//   GET /api/overview/consumer-lag?range=15m
-//   Header: X-Kafka-Bootstrap: localhost:9092
+// Маршрут:
+//
+//	GET /api/overview/consumer-lag?range=15m|1h|6h|24h
+//
+// Ответ содержит:
+//
+//	points — исторические данные для графика;
+//	rows   — текущие данные для таблицы.
 func GetConsumerLagHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -354,31 +502,35 @@ func GetConsumerLagHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Определяем лимит точек в зависимости от выбранного диапазона
 	rangeParam := r.URL.Query().Get("range")
 	limit := 0
+
 	switch rangeParam {
 	case "15m":
-		limit = 90 // 90 точек = 15 минут (10 сек интервал)
+		limit = 90
 	case "1h":
-		limit = 360 // 360 точек = 1 час
+		limit = 360
 	case "6h":
-		limit = 2160 // 2160 точек = 6 часов
+		limit = 2160
 	case "24h":
-		limit = 8640 // 8640 точек = 24 часа
-	default:
-		limit = 0 // все доступные точки
+		limit = 8640
 	}
 
-	allPoints := collector.GetPoints()
-	var points []LagPoint
+	allPoints := collector.storage.getAllPoints()
+	points := allPoints
+
 	if limit > 0 && len(allPoints) > limit {
 		points = allPoints[len(allPoints)-limit:]
-	} else {
-		points = allPoints
 	}
 
-	response := LagResponse{Points: points}
-	log.Printf("[GetConsumerLagHandler] возвращаем %d точек (из %d) для range=%s", len(points), len(allPoints), rangeParam)
-	_ = json.NewEncoder(w).Encode(response)
+	rows, rowsErr := collectConsumerLagRows(bootstrap)
+	if rowsErr != nil {
+		log.Printf("[GetConsumerLagHandler] ошибка получения таблицы: %v", rowsErr)
+		rows = []ConsumerLagRow{}
+	}
+
+	_ = json.NewEncoder(w).Encode(LagResponse{
+		Points: points,
+		Rows:   rows,
+	})
 }

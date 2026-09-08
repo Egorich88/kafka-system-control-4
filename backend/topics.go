@@ -66,10 +66,10 @@ type TopicsResponse struct {
 
 // CreateTopicRequest — тело запроса для создания нового топика.
 type CreateTopicRequest struct {
-	Topic       string            `json:"topic"`                 // Имя топика
-	Partitions  int32             `json:"partitions"`            // Количество партиций
-	Replication int16             `json:"replication"`           // Фактор репликации
-	Configs     map[string]string `json:"configs,omitempty"`     // Дополнительные параметры конфигурации
+	Topic       string            `json:"topic"`             // Имя топика
+	Partitions  int32             `json:"partitions"`        // Количество партиций
+	Replication int16             `json:"replication"`       // Фактор репликации
+	Configs     map[string]string `json:"configs,omitempty"` // Дополнительные параметры конфигурации
 }
 
 // CreateTopicResponse — ответ API после создания топика.

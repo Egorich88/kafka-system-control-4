@@ -49,7 +49,7 @@ type BrokerInfo struct {
 	ReplicaCount    int32   `json:"replicaCount"`    // Количество реплик на брокере
 	UnderReplicated int32   `json:"underReplicated"` // Количество недореплицированных партиций
 	DiskUsage       float64 `json:"diskUsage"`       // Использование диска в GB
-	DiskTotal     float64 `json:"diskTotal"`         // Общий размер диска в GB
+	DiskTotal       float64 `json:"diskTotal"`       // Общий размер диска в GB
 }
 
 // BrokersResponse - структура ответа API с брокерами
@@ -122,7 +122,7 @@ func GetBrokersHandler(w http.ResponseWriter, r *http.Request) {
 			ReplicaCount:    replicaCount,
 			UnderReplicated: 0,
 			DiskUsage:       diskUsage,
-			DiskTotal:  diskTotal,
+			DiskTotal:       diskTotal,
 		})
 	}
 

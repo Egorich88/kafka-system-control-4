@@ -39,6 +39,9 @@
 @import './overview/throughput-panel.css';
 @import './overview/topics-panel.css';
 @import './overview/consumer-lag-panel.css';
+@import './overview/cluster-health-panel.css';
+@import './overview/partition-distribution-panel.css';
+@import './overview/rate-panels.css';
 @import './overview/events-panel.css';
 @import './components/panel-info.css';
 
@@ -94,10 +97,17 @@
     flex-shrink: 0;
 }
 
+
+/* Единый размер типографики для заголовков всех панелей Overview. */
+.dashboard-container .panel-title-with-info {
+    font-size: 15px;
+    font-weight: 600;
+}
+
 .panel-body {
     padding: 16px;
     color: var(--text-secondary);
-    
+
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -111,52 +121,60 @@
 .dashboard-row {
     display: grid;
     gap: var(--dashboard-gap);
-    margin-top: 0;
     min-width: 0;
+    min-height: 0;
+    margin-top: 0;
+    grid-template-rows: minmax(0, 1fr);
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* Ряд 2: Throughput (2fr) | Topics (3fr) — fr учитывает gap, проценты нет */
+.dashboard-row > * {
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.dashboard-row-status {
+    grid-template-columns:
+        minmax(0, 2.3fr)
+        minmax(245px, .95fr)
+        minmax(205px, .72fr)
+        minmax(205px, .72fr);
+    height: clamp(255px, 25vh, 315px);
+    min-height: 255px;
+    max-height: 315px;
+    overflow: hidden;
+}
+
 .dashboard-row-top {
-    display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    gap: var(--dashboard-gap);
+    height: clamp(260px, 22vh, 340px);
+    min-height: 260px;
+    max-height: 340px;
+    overflow: hidden;
 }
 
 .panel-throughput,
 .panel-topics {
     min-width: 0;
-    height: clamp(260px, 22vh, 340px);
+    height: 100%;
 }
 
-/* Ряд 3 + Ряд 4: Consumer Lag + Brokers (3fr) | Events (2fr) */
 .dashboard-row-main {
-    display: grid;
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    gap: var(--dashboard-gap);
+    height: clamp(430px, 42vh, 560px);
+    min-height: 430px;
+    max-height: 560px;
     align-items: stretch;
+    overflow: hidden;
 }
 
-.dashboard-main-left {
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-gap);
-    min-width: 0;
-}
-
-.panel-lag {
-    min-width: 0;
-    height: clamp(260px, 22vh, 340px);
-}
-
-.panel-brokers {
-    min-width: 0;
-    height: clamp(180px, 16vh, 240px);
-}
-
+.panel-lag,
 .panel-events {
     min-width: 0;
     min-height: 0;
-    height: auto;
+    height: 100%;
 }
 
 /* ============================================================
@@ -276,17 +294,39 @@
    ============================================================ */
 
 /* Планшеты и маленькие ноутбуки */
-@media (max-width: 1200px) {
-    .dashboard-row-top {
-        grid-template-columns: minmax(0, 1fr);
-        height: auto;
+@media (max-width: 1400px) {
+    .dashboard-row-status {
+        grid-template-columns: minmax(0, 2fr) minmax(220px, .9fr) minmax(190px, .7fr) minmax(190px, .7fr);
     }
+}
+
+@media (max-width: 1200px) {
+    .dashboard-row-status,
+    .dashboard-row-top,
     .dashboard-row-main {
         grid-template-columns: minmax(0, 1fr);
         height: auto;
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
     }
+
+    .dashboard-row-status {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cluster-health-panel,
+    .partition-distribution-panel,
+    .rate-panel {
+        min-height: 250px;
+    }
+
     .panel-events {
-        height: clamp(260px, 40vh, 340px);
+        height: 420px;
+    }
+
+    .panel-lag {
+        height: 520px;
     }
 }
 
@@ -323,7 +363,25 @@
         height: clamp(240px, 50vh, 320px);
     }
     .panel-body {
-        height: 280px;
+        height: auto;
+    }
+
+    .dashboard-row-status {
+        grid-template-columns: 1fr;
+    }
+
+    .rate-panel,
+    .partition-distribution-panel,
+    .cluster-health-panel {
+        min-height: 230px;
+    }
+
+    .panel-lag {
+        height: 560px;
+    }
+
+    .panel-events {
+        height: 360px;
     }
 }
 /* ============================================================

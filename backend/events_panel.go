@@ -42,6 +42,9 @@ const (
 type DashboardEvent struct {
 	Time    string     `json:"time"`
 	Level   EventLevel `json:"level"`
+	Group   string     `json:"group,omitempty"`
+	Topic   string     `json:"topic,omitempty"`
+	Status  string     `json:"status,omitempty"`
 	Message string     `json:"message"`
 	Source  string     `json:"source"`
 }
@@ -121,6 +124,7 @@ type EventCollector struct {
 	interval         time.Duration
 	mu               sync.Mutex
 	prevLags         map[string]int64
+	prevGroupTopics  map[string]string
 	prevTopicOffsets map[string]int64
 	prevTopics       map[string]int16
 	prevBrokers      map[int32]bool
@@ -140,6 +144,7 @@ func NewEventCollector(bootstrap string, bufferSize int, interval time.Duration)
 		stopChan:          make(chan struct{}),
 		interval:          interval,
 		prevLags:          make(map[string]int64),
+		prevGroupTopics:   make(map[string]string),
 		prevTopicOffsets:  make(map[string]int64),
 		prevTopics:        make(map[string]int16),
 		prevBrokers:       make(map[int32]bool),
@@ -218,6 +223,30 @@ func (ec *EventCollector) addEvent(timeStr string, level EventLevel, msg, source
 	log.Printf("[Event] %s %s %s (source: %s)", timeStr, level, msg, source)
 }
 
+// addConsumerGroupEvent добавляет событие с явной связкой Group + Topic + State.
+func (ec *EventCollector) addConsumerGroupEvent(
+	timeStr string,
+	level EventLevel,
+	group string,
+	topic string,
+	status string,
+	msg string,
+	source string,
+) {
+	e := DashboardEvent{
+		Time:    timeStr,
+		Level:   level,
+		Group:   group,
+		Topic:   topic,
+		Status:  status,
+		Message: msg,
+		Source:  source,
+	}
+	ec.buffer.Add(e)
+	log.Printf("[Event] %s %s group=%s topic=%s status=%s %s",
+		timeStr, level, group, topic, status, msg)
+}
+
 func (ec *EventCollector) initState() {
 	log.Printf("[EventCollector] инициализация состояния (без генерации событий)")
 
@@ -260,6 +289,14 @@ func (ec *EventCollector) initState() {
 			ec.prevLags[group] = lag
 		}
 		log.Printf("[EventCollector] инициализировано %d групп потребителей", len(lags))
+	}
+
+	// Сохраняем исходные состояния Group + Topic без генерации событий.
+	if rows, err := collectConsumerLagRows(ec.bootstrap); err == nil {
+		for _, row := range rows {
+			ec.prevGroupTopics[row.Group+"\\x00"+row.Topic] = row.Status
+		}
+		log.Printf("[EventCollector] инициализировано %d связок Group + Topic", len(rows))
 	}
 
 	ec.initialized = true
@@ -404,7 +441,58 @@ func (ec *EventCollector) collect() {
 		}
 	}
 
-	// ---- 5. Доступность брокеров ----
+	// ---- 5. Состояния Consumer Groups ----
+	if rows, rowsErr := collectConsumerLagRows(ec.bootstrap); rowsErr == nil {
+		seen := make(map[string]bool)
+
+		for _, row := range rows {
+			key := row.Group + "\\x00" + row.Topic
+			seen[key] = true
+
+			previousStatus, exists := ec.prevGroupTopics[key]
+			if !exists {
+				ec.prevGroupTopics[key] = row.Status
+				continue
+			}
+
+			if previousStatus != row.Status {
+				level := INFO
+				switch row.Status {
+				case "Empty", "Dead":
+					level = ERROR
+				case "Rebalancing":
+					level = WARN
+				}
+
+				message := fmt.Sprintf(
+					"Группа %s (%s) перешла из состояния %s в %s",
+					row.Group, row.Topic, previousStatus, row.Status,
+				)
+
+				ec.addConsumerGroupEvent(
+					timeStr,
+					level,
+					row.Group,
+					row.Topic,
+					row.Status,
+					message,
+					source,
+				)
+			}
+
+			ec.prevGroupTopics[key] = row.Status
+		}
+
+		for key := range ec.prevGroupTopics {
+			if !seen[key] {
+				delete(ec.prevGroupTopics, key)
+			}
+		}
+	} else {
+		log.Printf("[EventCollector] ошибка получения состояний Consumer Groups: %v", rowsErr)
+	}
+
+	// ---- 6. Доступность брокеров ----
 	currentBrokers, err := ec.fetchBrokerStatus()
 	if err != nil {
 		log.Printf("[EventCollector] ошибка получения статуса брокеров: %v", err)

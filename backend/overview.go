@@ -31,12 +31,12 @@ import (
 
 // DashboardOverviewResponse содержит сводную информацию о состоянии кластера.
 type DashboardOverviewResponse struct {
-	Brokers         int `json:"brokers"`         // количество брокеров
-	Topics          int `json:"topics"`          // количество топиков
-	Partitions      int `json:"partitions"`      // общее количество партиций
-	ConsumerGroups  int `json:"consumerGroups"`  // количество групп потребителей
-	ControllerID    int32 `json:"controllerId"`  // ID текущего брокера-контроллера
-	UnderReplicated int `json:"underReplicated"` // количество недореплицированных партиций
+	Brokers         int   `json:"brokers"`         // количество брокеров
+	Topics          int   `json:"topics"`          // количество топиков
+	Partitions      int   `json:"partitions"`      // общее количество партиций
+	ConsumerGroups  int   `json:"consumerGroups"`  // количество групп потребителей
+	ControllerID    int32 `json:"controllerId"`    // ID текущего брокера-контроллера
+	UnderReplicated int   `json:"underReplicated"` // количество недореплицированных партиций
 }
 
 // DashboardBroker описывает один брокер Kafka.
@@ -315,8 +315,6 @@ func getDashboardPartitionsHandler(w http.ResponseWriter, r *http.Request) {
 
 	_ = json.NewEncoder(w).Encode(DashboardPartitionsResponse{Total: totalPartitions})
 }
-
-
 
 // Примечание: в данном файле используются вспомогательные функции:
 // - getBootstrapFromRequest(r *http.Request) string
