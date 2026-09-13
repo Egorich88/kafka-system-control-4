@@ -26,6 +26,7 @@ import { Tooltip } from 'react-tooltip';
 import { NavLink } from 'react-router-dom';
 import {
   FiHome,
+  FiPlus,
   FiServer,
   FiLayers,
   FiUsers,
@@ -224,45 +225,50 @@ export default function Sidebar({ onAddCluster, onEditCluster }) {
 
         {/* Блок выбора / добавления кластера */}
         <div className="sidebar-cluster">
-          {hasCluster ? (
-              <div className={`cluster-row ${collapsed ? 'collapsed' : ''}`}>
-                  {!collapsed && (
-                      <Dropdown
-                          selectedItem={currentCluster}
-                          items={clusters.filter(cluster => cluster.id !== currentCluster.id)}
-                          onSelect={changeCluster}
-                          addLabel={t('sidebar.addCluster')}
-                          onAdd={onAddCluster}
-                          statusResolver={(cluster) => cluster?.connectionStatus || 'unknown'}
-                      />
-                  )}
+            {hasCluster ? (
+                <div className={`cluster-row ${collapsed ? 'collapsed' : ''}`}>
+                    {!collapsed && (
+                        <Dropdown
+                            selectedItem={currentCluster}
+                            items={clusters.filter(
+                                cluster => cluster.id !== currentCluster.id
+                            )}
+                            onSelect={changeCluster}
+                            addLabel={t('sidebar.addCluster')}
+                            onAdd={onAddCluster}
+                            statusResolver={(cluster) =>
+                                cluster?.connectionStatus || 'unknown'
+                            }
+                        />
+                    )}
 
-                  <FiSliders
-                      className="cluster-settings-icon"
-                      onClick={onEditCluster}
-                      data-tooltip-id="sidebar-tooltip"
-                      data-tooltip-content={t('sidebar.clusterSettings')}
-                  />
-              </div>
-          ) : (
-              collapsed ? (
-                  <button
-                      className="cluster-add-collapsed"
-                      onClick={onAddCluster}
-                      data-tooltip-id="sidebar-tooltip"
-                      data-tooltip-content={t('sidebar.addCluster')}
-                  >
-                      +
-                  </button>
-              ) : (
-                  <div
-                      className="cluster-add-link"
-                      onClick={onAddCluster}
-                  >
-                      {t('sidebar.addCluster')}
-                  </div>
-              )
-          )}
+                    <FiSliders
+                        className="cluster-settings-icon"
+                        onClick={onEditCluster}
+                        data-tooltip-id="sidebar-tooltip"
+                        data-tooltip-content={t('sidebar.clusterSettings')}
+                    />
+                </div>
+            ) : (
+                collapsed ? (
+                    <button
+                        type="button"
+                        className="cluster-add-collapsed"
+                        onClick={onAddCluster}
+                        data-tooltip-id="sidebar-tooltip"
+                        data-tooltip-content={t('sidebar.addCluster')}
+                    >
+                        <FiPlus />
+                    </button>
+                ) : (
+                    <div
+                        className="cluster-add-link"
+                        onClick={onAddCluster}
+                    >
+                        {t('sidebar.addCluster')}
+                    </div>
+                )
+            )}
         </div>
 
         {/* -------------------- Основная навигация (отображается только при выбранном кластере) -------------------- */}

@@ -195,7 +195,6 @@ export default function Overview() {
               <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer">Apache License 2.0</a>
             </div>
           </div>
-          <div className="welcome-divider large" />
           <a href="https://github.com/Egorich88/kafka-system-control-4" target="_blank" rel="noreferrer" className="welcome-github">
             <FiStar className="welcome-github-icon" />
             <span>Поддержите проект на GitHub</span>

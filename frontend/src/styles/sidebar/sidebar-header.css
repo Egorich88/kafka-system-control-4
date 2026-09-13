@@ -128,9 +128,20 @@
     color: var(--accent-hover);
 }
 
+/*
+ * В свернутом Sidebar логотип при наведении превращается
+ * в кнопку разворачивания панели.
+ *
+ * Размер иконки разворачивания не должен увеличиваться
+ * относительно иконки сворачивания в развернутом Sidebar.
+ *
+ * Поэтому используем тот же визуальный размер:
+ * 17 × 17 px.
+ */
+
 .sidebar-logo-expand-icon {
-    width: 26px;
-    height: 26px;
+    width: 17px;
+    height: 17px;
     stroke-width: 1.7;
     transition: color .18s ease, transform .18s ease;
 }

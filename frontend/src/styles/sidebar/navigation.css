@@ -1,9 +1,19 @@
 /*
- * Copyright 2026 Egor Khomenko (Egorich88)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- */
+
+* Copyright 2026 Egor Khomenko (Egorich88)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+  */
+
+/**
+
+* @fileoverview Стили основной навигации Sidebar.
+  */
+
+/* ============================================================
+Основная навигация
+============================================================ */
 
 .sidebar-nav {
     display: flex;
@@ -17,6 +27,10 @@
 .sidebar-nav::-webkit-scrollbar {
     display: none;
 }
+
+/* ============================================================
+Общие пункты Sidebar
+============================================================ */
 
 .sidebar-link,
 .sidebar-user-link {
@@ -37,7 +51,9 @@
     font-size: 15px;
     text-align: left;
     cursor: pointer;
-    transition: background-color .18s ease, color .18s ease;
+    transition:
+        background-color .18s ease,
+        color .18s ease;
 }
 
 .sidebar-link svg,
@@ -48,23 +64,41 @@
     stroke-width: 1.8;
 }
 
+.sidebar-link span,
+.sidebar-user-link span {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+Hover
+============================================================ */
+
 .sidebar-link:hover,
 .sidebar-user-link:hover {
     background: var(--sidebar-hover);
     color: var(--text-primary);
 }
 
-.sidebar-settings-link:hover,
-.sidebar-settings-link:focus-visible {
-    background: transparent;
-}
+/* ============================================================
+Активный пункт
+============================================================ */
 
-.sidebar-link.active {
+.sidebar-link.active,
+.sidebar-user-link.active {
     background: var(--menu-active-bg);
     color: var(--text-primary);
 }
 
-.sidebar-link.active::after {
+/*
+
+* Правая светящаяся полоса активного пункта.
+  */
+
+.sidebar-link.active::after,
+.sidebar-user-link.active::after {
     content: "";
     position: absolute;
     top: 7px;
@@ -74,34 +108,76 @@
     border-radius: 4px 0 0 4px;
     background: var(--accent-color);
     box-shadow:
-        0 0 8px color-mix(in srgb, var(--accent-color) 75%, transparent),
-        0 0 18px color-mix(in srgb, var(--accent-color) 45%, transparent);
+        0 0 8px color-mix(
+            in srgb,
+            var(--accent-color) 75%,
+            transparent
+        ),
+        0 0 18px color-mix(
+            in srgb,
+            var(--accent-color) 45%,
+            transparent
+        );
 }
 
-/* Настройки — намеренно без active-background и без правой полосы. */
-.sidebar-settings-link:hover,
+/*
+
+* «Настройки» использует выделение всей строки,
+* поэтому стандартная полоса самой ссылки отключается.
+  */
 .sidebar-settings-link.active {
     background: transparent;
     color: var(--text-primary);
 }
-
-.sidebar-settings-link:hover span,
-.sidebar-settings-link:hover svg {
-    color: var(--accent-hover);
-}
-
 .sidebar-settings-link.active::after {
     display: none;
 }
 
+/* ============================================================
+Настройки
+============================================================ */
 
-.sidebar-link span,
-.sidebar-user-link span {
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/*
+
+* «Настройки» использует те же цвета текста,
+* что и остальные пункты Sidebar.
+  */
+
+.sidebar-settings-link:hover {
+    background: var(--sidebar-hover);
+    color: var(--text-primary);
 }
+
+.sidebar-settings-row:has(.sidebar-settings-link.active) {
+    position: relative;
+    background: var(--menu-active-bg);
+}
+
+.sidebar-settings-row:has(.sidebar-settings-link.active)::after {
+    content: "";
+    position: absolute;
+    top: 7px;
+    right: 0;
+    bottom: 7px;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+    background: var(--accent-color);
+    box-shadow:
+        0 0 8px color-mix(
+            in srgb,
+            var(--accent-color) 75%,
+            transparent
+        ),
+        0 0 18px color-mix(
+            in srgb,
+            var(--accent-color) 45%,
+            transparent
+        );
+}
+
+/* ============================================================
+Разделители
+============================================================ */
 
 .sidebar-divider {
     width: calc(100% - 32px);
@@ -118,13 +194,16 @@
     box-shadow: 0 0 8px rgba(96, 165, 250, .18);
 }
 
-
 .sidebar-divider-bottom {
     margin-top: 5px;
     margin-bottom: 2px;
     background: var(--border-color);
     box-shadow: none;
 }
+
+/* ============================================================
+Свернутый Sidebar
+============================================================ */
 
 .sidebar.collapsed .sidebar-link,
 .sidebar.collapsed .sidebar-user-link {
@@ -138,7 +217,29 @@
     display: none;
 }
 
-.sidebar.collapsed .sidebar-link.active::after {
+.sidebar.collapsed .sidebar-link.active::after,
+.sidebar.collapsed .sidebar-user-link.active::after {
     top: 7px;
     bottom: 7px;
+}
+
+/*
+
+* «Настройки» в свернутом Sidebar также получает
+* активное выделение всей строки.
+  */
+
+.sidebar.collapsed .sidebar-settings-link.active {
+    background: var(--menu-active-bg);
+    color: var(--text-primary);
+}
+
+/*
+
+* Стандартная полоса ссылки «Настройки» отключена.
+* Активная полоса рисуется на уровне строки.
+  */
+
+.sidebar.collapsed .sidebar-settings-link.active::after {
+    display: none;
 }
