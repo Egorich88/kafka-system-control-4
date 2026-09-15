@@ -1,0 +1,310 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ * Licensed under the Apache License, Version 2.0.
+ */
+
+/**
+ * =============================================================================
+ * @file page-header.css
+ * =============================================================================
+ * Стили единой верхней панели страницы KSC.
+ * =============================================================================
+ */
+
+.page-header-bar {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 clamp(20px, 2vw, 32px);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 20;
+}
+
+.page-header-title-group {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.page-header-title-group h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.page-header-cluster {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.page-header-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.page-header-control,
+.page-header-refresh-control,
+.page-header-refresh-button {
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.page-header-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.page-header-time-picker {
+  position: relative;
+}
+
+.page-header-time-button {
+  max-width: min(420px, 34vw);
+}
+
+.page-header-time-button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-header-control-icon,
+.page-header-chevron {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+}
+
+.page-header-chevron {
+  font-size: 14px;
+}
+
+.page-header-control:hover,
+.page-header-refresh-control:hover,
+.page-header-refresh-button:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.page-header-time-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(420px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-primary);
+}
+
+.page-header-menu-title,
+.page-header-absolute-title {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.page-header-menu-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 6px 8px;
+}
+
+.page-header-range-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.page-header-range-list button {
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.page-header-range-list button:hover,
+.page-header-range-list button.selected {
+  background: var(--selected-color);
+  color: var(--text-primary);
+}
+
+.page-header-menu-divider {
+  height: 1px;
+  margin: 10px 0;
+  background: var(--border-color);
+}
+
+.page-header-absolute-title {
+  padding: 0 6px 8px;
+}
+
+.page-header-datetime-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.page-header-datetime-grid label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.page-header-datetime-grid input {
+  width: 100%;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 11px;
+  outline: none;
+}
+
+.page-header-datetime-grid input:focus {
+  border-color: var(--accent-color);
+}
+
+.page-header-apply-button {
+  width: 100%;
+  height: 34px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent-color);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.page-header-apply-button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.page-header-refresh-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+}
+
+.page-header-refresh-control select {
+  min-width: 72px;
+  height: 34px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.page-header-refresh-small-icon {
+  color: var(--text-secondary);
+  font-size: 14px;
+  flex: 0 0 auto;
+}
+
+.page-header-refresh-button {
+  width: 36px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.page-header-refresh-button:disabled {
+  opacity: .7;
+  cursor: default;
+}
+
+.is-spinning {
+  animation: pageHeaderRefreshSpin .75s linear infinite;
+}
+
+@keyframes pageHeaderRefreshSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .page-header-bar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-top: 13px;
+    padding-bottom: 13px;
+  }
+
+  .page-header-controls {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .page-header-time-button {
+    max-width: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .page-header-title-group {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+
+  .page-header-title-group h1 {
+    font-size: 20px;
+  }
+
+  .page-header-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .page-header-time-picker {
+    min-width: 0;
+  }
+
+  .page-header-time-button {
+    width: 100%;
+  }
+}

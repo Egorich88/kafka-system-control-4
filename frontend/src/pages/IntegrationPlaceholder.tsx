@@ -23,7 +23,6 @@ export default function IntegrationPlaceholder({
         <span className="integration-placeholder-kicker">
           {t('integration.comingSoon')}
         </span>
-        <h1>{t(titleKey)}</h1>
         <p>{t('integration.description')}</p>
       </div>
     </section>

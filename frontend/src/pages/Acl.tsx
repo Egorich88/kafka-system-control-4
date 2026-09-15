@@ -4,11 +4,6 @@ import '../styles/management-pages.css';
 export default function Acl() {
   return (
     <div className="management-page">
-      <header className="management-header">
-        <span className="management-kicker">Security</span>
-        <h1>ACL</h1>
-        <p>Контроль разрешений Kafka для пользователей и сервисных аккаунтов.</p>
-      </header>
       <div className="management-grid">
         <div className="management-card"><div className="management-card-label">Правила</div><div className="management-card-value">0</div></div>
         <div className="management-card"><div className="management-card-label">Пользователи</div><div className="management-card-value">0</div></div>

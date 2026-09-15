@@ -16,7 +16,7 @@
 
  /**
   * =============================================================================
-  * @file App.jsx
+  * @file App.tsx
   * =============================================================================
   *
   * Корневой компонент приложения Kafka System Control.
@@ -60,7 +60,7 @@ import Acl from './pages/Acl';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 import AuditPage from './pages/audit/AuditPage';
-import IntegrationPlaceholder from './pages/IntegrationPlaceholder';
+import IntegrationPlaceholder from './pages/IntegrationPlaceholder.tsx';
 import Alerts from './pages/Alerts';
 import User from './pages/User';
 

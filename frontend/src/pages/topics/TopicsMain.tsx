@@ -15,8 +15,9 @@
  */
 
 /**
- * @fileoverview Основной компонент страницы управления топиками
- * Собирает все части в единую страницу
+ * @fileoverview Основной компонент страницы управления топиками.
+ * Собирает все части в единую страницу: панель инструментов,
+ * таблицу топиков, панель деталей и модальное окно создания.
  */
 
 import '../../styles/topics.css';
@@ -26,8 +27,12 @@ import TopicToolbar from './components/TopicToolbar';
 import TopicTable from './components/TopicTable';
 import TopicDetailsPanel from './components/TopicDetailsPanel';
 import CreateTopicModal from './components/CreateTopicModal';
+import { useDashboardControls } from '../../contexts/DashboardControlsContext';
+import { useEffect } from 'react';
 
 export default function TopicsMain() {
+  const { registerRefreshHandler } = useDashboardControls();
+
   const {
     loading,
     filter,
@@ -64,18 +69,18 @@ export default function TopicsMain() {
     handleDeleteTopic,
     exportTopicsList,
     exportTopicsConfig,
+    fetchTopics,
   } = useTopics();
+
+  // Регистрируем обработчик обновления в глобальном контексте
+  useEffect(() => {
+    registerRefreshHandler(fetchTopics);
+    return () => registerRefreshHandler(null);
+  }, [registerRefreshHandler, fetchTopics]);
 
   return (
     <div className="topics-container">
       <Toaster position="top-right" />
-
-      {/* Заголовок страницы */}
-      <div className="topics-header">
-        <div>
-          <h1 className="topics-title">Управление топиками</h1>
-        </div>
-      </div>
 
       {/* Панель инструментов */}
       <TopicToolbar

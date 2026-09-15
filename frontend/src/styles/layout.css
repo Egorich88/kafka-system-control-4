@@ -53,6 +53,8 @@
 
 .main-content {
 
+    --content-inset: 28px;
+
     flex: 1 1 auto;
 
     width: 100%;

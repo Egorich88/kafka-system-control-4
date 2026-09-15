@@ -28,12 +28,12 @@
  *   - Ряд 4: Consumer Lag + таблица Group/Topic/Status/Lag | последние события.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import '../styles/overview.css';
-import Dropdown from '../components/common/Dropdown';
-import { FiInfo, FiCode, FiPlus, FiStar, FiClock, FiRefreshCcw } from 'react-icons/fi';
+import { FiInfo, FiCode, FiPlus, FiStar } from 'react-icons/fi';
 import { useCluster } from '../contexts/ClusterContext';
+import { useDashboardControls } from '../contexts/DashboardControlsContext';
 
 import ThroughputPanel from './overview/ThroughputPanel';
 import KpiCards from './overview/KpiCards';
@@ -44,26 +44,7 @@ import ClusterHealthPanel from './overview/ClusterHealthPanel';
 import PartitionDistributionPanel from './overview/PartitionDistributionPanel';
 import RatePanels from './overview/RatePanels';
 
-const TIME_RANGES = [
-  { id: '15m', name: 'Последние 15 минут' },
-  { id: '1h', name: 'Последний час' },
-  { id: '6h', name: 'Последние 6 часов' },
-  { id: '24h', name: 'Последние 24 часа' }
-];
-
-const REFRESH_INTERVALS = [
-  { value: 0, label: 'Выкл' },
-  { value: 10, label: '10с' },
-  { value: 30, label: '30с' },
-  { value: 60, label: '1м' }
-];
-
-const REFRESH_ITEMS = REFRESH_INTERVALS.map(item => ({
-  id: item.value,
-  name: item.label
-}));
-
-export default function Overview() {
+export default function Overview(): JSX.Element {
   const { currentCluster } = useCluster();
 
   const [overview, setOverview] = useState(null);
@@ -72,16 +53,14 @@ export default function Overview() {
   const [throughputData, setThroughputData] = useState([]);
   const [messagesIn, setMessagesIn] = useState(0);
   const [messagesOut, setMessagesOut] = useState(0);
-  const [timeRange, setTimeRange] = useState(TIME_RANGES[0]);
+  const { timeRange, registerRefreshHandler } = useDashboardControls();
+  // Текущий backend поддерживает относительные диапазоны; абсолютный
+  // диапазон уже принят frontend-контрактом и будет использован будущим источником истории.
+  const apiRange = timeRange.type === 'relative' ? timeRange.id : '24h';
   const [loading, setLoading] = useState(false);
   const [clusterHealth, setClusterHealth] = useState(null);
 
   const [refreshKey, setRefreshKey] = useState(0);
-
-  const [autoRefreshInterval, setAutoRefreshInterval] = useState(10);
-  const intervalRef = useRef(null);
-
-  const currentRefreshItem = REFRESH_ITEMS.find(item => item.id === autoRefreshInterval) || REFRESH_ITEMS[0];
 
   // ============================================================
   // Логотип приветственной страницы
@@ -99,7 +78,7 @@ export default function Overview() {
     setClusterHealth(null);
   };
 
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     if (!currentCluster) return;
     setLoading(true);
     clearDashboardData();
@@ -114,11 +93,15 @@ export default function Overview() {
 
       const headers = { 'X-Kafka-Bootstrap': bootstrap };
 
+      const throughputQuery = timeRange.type === 'relative'
+        ? `range=${timeRange.id}`
+        : `range=${apiRange}&from=${encodeURIComponent(timeRange.from)}&to=${encodeURIComponent(timeRange.to)}`;
+
       const [overviewResponse, brokersResponse, groupsResponse, throughputResponse] = await Promise.all([
         axios.get('/api/overview', { headers }),
         axios.get('/api/overview/brokers-detailed', { headers }),  // ← НОВЫЙ API
         axios.get('/api/overview/consumer-groups', { headers }),
-        axios.get(`/api/overview/throughput?range=${timeRange.id}`, { headers })
+        axios.get(`/api/overview/throughput?${throughputQuery}`, { headers })
       ]);
 
       setOverview(overviewResponse.data);
@@ -138,29 +121,16 @@ export default function Overview() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentCluster, timeRange, apiRange]);
 
   useEffect(() => {
-    loadDashboard();
-  }, [currentCluster, timeRange]);
+    void loadDashboard();
+  }, [loadDashboard]);
 
   useEffect(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    if (autoRefreshInterval > 0 && currentCluster) {
-      intervalRef.current = setInterval(() => {
-        loadDashboard();
-      }, autoRefreshInterval * 1000);
-    }
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [autoRefreshInterval, currentCluster]);
+    registerRefreshHandler(loadDashboard);
+    return () => registerRefreshHandler(null);
+  }, [loadDashboard, registerRefreshHandler]);
 
   if (!currentCluster) {
     return (
@@ -206,32 +176,6 @@ export default function Overview() {
 
   return (
     <div className="dashboard-container">
-      <div className="page-header">
-        <div className="page-header-text">
-          <h1 className="page-title">Обзор кластера</h1>
-          <div className="page-cluster-name">Кластер: {currentCluster.name}</div>
-        </div>
-        <div className="dashboard-toolbar">
-          <div className="dashboard-time-selector">
-            <FiClock />
-            <Dropdown
-              selectedItem={timeRange}
-              items={TIME_RANGES.filter(item => item.id !== timeRange.id)}
-              onSelect={setTimeRange}
-            />
-          </div>
-          <div className="dashboard-auto-refresh">
-            <Dropdown
-              selectedItem={currentRefreshItem}
-              items={REFRESH_ITEMS.filter(item => item.id !== autoRefreshInterval)}
-              onSelect={(item) => setAutoRefreshInterval(item.id)}
-            />
-          </div>
-          <button className="dashboard-refresh-button" onClick={loadDashboard} disabled={loading}>
-            <FiRefreshCcw className={`dashboard-refresh-icon ${loading ? 'dashboard-refresh-loading' : ''}`} />
-          </button>
-        </div>
-      </div>
 
       {/* Ряд 1: KPI-карточки */}
       <KpiCards
@@ -259,7 +203,7 @@ export default function Overview() {
           <ThroughputPanel data={throughputData} />
         </div>
         <div className="panel-topics">
-          <TopicsPanel timeRange={timeRange.id} refreshKey={refreshKey} />
+          <TopicsPanel timeRange={apiRange} refreshKey={refreshKey} />
         </div>
       </div>
 
@@ -267,7 +211,7 @@ export default function Overview() {
       <div className="dashboard-row dashboard-row-main">
         <div className="panel-lag">
           <ConsumerLagPanel
-            timeRange={timeRange.id}
+            timeRange={apiRange}
             refreshKey={refreshKey}
           />
         </div>

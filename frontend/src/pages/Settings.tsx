@@ -138,12 +138,7 @@ export default function Settings() {
 
   return (
     <div className="settings-page">
-      <div className="settings-page-header">
-        <h1>{t('settings.title')}</h1>
-        <p>{t('settings.subtitle')}</p>
-      </div>
-
-      <div className="settings-card">
+<div className="settings-card">
 
         {/* ================================================
             ВЫБОР ТЕМЫ

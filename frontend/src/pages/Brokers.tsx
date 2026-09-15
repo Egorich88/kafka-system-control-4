@@ -4,11 +4,6 @@ import '../styles/management-pages.css';
 export default function Brokers() {
   return (
     <div className="management-page">
-      <header className="management-header">
-        <span className="management-kicker">Kafka Cluster</span>
-        <h1>Брокеры</h1>
-        <p>Состояние брокеров, роли и распределение нагрузки кластера.</p>
-      </header>
       <div className="management-grid">
         <div className="management-card"><div className="management-card-label">Брокеры</div><div className="management-card-value">0</div></div>
         <div className="management-card"><div className="management-card-label">Online</div><div className="management-card-value">0</div></div>

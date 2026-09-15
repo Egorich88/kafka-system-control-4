@@ -66,6 +66,7 @@
  */
 .main-content:has(.dashboard-container) {
     --dashboard-inset: clamp(16px, 2vw, 28px);
+    --content-inset: var(--dashboard-inset);
     padding: var(--dashboard-inset);
 }
 

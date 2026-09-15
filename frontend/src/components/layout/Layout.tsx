@@ -16,7 +16,7 @@
 
 /**
  * =============================================================================
- * @file Layout.jsx
+ * @file Layout.tsx
  * =============================================================================
  *
  * Основной макет (Layout) приложения Kafka System Control.
@@ -48,7 +48,7 @@
 import { useState } from 'react';
 
 // React Router
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 // Контексты
 import { useCluster } from '../../contexts/ClusterContext';
@@ -57,6 +57,9 @@ import { useCluster } from '../../contexts/ClusterContext';
 import Sidebar from "../common/Sidebar";
 import CreateClusterPanel from '../CreateClusterPanel';
 import ClusterSettingsPanel from '../ClusterSettingsPanel';
+import PageHeader from '../page-header/PageHeader';
+import { DashboardControlsProvider } from '../../contexts/DashboardControlsContext';
+import { PAGE_CONFIG } from '../page-header/page-config';
 
 // =============================================================================
 // КОМПОНЕНТ LAYOUT
@@ -75,6 +78,9 @@ const Layout = () => {
 
   /** Хук навигации React Router */
   const navigate = useNavigate();
+
+  /** Текущий маршрут используется для определения заголовка страницы. */
+  const location = useLocation();
 
   /** Хук управления кластерами */
   const {
@@ -169,8 +175,13 @@ const Layout = () => {
   };
 
   // =========================================================================
-  // РЕНДЕР
+  // КОНФИГУРАЦИЯ ЗАГОЛОВКА СТРАНИЦЫ
   // =========================================================================
+
+  const currentPage = PAGE_CONFIG[location.pathname] ?? {
+    title: 'Kafka System Control',
+    mode: 'default' as const,
+  };
 
   return (
     <div className="app-layout sidebar-dark">
@@ -181,9 +192,18 @@ const Layout = () => {
       />
 
       {/* Основная область контента */}
-      <main className="main-content">
-        <Outlet />
-      </main>
+      <DashboardControlsProvider>
+        <main className="main-content">
+          <PageHeader
+            title={currentPage.title}
+            mode={currentPage.mode}
+          />
+
+          <div className="main-content-body">
+            <Outlet />
+          </div>
+        </main>
+      </DashboardControlsProvider>
 
       {/* Модальное окно управления кластером */}
       {showPanel && (

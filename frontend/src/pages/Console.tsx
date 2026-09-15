@@ -4,11 +4,6 @@ import '../styles/management-pages.css';
 export default function Console() {
   return (
     <div className="management-page">
-      <header className="management-header">
-        <span className="management-kicker">Kafka Tools</span>
-        <h1>Консоль</h1>
-        <p>Выполнение Kafka-команд и диагностических операций из интерфейса KSC.</p>
-      </header>
       <section className="management-panel">
         <div className="management-panel-head"><h2><FiTerminal /> Command Console</h2><FiPlay className="muted" /></div>
         <div style={{padding:'20px'}}>

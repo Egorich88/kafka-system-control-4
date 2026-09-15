@@ -15,11 +15,6 @@ export default function User() {
 
   return (
     <div className="management-page">
-      <header className="management-header">
-        <span className="management-kicker">Account</span>
-        <h1>Пользователь</h1>
-        <p>Профиль, локальные настройки и права доступа в KSC.</p>
-      </header>
       <div className="management-grid">
         <div className="management-card"><div className="management-card-label">Пользователь</div><div className="management-card-value">Egorich88</div></div>
         <div className="management-card"><div className="management-card-label">Роль</div><div className="management-card-value">Administrator</div></div>

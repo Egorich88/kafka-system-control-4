@@ -281,11 +281,6 @@ export default function Search() {
     <div className="search-page">
       <Toaster position="top-right" />
 
-      <div className="search-header">
-        <div>
-          <h1>Поиск сообщений</h1>
-        </div>
-      </div>
 
       <div className="search-toolbar-card">
         <SearchToolbar

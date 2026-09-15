@@ -4,11 +4,6 @@ import '../styles/management-pages.css';
 export default function Alerts() {
   return (
     <div className="management-page">
-      <header className="management-header">
-        <span className="management-kicker">Operations</span>
-        <h1>Оповещения</h1>
-        <p>События, требующие внимания при работе Kafka-кластера.</p>
-      </header>
       <div className="management-grid">
         <div className="management-card"><div className="management-card-label">Активные</div><div className="management-card-value">0</div></div>
         <div className="management-card"><div className="management-card-label">Критические</div><div className="management-card-value">0</div></div>
