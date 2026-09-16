@@ -1,0 +1,12 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ * Licensed under the Apache License, Version 2.0.
+ */
+/** @file rate-panels.css Стили единого Consumer / Producer rate. */
+.rate-panel { min-width:0; min-height:0; height:100%; overflow:hidden; }
+.rate-panel-header { align-items:center !important; padding:10px 14px 7px !important; }
+.rate-current-values { display:flex; gap:12px; color:var(--text-secondary); font-size:10px; white-space:nowrap; }
+.rate-chart { flex:1; min-height:0; padding:0 8px 5px 4px; }
+.rate-tooltip { display:flex; flex-direction:column; gap:3px; padding:7px 9px; border:1px solid var(--border-color); border-radius:7px; background:var(--card-bg); box-shadow:0 8px 20px rgba(0,0,0,.35); font-size:11px; }
+.rate-tooltip strong { color:var(--text-primary); }
+.rate-tooltip span { color:var(--text-secondary); }
