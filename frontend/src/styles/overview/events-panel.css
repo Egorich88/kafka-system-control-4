@@ -33,7 +33,15 @@
 .events-panel-header {
     margin-bottom: 6px;
     flex-shrink: 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
 }
+.events-panel-actions { display:flex; align-items:center; gap:5px; }
+.events-filter { position:relative; display:flex; align-items:center; gap:5px; color:var(--text-secondary); font-size:10px; }
+.events-filter select { appearance:none; border:0; outline:0; background:transparent; color:var(--text-primary); font:inherit; font-size:10px; padding:3px 16px 3px 4px; cursor:pointer; }
+
 
 .events-title {
     display: flex;
@@ -59,7 +67,7 @@
 .events-row {
     min-width: 0;
     display: grid;
-    grid-template-columns: 72px minmax(0, 1fr) 105px;
+    grid-template-columns: 72px 54px minmax(0, 1fr) 105px;
     gap: 10px;
     align-items: center;
 }
@@ -98,6 +106,8 @@
 .event-time {
     font-variant-numeric: tabular-nums;
 }
+
+.event-level-cell { display:flex; align-items:center; }
 
 .event-message {
     display: flex;
@@ -164,6 +174,6 @@
 }
 
 .events-table::-webkit-scrollbar-thumb {
-    background: var(--border-color);
+    background: var(--sidebar-divider-color);
     border-radius: 4px;
 }

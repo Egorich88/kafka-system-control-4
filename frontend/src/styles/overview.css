@@ -34,14 +34,13 @@
    1. ИМПОРТЫ ЧАСТЕЙ
    ============================================================ */
 @import './overview/welcome.css';
-@import './overview/kpi-cards.css';
-@import './overview/brokers-panel.css';
 @import './overview/throughput-panel.css';
 @import './overview/topics-panel.css';
 @import './overview/consumer-lag-panel.css';
 @import './overview/cluster-health-panel.css';
 @import './overview/partition-distribution-panel.css';
 @import './overview/rate-panels.css';
+@import './overview/certificates-panel.css';
 @import './overview/events-panel.css';
 @import './components/panel-info.css';
 
@@ -126,46 +125,97 @@
     box-sizing: border-box;
 }
 
+/* ============================================================
+   Сетка Overview.
+   Первый ряд: состояние кластера | распределение.
+   Второй ряд: rate | сертификаты.
+   Далее: throughput/topics и groups/events.
+   ============================================================ */
+
 .dashboard-row-status {
-    grid-template-columns:
-        minmax(0, 2.3fr)
-        minmax(245px, .95fr)
-        minmax(205px, .72fr)
-        minmax(205px, .72fr);
-    height: clamp(255px, 25vh, 315px);
-    min-height: 255px;
-    max-height: 315px;
-    overflow: hidden;
+    display:grid;
+    grid-template-columns:minmax(0, 2.55fr) minmax(310px, 1fr);
+    gap:var(--dashboard-gap);
+    height:clamp(300px, 31vh, 370px);
+    min-height:300px;
+    overflow:hidden;
+}
+
+.dashboard-row-rate {
+    display:grid;
+    grid-template-columns:minmax(0, 2.55fr) minmax(310px, 1fr);
+    gap:var(--dashboard-gap);
+    height:clamp(190px, 19vh, 235px);
+    min-height:190px;
+    overflow:hidden;
 }
 
 .dashboard-row-top {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    height: clamp(260px, 22vh, 340px);
-    min-height: 260px;
-    max-height: 340px;
-    overflow: hidden;
+    grid-template-columns:minmax(0, 2fr) minmax(0, 3fr);
+    height:clamp(250px, 22vh, 330px);
+    min-height:250px;
+    overflow:hidden;
 }
 
-.panel-throughput,
-.panel-topics {
-    min-width: 0;
-    height: 100%;
-}
+.panel-throughput,.panel-topics,.panel-lag,.panel-events { min-width:0; min-height:0; height:100%; }
 
 .dashboard-row-main {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    height: clamp(430px, 42vh, 560px);
-    min-height: 430px;
-    max-height: 560px;
-    align-items: stretch;
-    overflow: hidden;
+    grid-template-columns:minmax(0, 3fr) minmax(0, 2fr);
+    height:clamp(360px, 32vh, 470px);
+    min-height:360px;
+    align-items:stretch;
+    overflow:hidden;
 }
 
-.panel-lag,
-.panel-events {
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
+
+/* Полноэкранный режим панели по кнопке в правом верхнем углу. */
+.panel-fullscreen-button {
+    flex:0 0 auto;
+    width:28px;
+    height:28px;
+    display:grid;
+    place-items:center;
+    border:0;
+    border-radius:7px;
+    background:transparent;
+    color:var(--text-secondary);
+    cursor:pointer;
+}
+.panel-fullscreen-button:hover {
+    color:var(--accent-hover);
+    background:var(--sidebar-hover);
+}
+.is-panel-fullscreen {
+    position:fixed !important;
+    inset:0 !important;
+    z-index:10000 !important;
+    width:auto !important;
+    height:auto !important;
+    max-height:none !important;
+    min-height:0 !important;
+    margin:0 !important;
+    border-radius:0 !important;
+    box-shadow:0 24px 80px rgba(0,0,0,.55) !important;
+}
+
+
+/* Высота Overview распределяется по доступному окну. Ни одна строка
+   не выталкивает следующую: переполнение обрабатывается внутри панелей. */
+.dashboard-container {
+    height:100%;
+    min-height:0;
+    overflow:hidden;
+    display:grid;
+    grid-template-rows:minmax(0, 2.25fr) minmax(0, 1.35fr) minmax(0, 1.75fr) minmax(0, 2.05fr);
+    gap:var(--dashboard-gap);
+}
+.dashboard-row-status,
+.dashboard-row-rate,
+.dashboard-row-top,
+.dashboard-row-main {
+    height:auto;
+    min-height:0;
+    max-height:none;
 }
 
 /* ============================================================
@@ -295,33 +345,12 @@
 }
 
 @media (max-width: 1200px) {
-    .dashboard-row-status,
-    .dashboard-row-top,
-    .dashboard-row-main {
-        grid-template-columns: minmax(0, 1fr);
-        height: auto;
-        min-height: 0;
-        max-height: none;
-        overflow: visible;
+    .dashboard-container {
+        grid-template-rows:minmax(0, 2.2fr) minmax(0, 1.3fr) minmax(0, 1.7fr) minmax(0, 2fr);
     }
-
-    .dashboard-row-status {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .cluster-health-panel,
-    .partition-distribution-panel,
-    .rate-panel {
-        min-height: 250px;
-    }
-
-    .panel-events {
-        height: 420px;
-    }
-
-    .panel-lag {
-        height: 520px;
-    }
+    .dashboard-row-top { grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); }
+    .dashboard-row-main { grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr); }
+    .cluster-kpi-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
 }
 
 /* Мобильные устройства */
@@ -330,10 +359,7 @@
         --dashboard-gap: 8px;
     }
 
-    .main-content:has(.dashboard-container) {
-        --dashboard-inset: 16px;
-        padding: var(--dashboard-inset);
-    }
+    
 
     .dashboard-kpi-grid {
         grid-template-columns: 1fr;

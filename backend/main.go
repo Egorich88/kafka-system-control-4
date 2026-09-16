@@ -195,6 +195,7 @@ func main() {
 	http.HandleFunc("/api/overview/messages-total", getDashboardMessagesTotalHandler)
 	http.HandleFunc("/api/overview/consumer-lag", GetConsumerLagHandler)
 	http.HandleFunc("/api/overview/events", getDashboardEventsHandler)
+	http.HandleFunc("/api/overview/certificates", getCertificatesHandler)
 
 	// ----- Health check для кластера -----
 	// Эндпоинт проверяет доступность Kafka-брокера.

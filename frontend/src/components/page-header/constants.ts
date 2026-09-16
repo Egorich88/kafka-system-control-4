@@ -38,15 +38,16 @@ export const RELATIVE_TIME_RANGES: RelativeTimeRange[] = [
 ];
 
 export const REFRESH_INTERVALS: RefreshInterval[] = [
-  { value: 0, label: 'Выкл' },
-  { value: 5, label: '5 с' },
-  { value: 10, label: '10 с' },
-  { value: 30, label: '30 с' },
-  { value: 60, label: '1 мин' },
-  { value: 300, label: '5 мин' },
-  { value: 900, label: '15 мин' },
-  { value: 1800, label: '30 мин' },
-  { value: 3600, label: '1 час' },
+  { value: 0, label: 'Off' },
+  { value: 5, label: '5s' },
+  { value: 10, label: '10s' },
+  { value: 30, label: '30s' },
+  { value: 60, label: '1m' },
+  { value: 300, label: '5m' },
+  { value: 900, label: '15m' },
+  { value: 1800, label: '30m' },
+  { value: 3600, label: '1h' },
+  { value: 86400, label: '1d' },
 ];
 
 export const DEFAULT_TIME_RANGE = RELATIVE_TIME_RANGES[1];

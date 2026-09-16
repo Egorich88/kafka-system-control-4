@@ -40,9 +40,10 @@ import {
   YAxis
 } from 'recharts';
 import axios from 'axios';
-import '../../styles/overview/topics-panel.css';
-import { useCluster } from '../../contexts/ClusterContext';
-import PanelInfo from '../../components/common/PanelInfo';
+import '../../../styles/overview/topics-panel.css';
+import { useCluster } from '../../../contexts/ClusterContext';
+import PanelInfo from '../../../components/common/PanelInfo';
+import PanelFullscreenButton from './PanelFullscreenButton';
 
 // =========================================================================
 // Кастомный тултип – показывает только положительные значения
@@ -207,7 +208,9 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                           Пропускная способность по топикам
                       </span>
                   </div>
-              </div>
+              
+        <PanelFullscreenButton />
+      </div>
         <div className="panel-body topics-placeholder">Загрузка данных...</div>
       </div>
     );
@@ -265,7 +268,7 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                   top: 10,
                   right: 10,
                   left: 0,
-                  bottom: 30
+                  bottom: 6
                 }}
                 onClick={handleChartClick}
                 cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
@@ -273,8 +276,8 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                 <CartesianGrid stroke="var(--border-color)" strokeDasharray="4 4" />
                 <XAxis
                   dataKey="time"
-                  height={45}
-                  tickMargin={10}
+                  height={22}
+                  tickMargin={3}
                   tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
@@ -284,7 +287,7 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                   tickLine={false}
                   axisLine={false}
                   domain={[0, 'auto']}
-                  padding={{ top: 20 }}
+                  padding={{ top: 0 }}
                 />
                 <Tooltip content={<TopicsTooltip />} />
 

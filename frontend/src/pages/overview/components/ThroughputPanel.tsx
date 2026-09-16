@@ -20,7 +20,8 @@
  * Управление линиями: клик по линии – оставить только её,
  * клик по фону графика – показать обе линии.
  */
-import PanelInfo from '../../components/common/PanelInfo';
+import PanelInfo from '../../../components/common/PanelInfo';
+import PanelFullscreenButton from './PanelFullscreenButton';
 import { useState } from 'react';
 import {
   ResponsiveContainer,
@@ -108,6 +109,8 @@ export default function ThroughputPanel({ data }) {
             Исходящие: {latestPoint?.outgoing?.toFixed(1) ?? 0} msg/s
           </span>
         </div>
+      
+        <PanelFullscreenButton />
       </div>
 
       <div className="panel-body throughput-chart">
@@ -118,7 +121,7 @@ export default function ThroughputPanel({ data }) {
               top: 10,
               right: 10,
               left: 0,
-              bottom: 30
+              bottom: 6
             }}
             onClick={hasData ? handleChartClick : undefined}
           >
@@ -126,8 +129,8 @@ export default function ThroughputPanel({ data }) {
 
             <XAxis
               dataKey="time"
-              height={45}
-              tickMargin={10}
+              height={22}
+              tickMargin={3}
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
@@ -135,7 +138,7 @@ export default function ThroughputPanel({ data }) {
 
             <YAxis
               domain={[0, 'auto']}
-              padding={{ top: 20 }}
+              padding={{ top: 0 }}
               tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}

@@ -17,7 +17,7 @@
 .topics-table-wrapper::-webkit-scrollbar-thumb,
 .topic-config-wrapper::-webkit-scrollbar-thumb,
 .modal-content::-webkit-scrollbar-thumb {
-    background: var(--border-color);
+    background: var(--sidebar-divider-color);
     border-radius: 20px;
     border: 2px solid var(--panel-bg);
 }

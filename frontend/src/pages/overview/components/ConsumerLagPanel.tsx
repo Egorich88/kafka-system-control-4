@@ -23,7 +23,8 @@
  * группы: Stable, Rebalancing, Empty или Dead.
  */
 
-import PanelInfo from '../../components/common/PanelInfo';
+import PanelInfo from '../../../components/common/PanelInfo';
+import PanelFullscreenButton from './PanelFullscreenButton';
 import { useState, useEffect, useMemo } from 'react';
 import {
   ResponsiveContainer,
@@ -35,7 +36,7 @@ import {
   YAxis
 } from 'recharts';
 import axios from 'axios';
-import { useCluster } from '../../contexts/ClusterContext';
+import { useCluster } from '../../../contexts/ClusterContext';
 
 const TOPIC_COLORS = [
   '#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444',
@@ -267,6 +268,8 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
             ))}
           </div>
         </div>
+      
+        <PanelFullscreenButton />
       </div>
 
       <div className="consumer-lag-content">

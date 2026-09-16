@@ -15,404 +15,372 @@
  */
 
 /**
- * =============================================================================
  * @file page-header.css
- * =============================================================================
- * Стили общей горизонтальной шапки KSC.
- * Разделитель использует тот же цвет, что и разделитель Sidebar.
- * =============================================================================
+ * Стили общей верхней панели KSC.
+ *
+ * Разделитель использует фирменный цвет Sidebar. Во время загрузки
+ * поверх него проходит мягкая небесно-голубая волна.
  */
 
 .page-header-bar {
-    position: relative;
-    z-index: 30;
-    flex: 0 0 auto;
-    width: 100%;
-    min-height: 78px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 28px;
-    padding: 14px clamp(20px, 2.2vw, 34px) 13px;
-    box-sizing: border-box;
-    background: var(--bg-primary);
-    border-bottom: 1px solid var(--sidebar-divider-color);
+  position: relative;
+  z-index: 30;
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 14px clamp(20px, 2.2vw, 34px) 14px;
+  background: var(--bg-primary);
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--sidebar-divider-color);
 }
 
-/* Линия прогрузки в стиле Grafana. По умолчанию полностью скрыта. */
 .page-header-loading-line {
-    position: absolute;
-    left: 0;
-    bottom: -1px;
-    width: 0;
-    height: 2px;
-    pointer-events: none;
-    background: var(--accent-hover);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-hover) 55%, transparent);
-    opacity: 0;
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  background: var(--accent-hover);
+}
+
+.page-header-loading-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 42%;
+  background: linear-gradient(90deg, transparent, #87cefa, transparent);
+  filter: drop-shadow(0 0 5px #87cefa);
 }
 
 .page-header-bar.is-loading .page-header-loading-line {
-    opacity: 1;
-    animation: pageHeaderLoading 1.15s ease-in-out infinite;
+  width: 100%;
+  opacity: 1;
 }
 
-@keyframes pageHeaderLoading {
-    0% { width: 0; }
-    55% { width: 72%; }
-    100% { width: 100%; }
+.page-header-bar.is-loading .page-header-loading-line::after {
+  animation: pageHeaderLoadingWave 1.15s ease-in-out infinite;
+}
+
+@keyframes pageHeaderLoadingWave {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(250%); }
 }
 
 .page-header-title-group {
-    min-width: 0;
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-template-areas:
-        "title cluster"
-        "description description";
-    align-items: baseline;
-    column-gap: 14px;
-    row-gap: 3px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .page-header-title-group h1 {
-    grid-area: title;
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 30px;
-    line-height: 1.1;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 30px;
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .page-header-title-group p {
-    grid-area: description;
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 1.35;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.page-header-cluster {
-    grid-area: cluster;
-    color: var(--text-secondary);
-    font-size: 13px;
-    line-height: 1.2;
-    white-space: nowrap;
+  margin: 0;
+  max-width: min(700px, 50vw);
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .page-header-controls {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    min-width: 0;
-    flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
-.page-header-control,
-.page-header-refresh-control,
+/* Контролы намеренно плоские: никаких рамок вокруг периода/обновления. */
+.page-header-flat-control,
 .page-header-refresh-button {
-    height: 38px;
-    box-sizing: border-box;
-    border: 1px solid var(--border-color);
-    border-radius: 9px;
-    background: var(--card-bg);
-    color: var(--text-primary);
-    box-shadow: none;
+  height: 38px;
+  border: 0;
+  outline: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  box-shadow: none;
+  font: inherit;
 }
 
-.page-header-control {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 11px;
-    cursor: pointer;
-    font: inherit;
+.page-header-flat-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 5px;
+  cursor: pointer;
 }
 
-.page-header-time-picker {
-    position: relative;
+.page-header-flat-control:hover,
+.page-header-flat-control.is-open {
+  color: var(--accent-hover);
+  background: var(--sidebar-hover);
+}
+
+.page-header-time-picker,
+.page-header-refresh-picker {
+  position: relative;
 }
 
 .page-header-time-button {
-    width: 224px;
-    max-width: 224px;
+  width: 250px;
+  max-width: 250px;
 }
 
 .page-header-time-button span {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 12px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
 }
 
 .page-header-control-icon,
 .page-header-chevron,
-.page-header-select-chevron {
-    flex: 0 0 auto;
-    color: var(--text-secondary);
+.page-header-refresh-picker svg {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
 }
 
-.page-header-chevron,
-.page-header-select-chevron {
-    font-size: 14px;
+.page-header-time-button:hover svg,
+.page-header-time-button.is-open svg,
+.page-header-refresh-picker .is-open svg {
+  color: var(--accent-hover);
 }
 
-.page-header-control:hover,
-.page-header-refresh-control:hover,
-.page-header-refresh-button:hover,
-.page-header-control.is-open {
-    border-color: var(--accent-hover);
-    color: var(--accent-hover);
-}
-
-/* Компактное современное меню периода. */
+/* Меню периода имеет ту же ширину, что и контрол, но не раздувается
+   до огромного Windows-подобного списка. */
 .page-header-time-menu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 360px;
-    max-width: min(360px, calc(100vw - 32px));
-    padding: 10px;
-    box-sizing: border-box;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    background: var(--dropdown-bg);
-    box-shadow: var(--shadow-primary);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 250px;
+  max-width: calc(100vw - 32px);
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--dropdown-bg);
+  box-shadow: var(--shadow-primary);
+  box-sizing: border-box;
 }
 
 .page-header-menu-title,
 .page-header-absolute-title {
-    color: var(--text-primary);
-    font-size: 12px;
-    font-weight: 650;
-}
-
-.page-header-menu-title {
-    padding: 3px 5px 7px;
+  padding: 2px 4px 7px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .page-header-range-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.page-header-range-list button,
+.page-header-refresh-menu button {
+  min-width: 0;
+  height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
 }
 
 .page-header-range-list button {
-    min-width: 0;
-    height: 30px;
-    border: 0;
-    border-radius: 6px;
-    padding: 0 8px;
-    background: transparent;
-    color: var(--text-secondary);
-    text-align: left;
-    font: inherit;
-    font-size: 11px;
-    cursor: pointer;
-    transition: background .15s ease, color .15s ease;
+  padding: 0 8px;
 }
 
 .page-header-range-list button:hover,
-.page-header-range-list button.selected {
-    background: var(--selected-color);
-    color: var(--text-primary);
+.page-header-range-list button.selected,
+.page-header-refresh-menu button:hover,
+.page-header-refresh-menu button.selected {
+  background: var(--selected-color);
+  color: var(--text-primary);
 }
 
 .page-header-menu-divider {
-    height: 1px;
-    margin: 8px 0;
-    background: var(--border-color);
-}
-
-.page-header-absolute-title {
-    padding: 0 5px 7px;
+  height: 1px;
+  margin: 8px 0;
+  background: var(--border-color);
 }
 
 .page-header-datetime-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 7px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 7px;
 }
 
 .page-header-datetime-grid label {
-    display: grid;
-    gap: 4px;
-    color: var(--text-secondary);
-    font-size: 10px;
+  display: grid;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 10px;
 }
 
 .page-header-datetime-grid input {
-    width: 100%;
-    height: 32px;
-    padding: 0 7px;
-    box-sizing: border-box;
-    border: 1px solid var(--border-color);
-    border-radius: 7px;
-    background: var(--input-bg);
-    color: var(--text-primary);
-    font: inherit;
-    font-size: 10px;
-    outline: none;
+  width: 100%;
+  height: 32px;
+  padding: 0 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 10px;
+  outline: none;
 }
 
 .page-header-datetime-grid input:focus {
-    border-color: var(--accent-hover);
-    box-shadow: 0 0 0 2px var(--input-focus);
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 2px var(--input-focus);
 }
 
 .page-header-apply-button {
-    width: 100%;
-    height: 32px;
-    margin-top: 8px;
-    border: 0;
-    border-radius: 7px;
-    background: var(--accent-color);
-    color: #fff;
-    font: inherit;
-    font-size: 11px;
-    font-weight: 650;
-    cursor: pointer;
-}
-
-.page-header-apply-button:hover:not(:disabled) {
-    background: var(--accent-hover);
+  width: 100%;
+  height: 32px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent-color);
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
 }
 
 .page-header-apply-button:disabled {
-    opacity: .45;
-    cursor: not-allowed;
+  opacity: .45;
+  cursor: not-allowed;
 }
 
-.page-header-refresh-control {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    min-width: 116px;
-    padding: 0 8px 0 10px;
+/* Современный список интервалов на всю ширину своего контрола. */
+.page-header-refresh-picker {
+  min-width: 132px;
 }
 
 .page-header-refresh-label {
-    color: var(--text-secondary);
-    font-size: 11px;
-    white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: 11px;
+  white-space: nowrap;
 }
 
-.page-header-refresh-control select {
-    width: 48px;
-    height: 34px;
-    padding: 0 15px 0 0;
-    border: 0;
-    outline: 0;
-    appearance: none;
-    background: transparent;
-    color: var(--text-primary);
-    font: inherit;
-    font-size: 12px;
-    cursor: pointer;
+.page-header-flat-control strong {
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.page-header-select-chevron {
-    position: absolute;
-    right: 7px;
-    pointer-events: none;
+.page-header-refresh-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 132px;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--dropdown-bg);
+  box-shadow: var(--shadow-primary);
+  box-sizing: border-box;
+}
+
+.page-header-refresh-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 9px;
+}
+
+.page-header-check {
+  color: var(--accent-hover);
+  font-size: 12px;
 }
 
 .page-header-refresh-button {
-    width: 38px;
-    display: inline-grid;
-    place-items: center;
-    padding: 0;
-    cursor: pointer;
-    font-size: 16px;
+  width: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.page-header-refresh-button:hover {
+  color: var(--accent-hover);
+  background: var(--sidebar-hover);
 }
 
 .page-header-refresh-button:disabled {
-    opacity: .7;
-    cursor: default;
+  opacity: .65;
+  cursor: default;
 }
 
 .is-spinning {
-    animation: pageHeaderRefreshSpin .75s linear infinite;
+  animation: pageHeaderRefreshSpin .75s linear infinite;
 }
 
 @keyframes pageHeaderRefreshSpin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-@media (max-width: 1050px) {
-    .page-header-bar {
-        gap: 18px;
-    }
-
-    .page-header-title-group h1 {
-        font-size: 27px;
-    }
-
-    .page-header-time-button {
-        width: 205px;
-        max-width: 205px;
-    }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 900px) {
-    .page-header-bar {
-        align-items: flex-start;
-        flex-direction: column;
-        min-height: auto;
-        padding-top: 13px;
-        padding-bottom: 12px;
-    }
-
-    .page-header-controls {
-        width: 100%;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-    }
+  .page-header-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .page-header-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 560px) {
-    .page-header-title-group {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "title"
-            "cluster"
-            "description";
-        gap: 3px;
-    }
-
-    .page-header-title-group h1 {
-        font-size: 24px;
-    }
-
-    .page-header-title-group p {
-        white-space: normal;
-    }
-
-    .page-header-controls {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto;
-    }
-
-    .page-header-time-picker {
-        min-width: 0;
-    }
-
-    .page-header-time-button {
-        width: 100%;
-        max-width: none;
-    }
-
-    .page-header-time-menu {
-        left: 0;
-        right: auto;
-    }
+  .page-header-title-group h1 {
+    font-size: 24px;
+  }
+  .page-header-title-group p {
+    max-width: 100%;
+    white-space: normal;
+  }
+  .page-header-controls {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 132px 38px;
+  }
+  .page-header-time-button {
+    width: 100%;
+    max-width: none;
+  }
+  .page-header-time-menu {
+    left: 0;
+    right: auto;
+    width: min(360px, calc(100vw - 32px));
+  }
 }

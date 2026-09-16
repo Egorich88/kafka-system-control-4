@@ -46,8 +46,10 @@ export function useLoading(): LoadingState {
                 completed: false
             });
 
+            // Небольшая минимальная длительность нужна, чтобы фирменный
+            // экран запуска не исчезал мгновенно на быстрых машинах.
             await new Promise<void>(resolve => {
-                requestAnimationFrame(() => resolve());
+                window.setTimeout(resolve, 900);
             });
 
             if (cancelled) return;

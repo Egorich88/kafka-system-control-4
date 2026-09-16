@@ -22,16 +22,18 @@
  * Сообщение, Источник.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import '../../styles/overview/events-panel.css';
-import PanelInfo from '../../components/common/PanelInfo';
-import { useCluster } from '../../contexts/ClusterContext';
+import '../../../styles/overview/events-panel.css';
+import PanelInfo from '../../../components/common/PanelInfo';
+import PanelFullscreenButton from './PanelFullscreenButton';
+import { useCluster } from '../../../contexts/ClusterContext';
 
 export default function EventsPanel({ refreshKey }) {
   const { currentCluster } = useCluster();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [levelFilter, setLevelFilter] = useState<'ALL' | 'INFO' | 'WARN' | 'ERROR'>('ALL');
 
   const loadEvents = async () => {
     if (!currentCluster) return;
@@ -71,6 +73,11 @@ export default function EventsPanel({ refreshKey }) {
     }
   };
 
+  const filteredEvents = useMemo(
+    () => levelFilter === 'ALL' ? events : events.filter((event) => event.level === levelFilter),
+    [events, levelFilter]
+  );
+
   return (
     <div className="events-panel">
       <div className="events-panel-header">
@@ -81,23 +88,36 @@ export default function EventsPanel({ refreshKey }) {
           />
           <span>Последние события</span>
         </div>
+        <div className="events-panel-actions">
+          <label className="events-filter">
+            <span>Фильтр</span>
+            <select value={levelFilter} onChange={(event) => setLevelFilter(event.target.value as typeof levelFilter)}>
+              <option value="ALL">Все</option>
+              <option value="INFO">INFO</option>
+              <option value="WARN">WARN</option>
+              <option value="ERROR">ERROR</option>
+            </select>
+          </label>
+          <PanelFullscreenButton />
+        </div>
       </div>
 
       <div className="events-table">
         <div className="events-table-header">
           <div>Время</div>
+          <div>Уровень</div>
           <div>Сообщение</div>
           <div>Источник</div>
         </div>
 
-        {events.map((event, index) => (
+        {filteredEvents.map((event, index) => (
           <div className="events-row" key={`${event.time}-${index}`}>
             <div className="events-cell event-time">{event.time}</div>
 
+            <div className="events-cell event-level-cell">
+              <span className={`event-level-badge ${getLevelClass(event.level)}`}>{event.level || 'INFO'}</span>
+            </div>
             <div className="events-cell event-message">
-              <span className={`event-level-badge ${getLevelClass(event.level)}`}>
-                {event.level}
-              </span>
               <span className="event-message-text">{event.message}</span>
             </div>
 

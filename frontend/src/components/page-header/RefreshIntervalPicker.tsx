@@ -1,28 +1,17 @@
 /*
  * Copyright 2026 Egor Khomenko (Egorich88)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed under the Apache License, Version 2.0.
  */
 
 /**
- * =============================================================================
  * @file RefreshIntervalPicker.tsx
- * =============================================================================
- * Компактный выбор интервала автоматического обновления.
- * Иконка обновления намеренно находится только в общей кнопке справа.
- * =============================================================================
+ * Современный компактный выбор интервала автообновления.
+ * Выпадающее меню не использует нативный select, чтобы одинаково
+ * выглядеть во всех темах и браузерах.
  */
 
+import { useEffect, useRef, useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 import { REFRESH_INTERVALS } from './constants';
 import type { RefreshInterval } from './types';
@@ -32,24 +21,54 @@ interface Props {
   onChange: (seconds: number) => void;
 }
 
-export default function RefreshIntervalPicker({ value, onChange }: Props) {
+export default function RefreshIntervalPicker({ value, onChange }: Props): JSX.Element {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const selected = REFRESH_INTERVALS.find((item) => item.value === value) ?? REFRESH_INTERVALS[0];
 
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
   return (
-    <label className="page-header-refresh-control">
-      <span className="page-header-refresh-label">Обновление</span>
-      <select
-        value={selected.value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        aria-label="Интервал автоматического обновления"
+    <div className="page-header-refresh-picker" ref={rootRef}>
+      <button
+        type="button"
+        className={`page-header-flat-control ${open ? 'is-open' : ''}`}
+        onClick={() => setOpen((current) => !current)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
       >
-        {REFRESH_INTERVALS.map((item: RefreshInterval) => (
-          <option value={item.value} key={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
-      <FiChevronDown className="page-header-select-chevron" aria-hidden="true" />
-    </label>
+        <span className="page-header-refresh-label">Обновление</span>
+        <strong>{selected.label}</strong>
+        <FiChevronDown />
+      </button>
+
+      {open && (
+        <div className="page-header-refresh-menu" role="listbox" aria-label="Интервал обновления">
+          {REFRESH_INTERVALS.map((item: RefreshInterval) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={item.value === value}
+              className={item.value === value ? 'selected' : ''}
+              key={item.value}
+              onClick={() => {
+                onChange(item.value);
+                setOpen(false);
+              }}
+            >
+              <span>{item.label}</span>
+              {item.value === value && <span className="page-header-check">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

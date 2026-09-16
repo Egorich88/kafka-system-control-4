@@ -22,7 +22,7 @@
 
 .partition-distribution-body {
     display: grid;
-    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-columns: 205px minmax(0, 1fr);
     align-items: center;
     gap: 8px;
     padding: 8px 12px 12px;
@@ -32,8 +32,8 @@
 
 .partition-donut {
     position: relative;
-    width: 145px;
-    height: 145px;
+    width: 195px;
+    height: 195px;
 }
 
 .partition-donut-center {
@@ -47,14 +47,14 @@
 }
 
 .partition-donut-center strong {
-    font-size: 20px;
+    font-size: 24px;
     color: var(--text-primary);
     line-height: 1;
 }
 
 .partition-donut-center span {
     margin-top: 4px;
-    font-size: 12px;
+    font-size: 10px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: .04em;

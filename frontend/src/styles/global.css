@@ -53,3 +53,23 @@ body {
 
   overflow: hidden;
 }
+/* Единая тематическая полоса прокрутки. Цвет берётся из активной темы KSC. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-divider-color) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--sidebar-divider-color);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}

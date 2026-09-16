@@ -41,6 +41,7 @@
  * =============================================================================
  */
 
+import { useEffect } from 'react';
 import { useLoading } from './hooks/useLoading';
 
 import LoadingScreen from './components/LoadingScreen';
@@ -58,6 +59,12 @@ import App from '../../App';
  */
 export default function LoadingBootstrap() {
     const loading = useLoading();
+
+    useEffect(() => {
+        if (loading.completed) {
+            document.getElementById('initial-splash')?.remove();
+        }
+    }, [loading.completed]);
 
     if (!loading.completed) {
         return <LoadingScreen status={loading.message} />;

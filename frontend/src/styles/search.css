@@ -663,7 +663,7 @@
 }
 
 .topic-dropdown-list::-webkit-scrollbar-thumb {
-    background: rgba(148,163,184,0.35);
+    background: var(--sidebar-divider-color);
     border-radius: 999px;
 }
 
@@ -726,7 +726,7 @@
 
 .messages-table-wrapper::-webkit-scrollbar-thumb,
 .message-detail-content::-webkit-scrollbar-thumb {
-    background: rgba(148,163,184,0.35);
+    background: var(--sidebar-divider-color);
     border-radius: 999px;
 }
 
@@ -744,7 +744,7 @@
 }
 
 .search-results-card::-webkit-scrollbar-thumb {
-    background: rgba(148,163,184,0.35);
+    background: var(--sidebar-divider-color);
     border-radius: 999px;
 }
 

@@ -61,8 +61,6 @@ type BrokersResponse struct {
 // Глобальный кеш для версии (определяется один раз при первом запросе)
 // =============================================================================
 
-var cachedKafkaVersion string
-
 // =============================================================================
 // HTTP-обработчик
 // =============================================================================
@@ -317,10 +315,6 @@ func parseFloat(s string) (float64, error) {
 // Источники: переменная окружения, логи, jar-файлы
 func getRealKafkaVersionWithLog(bootstrap string) string {
 	// Если уже есть в кеше - возвращаем
-	if cachedKafkaVersion != "" {
-		log.Printf("[VERSION] Using cached version: %s", cachedKafkaVersion)
-		return cachedKafkaVersion
-	}
 
 	var version string
 	var source string
@@ -330,16 +324,24 @@ func getRealKafkaVersionWithLog(bootstrap string) string {
 		version = v
 		source = "ENV variable KAFKA_VERSION"
 		log.Printf("[VERSION] Found in %s: %s", source, version)
-		cachedKafkaVersion = version
 		return version
 	}
 
-	// 2. Пробуем через логи (самый надёжный способ)
+	// 2. Пробуем штатную kafka-topics.sh. Это основной способ:
+	// docker exec ... /opt/kafka/bin/kafka-topics.sh --version
+	// либо локальная Linux-установка с kafka-topics.sh в PATH.
+	if v, src := getVersionFromKafkaCommand(); v != "" {
+		version = v
+		source = src
+		log.Printf("[VERSION] Found in %s: %s", source, version)
+		return version
+	}
+
+	// 3. Пробуем через логи.
 	if v, src := getVersionFromLogsWithSource(); v != "" {
 		version = v
 		source = src
 		log.Printf("[VERSION] Found in %s: %s", source, version)
-		cachedKafkaVersion = version
 		return version
 	}
 
@@ -348,12 +350,10 @@ func getRealKafkaVersionWithLog(bootstrap string) string {
 		version = v
 		source = src
 		log.Printf("[VERSION] Found in %s: %s", source, version)
-		cachedKafkaVersion = version
 		return version
 	}
 
 	log.Printf("[VERSION] Version not found, using: unknown")
-	cachedKafkaVersion = "unknown"
 	return "unknown"
 }
 
@@ -464,6 +464,66 @@ func getVersionFromJarWithSource() (string, string) {
 				version := matches[1]
 				if !strings.HasPrefix(version, "2.12") && !strings.HasPrefix(version, "2.13") {
 					return version, "JAR file: " + file
+				}
+			}
+		}
+	}
+
+	return "", ""
+}
+
+// getVersionFromKafkaCommand получает точную версию через штатную команду Kafka.
+// Поддерживаются Docker-контейнеры и обычная Linux-установка.
+func getVersionFromKafkaCommand() (string, string) {
+	re := regexp.MustCompile(`(?m)\b(\d+\.\d+\.\d+)\b`)
+
+	// Docker: ищем контейнер с Kafka и несколько стандартных расположений
+	// kafka-topics.sh, включая путь из официальных Kafka-образов.
+	containerOutput, err := exec.Command("sh", "-c",
+		"docker ps --format '{{.Names}}' | grep -i kafka | head -1").Output()
+	if err == nil {
+		container := strings.TrimSpace(string(containerOutput))
+		if container != "" {
+			paths := []string{
+				"/opt/kafka/bin/kafka-topics.sh",
+				"/opt/bitnami/kafka/bin/kafka-topics.sh",
+				"/usr/bin/kafka-topics.sh",
+				"/usr/local/bin/kafka-topics.sh",
+			}
+			for _, path := range paths {
+				cmd := exec.Command("docker", "exec", container, path, "--version")
+				output, commandErr := cmd.CombinedOutput()
+				if commandErr == nil {
+					if match := re.FindStringSubmatch(string(output)); len(match) > 1 {
+						return match[1], "kafka-topics.sh в Docker: " + container
+					}
+				}
+			}
+		}
+	}
+
+	// Обычный Linux-сервер: команда может быть доступна в PATH.
+	for _, command := range []string{"kafka-topics.sh", "kafka-topics"} {
+		output, commandErr := exec.Command(command, "--version").CombinedOutput()
+		if commandErr == nil {
+			if match := re.FindStringSubmatch(string(output)); len(match) > 1 {
+				return match[1], "команда " + command
+			}
+		}
+	}
+
+	// Стандартные каталоги Kafka на Linux.
+	for _, path := range []string{
+		"/opt/kafka/bin/kafka-topics.sh",
+		"/opt/bitnami/kafka/bin/kafka-topics.sh",
+		"/usr/local/kafka/bin/kafka-topics.sh",
+		"/usr/share/kafka/bin/kafka-topics.sh",
+	} {
+		if _, statErr := os.Stat(path); statErr == nil {
+			output, commandErr := exec.Command(path, "--version").CombinedOutput()
+			if commandErr == nil {
+				if match := re.FindStringSubmatch(string(output)); len(match) > 1 {
+					return match[1], "kafka-topics.sh: " + path
 				}
 			}
 		}

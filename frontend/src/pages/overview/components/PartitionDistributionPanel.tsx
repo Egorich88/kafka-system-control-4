@@ -30,7 +30,8 @@ import {
   Cell,
   Tooltip
 } from 'recharts';
-import PanelInfo from '../../components/common/PanelInfo';
+import PanelInfo from '../../../components/common/PanelInfo';
+import PanelFullscreenButton from './PanelFullscreenButton';
 
 const ROLE_COLORS = ['#3b82f6', '#8b5cf6'];
 const HEALTH_COLORS = ['#22c55e', '#f59e0b', '#ef4444'];
@@ -101,6 +102,8 @@ export default function PartitionDistributionPanel({ data }) {
           />
           <span>Распределение партиций</span>
         </div>
+      
+        <PanelFullscreenButton />
       </div>
 
       <div className="partition-distribution-body">
@@ -153,7 +156,7 @@ export default function PartitionDistributionPanel({ data }) {
 
           <div className="partition-donut-center">
             <strong>{total}</strong>
-            <span>партиций</span>
+            <span>Кол-во</span>
           </div>
         </div>
 

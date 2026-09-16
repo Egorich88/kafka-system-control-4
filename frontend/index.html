@@ -27,7 +27,7 @@
  *
  * Этот файл является самым ранним этапом запуска frontend-приложения.
  *
- * Браузер загружает index.html до выполнения React и main.jsx.
+ * Браузер загружает index.html до выполнения React и main.tsx.
  *
  * Файл отвечает только за:
  *
@@ -62,7 +62,7 @@
  *    ↓
  * Static Splash
  *    ↓
- * main.jsx
+ * main.tsx
  *    ↓
  * React
  *    ↓
@@ -193,6 +193,42 @@
             width: 100%;
             min-height: 100%;
         }
+
+        #initial-splash {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            display: grid;
+            place-items: center;
+            background: #0f1117;
+        }
+
+        .initial-splash-logo-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .initial-splash-logo-wrap img {
+            width: 150px;
+            height: auto;
+            filter: drop-shadow(0 10px 24px rgba(0,0,0,.35));
+        }
+
+        .initial-splash-logo-wrap span {
+            width: 150px;
+            height: 3px;
+            border-radius: 999px;
+            background: radial-gradient(ellipse at center, #55e6dc, rgba(34,220,200,.35) 45%, transparent 80%);
+            box-shadow: 0 0 18px rgba(85,230,220,.45);
+            animation: initialSplashGlow 1.8s ease-in-out infinite;
+        }
+
+        @keyframes initialSplashGlow {
+            0%, 100% { opacity: .5; transform: scaleX(.82); }
+            50% { opacity: 1; transform: scaleX(1.08); }
+        }
     </style>
 
 </head>
@@ -208,7 +244,7 @@
 
      Логотип находится внутри этого контейнера намеренно.
 
-     После запуска React main.jsx удаляет #initial-splash.
+     После завершения React LoadingBootstrap удаляет #initial-splash.
 ====================================================================== -->
 
 
@@ -221,6 +257,13 @@
      В этот элемент React монтирует приложение.
 ====================================================================== -->
 
+<div id="initial-splash" aria-label="Kafka System Control">
+    <div class="initial-splash-logo-wrap">
+        <img src="/logo.svg" alt="Kafka System Control" />
+        <span></span>
+    </div>
+</div>
+
 <div id="root"></div>
 
 
@@ -230,7 +273,7 @@
 
 <script
         type="module"
-        src="/src/main.jsx"
+        src="/src/main.tsx"
 ></script>
 
 </body>
