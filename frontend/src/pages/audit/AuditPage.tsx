@@ -46,8 +46,6 @@ import {
 } from 'react';
 
 import {
-    FiRefreshCw,
-    FiClock,
     FiDownload
 } from 'react-icons/fi';
 
@@ -102,9 +100,7 @@ export default function AuditPage() {
 
         updateFilter,
 
-        resetFilters,
-
-        refresh
+        resetFilters
 
     } = useAudit();
 
@@ -145,16 +141,6 @@ export default function AuditPage() {
     };
 
 
-    const handleRefresh = () => {
-
-        refresh();
-
-        toast.success(
-            'Аудит обновлён'
-        );
-
-    };
-
 
     const handleExport = (
         format: 'json' | 'csv' | 'txt'
@@ -183,83 +169,6 @@ export default function AuditPage() {
         >
 
             <main className="audit-content">
-
-                {/* =========================================================
-                    Заголовок
-                   ========================================================= */}
-
-                <header className="audit-page-header">
-
-                    <div>
-
-                        <h1>
-                            Аудит
-                        </h1>
-
-                        <p>
-                            Обзор активности и событий безопасности в кластере
-                        </p>
-
-                    </div>
-
-
-                    <div className="audit-header-actions">
-
-                        <label className="audit-auto-refresh">
-
-                            <span>
-                                Автообновление
-                            </span>
-
-                            <input
-                                type="checkbox"
-                                defaultChecked
-                            />
-
-                        </label>
-
-
-                        <button
-                            type="button"
-                            className="audit-period-button"
-                        >
-
-                            <FiClock />
-
-                            Последние 24 часа
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            className="audit-header-button"
-                            onClick={handleRefresh}
-                            title="Обновить"
-                        >
-
-                            <FiRefreshCw />
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            className="audit-header-button"
-                            onClick={() =>
-                                handleExport('json')
-                            }
-                            title="Экспорт"
-                        >
-
-                            <FiDownload />
-
-                        </button>
-
-                    </div>
-
-                </header>
-
 
                 {/* =========================================================
                     KPI
@@ -296,10 +205,6 @@ export default function AuditPage() {
 
                     onReset={
                         resetFilters
-                    }
-
-                    onRefresh={
-                        handleRefresh
                     }
 
                     onExport={

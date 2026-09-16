@@ -18,13 +18,13 @@
  * =============================================================================
  * @file TimeRangePicker.tsx
  * =============================================================================
- * Выбор относительного или абсолютного периода в стиле Grafana.
+ * Компактный выбор периода в стиле Grafana.
+ * Поддерживает быстрые относительные интервалы и абсолютный диапазон дат.
  * =============================================================================
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { FiCalendar, FiChevronDown, FiClock } from 'react-icons/fi';
-
+import { FiCalendar, FiChevronDown } from 'react-icons/fi';
 import { RELATIVE_TIME_RANGES } from './constants';
 import type { TimeRange } from './types';
 import './page-header.css';
@@ -45,7 +45,7 @@ function fromInputValue(value: string): string {
 
 function formatAbsolute(value: string): string {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Выберите период';
+  if (Number.isNaN(date.getTime())) return 'Абсолютный диапазон';
 
   return new Intl.DateTimeFormat('ru-RU', {
     day: '2-digit',
@@ -69,23 +69,24 @@ export default function TimeRangePicker({ value, onChange }: Props) {
       setFrom(toInputValue(new Date(value.from)));
       setTo(toInputValue(new Date(value.to)));
     } else {
-      const end = new Date();
-      const start = new Date(end.getTime() - 15 * 60 * 1000);
-      setFrom(toInputValue(start));
-      setTo(toInputValue(end));
+      const now = new Date();
+      setTo(toInputValue(now));
+      setFrom('');
     }
   }, [open, value]);
 
   useEffect(() => {
-    const handleOutside = (event: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+    if (!open) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, []);
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [open]);
 
   const label = value.type === 'relative'
     ? value.label
@@ -115,7 +116,7 @@ export default function TimeRangePicker({ value, onChange }: Props) {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <FiClock className="page-header-control-icon" />
+        <FiCalendar className="page-header-control-icon" />
         <span>{label}</span>
         <FiChevronDown className="page-header-chevron" />
       </button>
@@ -123,7 +124,6 @@ export default function TimeRangePicker({ value, onChange }: Props) {
       {open && (
         <div className="page-header-time-menu" role="dialog" aria-label="Выбор периода">
           <div className="page-header-menu-title">
-            <FiCalendar />
             <span>Период</span>
           </div>
 

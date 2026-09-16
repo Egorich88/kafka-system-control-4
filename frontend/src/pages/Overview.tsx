@@ -53,7 +53,7 @@ export default function Overview(): JSX.Element {
   const [throughputData, setThroughputData] = useState([]);
   const [messagesIn, setMessagesIn] = useState(0);
   const [messagesOut, setMessagesOut] = useState(0);
-  const { timeRange, registerRefreshHandler } = useDashboardControls();
+  const { timeRange, registerRefreshHandler, setPageLoading } = useDashboardControls();
   // Текущий backend поддерживает относительные диапазоны; абсолютный
   // диапазон уже принят frontend-контрактом и будет использован будущим источником истории.
   const apiRange = timeRange.type === 'relative' ? timeRange.id : '24h';
@@ -81,6 +81,7 @@ export default function Overview(): JSX.Element {
   const loadDashboard = useCallback(async () => {
     if (!currentCluster) return;
     setLoading(true);
+    setPageLoading(true);
     clearDashboardData();
 
     try {
@@ -88,6 +89,7 @@ export default function Overview(): JSX.Element {
       if (!bootstrap) {
         console.error('Не указаны брокеры для кластера', currentCluster);
         setLoading(false);
+        setPageLoading(false);
         return;
       }
 
@@ -120,8 +122,9 @@ export default function Overview(): JSX.Element {
       console.error('Ошибка загрузки дашборда:', error);
     } finally {
       setLoading(false);
+      setPageLoading(false);
     }
-  }, [currentCluster, timeRange, apiRange]);
+  }, [currentCluster, timeRange, apiRange, setPageLoading]);
 
   useEffect(() => {
     void loadDashboard();

@@ -49,8 +49,10 @@ interface DashboardControlsContextValue {
   refreshInterval: number;
   refreshPulse: number;
   isRefreshing: boolean;
+  pageLoading: boolean;
   setTimeRange: (range: TimeRange) => void;
   setRefreshInterval: (seconds: number) => void;
+  setPageLoading: (loading: boolean) => void;
   refreshNow: () => Promise<void>;
   registerRefreshHandler: (handler: RefreshHandler | null) => void;
 }
@@ -86,6 +88,7 @@ export function DashboardControlsProvider({ children }: { children: ReactNode })
   const [refreshInterval, setRefreshIntervalState] = useState<number>(loadInitialRefreshInterval);
   const [refreshPulse, setRefreshPulse] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
 
   const refreshHandlerRef = useRef<RefreshHandler | null>(null);
   const runningRef = useRef(false);
@@ -142,8 +145,10 @@ export function DashboardControlsProvider({ children }: { children: ReactNode })
     refreshInterval,
     refreshPulse,
     isRefreshing,
+    pageLoading,
     setTimeRange,
     setRefreshInterval,
+    setPageLoading,
     refreshNow,
     registerRefreshHandler,
   }), [
@@ -151,8 +156,10 @@ export function DashboardControlsProvider({ children }: { children: ReactNode })
     refreshInterval,
     refreshPulse,
     isRefreshing,
+    pageLoading,
     setTimeRange,
     setRefreshInterval,
+    setPageLoading,
     refreshNow,
     registerRefreshHandler,
   ]);

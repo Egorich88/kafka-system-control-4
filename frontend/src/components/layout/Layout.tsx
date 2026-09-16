@@ -180,6 +180,7 @@ const Layout = () => {
 
   const currentPage = PAGE_CONFIG[location.pathname] ?? {
     title: 'Kafka System Control',
+    description: 'Интерфейс управления Apache Kafka',
     mode: 'default' as const,
   };
 
@@ -196,6 +197,7 @@ const Layout = () => {
         <main className="main-content">
           <PageHeader
             title={currentPage.title}
+            description={currentPage.description}
             mode={currentPage.mode}
           />
 

@@ -23,13 +23,12 @@
  *
  * Порядок блоков:
  *
- * 1. Заголовок.
- * 2. KPI-карточки.
- * 3. Аналитические диаграммы.
- * 4. Toolbar.
- * 5. Таблица Consumer Groups.
- * 6. Details + Consumer Lag.
- * 7. Offset Reset Wizard.
+ * 1. KPI-карточки.
+ * 2. Аналитические диаграммы.
+ * 3. Toolbar.
+ * 4. Таблица Consumer Groups.
+ * 5. Details + Consumer Lag.
+ * 6. Offset Reset Wizard.
  *
  * =============================================================================
  */
@@ -43,6 +42,7 @@ import {
 import toast from 'react-hot-toast';
 
 import { useCluster } from '../../contexts/ClusterContext';
+import { useDashboardControls } from '../../contexts/DashboardControlsContext';
 
 import type {
     ConsumerGroup,
@@ -88,6 +88,7 @@ import './styles/consumer-groups.css';
 export default function ConsumerGroupsPage() {
 
     const { currentCluster } = useCluster();
+    const { setPageLoading } = useDashboardControls();
 
     const [groups, setGroups] =
         useState<ConsumerGroup[]>([]);
@@ -534,13 +535,13 @@ export default function ConsumerGroupsPage() {
     };
 
 
+    useEffect(() => {
+        setPageLoading(loading);
+        return () => setPageLoading(false);
+    }, [loading, setPageLoading]);
+
     return (
         <div className="consumer-groups-page">
-
-            <h1 className="page-title">
-                Группы потребителей
-            </h1>
-
 
             {/*
              * KPI-карточки.

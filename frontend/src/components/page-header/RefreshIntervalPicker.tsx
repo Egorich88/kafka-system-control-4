@@ -18,26 +18,26 @@
  * =============================================================================
  * @file RefreshIntervalPicker.tsx
  * =============================================================================
- * Выбор интервала автоматического обновления.
+ * Компактный выбор интервала автоматического обновления.
+ * Иконка обновления намеренно находится только в общей кнопке справа.
  * =============================================================================
  */
 
-import { FiRefreshCw } from 'react-icons/fi';
+import { FiChevronDown } from 'react-icons/fi';
 import { REFRESH_INTERVALS } from './constants';
 import type { RefreshInterval } from './types';
 
 interface Props {
   value: number;
   onChange: (seconds: number) => void;
-  isRefreshing: boolean;
 }
 
-export default function RefreshIntervalPicker({ value, onChange, isRefreshing }: Props) {
+export default function RefreshIntervalPicker({ value, onChange }: Props) {
   const selected = REFRESH_INTERVALS.find((item) => item.value === value) ?? REFRESH_INTERVALS[0];
 
   return (
     <label className="page-header-refresh-control">
-      <FiRefreshCw className={`page-header-refresh-small-icon ${isRefreshing ? 'is-spinning' : ''}`} />
+      <span className="page-header-refresh-label">Обновление</span>
       <select
         value={selected.value}
         onChange={(event) => onChange(Number(event.target.value))}
@@ -49,6 +49,7 @@ export default function RefreshIntervalPicker({ value, onChange, isRefreshing }:
           </option>
         ))}
       </select>
+      <FiChevronDown className="page-header-select-chevron" aria-hidden="true" />
     </label>
   );
 }

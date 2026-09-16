@@ -19,6 +19,9 @@
  * @file PageHeader.tsx
  * =============================================================================
  * Единая горизонтальная шапка страниц KSC.
+ *
+ * Содержит название, краткое описание, текущий кластер и, только для
+ * мониторинговых страниц, выбор периода и интервала обновления.
  * =============================================================================
  */
 
@@ -32,24 +35,31 @@ import './page-header.css';
 
 interface Props {
   title: string;
+  description: string;
   mode: PageHeaderMode;
 }
 
-export default function PageHeader({ title, mode }: Props) {
+export default function PageHeader({ title, description, mode }: Props) {
   const { currentCluster } = useCluster();
   const {
     timeRange,
     refreshInterval,
     isRefreshing,
+    pageLoading,
     setTimeRange,
     setRefreshInterval,
     refreshNow,
   } = useDashboardControls();
 
+  const loading = mode === 'monitoring' && (pageLoading || isRefreshing);
+
   return (
-    <header className={`page-header-bar page-header-${mode}`}>
+    <header className={`page-header-bar page-header-${mode} ${loading ? 'is-loading' : ''}`}>
+      <div className="page-header-loading-line" aria-hidden="true" />
+
       <div className="page-header-title-group">
         <h1>{title}</h1>
+        <p>{description}</p>
         {mode === 'monitoring' && currentCluster?.name && (
           <span className="page-header-cluster">кластер: {currentCluster.name}</span>
         )}
@@ -61,7 +71,6 @@ export default function PageHeader({ title, mode }: Props) {
           <RefreshIntervalPicker
             value={refreshInterval}
             onChange={setRefreshInterval}
-            isRefreshing={isRefreshing}
           />
           <button
             type="button"
@@ -71,7 +80,7 @@ export default function PageHeader({ title, mode }: Props) {
             title="Обновить"
             aria-label="Обновить"
           >
-            <FiRefreshCw className={isRefreshing ? 'is-spinning' : ''} />
+            <FiRefreshCw className={loading ? 'is-spinning' : ''} />
           </button>
         </div>
       )}
