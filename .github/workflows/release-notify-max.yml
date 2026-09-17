@@ -1,0 +1,34 @@
+name: MAX Release Notifier
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify-max:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send message to MAX
+        env:
+          MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
+          MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        run: |
+          MESSAGE="🚀 **Новый релиз: ${RELEASE_NAME} (${RELEASE_TAG})**
+
+          📝 **Что нового:**
+          ${RELEASE_BODY}
+
+          🔗 [Смотреть на GitHub](${RELEASE_URL})"
+
+          curl -s -X POST "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
+            -H "Authorization: ${MAX_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"text\": \"${MESSAGE}\",
+              \"format\": \"markdown\",
+              \"notify\": true
+            }"
