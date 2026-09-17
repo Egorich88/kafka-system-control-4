@@ -3,32 +3,70 @@ name: MAX Release Notifier
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   notify-max:
     runs-on: ubuntu-latest
     steps:
-      - name: Send message to MAX
+      # 1. Клонируем репозиторий (нужно для доступа к скриншотам)
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # 2. Устанавливаем сертификаты Минцифры для работы с MAX API
+      - name: Install Russian Trusted CA certificates
+        run: |
+          sudo wget -q https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer \
+            -O /usr/local/share/ca-certificates/russian_trusted_root_ca.crt
+          sudo wget -q https://gu-st.ru/content/Other/doc/russian_trusted_sub_ca.cer \
+            -O /usr/local/share/ca-certificates/russian_trusted_sub_ca.crt
+          sudo update-ca-certificates
+
+      # 3. Собираем текст релиза + ссылки на скриншоты
+      - name: Build release message
         env:
-          MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
-          MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
           RELEASE_NAME: ${{ github.event.release.name }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           RELEASE_BODY: ${{ github.event.release.body }}
           RELEASE_URL: ${{ github.event.release.html_url }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.event.release.tag_name }}
         run: |
+          # Ищем скриншоты для текущей версии
+          SCREENSHOTS=""
+          if [ -d "docs/screenshots" ]; then
+            for img in docs/screenshots/${TAG}-*.png; do
+              if [ -f "$img" ]; then
+                FILENAME=$(basename "$img")
+                # Ссылка на raw-файл в GitHub
+                RAW_URL="https://raw.githubusercontent.com/${REPO}/${TAG}/${img}"
+                SCREENSHOTS="${SCREENSHOTS}\n![${FILENAME}](${RAW_URL})"
+              fi
+            done
+          fi
+
+          # Формируем итоговое сообщение
           MESSAGE="🚀 **Новый релиз: ${RELEASE_NAME} (${RELEASE_TAG})**
 
           📝 **Что нового:**
           ${RELEASE_BODY}
+          ${SCREENSHOTS}
 
           🔗 [Смотреть на GitHub](${RELEASE_URL})"
 
+          # Сохраняем в файл (чтобы не сломать спецсимволы)
+          echo "$MESSAGE" > /tmp/message.txt
+
+      # 4. Отправляем сообщение в MAX
+      - name: Send message to MAX
+        env:
+          MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
+          MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
+        run: |
+          MESSAGE=$(cat /tmp/message.txt)
           curl -s -X POST "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
             -H "Authorization: ${MAX_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"text\": \"${MESSAGE}\",
-              \"format\": \"markdown\",
-              \"notify\": true
-            }"
+            -d "$(jq -n --arg text "$MESSAGE" '{text: $text, format: "markdown", notify: true}')"
