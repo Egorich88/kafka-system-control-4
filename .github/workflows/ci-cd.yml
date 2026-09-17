@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 name: CI/CD для Kafka System Control 4.0
 
 on:
@@ -101,19 +102,59 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # ---- ГЕНЕРАЦИЯ CHANGELOG ИЗ КОММИТОВ (только для тегов) ----
+      - name: Generate changelog
+        id: changelog
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          # Находим предыдущий тег (все теги, кроме текущего, сортировка по дате)
+          PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${GITHUB_REF_NAME}$" | head -1)
+
+          # Если предыдущего тега нет — берём самый первый коммит
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+
+          echo "Previous tag: $PREV_TAG"
+          echo "Current tag: $GITHUB_REF_NAME"
+
+          # Собираем коммиты между предыдущим и текущим тегом
+          CHANGES=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --no-merges)
+
+          # Если коммитов нет — пишем заглушку
+          if [ -z "$CHANGES" ]; then
+            CHANGES="- Изменения не указаны"
+          fi
+
+          # Экранируем многострочный вывод для GitHub Actions
+          {
+            echo "changes<<EOF"
+            echo "$CHANGES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
       # ---- СОЗДАНИЕ GITHUB RELEASE (только для тегов) ----
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          name: Kafka System Control ${{ github.ref_name }}
           body: |
-            ## Kafka System Control ${{ github.ref_name }}
-            ✅ **Что внутри:**
-            - Docker образы backend и frontend загружены в Docker Hub
-            - Тег: `${{ github.ref_name }}`
-            🚀 **Как запустить:** см. README
+            ## 🚀 Kafka System Control ${{ github.ref_name }}
+
+            ### 📝 Что нового
+
+            ${{ steps.changelog.outputs.changes }}
+
+            ### 🐳 Docker образы
+
+            - **Backend:** `egorich27/kafka-control-backend:${{ github.ref_name }}`
+            - **Frontend:** `egorich27/kafka-control-frontend:${{ github.ref_name }}`
+
+            ### 📦 Как запустить
+
+            См. [README](https://github.com/${{ github.repository }}/blob/main/README.md)
           draft: false
           prerelease: false
         env:
