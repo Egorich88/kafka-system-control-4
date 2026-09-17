@@ -9,13 +9,11 @@ jobs:
   notify-max:
     runs-on: ubuntu-latest
     steps:
-      # 1. Клонируем репозиторий (нужно для доступа к скриншотам)
       - name: Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      # 2. Устанавливаем сертификаты Минцифры для работы с MAX API
       - name: Install Russian Trusted CA certificates
         run: |
           sudo wget -q https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer \
@@ -24,30 +22,26 @@ jobs:
             -O /usr/local/share/ca-certificates/russian_trusted_sub_ca.crt
           sudo update-ca-certificates
 
-      # 3. Собираем текст релиза + ссылки на скриншоты
       - name: Build release message
         env:
-          RELEASE_NAME: ${{ github.event.release.name }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
-          RELEASE_URL: ${{ github.event.release.html_url }}
+          RELEASE_NAME: ${{ github.event.release.name || 'Тестовый релиз' }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || 'v4.2.8.3' }}
+          RELEASE_BODY: ${{ github.event.release.body || 'Проверка отправки уведомлений в MAX' }}
+          RELEASE_URL: ${{ github.event.release.html_url || 'https://github.com/Egorich88/kafka-system-control-4/releases' }}
           REPO: ${{ github.repository }}
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.release.tag_name || 'v4.2.8.3' }}
         run: |
-          # Ищем скриншоты для текущей версии
           SCREENSHOTS=""
           if [ -d "docs/screenshots" ]; then
             for img in docs/screenshots/${TAG}-*.png; do
               if [ -f "$img" ]; then
                 FILENAME=$(basename "$img")
-                # Ссылка на raw-файл в GitHub
                 RAW_URL="https://raw.githubusercontent.com/${REPO}/${TAG}/${img}"
                 SCREENSHOTS="${SCREENSHOTS}\n![${FILENAME}](${RAW_URL})"
               fi
             done
           fi
 
-          # Формируем итоговое сообщение
           MESSAGE="🚀 **Новый релиз: ${RELEASE_NAME} (${RELEASE_TAG})**
 
           📝 **Что нового:**
@@ -56,10 +50,8 @@ jobs:
 
           🔗 [Смотреть на GitHub](${RELEASE_URL})"
 
-          # Сохраняем в файл (чтобы не сломать спецсимволы)
           echo "$MESSAGE" > /tmp/message.txt
 
-      # 4. Отправляем сообщение в MAX
       - name: Send message to MAX
         env:
           MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
