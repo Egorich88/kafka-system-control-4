@@ -139,9 +139,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: Kafka System Control ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: |
-            ## 🚀 Kafka System Control ${{ github.ref_name }}
+            ## 🚀 Release ${{ github.ref_name }}
 
             ### 📝 Что нового
 

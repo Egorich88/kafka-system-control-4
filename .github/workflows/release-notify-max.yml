@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -24,12 +24,12 @@ jobs:
 
       - name: Build release message
         env:
-          RELEASE_NAME: ${{ github.event.release.name || 'Тестовый релиз' }}
-          RELEASE_TAG: ${{ github.event.release.tag_name || 'v4.2.8.3' }}
+          RELEASE_NAME: ${{ github.event.release.name || github.ref_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || github.ref_name }}
           RELEASE_BODY: ${{ github.event.release.body || 'Проверка отправки уведомлений в MAX' }}
-          RELEASE_URL: ${{ github.event.release.html_url || 'https://github.com/Egorich88/kafka-system-control-4/releases' }}
+          RELEASE_URL: ${{ github.event.release.html_url || format('https://github.com/{0}/releases', github.repository) }}
           REPO: ${{ github.repository }}
-          TAG: ${{ github.event.release.tag_name || 'v4.2.8.3' }}
+          TAG: ${{ github.event.release.tag_name || github.ref_name }}
         run: |
           SCREENSHOTS=""
           if [ -d "docs/screenshots" ]; then
