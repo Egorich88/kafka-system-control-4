@@ -15,12 +15,13 @@ jobs:
           fetch-depth: 0
 
       - name: Install Russian Trusted CA certificates
+        continue-on-error: true
         run: |
-          sudo wget -q https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer \
-            -O /usr/local/share/ca-certificates/russian_trusted_root_ca.crt
-          sudo wget -q https://gu-st.ru/content/Other/doc/russian_trusted_sub_ca.cer \
-            -O /usr/local/share/ca-certificates/russian_trusted_sub_ca.crt
-          sudo update-ca-certificates
+          sudo wget -q --timeout=10 --tries=2 https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer \
+            -O /usr/local/share/ca-certificates/russian_trusted_root_ca.crt || true
+          sudo wget -q --timeout=10 --tries=2 https://gu-st.ru/content/Other/doc/russian_trusted_sub_ca.cer \
+            -O /usr/local/share/ca-certificates/russian_trusted_sub_ca.crt || true
+          sudo update-ca-certificates || true
 
       - name: Build release message
         env:
