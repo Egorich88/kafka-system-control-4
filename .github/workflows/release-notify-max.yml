@@ -1,7 +1,6 @@
 name: MAX Release Notifier
 
 on:
-  # Этот блок заставляет скрипт запускаться автоматически сразу после успешного завершения основного CI/CD
   workflow_run:
     workflows: ["CI/CD для Kafka System Control 4.0"]
     types:
@@ -11,7 +10,6 @@ on:
 jobs:
   notify-max:
     runs-on: ubuntu-latest
-    # Запускаем отправку только если родительский воркфлоу завершился успешно и это был тег версии
     if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v') || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout
@@ -30,29 +28,41 @@ jobs:
 
       - name: Build release message
         env:
-          # Берём имя ветки/тега, которая стриггерила запуск
-          RELEASE_TAG: ${{ github.event.workflow_run.head_branch || github.ref_name }}
-          RELEASE_BODY: ${{ github.event.release.body || 'Проверка отправки уведомлений в MAX' }}
-          RELEASE_URL: ${{ github.event.release.html_url || format('https://github.com{0}/releases/tag/{1}', github.repository, github.event.workflow_run.head_branch || github.ref_name) }}
-          REPO: ${{ github.repository }}
           TAG: ${{ github.event.workflow_run.head_branch || github.ref_name }}
+          REPO: ${{ github.repository }}
+          RELEASE_BODY: ${{ github.event.release.body || 'Проверка отправки уведомлений в MAX' }}
         run: |
+          # 1. Автоматически генерируем список коммитов (Changelog) между тегами
+          PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${TAG}$" | head -1)
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          
+          CHANGES=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --no-merges)
+          if [ -z "$CHANGES" ]; then
+            CHANGES="${RELEASE_BODY}"
+          fi
+
+          # 2. Ищем скриншоты в папке docs/screenshots (Исправили утерянный слеш и $)
           SCREENSHOTS=""
           if [ -d "docs/screenshots" ]; then
             for img in docs/screenshots/${TAG}-*.png; do
               if [ -f "$img" ]; then
                 FILENAME=$(basename "$img")
-                RAW_URL="https://githubusercontent.com{REPO}/${TAG}/${img}"
+                RAW_URL="https://githubusercontent.com{REPO}/${TAG}/docs/screenshots/${FILENAME}"
                 SCREENSHOTS="${SCREENSHOTS}\n![${FILENAME}](${RAW_URL})"
               fi
             done
           fi
 
-          # Убрано дублирование в скобках, теперь строка чистая
-          MESSAGE="🚀 **Новый релиз: ${RELEASE_TAG}**
+          # 3. Формируем красивую прямую ссылку на релиз (Исправили слипшийся .com/)
+          RELEASE_URL="https://github.com{REPO}/releases/tag/${TAG}"
+
+          # 4. Собираем чистое сообщение БЕЗ дублирования версий в скобках
+          MESSAGE="🚀 **Новый релиз: ${TAG}**
 
           📝 **Что нового:**
-          ${RELEASE_BODY}
+          ${CHANGES}
           ${SCREENSHOTS}
 
           🔗 [Смотреть на GitHub](${RELEASE_URL})"
@@ -65,6 +75,7 @@ jobs:
           MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
         run: |
           MESSAGE=$(cat /tmp/message.txt)
+          # Исправили домен platform-api2.max.ru и добавили пропущенный знак $ перед CHAT_ID
           curl -s -X POST "https://max.ru{MAX_CHAT_ID}" \
             -H "Authorization: ${MAX_TOKEN}" \
             -H "Content-Type: application/json" \
