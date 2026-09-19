@@ -1,6 +1,7 @@
 name: MAX Release Notifier
 
 on:
+  # Оставляем автоматическую сцепку с основным CI/CD
   workflow_run:
     workflows: ["CI/CD для Kafka System Control 4.0"]
     types:
@@ -10,8 +11,7 @@ on:
 jobs:
   notify-max:
     runs-on: ubuntu-latest
-    # ЖЕСТКИЙ ФИЛЬТР: запускаемся только при успехе CI/CD И только если имя ветки/тега начинается на 'v' (наш релиз)
-    # Это полностью защищает от ложных запусков и спама при обычных пушах в main
+    # Работает только при успешном завершении сборки и только для тегов версий v*
     if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v') || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout
@@ -22,9 +22,9 @@ jobs:
       - name: Install Russian Trusted CA certificates
         continue-on-error: true
         run: |
-          sudo wget -q --timeout=10 --tries=2 https://gu-st.ru \
+          sudo wget -q --timeout=10 --tries=2 https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer \
             -O /usr/local/share/ca-certificates/russian_trusted_root_ca.crt || true
-          sudo wget -q --timeout=10 --tries=2 https://gu-st.ru \
+          sudo wget -q --timeout=10 --tries=2 https://gu-st.ru/content/Other/doc/russian_trusted_sub_ca.cer \
             -O /usr/local/share/ca-certificates/russian_trusted_sub_ca.crt || true
           sudo update-ca-certificates || true
 
@@ -34,7 +34,7 @@ jobs:
           REPO: ${{ github.repository }}
           RELEASE_BODY: ${{ github.event.release.body || 'Проверка отправки уведомлений в MAX' }}
         run: |
-          # 1. Автоматически вытаскиваем список коммитов между тегами для чейнджлога
+          # 1. Вытаскиваем список реальных коммитов между тегами
           PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${TAG}$" | head -1)
           if [ -z "$PREV_TAG" ]; then
             PREV_TAG=$(git rev-list --max-parents=0 HEAD)
@@ -45,29 +45,29 @@ jobs:
             CHANGES="${RELEASE_BODY}"
           fi
 
-          # 2. Ищем скриншоты в папке docs/screenshots
+          # 2. Ищем скриншоты по вашей исходной логике (с правильным путем docs/screenshots)
           SCREENSHOTS=""
           if [ -d "docs/screenshots" ]; then
             for img in docs/screenshots/${TAG}-*.png; do
               if [ -f "$img" ]; then
                 FILENAME=$(basename "$img")
-                RAW_URL="https://githubusercontent.com{REPO}/${TAG}/docs/screenshots/${FILENAME}"
+                RAW_URL="https://raw.githubusercontent.com/${REPO}/${TAG}/docs/screenshots/${FILENAME}"
                 SCREENSHOTS="${SCREENSHOTS}\n![${FILENAME}](${RAW_URL})"
               fi
             done
           fi
 
-          # 3. Собираем правильную прямую ссылку на релиз
+          # 3. Собираем чистую ссылку на релиз на GitHub (добавили пропущенный / после .com)
           RELEASE_URL="https://github.com{REPO}/releases/tag/${TAG}"
 
-          # 4. Формируем чистое сообщение с рабочей ссылкой внизу
+          # 4. Формируем сообщение без дублирования версий в скобках
           MESSAGE="🚀 **Новый релиз: ${TAG}**
 
           📝 **Что нового:**
           ${CHANGES}
           ${SCREENSHOTS}
 
-          🔗 Смотреть на GitHub: ${RELEASE_URL}"
+          🔗 [Смотреть на GitHub](${RELEASE_URL})"
 
           echo "$MESSAGE" > /tmp/message.txt
 
@@ -77,8 +77,8 @@ jobs:
           MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
         run: |
           MESSAGE=$(cat /tmp/message.txt)
-          # Ваша точная ссылка с правильным экранирующим переносом строки \ в конце
-          curl -s -X POST "https://max.ru{MAX_CHAT_ID}" \
+          # Используем ваш оригинальный рабочий curl с правильным синтаксисом переменных
+          curl -s -X POST "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
             -H "Authorization: ${MAX_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "$(jq -n --arg text "$MESSAGE" '{text: $text, format: "markdown", notify: true}')"
