@@ -32,7 +32,7 @@ jobs:
           REPO: ${{ github.repository }}
           RELEASE_BODY: ${{ github.event.release.body || 'Проверка отправки уведомлений в MAX' }}
         run: |
-          # 1. Автоматически генерируем список коммитов (Changelog) между тегами
+          # 1. Генерируем changelog из коммитов между тегами
           PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${TAG}$" | head -1)
           if [ -z "$PREV_TAG" ]; then
             PREV_TAG=$(git rev-list --max-parents=0 HEAD)
@@ -43,7 +43,7 @@ jobs:
             CHANGES="${RELEASE_BODY}"
           fi
 
-          # 2. Ищем скриншоты в папке docs/screenshots (Исправили утерянный слеш и $)
+          # 2. Собираем скриншоты, если они есть
           SCREENSHOTS=""
           if [ -d "docs/screenshots" ]; then
             for img in docs/screenshots/${TAG}-*.png; do
@@ -55,10 +55,10 @@ jobs:
             done
           fi
 
-          # 3. Формируем красивую прямую ссылку на релиз (Исправили слипшийся .com/)
+          # 3. Собираем ссылки (аккуратно экранируя слеши)
           RELEASE_URL="https://github.com{REPO}/releases/tag/${TAG}"
 
-          # 4. Собираем чистое сообщение БЕЗ дублирования версий в скобках
+          # 4. Формируем чистое сообщение без дублей в скобках
           MESSAGE="🚀 **Новый релиз: ${TAG}**
 
           📝 **Что нового:**
@@ -72,11 +72,13 @@ jobs:
       - name: Send message to MAX
         env:
           MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
-          MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
+          # Выносим URL целиком на уровень ENV, подставляя секреты средствами GitHub Actions, а не bash!
+          MAX_API_URL: "https://max.ru{{ secrets.MAX_CHAT_ID }}"
         run: |
           MESSAGE=$(cat /tmp/message.txt)
-          # Исправили домен platform-api2.max.ru и добавили пропущенный знак $ перед CHAT_ID
-          curl -s -X POST "https://max.ru{MAX_CHAT_ID}" \
+          
+          # Теперь curl вызывает чистую переменную URL без фигурных скобок внутри bash
+          curl -s -X POST "${MAX_API_URL}" \
             -H "Authorization: ${MAX_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "$(jq -n --arg text "$MESSAGE" '{text: $text, format: "markdown", notify: true}')"
