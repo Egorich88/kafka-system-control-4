@@ -5,17 +5,14 @@ on:
     workflows: ["CI/CD для Kafka System Control 4.0"]
     types:
       - completed
-    # Запускать пайплайн ТОЛЬКО если родительский воркфлоу завершился на теге релиза v*
-    # Это полностью уберет лишние пустые запуски при обычных пушах в ветку main
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 jobs:
   notify-max:
     runs-on: ubuntu-latest
-    # Запускаемся только при успешном завершении сборки основного CI/CD
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # ЖЕСТКИЙ ФИЛЬТР: запускаемся только при успехе CI/CD И только если имя ветки/тега начинается на 'v' (наш релиз)
+    # Это полностью защищает от ложных запусков и спама при обычных пушах в main
+    if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v') || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
@@ -80,8 +77,8 @@ jobs:
           MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
         run: |
           MESSAGE=$(cat /tmp/message.txt)
-          # Ваша точная рабочая ссылка с правильным переносом строки через \
-          curl -s -X POST "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
+          # Ваша точная ссылка с правильным экранирующим переносом строки \ в конце
+          curl -s -X POST "https://max.ru{MAX_CHAT_ID}" \
             -H "Authorization: ${MAX_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "$(jq -n --arg text "$MESSAGE" '{text: $text, format: "markdown", notify: true}')"
