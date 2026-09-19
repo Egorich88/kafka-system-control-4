@@ -45,31 +45,33 @@ jobs:
             CHANGES="${RELEASE_BODY}"
           fi
 
-          # 2. Ищем скриншоты по вашей исходной логике (с правильным путем docs/screenshots)
+          # 2. Ищем скриншоты. ВАЖНО: используем $'\n' для правильного переноса строки
           SCREENSHOTS=""
           if [ -d "docs/screenshots" ]; then
             for img in docs/screenshots/${TAG}-*.png; do
               if [ -f "$img" ]; then
                 FILENAME=$(basename "$img")
                 RAW_URL="https://raw.githubusercontent.com/${REPO}/${TAG}/docs/screenshots/${FILENAME}"
-                SCREENSHOTS="${SCREENSHOTS}\n![${FILENAME}](${RAW_URL})"
+                # Ключевое: используем $'\n' (bash ANSI-C quoting) для реального переноса
+                SCREENSHOTS="${SCREENSHOTS}"$'\n'"![${FILENAME}](${RAW_URL})"
               fi
             done
           fi
 
-          # 3. Собираем чистую ссылку на релиз на GitHub (добавили пропущенный / после .com)
-          RELEASE_URL="https://github.com{REPO}/releases/tag/${TAG}"
+          # 3. Собираем чистую ссылку на релиз (ИСПРАВЛЕН пропущенный слэш)
+          RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG}"
 
-          # 4. Формируем сообщение без дублирования версий в скобках
-          MESSAGE="🚀 **Новый релиз: ${TAG}**
+          # 4. Формируем сообщение через printf для правильных переносов строк
+          printf '🚀 **Новый релиз: %s**\n\n📝 **Что нового:**\n%s\n%s\n\n🔗 [Смотреть на GitHub](%s)\n' \
+            "${TAG}" \
+            "${CHANGES}" \
+            "${SCREENSHOTS}" \
+            "${RELEASE_URL}" \
+            > /tmp/message.txt
 
-          📝 **Что нового:**
-          ${CHANGES}
-          ${SCREENSHOTS}
-
-          🔗 [Смотреть на GitHub](${RELEASE_URL})"
-
-          echo "$MESSAGE" > /tmp/message.txt
+          echo "=== MESSAGE TO SEND ==="
+          cat /tmp/message.txt
+          echo "=== END ==="
 
       - name: Send message to MAX
         env:
@@ -77,7 +79,6 @@ jobs:
           MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
         run: |
           MESSAGE=$(cat /tmp/message.txt)
-          # Используем ваш оригинальный рабочий curl с правильным синтаксисом переменных
           curl -s -X POST "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
             -H "Authorization: ${MAX_TOKEN}" \
             -H "Content-Type: application/json" \
