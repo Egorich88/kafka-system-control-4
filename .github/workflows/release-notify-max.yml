@@ -10,12 +10,13 @@ on:
 jobs:
   notify-max:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v') || github.event_name == 'workflow_dispatch' }}
+    if: ${{ (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v')) || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Install Russian Trusted CA certificates
         continue-on-error: true
@@ -32,7 +33,6 @@ jobs:
           REPO: ${{ github.repository }}
           RELEASE_BODY: ${{ github.event.release.body || 'Проверка отправки уведомлений в MAX' }}
         run: |
-          # 1. Список коммитов между тегами
           PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${TAG}$" | head -1)
           if [ -z "$PREV_TAG" ]; then
             PREV_TAG=$(git rev-list --max-parents=0 HEAD)
@@ -43,10 +43,8 @@ jobs:
             CHANGES="${RELEASE_BODY}"
           fi
 
-          # 2. Ссылка на релиз
           RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG}"
 
-          # 3. Формируем ТЕКСТ сообщения БЕЗ markdown-картинки
           printf '🚀 **Новый релиз: %s**\n\n📝 **Что нового:**\n%s\n\n🔗 [Смотреть на GitHub](%s)\n' \
             "${TAG}" \
             "${CHANGES}" \
@@ -91,11 +89,14 @@ jobs:
               echo "$UPLOAD_RESULT"
               echo "=== END UPLOAD RESULT ==="
 
-              PHOTO_TOKEN=$(echo "$UPLOAD_RESULT" | jq -r '.token // empty')
+              # ВАЖНО: token и photo_id лежат внутри .photos.<photo_id>.token
+              PHOTO_ID=$(echo "$UPLOAD_RESULT" | jq -r '.photos | keys | .[0] // empty')
+              PHOTO_TOKEN=$(echo "$UPLOAD_RESULT" | jq -r '.photos | to_entries | .[0].value.token // empty')
 
-              if [ -n "$PHOTO_TOKEN" ]; then
-                echo "=== PHOTO TOKEN: $PHOTO_TOKEN ==="
+              echo "=== PHOTO_ID: $PHOTO_ID ==="
+              echo "=== PHOTO_TOKEN: $PHOTO_TOKEN ==="
 
+              if [ -n "$PHOTO_TOKEN" ] && [ -n "$PHOTO_ID" ]; then
                 # Шаг 3: Отправляем сообщение с картинкой
                 SEND_RESULT=$(curl -s -X POST "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
                   -H "Authorization: ${MAX_TOKEN}" \
@@ -103,7 +104,9 @@ jobs:
                   -d "$(jq -n \
                     --arg text "$MESSAGE" \
                     --arg token "$PHOTO_TOKEN" \
-                    '{text: $text, format: "markdown", notify: true, attachments: [{type: "image", payload: {token: $token}}]}')")
+                    --arg pid "$PHOTO_ID" \
+                    '{text: $text, format: "markdown", notify: true,
+                      attachments: [{type: "image", payload: {photo_id: $pid, token: $token}}]}')")
 
                 echo "=== SEND RESULT ==="
                 echo "$SEND_RESULT"
