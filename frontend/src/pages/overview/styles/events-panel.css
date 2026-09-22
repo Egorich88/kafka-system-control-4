@@ -1,0 +1,109 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ * Licensed under the Apache License, Version 2.0.
+ */
+
+/** @file events-panel.css Панель последних событий. */
+
+.events-panel { padding: 0; }
+.events-panel-header { padding: 11px 14px; }
+.events-panel-actions { display: flex; align-items: center; gap: 7px; }
+
+.events-filter { position: relative; display: flex; align-items: center; gap: 7px; color: var(--text-secondary); font-size: 12px; }
+.events-filter > span { color: var(--text-secondary); }
+.events-filter select {
+  appearance: none;
+  min-width: 92px;
+  height: 32px;
+  padding: 0 27px 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  outline: none;
+  background: var(--dropdown-bg);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+.events-filter::after {
+  content: '⌄';
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-53%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+:root[data-theme='light'] .events-filter select,
+:root[data-theme='github-light'] .events-filter select,
+:root[data-theme='solarized-light'] .events-filter select {
+  color-scheme: light;
+}
+
+.events-filter select:focus { border-color: var(--accent-hover); box-shadow: 0 0 0 2px var(--input-focus); }
+.events-filter select option { background: var(--dropdown-bg); color: var(--text-primary); }
+
+.events-title { font-size: 15px; }
+.events-table {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 9px 9px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-divider-color) transparent;
+}
+
+.events-table::-webkit-scrollbar { width: 6px; }
+.events-table::-webkit-scrollbar-thumb { background: var(--sidebar-divider-color); border-radius: 6px; }
+
+.events-table-header,
+.events-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 82px 60px minmax(0, 1fr) 112px;
+  gap: 10px;
+  align-items: center;
+}
+
+.events-table-header {
+  position: sticky;
+  top: -7px;
+  z-index: 1;
+  padding: 6px 8px 7px;
+  background: var(--panel-bg);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.events-row {
+  min-height: 33px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--card-bg);
+  flex: 0 0 auto;
+}
+.events-row:hover { background: var(--table-row-hover); }
+.events-cell { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); font-size: 13px; line-height: 1.35; }
+.event-time { font-variant-numeric: tabular-nums; }
+.event-level-cell { display: flex; align-items: center; }
+.event-message { display: flex; align-items: center; min-width: 0; color: var(--text-primary); }
+.event-message-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.event-level-badge { width: 44px; padding: 4px 5px; border-radius: 5px; text-align: center; font-size: 10px; line-height: 1; font-weight: 700; letter-spacing: .02em; }
+.event-level-info { color: var(--success-color); background: color-mix(in srgb, var(--success-color) 15%, transparent); }
+.event-level-warn { color: #f59e0b; background: rgba(245,158,11,.15); }
+.event-level-error { color: var(--danger-color); background: color-mix(in srgb, var(--danger-color) 15%, transparent); }
+.source { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.events-loading { padding: 16px; text-align: center; color: var(--text-secondary); font-size: 13px; }
+
+@media (max-width: 760px) {
+  .events-filter > span { display: none; }
+  .events-table-header, .events-row { grid-template-columns: 72px 54px minmax(0, 1fr) 90px; }
+}

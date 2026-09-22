@@ -1,0 +1,115 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ * Licensed under the Apache License, Version 2.0.
+ */
+
+/** @file certificates-panel.css Табличное представление сертификатов Kafka. */
+
+.certificate-panel { min-width: 0; min-height: 0; }
+
+.certificate-panel-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px 10px;
+  overflow: hidden;
+}
+
+.certificate-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 4px 7px;
+}
+
+.certificate-summary-main {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.certificate-summary-main strong {
+  color: var(--text-primary);
+  font-size: 22px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.certificate-summary-main span,
+.certificate-summary-nearest {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.certificate-summary-nearest strong { color: var(--text-primary); }
+
+.certificate-demo-badge {
+  margin-left: auto;
+  padding: 3px 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.certificate-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-top: 1px solid var(--border-color);
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-divider-color) transparent;
+}
+
+.certificate-table-wrap::-webkit-scrollbar { width: 5px; }
+.certificate-table-wrap::-webkit-scrollbar-thumb { background: var(--sidebar-divider-color); border-radius: 5px; }
+
+.certificate-table {
+  min-width: 440px;
+  display: flex;
+  flex-direction: column;
+}
+
+.certificate-table-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(110px, 1fr) 74px 74px;
+  gap: 8px;
+  align-items: center;
+  min-height: 31px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.certificate-table-row.header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 29px;
+  background: var(--panel-bg);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.certificate-table-row:not(.header) {
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.certificate-table-row > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.certificate-days { text-align: right; font-variant-numeric: tabular-nums; }
+.certificate-expiry { color: var(--text-secondary); }
+.certificate-warning { color: #f59e0b !important; font-weight: 650; }
+.certificate-ok { color: var(--success-color) !important; }
+.certificate-empty { padding: 12px; text-align: center; color: var(--text-secondary); font-size: 12px; }

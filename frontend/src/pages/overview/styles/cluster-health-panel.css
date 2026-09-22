@@ -1,0 +1,161 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ * Licensed under the Apache License, Version 2.0.
+ */
+
+/** @file cluster-health-panel.css Состояние кластера и таблица брокеров. */
+
+.cluster-health-panel { min-height: 0; }
+
+.cluster-health-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 9px 13px 11px;
+}
+
+.cluster-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.cluster-kpi {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px 7px 10px;
+  border-left: 2px solid var(--sidebar-divider-color);
+  background: var(--card-bg);
+  border-radius: 6px;
+}
+
+.cluster-kpi-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: var(--accent-hover);
+  font-size: 16px;
+}
+
+.cluster-kpi-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cluster-kpi-copy span {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cluster-kpi-copy strong {
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cluster-kpi.is-danger { border-left-color: var(--danger-color); }
+.cluster-kpi.is-danger strong { color: var(--danger-color); }
+
+.cluster-status-summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+  padding: 3px 4px;
+}
+
+.cluster-status-icon {
+  display: grid;
+  place-items: center;
+  color: var(--success-color);
+  font-size: 17px;
+}
+
+.cluster-status-warning .cluster-status-icon { color: #f59e0b; }
+.cluster-status-critical .cluster-status-icon { color: var(--danger-color); }
+.cluster-status-unknown .cluster-status-icon { color: var(--accent-hover); }
+
+.cluster-status-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.cluster-status-description {
+  margin-top: 1px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.cluster-brokers-table-wrap {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  border-top: 1px solid var(--border-color);
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidebar-divider-color) transparent;
+}
+
+.cluster-brokers-table-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+.cluster-brokers-table-wrap::-webkit-scrollbar-track { background: transparent; }
+.cluster-brokers-table-wrap::-webkit-scrollbar-thumb { background: var(--sidebar-divider-color); border-radius: 6px; }
+
+.cluster-brokers-table-header,
+.cluster-brokers-table-row {
+  min-width: 1080px;
+  display: grid;
+  grid-template-columns: 42px minmax(140px, 1.35fr) 86px 78px 98px 62px 62px 66px 82px 120px 76px;
+  gap: 8px;
+  align-items: center;
+}
+
+.cluster-brokers-table-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 7px 7px;
+  background: var(--panel-bg);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.cluster-brokers-table-row {
+  padding: 7px;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.cluster-brokers-table-row > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.broker-online,
+.broker-offline { display: flex; align-items: center; gap: 6px; }
+.broker-online i,
+.broker-offline i { width: 7px; height: 7px; border-radius: 50%; background: var(--success-color); flex: 0 0 auto; }
+.broker-offline i { background: var(--danger-color); }
+.broker-controller { color: var(--accent-hover); font-style: normal; }
+.broker-version { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.cluster-broker-empty { padding: 14px; text-align: center; color: var(--text-secondary); font-size: 13px; }
+
+@media (max-width: 1200px) { .cluster-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .cluster-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

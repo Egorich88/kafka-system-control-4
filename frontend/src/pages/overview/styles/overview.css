@@ -1,0 +1,202 @@
+/*
+ * Copyright 2026 Egor Khomenko (Egorich88)
+ * Licensed under the Apache License, Version 2.0.
+ */
+
+/**
+ * @file overview.css
+ * Основная сетка страницы «Обзор».
+ *
+ * Сетка намеренно состоит из трёх рядов:
+ * 1. Состояние кластера / Сертификаты Kafka;
+ * 2. Пропускная способность / Топики;
+ * 3. Группы потребителей / Последние события.
+ *
+ * Страница не прокручивается целиком. Каждая большая таблица имеет
+ * собственную внутреннюю прокрутку.
+ */
+
+@import './welcome.css';
+@import './throughput-panel.css';
+@import './topics-panel.css';
+@import './consumer-lag-panel.css';
+@import './cluster-health-panel.css';
+@import './certificates-panel.css';
+@import './events-panel.css';
+@import './panel-info.css';
+
+.dashboard-container {
+  --dashboard-gap: clamp(9px, .8vw, 12px);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 28%) minmax(0, 24%) minmax(0, 48%);
+  gap: var(--dashboard-gap);
+  overflow: hidden;
+}
+
+.dashboard-row {
+  display: grid;
+  gap: var(--dashboard-gap);
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.dashboard-row > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+.dashboard-row-status {
+  grid-template-columns: minmax(0, 2.15fr) minmax(300px, 1fr);
+}
+
+.dashboard-row-top {
+  grid-template-columns: minmax(300px, 3fr) minmax(0, 7fr);
+}
+
+.dashboard-row-main {
+  grid-template-columns: minmax(0, 6fr) minmax(300px, 4fr);
+}
+
+.dashboard-panel,
+.events-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-primary);
+}
+
+.panel-header,
+.events-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex: 0 0 auto;
+  min-height: 52px;
+  padding: 11px 15px;
+  border-bottom: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.panel-title-with-info,
+.dashboard-container .topics-panel-title,
+.dashboard-container .throughput-title,
+.events-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+.panel-body {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 12px 14px;
+  color: var(--text-secondary);
+  box-sizing: border-box;
+}
+
+/* Центрированная модальная панель вместо реального fullscreen. */
+body.panel-modal-open { overflow: hidden; }
+
+body:has(.is-panel-fullscreen)::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(3, 7, 18, .58);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.is-panel-fullscreen {
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: min(92vw, 1440px) !important;
+  height: min(88vh, 860px) !important;
+  max-height: 88vh !important;
+  min-height: 0 !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .58) !important;
+}
+
+.panel-fullscreen-button {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background .16s ease, color .16s ease;
+}
+
+.panel-fullscreen-button:hover {
+  color: var(--accent-hover);
+  background: var(--sidebar-hover);
+}
+
+/* Общая типографика таблиц и панелей Overview. */
+.dashboard-container table,
+.dashboard-container .panel-body,
+.dashboard-container .events-panel {
+  font-size: 13px;
+}
+
+.recharts-cartesian-axis-tick text,
+.recharts-xAxis .recharts-cartesian-axis-tick text,
+.recharts-yAxis .recharts-cartesian-axis-tick text,
+.recharts-cartesian-axis-tick tspan {
+  font-size: 12px !important;
+  fill: var(--text-secondary) !important;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-container {
+    grid-template-rows: minmax(0, 30%) minmax(0, 25%) minmax(0, 45%);
+  }
+  .dashboard-row-status,
+  .dashboard-row-top,
+  .dashboard-row-main {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-container {
+    height: auto;
+    overflow: auto;
+    grid-template-rows: none;
+  }
+  .dashboard-row-status,
+  .dashboard-row-top,
+  .dashboard-row-main {
+    grid-template-columns: 1fr;
+    min-height: 360px;
+  }
+}
