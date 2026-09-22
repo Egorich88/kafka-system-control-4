@@ -243,3 +243,15 @@ Hover
 .sidebar.collapsed .sidebar-settings-link.active::after {
     display: none;
 }
+
+/* При недоступном Kafka-кластере рабочие разделы визуально и функционально блокируются. */
+.sidebar-nav.is-disabled .sidebar-link.is-disabled {
+    opacity: .42;
+    cursor: not-allowed;
+    pointer-events: auto;
+}
+
+.sidebar-nav.is-disabled .sidebar-link.is-disabled:hover {
+    background: transparent;
+    color: var(--text-secondary);
+}

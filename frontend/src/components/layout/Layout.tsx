@@ -59,6 +59,8 @@ import CreateClusterPanel from '../CreateClusterPanel';
 import ClusterSettingsPanel from '../ClusterSettingsPanel';
 import PageHeader from '../page-header/PageHeader';
 import { DashboardControlsProvider } from '../../contexts/DashboardControlsContext';
+import ClusterStatusScreen from '../cluster-status/ClusterStatusScreen';
+import '../cluster-status/cluster-status-screen.css';
 import { PAGE_CONFIG } from '../page-header/page-config';
 
 // =============================================================================
@@ -86,7 +88,6 @@ const Layout = () => {
   const {
     clusters,
     currentCluster,
-    changeCluster,
     addCluster,
     updateCluster,
     removeCluster
@@ -178,11 +179,25 @@ const Layout = () => {
   // КОНФИГУРАЦИЯ ЗАГОЛОВКА СТРАНИЦЫ
   // =========================================================================
 
-  const currentPage = PAGE_CONFIG[location.pathname] ?? {
+  const configuredPage = PAGE_CONFIG[location.pathname] ?? {
     title: 'Kafka System Control',
     description: 'Интерфейс управления Apache Kafka',
     mode: 'default' as const,
   };
+
+  // Когда кластеров ещё нет, корневая страница является приветственной.
+  // Поэтому заголовок и режим верхней панели не должны оставаться «Обзором».
+  const isWelcome = !currentCluster && clusters.length === 0 && (location.pathname === '/' || location.pathname === '/overview');
+  const currentPage = isWelcome
+    ? {
+        title: 'Добро пожаловать',
+        description: 'Добавьте Kafka-кластер, чтобы начать мониторинг и управление.',
+        mode: 'default' as const,
+      }
+    : configuredPage;
+
+  const kafkaRequiredPage = !['/settings', '/user'].includes(location.pathname) && !isWelcome;
+  const clusterUnavailable = Boolean(currentCluster && currentCluster.connectionStatus && ['checking', 'unknown', 'error', 'disconnected'].includes(currentCluster.connectionStatus));
 
   return (
     <div className="app-layout sidebar-dark">
@@ -190,6 +205,7 @@ const Layout = () => {
       <Sidebar
         onAddCluster={handleAdd}
         onEditCluster={handleEdit}
+        clusterUnavailable={clusterUnavailable}
       />
 
       {/* Основная область контента */}
@@ -202,7 +218,11 @@ const Layout = () => {
           />
 
           <div className="main-content-body">
-            <Outlet />
+            {kafkaRequiredPage && clusterUnavailable ? (
+              <ClusterStatusScreen status={currentCluster?.connectionStatus ?? 'unknown'} />
+            ) : (
+              <Outlet />
+            )}
           </div>
         </main>
       </DashboardControlsProvider>

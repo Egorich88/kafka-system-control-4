@@ -3,162 +3,117 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 /**
- * @fileoverview Главная страница мониторинга (Overview).
- * Отображает KPI-карточки, графики пропускной способности,
- * таблицу брокеров, отставание групп и события.
- * При смене кластера автоматически очищает все данные и загружает новые.
- * Поддерживается автообновление с выбираемым интервалом (как в Grafana).
+ * @file Overview.tsx
+ * Главная мониторинговая страница KSC.
  *
- * Структура страницы:
- *   - Ряд 1: KPI-карточки;
- *   - Ряд 2: состояние кластера | распределение партиций | Consumer rate | Producer rate;
- *   - Ряд 3: пропускная способность кластера | пропускная способность по топикам;
- *   - Ряд 4: Consumer Lag + таблица Group/Topic/Status/Lag | последние события.
+ * Важно: доступность Kafka контролируется ClusterContext/Layout.
+ * Автообновление данных страницы не меняет статус подключения кластера и
+ * поэтому никогда не должно выбрасывать пользователя на экран ошибки.
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import '../styles/overview.css';
-import { FiInfo, FiCode, FiPlus, FiStar } from 'react-icons/fi';
+import { FiCode, FiInfo, FiPlus, FiStar } from 'react-icons/fi';
+import './overview/styles/overview.css';
 import { useCluster } from '../contexts/ClusterContext';
 import { useDashboardControls } from '../contexts/DashboardControlsContext';
-
 import ThroughputPanel from './overview/components/ThroughputPanel';
 import TopicsPanel from './overview/components/TopicsPanel';
 import ConsumerLagPanel from './overview/components/ConsumerLagPanel';
 import EventsPanel from './overview/components/EventsPanel';
 import ClusterHealthPanel from './overview/components/ClusterHealthPanel';
-import PartitionDistributionPanel from './overview/components/PartitionDistributionPanel';
-import RatePanels from './overview/components/RatePanels';
 import CertificatesPanel from './overview/components/CertificatesPanel';
+
+interface OverviewData {
+  topics?: number;
+  topicCount?: number;
+  partitions?: number;
+  partitionCount?: number;
+  consumerGroups?: number;
+  underReplicated?: number;
+  [key: string]: unknown;
+}
 
 export default function Overview(): JSX.Element {
   const { currentCluster } = useCluster();
+  const { timeRange, registerRefreshHandler, setPageLoading } = useDashboardControls();
 
-  const [overview, setOverview] = useState(null);
-  const [brokers, setBrokers] = useState([]);
-  const [consumerGroups, setConsumerGroups] = useState([]);
-  const [throughputData, setThroughputData] = useState([]);
+  const [overview, setOverview] = useState<OverviewData | null>(null);
+  const [consumerGroups, setConsumerGroups] = useState<unknown[]>([]);
+  const [throughputData, setThroughputData] = useState<any[]>([]);
   const [messagesIn, setMessagesIn] = useState(0);
   const [messagesOut, setMessagesOut] = useState(0);
-  const { timeRange, registerRefreshHandler, setPageLoading } = useDashboardControls();
-  // Текущий backend поддерживает относительные диапазоны; абсолютный
-  // диапазон уже принят frontend-контрактом и будет использован будущим источником истории.
-  const apiRange = timeRange.type === 'relative' ? timeRange.id : '24h';
-  const [loading, setLoading] = useState(false);
-  const [clusterHealth, setClusterHealth] = useState(null);
-  const [clusterUnavailable, setClusterUnavailable] = useState(false);
-  const [loadedClusterId, setLoadedClusterId] = useState<string | null>(null);
-
   const [refreshKey, setRefreshKey] = useState(0);
   const requestIdRef = useRef(0);
+  const previousClusterIdRef = useRef<string | null>(null);
 
-  // ============================================================
-  // Логотип приветственной страницы
-  // ============================================================
+  const apiRange = timeRange.type === 'relative' ? timeRange.id : '24h';
+  const currentClusterId = currentCluster?.id ?? null;
+  const bootstrap = currentCluster?.brokers || currentCluster?.bootstrapServers || '';
 
-  const welcomeLogo = '/logo.svg';
-
-  const clearDashboardData = () => {
+  const clearForClusterSwitch = useCallback(() => {
     setOverview(null);
-    setBrokers([]);
     setConsumerGroups([]);
     setThroughputData([]);
     setMessagesIn(0);
     setMessagesOut(0);
-    setClusterHealth(null);
-    setClusterUnavailable(false);
-    setLoadedClusterId(null);
-  };
+    setRefreshKey(0);
+  }, []);
 
   const loadDashboard = useCallback(async () => {
     if (!currentCluster) return;
+
+    if (!bootstrap || !currentClusterId) return;
+
     const requestId = ++requestIdRef.current;
-    setLoading(true);
     setPageLoading(true);
-    clearDashboardData();
+
+    // Очищаем данные только при фактическом переключении кластера.
+    // Обычный refresh сохраняет текущий график до прихода новых данных.
+    if (previousClusterIdRef.current !== currentClusterId) {
+      previousClusterIdRef.current = currentClusterId;
+      clearForClusterSwitch();
+    }
+
+    const headers = { 'X-Kafka-Bootstrap': bootstrap };
+    const throughputQuery = timeRange.type === 'relative'
+      ? `range=${timeRange.id}`
+      : `range=${apiRange}&from=${encodeURIComponent(timeRange.from)}&to=${encodeURIComponent(timeRange.to)}`;
 
     try {
-      const bootstrap = currentCluster.brokers || currentCluster.bootstrapServers;
-      if (!bootstrap) {
-        console.error('Не указаны брокеры для кластера', currentCluster);
-        setLoading(false);
-        setPageLoading(false);
-        return;
-      }
-
-      const headers = { 'X-Kafka-Bootstrap': bootstrap };
-
-      // Сначала проверяем именно выбранный кластер. Если он недоступен,
-      // данные предыдущего кластера никогда не используются.
-      let healthResponse;
-      try {
-        healthResponse = await axios.get('/api/overview/health', { headers, timeout: 5000 });
-      } catch (healthError) {
-        console.error('Выбранный Kafka-кластер недоступен:', healthError);
-        setClusterUnavailable(true);
-        return;
-      }
-
-      if (requestId !== requestIdRef.current) return;
-      setClusterHealth(healthResponse.data);
-      setClusterUnavailable(false);
-    setLoadedClusterId(null);
-
-      const throughputQuery = timeRange.type === 'relative'
-        ? `range=${timeRange.id}`
-        : `range=${apiRange}&from=${encodeURIComponent(timeRange.from)}&to=${encodeURIComponent(timeRange.to)}`;
-
-      const [overviewResponse, brokersResponse, groupsResponse, throughputResponse] = await Promise.all([
-        axios.get('/api/overview', { headers }),
-        axios.get('/api/overview/brokers-detailed', { headers }),
-        axios.get('/api/overview/consumer-groups', { headers }),
-        axios.get(`/api/overview/throughput?${throughputQuery}`, { headers })
+      const [overviewResponse, groupsResponse, throughputResponse] = await Promise.all([
+        axios.get<OverviewData>('/api/overview', { headers }),
+        axios.get<{ groups?: unknown[] }>('/api/overview/consumer-groups', { headers }),
+        axios.get<{ points?: any[] }>(`/api/overview/throughput?${throughputQuery}`, { headers }),
       ]);
 
       if (requestId !== requestIdRef.current) return;
+
       setOverview(overviewResponse.data);
-      setLoadedClusterId(currentCluster.id);
-      setBrokers(brokersResponse.data.brokers || []);
       setConsumerGroups(groupsResponse.data.groups || []);
 
       const points = throughputResponse.data.points || [];
       setThroughputData(points);
-      const latestPoint = points[points.length - 1];
-      setMessagesIn(latestPoint?.incoming || 0);
-      setMessagesOut(latestPoint?.outgoing || 0);
-
-      setRefreshKey(prev => prev + 1);
-
+      const latest = points[points.length - 1];
+      setMessagesIn(Number(latest?.incoming || 0));
+      setMessagesOut(Number(latest?.outgoing || 0));
+      setRefreshKey((value) => value + 1);
     } catch (error) {
-      if (requestId !== requestIdRef.current) return;
-      console.error('Ошибка загрузки дашборда:', error);
-      // Если кластер перестал отвечать после первичной проверки,
-      // очищаем данные и не оставляем информацию старого кластера.
-      clearDashboardData();
-      setClusterUnavailable(true);
+      // Ошибка обновления данных не равна потере Kafka-соединения.
+      // ClusterContext отдельно контролирует доступность выбранного кластера.
+      console.error('Ошибка обновления данных Overview:', error);
     } finally {
-      if (requestId !== requestIdRef.current) return;
-      setLoading(false);
-      setPageLoading(false);
+      if (requestId === requestIdRef.current) setPageLoading(false);
     }
-  }, [currentCluster, timeRange, apiRange, setPageLoading]);
+  }, [apiRange, bootstrap, clearForClusterSwitch, currentClusterId, setPageLoading, timeRange]);
 
   useEffect(() => {
+    if (!currentClusterId) return;
     void loadDashboard();
-  }, [loadDashboard]);
+  }, [currentClusterId, loadDashboard]);
 
   useEffect(() => {
     registerRefreshHandler(loadDashboard);
@@ -170,32 +125,27 @@ export default function Overview(): JSX.Element {
       <div className="welcome-page">
         <div className="welcome-card">
           <div className="welcome-logo-wrap">
-            <img src={welcomeLogo} alt="Kafka System Control" className="welcome-logo" />
+            <img src="/logo.svg" alt="Kafka System Control" className="welcome-logo" />
           </div>
 
-          <p className="welcome-subtitle">
-              KAFKA SYSTEM CONTROL
-          </p>
+          <p className="welcome-subtitle">KAFKA SYSTEM CONTROL</p>
 
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiInfo /></div>
             <div className="welcome-feature-text">
-              Современный интерфейс для работы с{' '}
-              <a href="https://kafka.apache.org/" target="_blank" rel="noreferrer">Apache Kafka</a>
+              Современный интерфейс для работы с <a href="https://kafka.apache.org/" target="_blank" rel="noreferrer">Apache Kafka</a>
             </div>
           </div>
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiPlus /></div>
             <div className="welcome-feature-text">
-              Чтобы начать работу — нажмите{' '}
-              <span className="welcome-highlight">+ Добавить кластер</span>
+              Чтобы начать работу — нажмите <span className="welcome-highlight">+ Добавить кластер</span>
             </div>
           </div>
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiCode /></div>
             <div className="welcome-feature-text">
-              Проект распространяется по лицензии{' '}
-              <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer">Apache License 2.0</a>
+              Проект распространяется по лицензии <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer">Apache License 2.0</a>
             </div>
           </div>
           <a href="https://github.com/Egorich88/kafka-system-control-4" target="_blank" rel="noreferrer" className="welcome-github">
@@ -207,36 +157,8 @@ export default function Overview(): JSX.Element {
     );
   }
 
-  if (!clusterUnavailable && loadedClusterId !== currentCluster.id) {
-    return (
-      <div className="cluster-unavailable-screen cluster-switch-loading">
-        <div className="cluster-unavailable-content">
-          <img src="/logo.svg" alt="Kafka System Control" className="cluster-unavailable-logo" />
-          <div className="cluster-unavailable-glow" />
-          <h2>Загрузка кластера</h2>
-          <p>Получение данных выбранного Kafka-кластера</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (clusterUnavailable) {
-    return (
-      <div className="cluster-unavailable-screen">
-        <div className="cluster-unavailable-content">
-          <img src="/logo.svg" alt="Kafka System Control" className="cluster-unavailable-logo" />
-          <div className="cluster-unavailable-glow" />
-          <h2>Кластер не доступен</h2>
-          <p>Пожалуйста выберите рабочий кластер</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="dashboard-container">
-
-      {/* KPI объединены с панелью состояния кластера. Дубликатов здесь нет. */}
       <div className="dashboard-row dashboard-row-status">
         <ClusterHealthPanel
           refreshKey={refreshKey}
@@ -244,17 +166,10 @@ export default function Overview(): JSX.Element {
           consumerGroups={consumerGroups}
           messagesIn={messagesIn}
           messagesOut={messagesOut}
-          onData={setClusterHealth}
         />
-        <PartitionDistributionPanel data={clusterHealth} />
-      </div>
-
-      <div className="dashboard-row dashboard-row-rate">
-        <RatePanels data={throughputData} />
         <CertificatesPanel refreshKey={refreshKey} />
       </div>
 
-      {/* Ряд 3: существующие панели throughput — без изменения назначения */}
       <div className="dashboard-row dashboard-row-top">
         <div className="panel-throughput">
           <ThroughputPanel data={throughputData} />
@@ -264,13 +179,9 @@ export default function Overview(): JSX.Element {
         </div>
       </div>
 
-      {/* Ряд 4: Consumer Lag + таблица | Последние события */}
       <div className="dashboard-row dashboard-row-main">
         <div className="panel-lag">
-          <ConsumerLagPanel
-            timeRange={apiRange}
-            refreshKey={refreshKey}
-          />
+          <ConsumerLagPanel timeRange={apiRange} refreshKey={refreshKey} />
         </div>
         <div className="panel-events">
           <EventsPanel refreshKey={refreshKey} />

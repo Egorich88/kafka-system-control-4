@@ -60,7 +60,7 @@ import Acl from './pages/Acl';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 import AuditPage from './pages/audit/AuditPage';
-import IntegrationPlaceholder from './pages/IntegrationPlaceholder.tsx';
+import IntegrationPlaceholder from './pages/IntegrationPlaceholder';
 import Alerts from './pages/Alerts';
 import User from './pages/User';
 

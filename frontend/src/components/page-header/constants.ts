@@ -25,16 +25,16 @@
 import type { RefreshInterval, RelativeTimeRange } from './types';
 
 export const RELATIVE_TIME_RANGES: RelativeTimeRange[] = [
-  { type: 'relative', id: '5m', label: 'Последние 5 минут' },
-  { type: 'relative', id: '15m', label: 'Последние 15 минут' },
-  { type: 'relative', id: '30m', label: 'Последние 30 минут' },
-  { type: 'relative', id: '1h', label: 'Последний час' },
-  { type: 'relative', id: '3h', label: 'Последние 3 часа' },
-  { type: 'relative', id: '6h', label: 'Последние 6 часов' },
-  { type: 'relative', id: '12h', label: 'Последние 12 часов' },
-  { type: 'relative', id: '24h', label: 'Последние 24 часа' },
-  { type: 'relative', id: '7d', label: 'Последние 7 дней' },
-  { type: 'relative', id: '30d', label: 'Последние 30 дней' },
+  { type: 'relative', id: '5m', label: '5 минут' },
+  { type: 'relative', id: '15m', label: '15 минут' },
+  { type: 'relative', id: '30m', label: '30 минут' },
+  { type: 'relative', id: '1h', label: '1 час' },
+  { type: 'relative', id: '3h', label: '3 часа' },
+  { type: 'relative', id: '6h', label: '6 часов' },
+  { type: 'relative', id: '12h', label: '12 часов' },
+  { type: 'relative', id: '24h', label: '24 часа' },
+  { type: 'relative', id: '7d', label: '7 дней' },
+  { type: 'relative', id: '30d', label: '30 дней' },
 ];
 
 export const REFRESH_INTERVALS: RefreshInterval[] = [

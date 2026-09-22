@@ -44,7 +44,6 @@ export default function RefreshIntervalPicker({ value, onChange }: Props): JSX.E
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className="page-header-refresh-label">Обновление</span>
         <strong>{selected.label}</strong>
         <FiChevronDown />
       </button>

@@ -3,21 +3,14 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 /**
  * @file PanelFullscreenButton.tsx
- * Кнопка полноэкранного просмотра панели Overview.
- * Комментарии и интерфейс предназначены для единого поведения всех панелей.
+ * Кнопка увеличения панели Overview.
+ *
+ * Панель не занимает весь монитор: она открывается по центру страницы,
+ * а остальной интерфейс закрывается затемнённым и размытым слоем.
  */
 
 import { useEffect, useState } from 'react';
@@ -27,37 +20,44 @@ export default function PanelFullscreenButton(): JSX.Element {
   const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
-    const close = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        document.querySelector<HTMLElement>('.is-panel-fullscreen')?.classList.remove('is-panel-fullscreen');
-        setFullscreen(false);
-      }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      closeFullscreen();
     };
-    document.addEventListener('keydown', close);
-    return () => document.removeEventListener('keydown', close);
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const toggle = () => {
-    const source = document.activeElement as HTMLElement | null;
-    const panel = source?.closest<HTMLElement>(
-      '.dashboard-panel, .events-panel, .certificate-panel'
-    );
-
-    if (!panel) return;
-    const next = !panel.classList.contains('is-panel-fullscreen');
-    document.querySelectorAll<HTMLElement>('.is-panel-fullscreen').forEach((item) => {
-      if (item !== panel) item.classList.remove('is-panel-fullscreen');
+  const closeFullscreen = () => {
+    document.querySelectorAll<HTMLElement>('.is-panel-fullscreen').forEach((panel) => {
+      panel.classList.remove('is-panel-fullscreen');
     });
-    panel.classList.toggle('is-panel-fullscreen', next);
-    setFullscreen(next);
+    document.body.classList.remove('panel-modal-open');
+    setFullscreen(false);
+  };
+
+  const toggle = () => {
+    const button = document.activeElement as HTMLElement | null;
+    const panel = button?.closest<HTMLElement>('.dashboard-panel, .events-panel');
+    if (!panel) return;
+
+    const next = !panel.classList.contains('is-panel-fullscreen');
+    closeFullscreen();
+
+    if (next) {
+      panel.classList.add('is-panel-fullscreen');
+      document.body.classList.add('panel-modal-open');
+      setFullscreen(true);
+    }
   };
 
   return (
     <button
       type="button"
       className="panel-fullscreen-button"
-      title={fullscreen ? 'Свернуть панель' : 'Открыть на весь экран'}
-      aria-label={fullscreen ? 'Свернуть панель' : 'Открыть панель на весь экран'}
+      title={fullscreen ? 'Свернуть панель' : 'Увеличить панель'}
+      aria-label={fullscreen ? 'Свернуть панель' : 'Увеличить панель'}
       onClick={toggle}
     >
       {fullscreen ? <FiMinimize2 /> : <FiMaximize2 />}

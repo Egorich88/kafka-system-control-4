@@ -24,7 +24,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import '../../../styles/overview/events-panel.css';
+import '../styles/events-panel.css';
 import PanelInfo from '../../../components/common/PanelInfo';
 import PanelFullscreenButton from './PanelFullscreenButton';
 import { useCluster } from '../../../contexts/ClusterContext';

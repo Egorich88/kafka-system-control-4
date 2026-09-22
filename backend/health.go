@@ -36,6 +36,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -70,15 +71,17 @@ func getClusterHealthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Конфигурация с агрессивными таймаутами для быстрой проверки
+	// Health-check должен быть быстрым и не выполнять тяжёлые Admin API-запросы.
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_8_0_0
-	config.Net.DialTimeout = 3 * time.Second // время ожидания подключения
-	config.Net.ReadTimeout = 2 * time.Second
-	config.Net.WriteTimeout = 2 * time.Second
+	config.Net.DialTimeout = 5 * time.Second
+	config.Net.ReadTimeout = 4 * time.Second
+	config.Net.WriteTimeout = 4 * time.Second
 
-	// Пытаемся создать клиент Sarama
-	client, err := sarama.NewClient([]string{bootstrap}, config)
+	// Для health-check достаточно установить клиентское соединение.
+	// Дополнительный вызов Topics() убран: на больших/медленных кластерах
+	// он мог превышать браузерный timeout и ложно показывать «недоступен».
+	client, err := sarama.NewClient(strings.Split(bootstrap, ","), config)
 	if err != nil {
 		// Не удалось подключиться — кластер недоступен
 		response := KafkaConnectionHealthResponse{
@@ -89,17 +92,6 @@ func getClusterHealthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer client.Close()
-
-	// Дополнительная проверка: запрашиваем список топиков,
-	// чтобы удостовериться, что брокер отвечает на запросы.
-	if _, err := client.Topics(); err != nil {
-		response := KafkaConnectionHealthResponse{
-			Status: "disconnected",
-			Error:  err.Error(),
-		}
-		_ = json.NewEncoder(w).Encode(response)
-		return
-	}
 
 	// Все проверки пройдены — кластер доступен
 	response := KafkaConnectionHealthResponse{Status: "connected"}

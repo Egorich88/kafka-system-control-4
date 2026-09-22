@@ -40,7 +40,7 @@ import {
   YAxis
 } from 'recharts';
 import axios from 'axios';
-import '../../../styles/overview/topics-panel.css';
+import '../styles/topics-panel.css';
 import { useCluster } from '../../../contexts/ClusterContext';
 import PanelInfo from '../../../components/common/PanelInfo';
 import PanelFullscreenButton from './PanelFullscreenButton';
@@ -155,6 +155,10 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
   const aggregatedData = prepareChartData();
   const lastPoint = aggregatedData.length > 0 ? aggregatedData[aggregatedData.length - 1] : {};
 
+  const topicMax = (topic: string) => {
+    return rawData.reduce((max, point) => Math.max(max, Number(point.topic === topic ? point.value || 0 : 0)), 0);
+  };
+
   // -------------------------------------------------------------------------
   // Обработчики кликов по легенде и фону графика
   // -------------------------------------------------------------------------
@@ -255,6 +259,7 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
             Пропускная способность по топикам
           </span>
         </div>
+        <PanelFullscreenButton />
       </div>
 
       <div className="panel-body">
@@ -319,7 +324,8 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
           <div className="topics-legend">
             <div className="topics-legend-header">
               <span>Топик</span>
-              <span>Сообщений/сек</span>
+              <span>Текущее</span>
+              <span>Макс.</span>
             </div>
             {visibleTopics.length === 0 ? (
               <div className="topics-legend-placeholder">Нет активных топиков за выбранный период</div>
@@ -340,7 +346,10 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
                     <span>{topic}</span>
                   </div>
                   <span className="topics-legend-value">
-                    {(lastPoint[topic] || 0).toFixed(1)}
+                    {(Number(lastPoint[topic]) || 0).toFixed(1)}
+                  </span>
+                  <span className="topics-legend-value topics-legend-max">
+                    {topicMax(topic).toFixed(1)}
                   </span>
                 </div>
               ))
