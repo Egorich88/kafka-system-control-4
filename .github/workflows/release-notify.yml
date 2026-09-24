@@ -1,4 +1,4 @@
-  # Copyright 2026 Egor Khomenko (Egorich88)
+   # Copyright 2026 Egor Khomenko (Egorich88)
   #
   # Licensed under the Apache License, Version 2.0 (the "License");
   # you may not use this file except in compliance with the License.
@@ -344,7 +344,8 @@
                 "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
                 -F "chat_id=${TELEGRAM_CHAT_ID}" \
                 -F "photo=@${IMG_PATH}" \
-                -F "caption=🚀 **Новый релиз: ${TAG}**")
+                -F "caption=🚀 <b>Новый релиз: ${TAG}</b>" \
+                -F "parse_mode=HTML")
             
               echo "=== TELEGRAM PHOTO RESULT ==="
               echo "${PHOTO_RESULT}"
@@ -355,11 +356,10 @@
               fi
             
               {
-                echo "📝 **Что нового:**"
+                echo "📝 <b>Что нового:</b>"
                 cat /tmp/changes.txt
                 echo
-                echo "🔗 Смотреть на GitHub:"
-                echo "${RELEASE_URL}"
+                echo "🔗 <a href=\"${RELEASE_URL}\">Смотреть на GitHub</a>"
               } > /tmp/telegram-message.txt
             
               echo "=== TELEGRAM MESSAGE ==="
@@ -369,6 +369,7 @@
                 -X POST \
                 "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
                 -d "chat_id=${TELEGRAM_CHAT_ID}" \
+                -d "parse_mode=HTML" \
                 --data-urlencode "text=$(cat /tmp/telegram-message.txt)")
             
               echo "=== TELEGRAM MESSAGE RESULT ==="
@@ -383,13 +384,12 @@
               echo "No screenshot. Sending single Telegram message."
             
               {
-                echo "🚀 Новый релиз: ${TAG}"
+                echo "🚀 <b>Новый релиз: ${TAG}</b>"
                 echo
-                echo "📝 Что нового:"
+                echo "📝 <b>Что нового:</b>"
                 cat /tmp/changes.txt
                 echo
-                echo "🔗 Смотреть на GitHub:"
-                echo "${RELEASE_URL}"
+                echo "🔗 <a href=\"${RELEASE_URL}\">Смотреть на GitHub</a>"
               } > /tmp/telegram-message.txt
             
               echo "=== TELEGRAM MESSAGE ==="
@@ -399,6 +399,7 @@
                 -X POST \
                 "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
                 -d "chat_id=${TELEGRAM_CHAT_ID}" \
+                -d "parse_mode=HTML" \
                 --data-urlencode "text=$(cat /tmp/telegram-message.txt)")
             
               echo "=== TELEGRAM MESSAGE RESULT ==="
