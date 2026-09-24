@@ -1,298 +1,261 @@
-   # Copyright 2026 Egor Khomenko (Egorich88)
-  #
-  # Licensed under the Apache License, Version 2.0 (the "License");
-  # you may not use this file except in compliance with the License.
-  # You may obtain a copy of the License at
-  #
-  #     http://www.apache.org/licenses/LICENSE-2.0
-  #
-  # Unless required by applicable law or agreed to in writing, software
-  # distributed under the License is distributed on an "AS IS" BASIS,
-  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  # See the License for the specific language governing permissions and
-  # limitations under the License.
+# Copyright 2026 Egor Khomenko (Egorich88)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-  name: Release Notifier
+name: Release Notifier
 
-  on:
-    workflow_run:
-      workflows:
-        - "CI/CD для Kafka System Control 4.0"
-      types:
-        - completed
+on:
+  workflow_run:
+    workflows:
+      - "CI/CD для Odyssey"
+    types:
+      - completed
 
-  permissions:
-    contents: read
+permissions:
+  contents: read
 
-  jobs:
-    notify:
-      runs-on: ubuntu-latest
+jobs:
+  notify:
+    runs-on: ubuntu-latest
 
-      if: >
-        github.event.workflow_run.conclusion == 'success' &&
-        startsWith(github.event.workflow_run.head_branch, 'v')
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_branch, 'v')
 
-      steps:
-        - name: Checkout release
-          uses: actions/checkout@v7.0.1
-          with:
-            ref: ${{ github.event.workflow_run.head_sha }}
-            fetch-depth: 0
-            fetch-tags: true
+    steps:
+      - name: Checkout release
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          fetch-tags: true
 
-        - name: Install Russian CA certificates
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y ca-certificates
-            sudo update-ca-certificates
+      - name: Install Russian CA certificates
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates
+          sudo update-ca-certificates
 
-        # ============================================================
-        # RELEASE INFORMATION
-        # ============================================================
+      # ============================================================
+      # RELEASE INFORMATION
+      # ============================================================
 
-        - name: Prepare release information
-          id: release
-          env:
-            REPO: ${{ github.repository }}
-            TAG: ${{ github.event.workflow_run.head_branch }}
-          run: |
-            set -e
-            
-            RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG}"
-            
-            echo "TAG=${TAG}" >> "$GITHUB_OUTPUT"
-            echo "RELEASE_URL=${RELEASE_URL}" >> "$GITHUB_OUTPUT"
-            
-            echo "=== Release ==="
-            echo "Tag: ${TAG}"
-            echo "URL: ${RELEASE_URL}"
-            
-            PREVIOUS_TAG=$(git tag --sort=-version:refname \
-              | grep '^v' \
-              | grep -vx "${TAG}" \
-              | head -1 || true)
-            
-            echo "Previous tag: ${PREVIOUS_TAG:-none}"
-            
-            if [ -n "${PREVIOUS_TAG}" ]; then
-              COMMITS=$(git log \
-                --pretty=format:'- %s' \
-                "${PREVIOUS_TAG}..${TAG}")
-            else
-              COMMITS=$(git log \
-                --pretty=format:'- %s' \
-                "${TAG}")
-            fi
-            
-            if [ -z "${COMMITS}" ]; then
-              COMMITS="- Изменения не указаны."
-            fi
-            
-            printf '%s\n' "${COMMITS}" > /tmp/changes.txt
-            
-            echo "=== Changes ==="
+      - name: Prepare release information
+        id: release
+        env:
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -e
+
+          RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG}"
+
+          echo "TAG=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_URL=${RELEASE_URL}" >> "$GITHUB_OUTPUT"
+
+          echo "=== Release ==="
+          echo "Tag: ${TAG}"
+          echo "URL: ${RELEASE_URL}"
+
+          PREVIOUS_TAG=$(git tag --sort=-version:refname \
+            | grep '^v' \
+            | grep -vx "${TAG}" \
+            | head -1 || true)
+
+          echo "Previous tag: ${PREVIOUS_TAG:-none}"
+
+          if [ -n "${PREVIOUS_TAG}" ]; then
+            COMMITS=$(git log \
+              --pretty=format:'- %s' \
+              "${PREVIOUS_TAG}..${TAG}")
+          else
+            COMMITS=$(git log \
+              --pretty=format:'- %s' \
+              "${TAG}")
+          fi
+
+          if [ -z "${COMMITS}" ]; then
+            COMMITS="- Изменения не указаны."
+          fi
+
+          printf '%s\n' "${COMMITS}" > /tmp/changes.txt
+
+          echo "=== Changes ==="
+          cat /tmp/changes.txt
+
+      # ============================================================
+      # SCREENSHOT
+      # ============================================================
+
+      - name: Find release screenshot
+        id: screenshot
+        env:
+          TAG: ${{ steps.release.outputs.TAG }}
+        run: |
+          set -e
+
+          SCREENSHOT_PATH="docs/screenshots/${TAG}.png"
+
+          echo "Looking for screenshot: ${SCREENSHOT_PATH}"
+
+          # Сначала ищем скриншот в состоянии репозитория,
+          # из которого был собран релиз.
+          if [ -f "${SCREENSHOT_PATH}" ]; then
+            cp "${SCREENSHOT_PATH}" /tmp/release-screenshot.png
+
+            echo "IMAGE_PATH=/tmp/release-screenshot.png" >> "$GITHUB_OUTPUT"
+            echo "Screenshot found in release checkout: ${SCREENSHOT_PATH}"
+            exit 0
+          fi
+
+          echo "Screenshot not found in release checkout."
+          echo "Checking main branch for ${SCREENSHOT_PATH}..."
+
+          # Если скриншот был добавлен после создания тега,
+          # ищем его в актуальном main.
+          git fetch origin main --depth=1
+
+          if git cat-file -e "origin/main:${SCREENSHOT_PATH}" 2>/dev/null; then
+            git show "origin/main:${SCREENSHOT_PATH}" > /tmp/release-screenshot.png
+
+            echo "IMAGE_PATH=/tmp/release-screenshot.png" >> "$GITHUB_OUTPUT"
+            echo "Screenshot found in main: ${SCREENSHOT_PATH}"
+          else
+            echo "No screenshot found for ${TAG}."
+          fi
+
+      # ============================================================
+      # MAX AND TELEGRAM
+      # ============================================================
+
+      - name: Send release notification to MAX and Telegram
+        env:
+          MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
+          MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
+          TAG: ${{ steps.release.outputs.TAG }}
+          RELEASE_URL: ${{ steps.release.outputs.RELEASE_URL }}
+          IMG_PATH: ${{ steps.screenshot.outputs.IMAGE_PATH }}
+        run: |
+          set -e
+
+          if [ -z "${MAX_TOKEN}" ]; then
+            echo "ERROR: MAX_BOT_TOKEN is not configured."
+            exit 1
+          fi
+
+          if [ -z "${MAX_CHAT_ID}" ]; then
+            echo "ERROR: MAX_CHAT_ID is not configured."
+            exit 1
+          fi
+
+          {
+            echo "🚀 **Новый релиз: ${TAG}**"
+            echo
+            echo "📝 **Что нового:**"
             cat /tmp/changes.txt
+            echo
+            echo "🔗 [Смотреть на GitHub](${RELEASE_URL})"
+          } > /tmp/max-message.txt
 
-        # ============================================================
-        # SCREENSHOT
-        # ============================================================
+          echo "=== MAX MESSAGE ==="
+          cat /tmp/max-message.txt
 
-        - name: Find release screenshot
-          id: screenshot
-          env:
-            TAG: ${{ steps.release.outputs.TAG }}
-          run: |
-            set -e
-            
-            SCREENSHOT_PATH="docs/screenshots/${TAG}.png"
-            
-            echo "Looking for screenshot: ${SCREENSHOT_PATH}"
-            
-            # Сначала ищем скриншот в состоянии репозитория,
-            # из которого был собран релиз.
-            if [ -f "${SCREENSHOT_PATH}" ]; then
-              cp "${SCREENSHOT_PATH}" /tmp/release-screenshot.png
-            
-              echo "IMAGE_PATH=/tmp/release-screenshot.png" >> "$GITHUB_OUTPUT"
-              echo "Screenshot found in release checkout: ${SCREENSHOT_PATH}"
-              exit 0
-            fi
-            
-            echo "Screenshot not found in release checkout."
-            echo "Checking main branch for ${SCREENSHOT_PATH}..."
-            
-            # Если скриншот был добавлен после создания тега,
-            # ищем его в актуальном main.
-            git fetch origin main --depth=1
-            
-            if git cat-file -e "origin/main:${SCREENSHOT_PATH}" 2>/dev/null; then
-              git show "origin/main:${SCREENSHOT_PATH}" > /tmp/release-screenshot.png
-            
-              echo "IMAGE_PATH=/tmp/release-screenshot.png" >> "$GITHUB_OUTPUT"
-              echo "Screenshot found in main: ${SCREENSHOT_PATH}"
-            else
-              echo "No screenshot found for ${TAG}."
-            fi
+          if [ -n "${IMG_PATH}" ] && [ -f "${IMG_PATH}" ]; then
+            echo "Uploading screenshot to MAX..."
 
-        # ============================================================
-        # MAX AND TELEGRAM
-        # ============================================================
+            # ======================================================
+            # STEP 1: Получаем URL для загрузки изображения
+            # ======================================================
 
-        - name: Send release notification to MAX and Telegram
-          env:
-            MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
-            MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
-            TAG: ${{ steps.release.outputs.TAG }}
-            RELEASE_URL: ${{ steps.release.outputs.RELEASE_URL }}
-            IMG_PATH: ${{ steps.screenshot.outputs.IMAGE_PATH }}
-          run: |
-            set -e
-            
-            if [ -z "${MAX_TOKEN}" ]; then
-              echo "ERROR: MAX_BOT_TOKEN is not configured."
+            UPLOAD_INIT_RESULT=$(curl -k -sS \
+              -X POST \
+              "https://platform-api2.max.ru/uploads?type=image" \
+              -H "Authorization: ${MAX_TOKEN}")
+
+            echo "=== MAX UPLOAD INIT RESULT ==="
+            echo "${UPLOAD_INIT_RESULT}"
+
+            UPLOAD_URL=$(echo "${UPLOAD_INIT_RESULT}" \
+              | jq -r '.url // empty')
+
+            if [ -z "${UPLOAD_URL}" ]; then
+              echo "ERROR: MAX did not return upload URL."
               exit 1
             fi
-            
-            if [ -z "${MAX_CHAT_ID}" ]; then
-              echo "ERROR: MAX_CHAT_ID is not configured."
-              exit 1
-            fi
-            
-            {
-              echo "🚀 **Новый релиз: ${TAG}**"
-              echo
-              echo "📝 **Что нового:**"
-              cat /tmp/changes.txt
-              echo
-              echo "🔗 [Смотреть на GitHub](${RELEASE_URL})"
-            } > /tmp/max-message.txt
-            
-            echo "=== MAX MESSAGE ==="
-            cat /tmp/max-message.txt
-            
-            if [ -n "${IMG_PATH}" ] && [ -f "${IMG_PATH}" ]; then
-              echo "Uploading screenshot to MAX..."
-            
-              # ======================================================
-              # STEP 1: Получаем URL для загрузки изображения
-              # ======================================================
-            
-              UPLOAD_INIT_RESULT=$(curl -k -sS \
-                -X POST \
-                "https://platform-api2.max.ru/uploads?type=image" \
-                -H "Authorization: ${MAX_TOKEN}")
-            
-              echo "=== MAX UPLOAD INIT RESULT ==="
-              echo "${UPLOAD_INIT_RESULT}"
-            
-              UPLOAD_URL=$(echo "${UPLOAD_INIT_RESULT}" \
-                | jq -r '.url // empty')
-            
-              if [ -z "${UPLOAD_URL}" ]; then
-                echo "ERROR: MAX did not return upload URL."
-                exit 1
-              fi
-            
-              echo "MAX upload URL received."
-            
-              # ======================================================
-              # STEP 2: Загружаем изображение
-              # ======================================================
-            
-              UPLOAD_RESULT=$(curl -k -sS \
-                -X POST \
-                "${UPLOAD_URL}" \
-                -H "Authorization: ${MAX_TOKEN}" \
-                -F "data=@${IMG_PATH}")
-            
-              echo "=== MAX IMAGE UPLOAD RESULT ==="
-              echo "${UPLOAD_RESULT}"
-            
+
+            echo "MAX upload URL received."
+
+            # ======================================================
+            # STEP 2: Загружаем изображение
+            # ======================================================
+
+            UPLOAD_RESULT=$(curl -k -sS \
+              -X POST \
+              "${UPLOAD_URL}" \
+              -H "Authorization: ${MAX_TOKEN}" \
+              -F "data=@${IMG_PATH}")
+
+            echo "=== MAX IMAGE UPLOAD RESULT ==="
+            echo "${UPLOAD_RESULT}"
+
+            PHOTO_TOKEN=$(echo "${UPLOAD_RESULT}" \
+              | jq -r '.photos | to_entries | .[0].value.token // empty')
+
+            # Некоторые ответы MAX могут содержать token
+            # непосредственно в корне ответа.
+            if [ -z "${PHOTO_TOKEN}" ]; then
               PHOTO_TOKEN=$(echo "${UPLOAD_RESULT}" \
-                | jq -r '.photos | to_entries | .[0].value.token // empty')
-            
-              # Некоторые ответы MAX могут содержать token
-              # непосредственно в корне ответа.
-              if [ -z "${PHOTO_TOKEN}" ]; then
-                PHOTO_TOKEN=$(echo "${UPLOAD_RESULT}" \
-                  | jq -r '.token // empty')
-              fi
-            
-              if [ -z "${PHOTO_TOKEN}" ]; then
-                echo "ERROR: MAX did not return image token."
-                exit 1
-              fi
-            
-              echo "MAX image token received."
-            
-              # ======================================================
-              # STEP 3: Даём MAX время обработать изображение
-              # ======================================================
-            
-              echo "Waiting for MAX to process the image..."
-              sleep 3
-            
-              # ======================================================
-              # STEP 4: Отправляем сообщение с изображением
-              # ======================================================
-            
-              SEND_RESULT=""
-            
-              for ATTEMPT in 1 2 3 4 5; do
-                echo "Sending image to MAX (attempt ${ATTEMPT}/5)..."
-            
-                SEND_RESULT=$(jq -n \
-                  --arg text "$(cat /tmp/max-message.txt)" \
-                  --arg token "${PHOTO_TOKEN}" \
-                  '{
-                    text: $text,
-                    format: "markdown",
-                    notify: true,
-                    attachments: [
-                      {
-                        type: "image",
-                        payload: {
-                          token: $token
-                        }
-                      }
-                    ]
-                  }' \
-                  | curl -k -sS \
-                    -X POST \
-                    "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
-                    -H "Authorization: ${MAX_TOKEN}" \
-                    -H "Content-Type: application/json" \
-                    -d @-)
-            
-                echo "=== MAX SEND RESULT ==="
-                echo "${SEND_RESULT}"
-            
-                if echo "${SEND_RESULT}" | jq -e '.message' >/dev/null 2>&1; then
-                  echo "MAX notification with screenshot sent successfully."
-                  break
-                fi
-            
-                ERROR_CODE=$(echo "${SEND_RESULT}" \
-                  | jq -r '.code // empty')
-            
-                if [ "${ERROR_CODE}" = "attachment.not.ready" ] && [ "${ATTEMPT}" -lt 5 ]; then
-                  echo "Image is not ready yet. Waiting 3 seconds..."
-                  sleep 3
-                else
-                  echo "ERROR: MAX notification failed."
-                  exit 1
-                fi
-              done
-            
-            else
-              echo "No screenshot. Sending text-only notification to MAX."
-            
+                | jq -r '.token // empty')
+            fi
+
+            if [ -z "${PHOTO_TOKEN}" ]; then
+              echo "ERROR: MAX did not return image token."
+              exit 1
+            fi
+
+            echo "MAX image token received."
+
+            # ======================================================
+            # STEP 3: Даём MAX время обработать изображение
+            # ======================================================
+
+            echo "Waiting for MAX to process the image..."
+            sleep 3
+
+            # ======================================================
+            # STEP 4: Отправляем сообщение с изображением
+            # ======================================================
+
+            SEND_RESULT=""
+
+            for ATTEMPT in 1 2 3 4 5; do
+              echo "Sending image to MAX (attempt ${ATTEMPT}/5)..."
+
               SEND_RESULT=$(jq -n \
                 --arg text "$(cat /tmp/max-message.txt)" \
+                --arg token "${PHOTO_TOKEN}" \
                 '{
                   text: $text,
                   format: "markdown",
-                  notify: true
+                  notify: true,
+                  attachments: [
+                    {
+                      type: "image",
+                      payload: {
+                        token: $token
+                      }
+                    }
+                  ]
                 }' \
                 | curl -k -sS \
                   -X POST \
@@ -300,116 +263,152 @@
                   -H "Authorization: ${MAX_TOKEN}" \
                   -H "Content-Type: application/json" \
                   -d @-)
-            
+
               echo "=== MAX SEND RESULT ==="
               echo "${SEND_RESULT}"
-            
-              if ! echo "${SEND_RESULT}" | jq -e '.message' >/dev/null 2>&1; then
+
+              if echo "${SEND_RESULT}" | jq -e '.message' >/dev/null 2>&1; then
+                echo "MAX notification with screenshot sent successfully."
+                break
+              fi
+
+              ERROR_CODE=$(echo "${SEND_RESULT}" \
+                | jq -r '.code // empty')
+
+              if [ "${ERROR_CODE}" = "attachment.not.ready" ] && [ "${ATTEMPT}" -lt 5 ]; then
+                echo "Image is not ready yet. Waiting 3 seconds..."
+                sleep 3
+              else
                 echo "ERROR: MAX notification failed."
                 exit 1
               fi
-            
-              echo "MAX text notification sent successfully."
-            fi
+            done
 
-        # ============================================================
-        # TELEGRAM
-        # ============================================================
+          else
+            echo "No screenshot. Sending text-only notification to MAX."
 
-        - name: Send release notification to Telegram
-          env:
-            TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-            TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-            TAG: ${{ steps.release.outputs.TAG }}
-            RELEASE_URL: ${{ steps.release.outputs.RELEASE_URL }}
-            IMG_PATH: ${{ steps.screenshot.outputs.IMAGE_PATH }}
-          run: |
-            set -e
-            
-            if [ -z "${TELEGRAM_BOT_TOKEN}" ]; then
-              echo "ERROR: TELEGRAM_BOT_TOKEN is not configured."
+            SEND_RESULT=$(jq -n \
+              --arg text "$(cat /tmp/max-message.txt)" \
+              '{
+                text: $text,
+                format: "markdown",
+                notify: true
+              }' \
+              | curl -k -sS \
+                -X POST \
+                "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
+                -H "Authorization: ${MAX_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d @-)
+
+            echo "=== MAX SEND RESULT ==="
+            echo "${SEND_RESULT}"
+
+            if ! echo "${SEND_RESULT}" | jq -e '.message' >/dev/null 2>&1; then
+              echo "ERROR: MAX notification failed."
               exit 1
             fi
-            
-            if [ -z "${TELEGRAM_CHAT_ID}" ]; then
-              echo "ERROR: TELEGRAM_CHAT_ID is not configured."
+
+            echo "MAX text notification sent successfully."
+          fi
+
+      # ============================================================
+      # TELEGRAM
+      # ============================================================
+
+      - name: Send release notification to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TAG: ${{ steps.release.outputs.TAG }}
+          RELEASE_URL: ${{ steps.release.outputs.RELEASE_URL }}
+          IMG_PATH: ${{ steps.screenshot.outputs.IMAGE_PATH }}
+        run: |
+          set -e
+
+          if [ -z "${TELEGRAM_BOT_TOKEN}" ]; then
+            echo "ERROR: TELEGRAM_BOT_TOKEN is not configured."
+            exit 1
+          fi
+
+          if [ -z "${TELEGRAM_CHAT_ID}" ]; then
+            echo "ERROR: TELEGRAM_CHAT_ID is not configured."
+            exit 1
+          fi
+
+          if [ -n "${IMG_PATH}" ] && [ -f "${IMG_PATH}" ]; then
+            echo "Sending screenshot to Telegram..."
+
+            PHOTO_RESULT=$(curl -sS \
+              -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
+              -F "chat_id=${TELEGRAM_CHAT_ID}" \
+              -F "photo=@${IMG_PATH}" \
+              -F "caption=🚀 <b>Новый релиз: ${TAG}</b>" \
+              -F "parse_mode=HTML")
+
+            echo "=== TELEGRAM PHOTO RESULT ==="
+            echo "${PHOTO_RESULT}"
+
+            if ! echo "${PHOTO_RESULT}" | jq -e '.ok == true' >/dev/null; then
+              echo "ERROR: Telegram screenshot notification failed."
               exit 1
             fi
-            
-            if [ -n "${IMG_PATH}" ] && [ -f "${IMG_PATH}" ]; then
-              echo "Sending screenshot to Telegram..."
-            
-              PHOTO_RESULT=$(curl -sS \
-                -X POST \
-                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
-                -F "chat_id=${TELEGRAM_CHAT_ID}" \
-                -F "photo=@${IMG_PATH}" \
-                -F "caption=🚀 <b>Новый релиз: ${TAG}</b>" \
-                -F "parse_mode=HTML")
-            
-              echo "=== TELEGRAM PHOTO RESULT ==="
-              echo "${PHOTO_RESULT}"
-            
-              if ! echo "${PHOTO_RESULT}" | jq -e '.ok == true' >/dev/null; then
-                echo "ERROR: Telegram screenshot notification failed."
-                exit 1
-              fi
-            
-              {
-                echo "📝 <b>Что нового:</b>"
-                cat /tmp/changes.txt
-                echo
-                echo "🔗 <a href=\"${RELEASE_URL}\">Смотреть на GitHub</a>"
-              } > /tmp/telegram-message.txt
-            
-              echo "=== TELEGRAM MESSAGE ==="
-              cat /tmp/telegram-message.txt
-            
-              MESSAGE_RESULT=$(curl -sS \
-                -X POST \
-                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-                -d "chat_id=${TELEGRAM_CHAT_ID}" \
-                -d "parse_mode=HTML" \
-                --data-urlencode "text=$(cat /tmp/telegram-message.txt)")
-            
-              echo "=== TELEGRAM MESSAGE RESULT ==="
-              echo "${MESSAGE_RESULT}"
-            
-              if ! echo "${MESSAGE_RESULT}" | jq -e '.ok == true' >/dev/null; then
-                echo "ERROR: Telegram release description notification failed."
-                exit 1
-              fi
-            
-            else
-              echo "No screenshot. Sending single Telegram message."
-            
-              {
-                echo "🚀 <b>Новый релиз: ${TAG}</b>"
-                echo
-                echo "📝 <b>Что нового:</b>"
-                cat /tmp/changes.txt
-                echo
-                echo "🔗 <a href=\"${RELEASE_URL}\">Смотреть на GitHub</a>"
-              } > /tmp/telegram-message.txt
-            
-              echo "=== TELEGRAM MESSAGE ==="
-              cat /tmp/telegram-message.txt
-            
-              MESSAGE_RESULT=$(curl -sS \
-                -X POST \
-                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-                -d "chat_id=${TELEGRAM_CHAT_ID}" \
-                -d "parse_mode=HTML" \
-                --data-urlencode "text=$(cat /tmp/telegram-message.txt)")
-            
-              echo "=== TELEGRAM MESSAGE RESULT ==="
-              echo "${MESSAGE_RESULT}"
-            
-              if ! echo "${MESSAGE_RESULT}" | jq -e '.ok == true' >/dev/null; then
-                echo "ERROR: Telegram notification failed."
-                exit 1
-              fi
-            fi
-            
-            echo "Telegram notification sent successfully."
 
+            {
+              echo "📝 <b>Что нового:</b>"
+              cat /tmp/changes.txt
+              echo
+              echo "🔗 <a href=\"${RELEASE_URL}\">Смотреть на GitHub</a>"
+            } > /tmp/telegram-message.txt
+
+            echo "=== TELEGRAM MESSAGE ==="
+            cat /tmp/telegram-message.txt
+
+            MESSAGE_RESULT=$(curl -sS \
+              -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d "chat_id=${TELEGRAM_CHAT_ID}" \
+              -d "parse_mode=HTML" \
+              --data-urlencode "text=$(cat /tmp/telegram-message.txt)")
+
+            echo "=== TELEGRAM MESSAGE RESULT ==="
+            echo "${MESSAGE_RESULT}"
+
+            if ! echo "${MESSAGE_RESULT}" | jq -e '.ok == true' >/dev/null; then
+              echo "ERROR: Telegram release description notification failed."
+              exit 1
+            fi
+
+          else
+            echo "No screenshot. Sending single Telegram message."
+
+            {
+              echo "🚀 <b>Новый релиз: ${TAG}</b>"
+              echo
+              echo "📝 <b>Что нового:</b>"
+              cat /tmp/changes.txt
+              echo
+              echo "🔗 <a href=\"${RELEASE_URL}\">Смотреть на GitHub</a>"
+            } > /tmp/telegram-message.txt
+
+            echo "=== TELEGRAM MESSAGE ==="
+            cat /tmp/telegram-message.txt
+
+            MESSAGE_RESULT=$(curl -sS \
+              -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d "chat_id=${TELEGRAM_CHAT_ID}" \
+              -d "parse_mode=HTML" \
+              --data-urlencode "text=$(cat /tmp/telegram-message.txt)")
+
+            echo "=== TELEGRAM MESSAGE RESULT ==="
+            echo "${MESSAGE_RESULT}"
+
+            if ! echo "${MESSAGE_RESULT}" | jq -e '.ok == true' >/dev/null; then
+              echo "ERROR: Telegram notification failed."
+              exit 1
+            fi
+          fi
+
+          echo "Telegram notification sent successfully."

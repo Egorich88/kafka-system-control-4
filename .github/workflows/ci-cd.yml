@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: CI/CD для Kafka System Control 4.0
+name: CI/CD для Odyssey
 
 on:
   push:
@@ -40,8 +40,49 @@ env:
   DOCKER_IMAGE_FRONTEND: egorich27/kafka-control-frontend
 
 jobs:
-  build-and-push:
+  # ────────────────────────────────────────────────────────────────
+  # 1. VERIFY — быстрая проверка сборки на push в main
+  #    Никаких образов в Docker Hub, только компиляция.
+  # ────────────────────────────────────────────────────────────────
+  verify:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.27'
+          cache-dependency-path: backend/go.sum
+
+      - name: Build backend
+        working-directory: backend
+        run: go build ./...
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+  # ────────────────────────────────────────────────────────────────
+  # 2. RELEASE — сборка и публикация образов только на тег v*
+  # ────────────────────────────────────────────────────────────────
+  release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -65,8 +106,7 @@ jobs:
         with:
           images: ${{ env.DOCKER_IMAGE_BACKEND }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
+            type=raw,value=latest
             type=ref,event=tag
             type=sha,prefix=sha-
 
@@ -87,8 +127,7 @@ jobs:
         with:
           images: ${{ env.DOCKER_IMAGE_FRONTEND }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
+            type=raw,value=latest
             type=ref,event=tag
             type=sha,prefix=sha-
 
@@ -102,15 +141,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ---- ГЕНЕРАЦИЯ CHANGELOG ИЗ КОММИТОВ (только для тегов) ----
+      # ---- ГЕНЕРАЦИЯ CHANGELOG ----
       - name: Generate changelog
         id: changelog
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
-          # Находим предыдущий тег (все теги, кроме текущего, сортировка по дате)
-          PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${GITHUB_REF_NAME}$" | head -1)
+          PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${GITHUB_REF_NAME}$" | head -1 || true)
 
-          # Если предыдущего тега нет — берём самый первый коммит
           if [ -z "$PREV_TAG" ]; then
             PREV_TAG=$(git rev-list --max-parents=0 HEAD)
           fi
@@ -118,24 +154,20 @@ jobs:
           echo "Previous tag: $PREV_TAG"
           echo "Current tag: $GITHUB_REF_NAME"
 
-          # Собираем коммиты между предыдущим и текущим тегом
-          CHANGES=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --no-merges)
+          CHANGES=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s" --no-merges || true)
 
-          # Если коммитов нет — пишем заглушку
           if [ -z "$CHANGES" ]; then
             CHANGES="- Изменения не указаны"
           fi
 
-          # Экранируем многострочный вывод для GitHub Actions
           {
             echo "changes<<EOF"
             echo "$CHANGES"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
-      # ---- СОЗДАНИЕ GITHUB RELEASE (только для тегов) ----
+      # ---- СОЗДАНИЕ GITHUB RELEASE ----
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
@@ -160,14 +192,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # ────────────────────────────────────────────────────────────────
+  # 3. DEPLOY — только вручную через workflow_dispatch
+  # ────────────────────────────────────────────────────────────────
   deploy-to-kubernetes:
-    needs: build-and-push
+    needs: release
     runs-on: ubuntu-latest
-    # Деплой запускается ТОЛЬКО при ручном запуске с флагом deploy=true
     if: github.event_name == 'workflow_dispatch' && inputs.deploy == true
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7.0.1
 
       - name: Install YC CLI and jq
         run: |
