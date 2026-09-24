@@ -135,10 +135,10 @@
             fi
 
         # ============================================================
-        # MAX
+        # MAX AND TELEGRAM
         # ============================================================
 
-        - name: Send release notification to MAX
+        - name: Send release notification to MAX and Telegram
           env:
             MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
             MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
@@ -159,9 +159,9 @@
             fi
             
             {
-              echo "🚀 Новый релиз: ${TAG}"
+              echo "🚀 **Новый релиз: ${TAG}**"
               echo
-              echo "📝 Что нового:"
+              echo "📝 **Что нового:**"
               cat /tmp/changes.txt
               echo
               echo "🔗 [Смотреть на GitHub](${RELEASE_URL})"
@@ -173,50 +173,116 @@
             if [ -n "${IMG_PATH}" ] && [ -f "${IMG_PATH}" ]; then
               echo "Uploading screenshot to MAX..."
             
-              UPLOAD_RESULT=$(curl -k -sS \
+              # ======================================================
+              # STEP 1: Получаем URL для загрузки изображения
+              # ======================================================
+            
+              UPLOAD_INIT_RESULT=$(curl -k -sS \
                 -X POST \
                 "https://platform-api2.max.ru/uploads?type=image" \
+                -H "Authorization: ${MAX_TOKEN}")
+            
+              echo "=== MAX UPLOAD INIT RESULT ==="
+              echo "${UPLOAD_INIT_RESULT}"
+            
+              UPLOAD_URL=$(echo "${UPLOAD_INIT_RESULT}" \
+                | jq -r '.url // empty')
+            
+              if [ -z "${UPLOAD_URL}" ]; then
+                echo "ERROR: MAX did not return upload URL."
+                exit 1
+              fi
+            
+              echo "MAX upload URL received."
+            
+              # ======================================================
+              # STEP 2: Загружаем изображение
+              # ======================================================
+            
+              UPLOAD_RESULT=$(curl -k -sS \
+                -X POST \
+                "${UPLOAD_URL}" \
                 -H "Authorization: ${MAX_TOKEN}" \
                 -F "data=@${IMG_PATH}")
             
-              echo "=== MAX UPLOAD RESULT ==="
+              echo "=== MAX IMAGE UPLOAD RESULT ==="
               echo "${UPLOAD_RESULT}"
-            
-              PHOTO_ID=$(echo "${UPLOAD_RESULT}" \
-                | jq -r '.photos | keys | .[0] // empty')
             
               PHOTO_TOKEN=$(echo "${UPLOAD_RESULT}" \
                 | jq -r '.photos | to_entries | .[0].value.token // empty')
             
-              if [ -z "${PHOTO_ID}" ] || [ -z "${PHOTO_TOKEN}" ]; then
-                echo "ERROR: Failed to upload screenshot to MAX."
+              # Некоторые ответы MAX могут содержать token
+              # непосредственно в корне ответа.
+              if [ -z "${PHOTO_TOKEN}" ]; then
+                PHOTO_TOKEN=$(echo "${UPLOAD_RESULT}" \
+                  | jq -r '.token // empty')
+              fi
+            
+              if [ -z "${PHOTO_TOKEN}" ]; then
+                echo "ERROR: MAX did not return image token."
                 exit 1
               fi
             
-              SEND_RESULT=$(jq -n \
-                --arg text "$(cat /tmp/max-message.txt)" \
-                --arg pid "${PHOTO_ID}" \
-                --arg token "${PHOTO_TOKEN}" \
-                '{
-                  text: $text,
-                  format: "markdown",
-                  notify: true,
-                  attachments: [
-                    {
-                      type: "image",
-                      payload: {
-                        photo_id: $pid,
-                        token: $token
+              echo "MAX image token received."
+            
+              # ======================================================
+              # STEP 3: Даём MAX время обработать изображение
+              # ======================================================
+            
+              echo "Waiting for MAX to process the image..."
+              sleep 3
+            
+              # ======================================================
+              # STEP 4: Отправляем сообщение с изображением
+              # ======================================================
+            
+              SEND_RESULT=""
+            
+              for ATTEMPT in 1 2 3 4 5; do
+                echo "Sending image to MAX (attempt ${ATTEMPT}/5)..."
+            
+                SEND_RESULT=$(jq -n \
+                  --arg text "$(cat /tmp/max-message.txt)" \
+                  --arg token "${PHOTO_TOKEN}" \
+                  '{
+                    text: $text,
+                    format: "markdown",
+                    notify: true,
+                    attachments: [
+                      {
+                        type: "image",
+                        payload: {
+                          token: $token
+                        }
                       }
-                    }
-                  ]
-                }' \
-                | curl -k -sS \
-                  -X POST \
-                  "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
-                  -H "Authorization: ${MAX_TOKEN}" \
-                  -H "Content-Type: application/json" \
-                  -d @-)
+                    ]
+                  }' \
+                  | curl -k -sS \
+                    -X POST \
+                    "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
+                    -H "Authorization: ${MAX_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -d @-)
+            
+                echo "=== MAX SEND RESULT ==="
+                echo "${SEND_RESULT}"
+            
+                if echo "${SEND_RESULT}" | jq -e '.message' >/dev/null 2>&1; then
+                  echo "MAX notification with screenshot sent successfully."
+                  break
+                fi
+            
+                ERROR_CODE=$(echo "${SEND_RESULT}" \
+                  | jq -r '.code // empty')
+            
+                if [ "${ERROR_CODE}" = "attachment.not.ready" ] && [ "${ATTEMPT}" -lt 5 ]; then
+                  echo "Image is not ready yet. Waiting 3 seconds..."
+                  sleep 3
+                else
+                  echo "ERROR: MAX notification failed."
+                  exit 1
+                fi
+              done
             
             else
               echo "No screenshot. Sending text-only notification to MAX."
@@ -234,17 +300,17 @@
                   -H "Authorization: ${MAX_TOKEN}" \
                   -H "Content-Type: application/json" \
                   -d @-)
+            
+              echo "=== MAX SEND RESULT ==="
+              echo "${SEND_RESULT}"
+            
+              if ! echo "${SEND_RESULT}" | jq -e '.message' >/dev/null 2>&1; then
+                echo "ERROR: MAX notification failed."
+                exit 1
+              fi
+            
+              echo "MAX text notification sent successfully."
             fi
-            
-            echo "=== MAX SEND RESULT ==="
-            echo "${SEND_RESULT}"
-            
-            if ! echo "${SEND_RESULT}" | jq -e '.message' >/dev/null; then
-              echo "ERROR: MAX notification failed."
-              exit 1
-            fi
-            
-            echo "MAX notification sent successfully."
 
         # ============================================================
         # TELEGRAM
@@ -278,7 +344,7 @@
                 "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
                 -F "chat_id=${TELEGRAM_CHAT_ID}" \
                 -F "photo=@${IMG_PATH}" \
-                -F "caption=🚀 Новый релиз: ${TAG}")
+                -F "caption=🚀 **Новый релиз: ${TAG}**")
             
               echo "=== TELEGRAM PHOTO RESULT ==="
               echo "${PHOTO_RESULT}"
@@ -289,7 +355,7 @@
               fi
             
               {
-                echo "📝 Что нового:"
+                echo "📝 **Что нового:**"
                 cat /tmp/changes.txt
                 echo
                 echo "🔗 Смотреть на GitHub:"
@@ -345,4 +411,4 @@
             fi
             
             echo "Telegram notification sent successfully."
-  
+
