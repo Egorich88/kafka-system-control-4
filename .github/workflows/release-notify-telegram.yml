@@ -1,0 +1,159 @@
+    # Copyright 2026 Egor Khomenko (Egorich88)
+  #
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+
+  name: Telegram Release Notifier
+
+  on:
+    workflow_run:
+      workflows:
+        - "CI/CD для Kafka System Control 4.0"
+      types:
+        - completed
+
+  permissions:
+    contents: read
+
+  jobs:
+    notify-telegram:
+      runs-on: ubuntu-latest
+
+      if: >
+        github.event.workflow_run.conclusion == 'success' &&
+        startsWith(github.event.workflow_run.head_branch, 'v')
+
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v5
+          with:
+            fetch-depth: 0
+            fetch-tags: true
+            ref: ${{ github.event.workflow_run.head_sha }}
+
+        - name: Build release message
+          env:
+            TAG: ${{ github.event.workflow_run.head_branch }}
+            REPO: ${{ github.repository }}
+          run: |
+            set -euo pipefail
+            
+            PREV_TAG=$(git tag --sort=-creatordate \
+              | grep -v "^${TAG}$" \
+              | grep '^v' \
+              | head -1 || true)
+            
+            if [ -z "${PREV_TAG}" ]; then
+              PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+            fi
+            
+            CHANGES=$(git log "${PREV_TAG}..HEAD" \
+              --pretty=format:"- %s" \
+              --no-merges || true)
+            
+            if [ -z "${CHANGES}" ]; then
+              CHANGES="- Изменения не указаны"
+            fi
+            
+            RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG}"
+            
+            {
+              echo "🚀 Новый релиз: ${TAG}"
+              echo
+              echo "📝 Что нового:"
+              echo "${CHANGES}"
+              echo
+              echo "🔗 Смотреть на GitHub: ${RELEASE_URL}"
+            } > /tmp/message.txt
+            
+            cat /tmp/message.txt
+
+        - name: Find release screenshot
+          id: screenshot
+          env:
+            TAG: ${{ github.event.workflow_run.head_branch }}
+          run: |
+            set -euo pipefail
+            
+            IMG_PATH=$(find docs/screenshots \
+              -maxdepth 1 \
+              -type f \
+              -name "${TAG}-*.png" \
+              | sort \
+              | head -1 || true)
+            
+            echo "path=${IMG_PATH}" >> "$GITHUB_OUTPUT"
+            
+            if [ -n "${IMG_PATH}" ]; then
+              echo "Screenshot found: ${IMG_PATH}"
+            else
+              echo "Screenshot not found for ${TAG}"
+            fi
+
+        - name: Send release to Telegram
+          env:
+            TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+            TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+            IMAGE_PATH: ${{ steps.screenshot.outputs.path }}
+          run: |
+            set -euo pipefail
+            
+            MESSAGE=$(cat /tmp/message.txt)
+            
+            # Экранируем текст для Telegram HTML.
+            MESSAGE=$(printf '%s' "${MESSAGE}" \
+              | sed \
+                -e 's/&/\&amp;/g' \
+                -e 's/</\&lt;/g' \
+                -e 's/>/\&gt;/g')
+            
+            if [ -n "${IMAGE_PATH}" ] && [ -f "${IMAGE_PATH}" ]; then
+              echo "Sending screenshot: ${IMAGE_PATH}"
+            
+              RESPONSE=$(curl -fsS \
+                -X POST \
+                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
+                -F "chat_id=${TELEGRAM_CHAT_ID}" \
+                -F "photo=@${IMAGE_PATH}" \
+                -F "caption=${MESSAGE}" \
+                -F "parse_mode=HTML")
+            
+            else
+              echo "Screenshot not found. Sending text only."
+            
+              RESPONSE=$(curl -fsS \
+                -X POST \
+                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                -H "Content-Type: application/json" \
+                -d "$(jq -n \
+                  --arg chat "${TELEGRAM_CHAT_ID}" \
+                  --arg text "${MESSAGE}" \
+                  '{
+                    chat_id: $chat,
+                    text: $text,
+                    parse_mode: "HTML",
+                    disable_web_page_preview: true
+                  }')")
+            
+            fi
+            
+            echo "=== TELEGRAM RESPONSE ==="
+            echo "${RESPONSE}"
+            echo "=== END ==="
+            
+            if [ "$(echo "${RESPONSE}" | jq -r '.ok // false')" != "true" ]; then
+              echo "ERROR: Telegram notification failed."
+              exit 1
+            fi
+            
+            echo "Telegram release notification sent successfully."
+
