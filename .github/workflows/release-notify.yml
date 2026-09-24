@@ -22,7 +22,7 @@ on:
       - completed
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   notify:
@@ -64,22 +64,34 @@ jobs:
           echo "Tag: ${TAG}"
           echo "URL: ${RELEASE_URL}"
 
-          CHANGES=$(gh release view "${TAG}" \
-            --repo "${REPO}" \
-            --json body \
-            --jq '.body // ""')
+          PREVIOUS_TAG=$(git tag --sort=-version:refname \
+            | grep '^v' \
+            | grep -vx "${TAG}" \
+            | head -1 || true)
 
-          if [ -z "${CHANGES}" ]; then
-            CHANGES="Изменения не указаны."
+          echo "Previous tag: ${PREVIOUS_TAG:-none}"
+
+          if [ -n "${PREVIOUS_TAG}" ]; then
+            COMMITS=$(git log \
+              --pretty=format:'- %s' \
+              "${PREVIOUS_TAG}..${TAG}")
+          else
+            COMMITS=$(git log \
+              --pretty=format:'- %s' \
+              "${TAG}")
+          fi
+
+          if [ -z "${COMMITS}" ]; then
+            COMMITS="- Изменения не указаны."
           fi
 
           {
-            echo "🚀 Новый релиз: ${TAG}"
+            echo "🚀 **Новый релиз: ${TAG}**"
             echo
-            echo "📝 Что нового:"
-            echo "${CHANGES}"
+            echo "📝 **Что нового:**"
+            echo "${COMMITS}"
             echo
-            echo "🔗 Смотреть на GitHub: ${RELEASE_URL}"
+            echo "🔗 [Смотреть на GitHub](${RELEASE_URL})"
           } > /tmp/message.txt
 
           echo "=== Release message ==="
@@ -99,11 +111,11 @@ jobs:
             | sort \
             | head -1 || true)
 
-          if [ -n "${IMG_PATH}" ]; then
+          if [ -n "${IMG_PATH}" ] && [ -f "${IMG_PATH}" ]; then
             echo "IMAGE_PATH=${IMG_PATH}" >> "$GITHUB_OUTPUT"
             echo "Screenshot found: ${IMG_PATH}"
           else
-            echo "No screenshot found for ${TAG}. Text-only notification will be sent."
+            echo "No screenshot found for ${TAG}."
           fi
 
       # ============================================================
@@ -130,17 +142,17 @@ jobs:
             exit 1
           fi
 
-          CHANGES=$(sed -n '/^📝 Что нового:$/,/^🔗 Смотреть на GitHub:/{ 
-            /^📝 Что нового:$/d
-            /^🔗 Смотреть на GitHub:/d
+          CHANGES=$(sed -n '/^📝 \*\*Что нового:\*\*$/,/^🔗 \*\*\[Смотреть на GitHub\]/{ 
+            /^📝 \*\*Что нового:\*\*$/d
+            /^🔗 \*\*\[Смотреть на GitHub\]/d
             p
           }' /tmp/message.txt)
 
           if [ -z "${CHANGES}" ]; then
-            CHANGES="Изменения не указаны."
+            CHANGES="- Изменения не указаны."
           fi
 
-          printf '🚀 **Новый релиз: %s**\n\n📝 **Что нового:**\n%s\n\n🔗 [Смотреть на GitHub](%s)\n' \
+          printf '**Новый релиз: %s**\n\n📝 **Что нового:**\n%s\n\n🔗 [Смотреть на GitHub](%s)\n' \
             "${TAG}" \
             "${CHANGES}" \
             "${RELEASE_URL}" \
@@ -257,7 +269,7 @@ jobs:
               "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
               -F "chat_id=${TELEGRAM_CHAT_ID}" \
               -F "photo=@${IMG_PATH}" \
-              -F "caption=🚀 Новый релиз: ${TAG}")
+              -F "caption=Новый релиз: ${TAG}")
 
             echo "=== TELEGRAM PHOTO RESULT ==="
             echo "${PHOTO_RESULT}"
@@ -267,18 +279,15 @@ jobs:
               exit 1
             fi
 
-            TELEGRAM_MESSAGE=$(cat /tmp/message.txt)
-
             {
               echo "📝 Описание релиза: ${TAG}"
               echo
               echo "Что нового:"
-              echo "${TELEGRAM_MESSAGE}" \
-                | sed -n '/^📝 Что нового:/,/^🔗 Смотреть на GitHub:/{
-                    /^📝 Что нового:/d
-                    /^🔗 Смотреть на GitHub:/d
-                    p
-                  }'
+              sed -n '/^📝 \*\*Что нового:\*\*$/,/^🔗 \*\*\[Смотреть на GitHub\]/{ 
+                /^📝 \*\*Что нового:\*\*$/d
+                /^🔗 \*\*\[Смотреть на GitHub\]/d
+                p
+              }' /tmp/message.txt
               echo
               echo "🔗 Смотреть на GitHub: ${RELEASE_URL}"
             } > /tmp/telegram-message.txt
@@ -303,6 +312,10 @@ jobs:
           else
             echo "No screenshot. Sending single Telegram message."
 
+            TELEGRAM_MESSAGE=$(sed \
+              -e 's/^\*\*Новый релиз: /**Новый релиз: /' \
+              /tmp/message.txt)
+
             MESSAGE_RESULT=$(curl -sS \
               -X POST \
               "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
@@ -319,39 +332,3 @@ jobs:
           fi
 
           echo "Telegram notification sent successfully."
-
-      # ============================================================
-      # CLEANUP
-      # ============================================================
-
-      - name: Remove release screenshots
-        run: |
-          set -e
-
-          if [ -d "docs/screenshots" ]; then
-            find docs/screenshots \
-              -maxdepth 1 \
-              -type f \
-              -name "*.png" \
-              -print \
-              -delete
-          fi
-
-      - name: Commit screenshot cleanup to main
-        env:
-          TAG: ${{ steps.release.outputs.TAG }}
-        run: |
-          set -e
-
-          if git diff --quiet -- docs/screenshots; then
-            echo "No screenshot cleanup required."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add docs/screenshots
-          git commit -m "chore: удалить скриншоты релиза ${TAG}"
-
-          git push origin HEAD:main
