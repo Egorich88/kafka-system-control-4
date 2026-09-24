@@ -104,36 +104,32 @@
           run: |
             set -e
             
-            IMG_PATH=$(find docs/screenshots \
-              -maxdepth 1 \
-              -type f \
-              -name "${TAG}-*.png" \
-              | sort \
-              | head -1 || true)
+            SCREENSHOT_PATH="docs/screenshots/${TAG}.png"
             
-            if [ -n "${IMG_PATH}" ] && [ -f "${IMG_PATH}" ]; then
-              cp "${IMG_PATH}" /tmp/release-screenshot.png
+            echo "Looking for screenshot: ${SCREENSHOT_PATH}"
+            
+            # Сначала ищем скриншот в состоянии репозитория,
+            # из которого был собран релиз.
+            if [ -f "${SCREENSHOT_PATH}" ]; then
+              cp "${SCREENSHOT_PATH}" /tmp/release-screenshot.png
             
               echo "IMAGE_PATH=/tmp/release-screenshot.png" >> "$GITHUB_OUTPUT"
-              echo "Screenshot found in release checkout: ${IMG_PATH}"
+              echo "Screenshot found in release checkout: ${SCREENSHOT_PATH}"
               exit 0
             fi
             
             echo "Screenshot not found in release checkout."
-            echo "Checking main branch for ${TAG}-*.png..."
+            echo "Checking main branch for ${SCREENSHOT_PATH}..."
             
+            # Если скриншот был добавлен после создания тега,
+            # ищем его в актуальном main.
             git fetch origin main --depth=1
             
-            MAIN_IMG=$(git ls-tree -r --name-only origin/main -- \
-              "docs/screenshots/${TAG}-*.png" \
-              | sort \
-              | head -1 || true)
-            
-            if [ -n "${MAIN_IMG}" ]; then
-              git show "origin/main:${MAIN_IMG}" > /tmp/release-screenshot.png
+            if git cat-file -e "origin/main:${SCREENSHOT_PATH}" 2>/dev/null; then
+              git show "origin/main:${SCREENSHOT_PATH}" > /tmp/release-screenshot.png
             
               echo "IMAGE_PATH=/tmp/release-screenshot.png" >> "$GITHUB_OUTPUT"
-              echo "Screenshot found in main: ${MAIN_IMG}"
+              echo "Screenshot found in main: ${SCREENSHOT_PATH}"
             else
               echo "No screenshot found for ${TAG}."
             fi
