@@ -1,4 +1,4 @@
-    # Copyright 2026 Egor Khomenko (Egorich88)
+  # Copyright 2026 Egor Khomenko (Egorich88)
   #
   # Licensed under the Apache License, Version 2.0 (the "License");
   # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 
       steps:
         - name: Checkout
-          uses: actions/checkout@v5
+          uses: actions/checkout@v7.0.1
           with:
             fetch-depth: 0
             fetch-tags: true
@@ -104,56 +104,74 @@
             TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
             TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
             IMAGE_PATH: ${{ steps.screenshot.outputs.path }}
+            TAG: ${{ github.event.workflow_run.head_branch }}
           run: |
             set -euo pipefail
             
             MESSAGE=$(cat /tmp/message.txt)
             
-            # Экранируем текст для Telegram HTML.
-            MESSAGE=$(printf '%s' "${MESSAGE}" \
-              | sed \
-                -e 's/&/\&amp;/g' \
-                -e 's/</\&lt;/g' \
-                -e 's/>/\&gt;/g')
+            if [ -z "${TELEGRAM_BOT_TOKEN}" ]; then
+              echo "ERROR: TELEGRAM_BOT_TOKEN is empty."
+              exit 1
+            fi
             
+            if [ -z "${TELEGRAM_CHAT_ID}" ]; then
+              echo "ERROR: TELEGRAM_CHAT_ID is empty."
+              exit 1
+            fi
+            
+            # Если скриншот есть — сначала отправляем его
+            # с короткой подписью. Telegram ограничивает caption
+            # для sendPhoto 1024 символами.
             if [ -n "${IMAGE_PATH}" ] && [ -f "${IMAGE_PATH}" ]; then
               echo "Sending screenshot: ${IMAGE_PATH}"
             
-              RESPONSE=$(curl -fsS \
+              PHOTO_RESPONSE=$(curl -sS \
                 -X POST \
                 "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
                 -F "chat_id=${TELEGRAM_CHAT_ID}" \
                 -F "photo=@${IMAGE_PATH}" \
-                -F "caption=${MESSAGE}" \
-                -F "parse_mode=HTML")
+                -F "caption=🚀 Новый релиз: ${TAG}")
             
+              echo "=== TELEGRAM PHOTO RESPONSE ==="
+              echo "${PHOTO_RESPONSE}" | jq .
+              echo "=== END PHOTO RESPONSE ==="
+            
+              if [ "$(echo "${PHOTO_RESPONSE}" | jq -r '.ok // false')" != "true" ]; then
+                echo "ERROR: Telegram screenshot notification failed."
+                exit 1
+              fi
+            
+              echo "Screenshot sent successfully."
             else
-              echo "Screenshot not found. Sending text only."
-            
-              RESPONSE=$(curl -fsS \
-                -X POST \
-                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-                -H "Content-Type: application/json" \
-                -d "$(jq -n \
-                  --arg chat "${TELEGRAM_CHAT_ID}" \
-                  --arg text "${MESSAGE}" \
-                  '{
-                    chat_id: $chat,
-                    text: $text,
-                    parse_mode: "HTML",
-                    disable_web_page_preview: true
-                  }')")
-            
+              echo "Screenshot not found for ${TAG}."
             fi
             
-            echo "=== TELEGRAM RESPONSE ==="
-            echo "${RESPONSE}"
-            echo "=== END ==="
+            # Полное сообщение отправляем отдельным сообщением,
+            # чтобы changelog не попадал в ограничение caption.
+            echo "Sending release message..."
             
-            if [ "$(echo "${RESPONSE}" | jq -r '.ok // false')" != "true" ]; then
-              echo "ERROR: Telegram notification failed."
+            MESSAGE_RESPONSE=$(curl -sS \
+              -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -n \
+                --arg chat "${TELEGRAM_CHAT_ID}" \
+                --arg text "${MESSAGE}" \
+                '{
+                  chat_id: $chat,
+                  text: $text,
+                  disable_web_page_preview: true
+                }')")
+            
+            echo "=== TELEGRAM MESSAGE RESPONSE ==="
+            echo "${MESSAGE_RESPONSE}" | jq .
+            echo "=== END MESSAGE RESPONSE ==="
+            
+            if [ "$(echo "${MESSAGE_RESPONSE}" | jq -r '.ok // false')" != "true" ]; then
+              echo "ERROR: Telegram release message failed."
               exit 1
             fi
             
             echo "Telegram release notification sent successfully."
-
+  
