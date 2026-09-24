@@ -1,0 +1,392 @@
+  # Copyright 2026 Egor Khomenko (Egorich88)
+  #
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+
+  name: Release Notifier
+
+  on:
+    workflow_run:
+      workflows:
+        - "CI/CD для Kafka System Control 4.0"
+      types:
+        - completed
+
+  permissions:
+    contents: write
+
+  jobs:
+    notify:
+      runs-on: ubuntu-latest
+
+      if: >
+        github.event.workflow_run.conclusion == 'success' &&
+        startsWith(github.event.workflow_run.head_branch, 'v')
+
+      steps:
+        - name: Checkout release
+          uses: actions/checkout@v7.0.1
+          with:
+            fetch-depth: 0
+            fetch-tags: true
+            ref: ${{ github.event.workflow_run.head_sha }}
+
+        - name: Install Russian Trusted CA certificates
+          continue-on-error: true
+          run: |
+            sudo wget -q --timeout=10 --tries=2 \
+              https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer \
+              -O /usr/local/share/ca-certificates/russian_trusted_root_ca.crt || true
+            
+            sudo wget -q --timeout=10 --tries=2 \
+              https://gu-st.ru/content/Other/doc/russian_trusted_sub_ca.cer \
+              -O /usr/local/share/ca-certificates/russian_trusted_sub_ca.crt || true
+            
+            sudo update-ca-certificates || true
+
+        - name: Build release message
+          env:
+            TAG: ${{ github.event.workflow_run.head_branch }}
+            REPO: ${{ github.repository }}
+          run: |
+            set -euo pipefail
+            
+            PREV_TAG=$(git tag --sort=-creatordate \
+              | grep -v "^${TAG}$" \
+              | grep '^v' \
+              | head -1 || true)
+            
+            if [ -z "${PREV_TAG}" ]; then
+              PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+            fi
+            
+            CHANGES=$(git log "${PREV_TAG}..HEAD" \
+              --pretty=format:"- %s" \
+              --no-merges || true)
+            
+            if [ -z "${CHANGES}" ]; then
+              CHANGES="- Изменения не указаны"
+            fi
+            
+            RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG}"
+            
+            {
+              echo "🚀 Новый релиз: ${TAG}"
+              echo
+              echo "📝 Описание релиза: ${TAG}"
+              echo
+              echo "Что нового:"
+              echo "${CHANGES}"
+              echo
+              echo "🔗 Смотреть на GitHub: ${RELEASE_URL}"
+            } > /tmp/message.txt
+            
+            echo "=== RELEASE MESSAGE ==="
+            cat /tmp/message.txt
+            echo "=== END RELEASE MESSAGE ==="
+
+        - name: Find release screenshot
+          id: screenshot
+          env:
+            TAG: ${{ github.event.workflow_run.head_branch }}
+          run: |
+            set -euo pipefail
+            
+            IMG_PATH=$(find docs/screenshots \
+              -maxdepth 1 \
+              -type f \
+              -name "${TAG}-*.png" \
+              | sort \
+              | head -1 || true)
+            
+            echo "path=${IMG_PATH}" >> "$GITHUB_OUTPUT"
+            
+            if [ -n "${IMG_PATH}" ]; then
+              echo "Screenshot found: ${IMG_PATH}"
+            else
+              echo "Screenshot not found for ${TAG}"
+            fi
+
+        - name: Send release to MAX
+          env:
+            MAX_TOKEN: ${{ secrets.MAX_BOT_TOKEN }}
+            MAX_CHAT_ID: ${{ secrets.MAX_CHAT_ID }}
+            TAG: ${{ github.event.workflow_run.head_branch }}
+            IMAGE_PATH: ${{ steps.screenshot.outputs.path }}
+          run: |
+            set -euo pipefail
+            
+            MESSAGE=$(cat /tmp/message.txt)
+            
+            if [ -z "${MAX_TOKEN}" ]; then
+              echo "ERROR: MAX_BOT_TOKEN is empty."
+              exit 1
+            fi
+            
+            if [ -z "${MAX_CHAT_ID}" ]; then
+              echo "ERROR: MAX_CHAT_ID is empty."
+              exit 1
+            fi
+            
+            if [ -n "${IMAGE_PATH}" ] && [ -f "${IMAGE_PATH}" ]; then
+              echo "=== FOUND SCREENSHOT: ${IMAGE_PATH} ==="
+            
+              # Шаг 1: Получаем URL для загрузки картинки.
+              UPLOAD_INFO=$(curl -sS \
+                -X POST \
+                "https://platform-api2.max.ru/uploads?type=image" \
+                -H "Authorization: ${MAX_TOKEN}")
+            
+              echo "=== UPLOAD INFO ==="
+              echo "${UPLOAD_INFO}" | jq .
+              echo "=== END UPLOAD INFO ==="
+            
+              UPLOAD_URL=$(echo "${UPLOAD_INFO}" | jq -r '.url // empty')
+            
+              if [ -z "${UPLOAD_URL}" ]; then
+                echo "ERROR: MAX upload URL was not returned."
+                exit 1
+              fi
+            
+              # Шаг 2: Загружаем файл.
+              UPLOAD_RESULT=$(curl -sS \
+                -X POST \
+                "${UPLOAD_URL}" \
+                -H "Content-Type: multipart/form-data" \
+                -F "data=@${IMAGE_PATH}")
+            
+              echo "=== UPLOAD RESULT ==="
+              echo "${UPLOAD_RESULT}" | jq .
+              echo "=== END UPLOAD RESULT ==="
+            
+              # token и photo_id лежат внутри .photos.<photo_id>.token.
+              PHOTO_ID=$(echo "${UPLOAD_RESULT}" \
+                | jq -r '.photos | keys | .[0] // empty')
+            
+              PHOTO_TOKEN=$(echo "${UPLOAD_RESULT}" \
+                | jq -r '.photos | to_entries | .[0].value.token // empty')
+            
+              echo "=== PHOTO_ID: ${PHOTO_ID} ==="
+              echo "=== PHOTO_TOKEN: ${PHOTO_TOKEN} ==="
+            
+              if [ -z "${PHOTO_TOKEN}" ] || [ -z "${PHOTO_ID}" ]; then
+                echo "ERROR: MAX photo upload data is incomplete."
+                exit 1
+              fi
+            
+              # Шаг 3: Отправляем сообщение с картинкой.
+              SEND_RESULT=$(curl -sS \
+                -X POST \
+                "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
+                -H "Authorization: ${MAX_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d "$(jq -n \
+                  --arg text "${MESSAGE}" \
+                  --arg token "${PHOTO_TOKEN}" \
+                  --arg pid "${PHOTO_ID}" \
+                  '{
+                    text: $text,
+                    format: "markdown",
+                    notify: true,
+                    attachments: [
+                      {
+                        type: "image",
+                        payload: {
+                          photo_id: $pid,
+                          token: $token
+                        }
+                      }
+                    ]
+                  }')")
+            
+              echo "=== MAX SEND RESULT ==="
+              echo "${SEND_RESULT}" | jq .
+              echo "=== END MAX SEND RESULT ==="
+            
+              if [ "$(echo "${SEND_RESULT}" | jq -r '.ok // false')" != "true" ]; then
+                echo "ERROR: MAX notification failed."
+                exit 1
+              fi
+            
+              echo "MAX release notification with screenshot sent successfully."
+            
+            else
+              echo "=== NO IMAGE, SENDING TEXT ONLY ==="
+            
+              SEND_RESULT=$(curl -sS \
+                -X POST \
+                "https://platform-api2.max.ru/messages?chat_id=${MAX_CHAT_ID}" \
+                -H "Authorization: ${MAX_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d "$(jq -n \
+                  --arg text "${MESSAGE}" \
+                  '{
+                    text: $text,
+                    format: "markdown",
+                    notify: true
+                  }')")
+            
+              echo "=== MAX SEND RESULT ==="
+              echo "${SEND_RESULT}" | jq .
+              echo "=== END MAX SEND RESULT ==="
+            
+              if [ "$(echo "${SEND_RESULT}" | jq -r '.ok // false')" != "true" ]; then
+                echo "ERROR: MAX notification failed."
+                exit 1
+              fi
+            
+              echo "MAX release notification sent successfully."
+            fi
+
+        - name: Send release to Telegram
+          env:
+            TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+            TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+            IMAGE_PATH: ${{ steps.screenshot.outputs.path }}
+            TAG: ${{ github.event.workflow_run.head_branch }}
+          run: |
+            set -euo pipefail
+            
+            MESSAGE=$(cat /tmp/message.txt)
+            
+            if [ -z "${TELEGRAM_BOT_TOKEN}" ]; then
+              echo "ERROR: TELEGRAM_BOT_TOKEN is empty."
+              exit 1
+            fi
+            
+            if [ -z "${TELEGRAM_CHAT_ID}" ]; then
+              echo "ERROR: TELEGRAM_CHAT_ID is empty."
+              exit 1
+            fi
+            
+            if [ -n "${IMAGE_PATH}" ] && [ -f "${IMAGE_PATH}" ]; then
+              echo "Sending screenshot to Telegram: ${IMAGE_PATH}"
+            
+              # При наличии скриншота Telegram получает короткую подпись.
+              PHOTO_RESPONSE=$(curl -sS \
+                -X POST \
+                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto" \
+                -F "chat_id=${TELEGRAM_CHAT_ID}" \
+                -F "photo=@${IMAGE_PATH}" \
+                -F "caption=🚀 Новый релиз: ${TAG}")
+            
+              echo "=== TELEGRAM PHOTO RESPONSE ==="
+              echo "${PHOTO_RESPONSE}" | jq .
+              echo "=== END PHOTO RESPONSE ==="
+            
+              if [ "$(echo "${PHOTO_RESPONSE}" | jq -r '.ok // false')" != "true" ]; then
+                echo "ERROR: Telegram screenshot notification failed."
+                exit 1
+              fi
+            
+              echo "Telegram screenshot sent successfully."
+            
+              # При наличии скриншота не дублируем заголовок
+              # «🚀 Новый релиз: v*» в следующем сообщении.
+              {
+                echo "📝 Описание релиза: ${TAG}"
+                echo
+                echo "Что нового:"
+                sed -n '/^📝 Описание релиза:/,/^🔗 Смотреть на GitHub:/{
+                  /^📝 Описание релиза:/d
+                  /^🔗 Смотреть на GitHub:/d
+                  p
+                }' /tmp/message.txt
+                echo
+                echo "🔗 Смотреть на GitHub: https://github.com/${{ github.repository }}/releases/tag/${TAG}"
+              } > /tmp/telegram_message.txt
+            
+            else
+              echo "Screenshot not found for ${TAG}. Sending full release message."
+            
+              # Если скриншота нет — сохраняем прежний формат:
+              # 🚀 Новый релиз: v*
+              cp /tmp/message.txt /tmp/telegram_message.txt
+            fi
+            
+            TELEGRAM_MESSAGE=$(cat /tmp/telegram_message.txt)
+            
+            echo "=== TELEGRAM MESSAGE ==="
+            cat /tmp/telegram_message.txt
+            echo "=== END TELEGRAM MESSAGE ==="
+            
+            MESSAGE_RESPONSE=$(curl -sS \
+              -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -n \
+                --arg chat "${TELEGRAM_CHAT_ID}" \
+                --arg text "${TELEGRAM_MESSAGE}" \
+                '{
+                  chat_id: $chat,
+                  text: $text,
+                  disable_web_page_preview: true
+                }')")
+            
+            echo "=== TELEGRAM MESSAGE RESPONSE ==="
+            echo "${MESSAGE_RESPONSE}" | jq .
+            echo "=== END TELEGRAM MESSAGE RESPONSE ==="
+            
+            if [ "$(echo "${MESSAGE_RESPONSE}" | jq -r '.ok // false')" != "true" ]; then
+              echo "ERROR: Telegram release message failed."
+              exit 1
+            fi
+            
+            echo "Telegram release notification sent successfully."
+
+        - name: Remove release screenshots
+          env:
+            TAG: ${{ github.event.workflow_run.head_branch }}
+          run: |
+            set -euo pipefail
+            
+            echo "Both notifications were sent successfully."
+            echo "Removing screenshots from docs/screenshots..."
+            
+            find docs/screenshots \
+              -maxdepth 1 \
+              -type f \
+              -name "*.png" \
+              -print \
+              -delete
+            
+            echo "Remaining screenshots:"
+            find docs/screenshots \
+              -maxdepth 1 \
+              -type f \
+              -print || true
+
+        - name: Commit and push screenshot cleanup
+          env:
+            TAG: ${{ github.event.workflow_run.head_branch }}
+          run: |
+            set -euo pipefail
+            
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            
+            git fetch origin main
+            git checkout main
+            git pull --ff-only origin main
+            
+            git add docs/screenshots
+            
+            if git diff --cached --quiet; then
+              echo "No screenshots to remove."
+              exit 0
+            fi
+            
+            git commit -m "Удалены скриншоты после релиза ${TAG}"
+            git push origin main
+            
+            echo "Screenshot cleanup committed and pushed to main."
+
