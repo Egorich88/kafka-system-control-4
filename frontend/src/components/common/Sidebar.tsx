@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Боковое меню (Sidebar) приложения Kafka System Control.
+ * @fileoverview Боковое меню (Sidebar) приложения ODYSSEY.
  * Содержит логотип, информацию о версии, выбор/добавление кластера,
  * основную навигацию по разделам, настройки и футер с лицензией.
  */
@@ -176,7 +176,7 @@ export default function Sidebar({ onAddCluster, onEditCluster, clusterUnavailabl
 
             {/* Логотип */}
             {/* ==========================================================
-                Брендинг Kafka System Control
+                Брендинг ODYSSEY
 
                 Слева:
                 фирменный графический знак.
@@ -184,7 +184,7 @@ export default function Sidebar({ onAddCluster, onEditCluster, clusterUnavailabl
                 Справа:
                 короткий wordmark KSC.
 
-                Полное название Kafka System Control
+                Полное название ODYSSEY
                 в Sidebar не используется — здесь нужен
                 компактный фирменный идентификатор.
                ========================================================== */}
@@ -195,7 +195,7 @@ export default function Sidebar({ onAddCluster, onEditCluster, clusterUnavailabl
               onClick={() => collapsed && setCollapsed(false)}
               onMouseEnter={() => setLogoHovered(true)}
               onMouseLeave={() => setLogoHovered(false)}
-              aria-label={collapsed ? t('sidebar.expand') : 'Kafka System Control'}
+              aria-label={collapsed ? t('sidebar.expand') : 'ODYSSEY'}
               data-tooltip-id={collapsed ? 'sidebar-tooltip' : undefined}
               data-tooltip-content={collapsed ? t('sidebar.expand') : undefined}
             >
@@ -204,14 +204,14 @@ export default function Sidebar({ onAddCluster, onEditCluster, clusterUnavailabl
               ) : (
                 <img
                   src="/logo.svg"
-                  alt="Kafka System Control"
+                  alt="ODYSSEY"
                   className="sidebar-logo-image"
                 />
               )}
 
               {!collapsed && (
                 <span className="sidebar-brand-name">
-                  KSC
+                  ODYSSEY
                 </span>
               )}
             </button>

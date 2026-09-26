@@ -125,10 +125,10 @@ export default function Overview(): JSX.Element {
       <div className="welcome-page">
         <div className="welcome-card">
           <div className="welcome-logo-wrap">
-            <img src="/logo.svg" alt="Kafka System Control" className="welcome-logo" />
+            <img src="/logo.svg" alt="ODYSSEY" className="welcome-logo" />
           </div>
 
-          <p className="welcome-subtitle">KAFKA SYSTEM CONTROL</p>
+          <p className="welcome-subtitle">ODYSSEY</p>
 
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiInfo /></div>

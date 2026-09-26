@@ -22,8 +22,9 @@
  * Сообщение, Источник.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
+import { FiCheck, FiChevronDown } from 'react-icons/fi';
 import '../styles/events-panel.css';
 import PanelInfo from '../../../components/common/PanelInfo';
 import PanelFullscreenButton from './PanelFullscreenButton';
@@ -34,6 +35,8 @@ export default function EventsPanel({ refreshKey }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [levelFilter, setLevelFilter] = useState<'ALL' | 'INFO' | 'WARN' | 'ERROR'>('ALL');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement | null>(null);
 
   const loadEvents = async () => {
     if (!currentCluster) return;
@@ -73,6 +76,15 @@ export default function EventsPanel({ refreshKey }) {
     }
   };
 
+  useEffect(() => {
+    if (!filterOpen) return;
+    const close = (event: MouseEvent) => {
+      if (!filterRef.current?.contains(event.target as Node)) setFilterOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [filterOpen]);
+
   const filteredEvents = useMemo(
     () => levelFilter === 'ALL' ? events : events.filter((event) => event.level === levelFilter),
     [events, levelFilter]
@@ -89,15 +101,39 @@ export default function EventsPanel({ refreshKey }) {
           <span>Последние события</span>
         </div>
         <div className="events-panel-actions">
-          <label className="events-filter">
+          <div className="events-filter" ref={filterRef}>
             <span>Фильтр</span>
-            <select value={levelFilter} onChange={(event) => setLevelFilter(event.target.value as typeof levelFilter)}>
-              <option value="ALL">Все</option>
-              <option value="INFO">INFO</option>
-              <option value="WARN">WARN</option>
-              <option value="ERROR">ERROR</option>
-            </select>
-          </label>
+            <button
+              type="button"
+              className={`events-filter-button ${filterOpen ? 'is-open' : ''}`}
+              onClick={() => setFilterOpen((open) => !open)}
+              aria-haspopup="listbox"
+              aria-expanded={filterOpen}
+            >
+              <span>{levelFilter === 'ALL' ? 'Все' : levelFilter}</span>
+              <FiChevronDown />
+            </button>
+            {filterOpen && (
+              <div className="events-filter-menu" role="listbox" aria-label="Фильтр событий">
+                {(['ALL', 'INFO', 'WARN', 'ERROR'] as const).map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    role="option"
+                    aria-selected={levelFilter === level}
+                    className={levelFilter === level ? 'selected' : ''}
+                    onClick={() => {
+                      setLevelFilter(level);
+                      setFilterOpen(false);
+                    }}
+                  >
+                    <span>{level === 'ALL' ? 'Все' : level}</span>
+                    {levelFilter === level && <FiCheck />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <PanelFullscreenButton />
         </div>
       </div>

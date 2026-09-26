@@ -180,8 +180,8 @@ const Layout = () => {
   // =========================================================================
 
   const configuredPage = PAGE_CONFIG[location.pathname] ?? {
-    title: 'Kafka System Control',
-    description: 'Интерфейс управления Apache Kafka',
+    title: 'ODYSSEY',
+    description: 'Платформа мониторинга и управления Apache Kafka',
     mode: 'default' as const,
   };
 
@@ -191,7 +191,7 @@ const Layout = () => {
   const currentPage = isWelcome
     ? {
         title: 'Добро пожаловать',
-        description: 'Добавьте Kafka-кластер, чтобы начать мониторинг и управление.',
+        description: 'Добро пожаловать в ODYSSEY.',
         mode: 'default' as const,
       }
     : configuredPage;

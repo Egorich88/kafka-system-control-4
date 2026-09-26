@@ -16,9 +16,12 @@
 
 /**
  * @file certificates.go
- * Сводная информация о JKS/PKCS12 хранилищах сертификатов Kafka.
+ * Сводная информация о сертификатах и хранилищах Kafka.
  *
- * Поддерживаются:
+ * Поддерживаются основные форматы, используемые в TLS-конфигурациях Kafka:
+ * - JKS keystore/truststore;
+ * - PKCS#12 (.p12/.pfx);
+ * - X.509 в PEM/CRT/CER;
  * - обычная Linux-установка Kafka;
  * - Docker-контейнер Kafka при наличии доступа к Docker socket;
  * - пути из переменных окружения KAFKA_SSL_*_LOCATION.
@@ -44,6 +47,7 @@ import (
 type CertificateInfo struct {
 	Name      string `json:"name"`
 	Path      string `json:"path"`
+	Type      string `json:"type"`
 	ExpiresAt string `json:"expiresAt"`
 	DaysLeft  int    `json:"daysLeft"`
 }
@@ -105,7 +109,7 @@ func getCertificatesHandler(w http.ResponseWriter, r *http.Request) {
 		Available:    len(result) > 0,
 	}
 	if len(result) == 0 {
-		response.Message = "JKS/PKCS12 сертификаты не обнаружены"
+		response.Message = "JKS/PKCS12/X.509 сертификаты не обнаружены"
 	}
 
 	_ = json.NewEncoder(w).Encode(response)
@@ -142,7 +146,7 @@ func findLocalKeystores() []string {
 				return nil
 			}
 			ext := strings.ToLower(filepath.Ext(path))
-			if ext == ".jks" || ext == ".p12" || ext == ".pfx" {
+			if ext == ".jks" || ext == ".p12" || ext == ".pfx" || ext == ".pem" || ext == ".crt" || ext == ".cer" {
 				add(path)
 			}
 			return nil
@@ -191,7 +195,7 @@ func findDockerKeystores(container string) []string {
 		return nil
 	}
 
-	command := `find /etc/kafka /opt/kafka/config /var/lib/kafka /opt/bitnami/kafka/config -type f \( -name "*.jks" -o -name "*.p12" -o -name "*.pfx" \) 2>/dev/null | head -100`
+	command := `find /etc/kafka /opt/kafka/config /var/lib/kafka /opt/bitnami/kafka/config -type f \( -name "*.jks" -o -name "*.p12" -o -name "*.pfx" -o -name "*.pem" -o -name "*.crt" -o -name "*.cer" \) 2>/dev/null | head -100`
 	output, err := exec.Command("docker", "exec", container, "sh", "-c", command).Output()
 	if err != nil {
 		return nil
@@ -207,6 +211,40 @@ func findDockerKeystores(container string) []string {
 }
 
 func readKeystoreCertificate(path, container string) (CertificateInfo, bool) {
+	ext := strings.ToLower(filepath.Ext(path))
+
+	// PEM/CRT/CER — обычный X.509 сертификат. Для него не требуется пароль.
+	if ext == ".pem" || ext == ".crt" || ext == ".cer" {
+		var output []byte
+		var err error
+		if container != "" {
+			output, err = exec.Command("docker", "exec", container, "openssl", "x509", "-in", path, "-noout", "-enddate").CombinedOutput()
+		} else {
+			output, err = exec.Command("openssl", "x509", "-in", path, "-noout", "-enddate").CombinedOutput()
+		}
+		if err != nil {
+			return CertificateInfo{}, false
+		}
+
+		line := strings.TrimSpace(string(output))
+		if !strings.HasPrefix(line, "notAfter=") {
+			return CertificateInfo{}, false
+		}
+		raw := strings.TrimSpace(strings.TrimPrefix(line, "notAfter="))
+		expires, err := time.Parse("Jan 2 15:04:05 2006 MST", raw)
+		if err != nil {
+			return CertificateInfo{}, false
+		}
+
+		return CertificateInfo{
+			Name:      filepath.Base(path),
+			Path:      path,
+			Type:      "X.509 / PEM",
+			ExpiresAt: expires.Format(time.RFC3339),
+			DaysLeft:  int(time.Until(expires).Hours() / 24),
+		}, true
+	}
+
 	password := os.Getenv("KAFKA_KEYSTORE_PASSWORD")
 	if password == "" {
 		password = "changeit"
@@ -235,7 +273,6 @@ func readKeystoreCertificate(path, container string) (CertificateInfo, bool) {
 		return CertificateInfo{}, false
 	}
 
-	raw := strings.TrimSpace(match[1])
 	layouts := []string{
 		"Mon Jan 02 15:04:05 MST 2006",
 		"Mon Jan 02 15:04:05 UTC 2006",
@@ -244,7 +281,7 @@ func readKeystoreCertificate(path, container string) (CertificateInfo, bool) {
 
 	var expires time.Time
 	for _, layout := range layouts {
-		if parsed, parseErr := time.Parse(layout, raw); parseErr == nil {
+		if parsed, parseErr := time.Parse(layout, strings.TrimSpace(match[1])); parseErr == nil {
 			expires = parsed
 			break
 		}
@@ -253,9 +290,19 @@ func readKeystoreCertificate(path, container string) (CertificateInfo, bool) {
 		return CertificateInfo{}, false
 	}
 
+	typeName := "JKS Keystore"
+	if ext == ".p12" || ext == ".pfx" {
+		typeName = "PKCS#12"
+	}
+	lowerName := strings.ToLower(filepath.Base(path))
+	if strings.Contains(lowerName, "truststore") {
+		typeName = "JKS Truststore"
+	}
+
 	return CertificateInfo{
 		Name:      filepath.Base(path),
 		Path:      path,
+		Type:      typeName,
 		ExpiresAt: expires.Format(time.RFC3339),
 		DaysLeft:  int(time.Until(expires).Hours() / 24),
 	}, true

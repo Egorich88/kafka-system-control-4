@@ -16,6 +16,7 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FiShield } from 'react-icons/fi';
 import PanelInfo from '../../../components/common/PanelInfo';
 import PanelFullscreenButton from './PanelFullscreenButton';
 import { useCluster } from '../../../contexts/ClusterContext';
@@ -25,6 +26,7 @@ interface Certificate {
   path: string;
   expiresAt: string;
   daysLeft: number;
+  type?: string;
 }
 
 interface ResponseData {
@@ -36,9 +38,14 @@ interface ResponseData {
 }
 
 const DEMO_CERTIFICATES: Certificate[] = [
-  { name: 'kafka-broker.crt', path: '/etc/kafka/tls/', expiresAt: '2027-03-25', daysLeft: 184 },
-  { name: 'client.crt', path: '/etc/kafka/tls/', expiresAt: '2026-12-24', daysLeft: 92 },
-  { name: 'ca.crt', path: '/etc/kafka/tls/', expiresAt: '2026-10-24', daysLeft: 31 },
+  { name: 'kafka-broker.crt', path: '/etc/kafka/tls/', expiresAt: '2027-03-25', daysLeft: 184, type: 'X.509 / PEM' },
+  { name: 'client.crt', path: '/etc/kafka/tls/', expiresAt: '2026-12-24', daysLeft: 92, type: 'X.509 / PEM' },
+  { name: 'ca-chain.pem', path: '/etc/kafka/tls/', expiresAt: '2027-01-18', daysLeft: 117, type: 'X.509 Chain' },
+  { name: 'kafka.keystore.jks', path: '/etc/kafka/secrets/', expiresAt: '2027-05-11', daysLeft: 231, type: 'JKS Keystore' },
+  { name: 'kafka.truststore.jks', path: '/etc/kafka/secrets/', expiresAt: '2027-04-07', daysLeft: 197, type: 'JKS Truststore' },
+  { name: 'client.p12', path: '/etc/kafka/secrets/', expiresAt: '2027-02-02', daysLeft: 133, type: 'PKCS#12' },
+  { name: 'client.pfx', path: '/etc/kafka/secrets/', expiresAt: '2026-11-29', daysLeft: 67, type: 'PKCS#12' },
+  { name: 'client-key.pem', path: '/etc/kafka/tls/', expiresAt: '2027-02-02', daysLeft: 133, type: 'PKCS#8 / PEM' },
 ];
 
 export default function CertificatesPanel({ refreshKey }: { refreshKey: number }): JSX.Element {
@@ -78,8 +85,9 @@ export default function CertificatesPanel({ refreshKey }: { refreshKey: number }
         <div className="panel-title-with-info">
           <PanelInfo
             title="Сертификаты Kafka"
-            description="Список найденных сертификатов, срок их действия и оставшееся количество дней. При отсутствии данных backend пример помечается отдельно."
+            description="Список сертификатов и TLS-хранилищ Kafka с типом, сроком действия и оставшимся количеством дней. При отсутствии данных отображается явно обозначенный пример поддерживаемых форматов."
           />
+          <FiShield className="certificate-title-icon" aria-hidden="true" />
           <span>Сертификаты Kafka</span>
         </div>
         <PanelFullscreenButton />
@@ -101,7 +109,7 @@ export default function CertificatesPanel({ refreshKey }: { refreshKey: number }
           <div className="certificate-table">
             <div className="certificate-table-row header">
               <span>Сертификат</span>
-              <span>Путь</span>
+              <span>Тип</span>
               <span>Истекает</span>
               <span>Осталось</span>
             </div>
@@ -109,7 +117,7 @@ export default function CertificatesPanel({ refreshKey }: { refreshKey: number }
             {certificates.map((certificate) => (
               <div className="certificate-table-row" key={`${certificate.name}-${certificate.path}`}>
                 <span title={certificate.name}>{certificate.name}</span>
-                <span className="certificate-expiry" title={certificate.path}>{certificate.path}</span>
+                <span className="certificate-type" title={certificate.type || certificate.path}>{certificate.type || certificate.path}</span>
                 <span className="certificate-expiry">{certificate.expiresAt || '—'}</span>
                 <span className={`certificate-days ${certificate.daysLeft <= 30 ? 'certificate-warning' : 'certificate-ok'}`}>
                   {certificate.daysLeft} дн.

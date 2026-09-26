@@ -76,7 +76,7 @@
 
 .certificate-table-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(110px, 1fr) 74px 74px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(108px, .95fr) minmax(82px, .8fr) 74px;
   gap: 8px;
   align-items: center;
   min-height: 31px;
@@ -113,3 +113,17 @@
 .certificate-warning { color: #f59e0b !important; font-weight: 650; }
 .certificate-ok { color: var(--success-color) !important; }
 .certificate-empty { padding: 12px; text-align: center; color: var(--text-secondary); font-size: 12px; }
+
+
+.certificate-title-icon {
+  flex: 0 0 auto;
+  color: var(--accent-hover);
+  font-size: 17px;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent-hover) 22%, transparent));
+}
+
+
+.certificate-type {
+  color: var(--text-primary);
+  font-size: 11px;
+}

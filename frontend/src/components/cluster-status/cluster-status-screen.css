@@ -40,7 +40,7 @@
 .cluster-status-logo-glow {
   position: absolute;
   left: 50%;
-  bottom: 3px;
+  bottom: -3px;
   width: 118px;
   height: 4px;
   transform: translateX(-50%);
@@ -48,25 +48,6 @@
   background: radial-gradient(ellipse at center, #55e6dc 0%, rgba(85,230,220,.55) 35%, transparent 78%);
   box-shadow: 0 0 8px rgba(85,230,220,.75), 0 0 24px rgba(85,230,220,.4);
   animation: clusterStatusGlow 1.55s ease-in-out infinite;
-}
-
-.cluster-status-spinner {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  margin-top: 22px;
-  border-radius: 50%;
-  color: var(--accent-hover);
-  font-size: 18px;
-}
-
-.is-checking .cluster-status-spinner svg {
-  animation: clusterStatusSpin 1s linear infinite;
-}
-
-.is-unavailable .cluster-status-spinner {
-  color: var(--danger-color);
 }
 
 .is-unavailable .cluster-status-logo {
@@ -79,7 +60,7 @@
 }
 
 .cluster-status-content h2 {
-  margin: 8px 0 0;
+  margin: 26px 0 0;
   color: var(--text-primary);
   font-size: 21px;
   line-height: 1.25;
@@ -98,6 +79,3 @@
   50% { opacity: 1; transform: translateX(-50%) scaleX(1.08); }
 }
 
-@keyframes clusterStatusSpin {
-  to { transform: rotate(360deg); }
-}

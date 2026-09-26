@@ -14,7 +14,6 @@
  * намеренно обходят этот экран.
  */
 
-import { FiAlertTriangle, FiLoader } from 'react-icons/fi';
 import type { ClusterConnectionStatus } from '../../contexts/ClusterContext';
 import './cluster-status-screen.css';
 
@@ -33,9 +32,6 @@ export default function ClusterStatusScreen({ status }: Props): JSX.Element {
           <span className="cluster-status-logo-glow" />
         </div>
 
-        <div className="cluster-status-spinner" aria-hidden="true">
-          {checking ? <FiLoader /> : <FiAlertTriangle />}
-        </div>
 
         <h2>{checking ? 'Подключение к кластеру' : 'Кластер не доступен'}</h2>
         <p>

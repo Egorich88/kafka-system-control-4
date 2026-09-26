@@ -61,10 +61,11 @@ export default function LoadingBootstrap() {
     const loading = useLoading();
 
     useEffect(() => {
-        if (loading.completed) {
-            document.getElementById('initial-splash')?.remove();
-        }
-    }, [loading.completed]);
+        // Удаляем статический splash сразу после монтирования React.
+        // Иначе на короткий момент одновременно видны два экрана загрузки,
+        // из-за чего логотип визуально увеличивается и накладывается на линию.
+        document.getElementById('initial-splash')?.remove();
+    }, []);
 
     if (!loading.completed) {
         return <LoadingScreen status={loading.message} />;
