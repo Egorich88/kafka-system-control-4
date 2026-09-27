@@ -45,6 +45,8 @@ import { useCluster } from '../../../contexts/ClusterContext';
 import PanelInfo from '../../../components/common/PanelInfo';
 import PanelFullscreenButton from './PanelFullscreenButton';
 
+interface TopicPoint { time: string; timestamp?: number; topic: string; value: number; }
+
 // =========================================================================
 // Кастомный тултип – показывает только положительные значения
 // =========================================================================
@@ -80,12 +82,14 @@ const getTopicColor = (topic, index) => {
   return colors[index % colors.length];
 };
 
-export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
+interface TopicsPanelProps { timeRange?: string; refreshKey: number; }
+
+export default function TopicsPanel({ timeRange = '15m', refreshKey }: TopicsPanelProps): JSX.Element {
   const { currentCluster } = useCluster();
 
   const [visibleTopics, setVisibleTopics] = useState([]);
   const [allTopics, setAllTopics] = useState([]);
-  const [rawData, setRawData] = useState([]);
+  const [rawData, setRawData] = useState<TopicPoint[]>([]);
   const [loading, setLoading] = useState(false);
 
   // -------------------------------------------------------------------------
@@ -96,7 +100,7 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
     setLoading(true);
     try {
       const headers = { 'X-Kafka-Bootstrap': currentCluster.brokers || currentCluster.bootstrapServers };
-      const response = await axios.get(`/api/overview/topics-throughput?range=${timeRange}`, { headers });
+      const response = await axios.get(`/api/overview/topics-throughput?${timeRange}`, { headers });
       const points = response.data.points || [];
 
       // Защита от отрицательных значений (обрезаем до нуля)
@@ -142,14 +146,15 @@ export default function TopicsPanel({ timeRange = '15m', refreshKey }) {
   const prepareChartData = () => {
     const timeMap = new Map();
     for (const point of rawData) {
-      if (!timeMap.has(point.time)) {
-        timeMap.set(point.time, { time: point.time });
+      const pointKey = point.timestamp || point.time;
+      if (!timeMap.has(pointKey)) {
+        timeMap.set(pointKey, { time: point.time, timestamp: point.timestamp || 0 });
       }
-      const entry = timeMap.get(point.time);
+      const entry = timeMap.get(pointKey);
       // Второй уровень защиты: обрезаем отрицательные
       entry[point.topic] = Math.max(0, point.value || 0);
     }
-    return Array.from(timeMap.values()).sort((a, b) => a.time.localeCompare(b.time));
+    return Array.from(timeMap.values()).sort((a, b) => Number(a.timestamp || 0) - Number(b.timestamp || 0));
   };
 
   const aggregatedData = prepareChartData();

@@ -52,7 +52,7 @@
 }
 
 .dashboard-row-status {
-  grid-template-columns: minmax(0, 2.15fr) minmax(300px, 1fr);
+  grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr);
 }
 
 .dashboard-row-top {

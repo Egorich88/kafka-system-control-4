@@ -203,50 +203,35 @@
 }
 
 /* ============================================================
-   Название продукта
+   Брендинг ODYSSEY
    ============================================================ */
 
-.welcome-subtitle {
-    font-family: 'Inter', sans-serif;
-
-    /*
-     * Немного увеличиваем размер.
-     */
-    font-size: 22px;
-
-    /*
-     * SemiBold — достаточно выразительно,
-     * но без тяжёлого жирного начертания.
-     */
-    font-weight: 600;
-
-    /*
-     * Заглавные буквы требуют немного воздуха.
-     */
-    letter-spacing: 2.4px;
-
-    color: var(--text-primary);
-
-    text-align: center;
-
-    /*
-     * От логотипа до названия.
-     */
+.welcome-branding {
     margin-top: 24px;
-
-    /*
-     * ВАЖНО:
-     * увеличиваем пространство после названия.
-     *
-     * Именно этого сейчас не хватает перед
-     * "Современный интерфейс..."
-     */
     margin-bottom: 30px;
+    text-align: center;
+}
 
-    /*
-     * Никакого отдельного неонового текста.
-     */
-    text-shadow: none;
+.welcome-subtitle {
+    margin: 0;
+    color: var(--text-primary);
+    font-family: "Century Gothic", "Arial Narrow", "Segoe UI", sans-serif;
+    font-size: clamp(38px, 4vw, 54px);
+    font-weight: 300;
+    letter-spacing: clamp(9px, 1.05vw, 15px);
+    line-height: 1;
+    padding-left: clamp(9px, 1.05vw, 15px);
+}
+
+.welcome-tagline {
+    margin-top: 14px;
+    color: #55e6dc;
+    font-family: "Century Gothic", "Arial Narrow", "Segoe UI", sans-serif;
+    font-size: clamp(11px, 1.05vw, 14px);
+    font-weight: 500;
+    letter-spacing: clamp(3px, .55vw, 7px);
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .welcome-feature {

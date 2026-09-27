@@ -57,7 +57,7 @@ export default function PageHeader({ title, description, mode }: Props) {
 
       <div className="page-header-title-group">
         <h1>{title}</h1>
-        <p>{description}</p>
+        {description && <p>{description}</p>}
 
       </div>
 

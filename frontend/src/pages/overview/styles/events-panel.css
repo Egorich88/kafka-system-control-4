@@ -9,69 +9,42 @@
 .events-panel-header { padding: 11px 14px; }
 .events-panel-actions { display: flex; align-items: center; gap: 7px; }
 
-.events-filter { position: relative; display: flex; align-items: center; gap: 7px; color: var(--text-secondary); font-size: 12px; }
-.events-filter > span { color: var(--text-secondary); }
+.events-filter { position: relative; display: flex; align-items: center; gap: 7px; color: var(--text-secondary); font-size: 12px; white-space: nowrap; }
 .events-filter-button {
-  min-width: 88px;
+  width: 86px;
   height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 0 9px 0 10px;
+  gap: 7px;
+  padding: 0 9px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  outline: none;
   background: var(--dropdown-bg);
   color: var(--text-primary);
   font: inherit;
-  font-size: 12px;
   cursor: pointer;
-  box-sizing: border-box;
-  transition: border-color .16s ease, background .16s ease, color .16s ease;
 }
-.events-filter-button:hover,
-.events-filter-button.is-open {
-  border-color: var(--accent-hover);
-  background: var(--selected-color);
-}
-.events-filter-button svg { color: var(--text-secondary); flex: 0 0 auto; }
+.events-filter-button:hover, .events-filter-button.is-open { border-color: var(--accent-hover); background: var(--sidebar-hover); }
 .events-filter-menu {
   position: absolute;
   top: calc(100% + 7px);
   right: 0;
-  z-index: 50;
-  width: 88px;
+  z-index: 20;
+  width: 86px;
   padding: 5px;
   border: 1px solid var(--border-color);
   border-radius: 10px;
   background: var(--dropdown-bg);
   box-shadow: var(--shadow-primary);
-  box-sizing: border-box;
+  backdrop-filter: blur(14px);
 }
 .events-filter-menu button {
-  width: 100%;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 7px;
-  padding: 0 8px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 11px;
-  text-align: left;
-  cursor: pointer;
+  width: 100%; height: 30px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text-secondary);
+  font: inherit; font-size: 11px; cursor: pointer;
 }
-.events-filter-menu button:hover,
-.events-filter-menu button.selected {
-  background: var(--selected-color);
-  color: var(--text-primary);
-}
-.events-filter-menu button svg { color: var(--accent-hover); flex: 0 0 auto; }
+.events-filter-menu button:hover, .events-filter-menu button.selected { background: var(--selected-color); color: var(--text-primary); }
 
 .events-title { font-size: 15px; }
 .events-table {

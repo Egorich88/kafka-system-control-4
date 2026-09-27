@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Боковое меню (Sidebar) приложения ODYSSEY.
+ * @fileoverview Боковое меню (Sidebar) приложения Kafka System Control.
  * Содержит логотип, информацию о версии, выбор/добавление кластера,
  * основную навигацию по разделам, настройки и футер с лицензией.
  */
@@ -176,7 +176,7 @@ export default function Sidebar({ onAddCluster, onEditCluster, clusterUnavailabl
 
             {/* Логотип */}
             {/* ==========================================================
-                Брендинг ODYSSEY
+                Брендинг Kafka System Control
 
                 Слева:
                 фирменный графический знак.
@@ -184,7 +184,7 @@ export default function Sidebar({ onAddCluster, onEditCluster, clusterUnavailabl
                 Справа:
                 короткий wordmark KSC.
 
-                Полное название ODYSSEY
+                Полное название Kafka System Control
                 в Sidebar не используется — здесь нужен
                 компактный фирменный идентификатор.
                ========================================================== */}

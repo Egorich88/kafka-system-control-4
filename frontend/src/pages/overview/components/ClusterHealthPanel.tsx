@@ -51,7 +51,7 @@ const formatDisk = (broker: any) => broker.diskUsage != null && broker.diskTotal
   ? `${Number(broker.diskUsage).toFixed(1)}/${Number(broker.diskTotal).toFixed(0)} GB`
   : '—';
 
-export default function ClusterHealthPanel({ refreshKey, overview, brokers, consumerGroups, messagesIn, messagesOut, onData }: Props): JSX.Element {
+export default function ClusterHealthPanel({ refreshKey, overview, consumerGroups, messagesIn, messagesOut, onData }: Props): JSX.Element {
   const { currentCluster } = useCluster();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -93,6 +93,10 @@ export default function ClusterHealthPanel({ refreshKey, overview, brokers, cons
           />
           <span>Состояние кластера</span>
         </div>
+        <div className={`cluster-status-inline ${meta.className}`}>
+          <StatusIcon />
+          <span>{meta.title}</span>
+        </div>
         <PanelFullscreenButton />
       </div>
 
@@ -105,14 +109,6 @@ export default function ClusterHealthPanel({ refreshKey, overview, brokers, cons
           <Kpi icon={<FiArrowDown />} label="Входящие сообщения" value={loading ? '—' : `${Number(messagesIn || 0).toFixed(1)} msg/s`} />
           <Kpi icon={<FiArrowUp />} label="Исходящие сообщения" value={loading ? '—' : `${Number(messagesOut || 0).toFixed(1)} msg/s`} />
           <Kpi icon={<FiAlertTriangle />} label="Недореплицированные" value={loading ? '—' : formatNumber(underReplicated)} danger={Number(underReplicated) > 0} />
-        </div>
-
-        <div className="cluster-status-summary">
-          <div className="cluster-status-icon"><StatusIcon /></div>
-          <div>
-            <div className="cluster-status-title">{meta.title}</div>
-            <div className="cluster-status-description">{meta.description}</div>
-          </div>
         </div>
 
         <div className="cluster-brokers-table-wrap">

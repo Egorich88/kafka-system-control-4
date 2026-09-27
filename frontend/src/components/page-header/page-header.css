@@ -55,8 +55,8 @@
   position: absolute;
   inset: 0;
   width: 18%;
-  background: linear-gradient(90deg, transparent, var(--sidebar-divider-color) 22%, var(--sidebar-divider-color) 50%, var(--sidebar-divider-color) 78%, transparent);
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--sidebar-divider-color) 80%, transparent));
+  background: linear-gradient(90deg, transparent, var(--sidebar-divider-color) 18%, var(--sidebar-divider-color) 50%, var(--sidebar-divider-color) 82%, transparent);
+  filter: drop-shadow(0 0 4px var(--sidebar-divider-color));
 }
 
 .page-header-bar.is-loading .page-header-loading-line {
@@ -66,12 +66,12 @@
 }
 
 .page-header-bar.is-loading .page-header-loading-line::after {
-  animation: pageHeaderLoadingWave 1.5s ease-in-out infinite;
+  animation: pageHeaderLoadingWave 1.8s linear infinite;
 }
 
 @keyframes pageHeaderLoadingWave {
-  from { transform: translateX(-130%); }
-  to { transform: translateX(650%); }
+  from { transform: translateX(-110%); }
+  to { transform: translateX(560%); }
 }
 
 .page-header-title-group {
@@ -106,7 +106,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
   flex: 0 0 auto;
   min-width: 0;
 }
@@ -114,7 +114,7 @@
 /* Контролы намеренно плоские: никаких рамок вокруг периода/обновления. */
 .page-header-flat-control,
 .page-header-refresh-button {
-  height: 40px;
+  height: 38px;
   border: 0;
   outline: none;
   border-radius: 8px;
@@ -144,8 +144,8 @@
 }
 
 .page-header-time-button {
-  width: 260px;
-  max-width: 260px;
+  width: 228px;
+  max-width: 228px;
 }
 
 .page-header-time-button span {
@@ -173,16 +173,18 @@
    до огромного Windows-подобного списка. */
 .page-header-time-menu {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 7px);
   right: 0;
-  width: 260px;
+  width: 228px;
   max-width: calc(100vw - 32px);
-  padding: 10px;
+  padding: 7px;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--dropdown-bg);
-  box-shadow: var(--shadow-primary);
   color: var(--text-primary);
+  box-shadow: var(--shadow-primary);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   box-sizing: border-box;
 }
 
@@ -247,7 +249,6 @@
 
 .page-header-datetime-grid input {
   width: 100%;
-  box-sizing: border-box;
   height: 32px;
   padding: 0 7px;
   border: 1px solid var(--border-color);
@@ -285,7 +286,15 @@
 
 /* Современный список интервалов на всю ширину своего контрола. */
 .page-header-refresh-picker {
-  min-width: 88px;
+  width: 76px;
+  min-width: 76px;
+}
+
+.page-header-refresh-picker .page-header-flat-control {
+  width: 76px;
+  min-width: 76px;
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .page-header-refresh-label {
@@ -301,10 +310,11 @@
 
 .page-header-refresh-menu {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 7px);
   right: 0;
-  width: 92px;
-  padding: 6px;
+  width: 76px;
+  min-width: 76px;
+  padding: 5px;
   border: 1px solid var(--border-color);
   border-radius: 10px;
   background: var(--dropdown-bg);
@@ -326,7 +336,7 @@
 }
 
 .page-header-refresh-button {
-  width: 36px;
+  width: 38px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -375,8 +385,7 @@
   .page-header-controls {
     width: 100%;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 92px 36px;
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) 132px 38px;
   }
   .page-header-time-button {
     width: 100%;
@@ -385,6 +394,6 @@
   .page-header-time-menu {
     left: 0;
     right: auto;
-    width: min(360px, calc(100vw - 32px));
+    width: min(228px, calc(100vw - 32px));
   }
 }

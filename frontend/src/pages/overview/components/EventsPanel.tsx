@@ -24,11 +24,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
-import { FiCheck, FiChevronDown } from 'react-icons/fi';
 import '../styles/events-panel.css';
 import PanelInfo from '../../../components/common/PanelInfo';
 import PanelFullscreenButton from './PanelFullscreenButton';
 import { useCluster } from '../../../contexts/ClusterContext';
+import { FiCheck, FiChevronDown } from 'react-icons/fi';
 
 export default function EventsPanel({ refreshKey }) {
   const { currentCluster } = useCluster();
@@ -63,6 +63,15 @@ export default function EventsPanel({ refreshKey }) {
     loadEvents();
   }, [currentCluster, refreshKey]);
 
+  useEffect(() => {
+    if (!filterOpen) return;
+    const close = (event: MouseEvent) => {
+      if (!filterRef.current?.contains(event.target as Node)) setFilterOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [filterOpen]);
+
   const getLevelClass = (level) => {
     switch (level) {
       case 'INFO':
@@ -75,15 +84,6 @@ export default function EventsPanel({ refreshKey }) {
         return '';
     }
   };
-
-  useEffect(() => {
-    if (!filterOpen) return;
-    const close = (event: MouseEvent) => {
-      if (!filterRef.current?.contains(event.target as Node)) setFilterOpen(false);
-    };
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
-  }, [filterOpen]);
 
   const filteredEvents = useMemo(
     () => levelFilter === 'ALL' ? events : events.filter((event) => event.level === levelFilter),
@@ -102,11 +102,11 @@ export default function EventsPanel({ refreshKey }) {
         </div>
         <div className="events-panel-actions">
           <div className="events-filter" ref={filterRef}>
-            <span>Фильтр</span>
+            <span>Уровень:</span>
             <button
               type="button"
               className={`events-filter-button ${filterOpen ? 'is-open' : ''}`}
-              onClick={() => setFilterOpen((open) => !open)}
+              onClick={() => setFilterOpen((value) => !value)}
               aria-haspopup="listbox"
               aria-expanded={filterOpen}
             >
@@ -114,21 +114,18 @@ export default function EventsPanel({ refreshKey }) {
               <FiChevronDown />
             </button>
             {filterOpen && (
-              <div className="events-filter-menu" role="listbox" aria-label="Фильтр событий">
-                {(['ALL', 'INFO', 'WARN', 'ERROR'] as const).map((level) => (
+              <div className="events-filter-menu" role="listbox">
+                {(['ALL', 'INFO', 'WARN', 'ERROR'] as const).map((value) => (
                   <button
-                    key={level}
                     type="button"
                     role="option"
-                    aria-selected={levelFilter === level}
-                    className={levelFilter === level ? 'selected' : ''}
-                    onClick={() => {
-                      setLevelFilter(level);
-                      setFilterOpen(false);
-                    }}
+                    aria-selected={levelFilter === value}
+                    className={levelFilter === value ? 'selected' : ''}
+                    key={value}
+                    onClick={() => { setLevelFilter(value); setFilterOpen(false); }}
                   >
-                    <span>{level === 'ALL' ? 'Все' : level}</span>
-                    {levelFilter === level && <FiCheck />}
+                    <span>{value === 'ALL' ? 'Все' : value}</span>
+                    {levelFilter === value && <FiCheck />}
                   </button>
                 ))}
               </div>

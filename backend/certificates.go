@@ -3,33 +3,22 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 /**
  * @file certificates.go
- * Сводная информация о сертификатах и хранилищах Kafka.
+ * Обнаружение TLS-сертификатов и связанных файлов Kafka.
  *
- * Поддерживаются основные форматы, используемые в TLS-конфигурациях Kafka:
- * - JKS keystore/truststore;
- * - PKCS#12 (.p12/.pfx);
- * - X.509 в PEM/CRT/CER;
- * - обычная Linux-установка Kafka;
- * - Docker-контейнер Kafka при наличии доступа к Docker socket;
- * - пути из переменных окружения KAFKA_SSL_*_LOCATION.
+ * Refactor 4.2.35:
+ * - поддерживаются JKS / PKCS#12 / PFX / P12 / PEM / CRT / DER / KEY / P8;
+ * - для X.509 читаются Subject, Issuer, CN и SAN;
+ * - для keystore/truststore используется keytool;
+ * - приватные ключи показываются как связанные TLS-файлы, даже если у них
+ *   нет собственного срока действия.
  *
- * Пароли не хранятся в коде. Для чтения JKS используется KAFKA_KEYSTORE_PASSWORD
- * либо стандартный пароль changeit, если он явно не задан.
+ * Важно: компонент не хранит пароли. Для JKS/PKCS#12 используется
+ * KAFKA_KEYSTORE_PASSWORD, а при его отсутствии — стандартный changeit.
  */
-
 package main
 
 import (
@@ -45,11 +34,15 @@ import (
 )
 
 type CertificateInfo struct {
-	Name      string `json:"name"`
-	Path      string `json:"path"`
-	Type      string `json:"type"`
-	ExpiresAt string `json:"expiresAt"`
-	DaysLeft  int    `json:"daysLeft"`
+	Name       string `json:"name"`
+	Path       string `json:"path"`
+	Type       string `json:"type"`
+	ExpiresAt  string `json:"expiresAt"`
+	DaysLeft   int    `json:"daysLeft"`
+	Subject    string `json:"subject,omitempty"`
+	Issuer     string `json:"issuer,omitempty"`
+	CommonName string `json:"commonName,omitempty"`
+	SAN        string `json:"san,omitempty"`
 }
 
 type CertificatesResponse struct {
@@ -68,9 +61,6 @@ func getCertificatesHandler(w http.ResponseWriter, r *http.Request) {
 	var result []CertificateInfo
 	seen := make(map[string]bool)
 
-	// Сначала проверяем обычную Linux-файловую систему только для Kafka,
-	// работающей на том же сервере. Это не позволяет показать сертификаты
-	// другого удалённого кластера.
 	if isLocalBootstrap(bootstrap) {
 		for _, path := range findLocalKeystores() {
 			if info, ok := readKeystoreCertificate(path, ""); ok && !seen[info.Path] {
@@ -80,8 +70,6 @@ func getCertificatesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Затем ищем Docker-контейнер, который действительно соответствует
-	// выбранному bootstrap. Контейнер другого кластера не используется.
 	if container := findKafkaContainerForBootstrap(bootstrap); container != "" {
 		for _, path := range findDockerKeystores(container) {
 			if info, ok := readKeystoreCertificate(path, container); ok {
@@ -96,8 +84,8 @@ func getCertificatesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	nearest := 0
-	for index, cert := range result {
-		if index == 0 || cert.DaysLeft < nearest {
+	for _, cert := range result {
+		if cert.DaysLeft >= 0 && (nearest == 0 || cert.DaysLeft < nearest) {
 			nearest = cert.DaysLeft
 		}
 	}
@@ -109,7 +97,7 @@ func getCertificatesHandler(w http.ResponseWriter, r *http.Request) {
 		Available:    len(result) > 0,
 	}
 	if len(result) == 0 {
-		response.Message = "JKS/PKCS12/X.509 сертификаты не обнаружены"
+		response.Message = "JKS/PKCS#12/PFX/P12/PEM/CRT/DER/KEY/P8 файлы не обнаружены"
 	}
 
 	_ = json.NewEncoder(w).Encode(response)
@@ -118,7 +106,6 @@ func getCertificatesHandler(w http.ResponseWriter, r *http.Request) {
 func findLocalKeystores() []string {
 	var result []string
 	seen := make(map[string]bool)
-
 	add := func(path string) {
 		if path != "" && !seen[path] {
 			seen[path] = true
@@ -127,16 +114,12 @@ func findLocalKeystores() []string {
 	}
 
 	for _, env := range []string{
-		"KAFKA_SSL_KEYSTORE_LOCATION",
-		"KAFKA_SSL_TRUSTSTORE_LOCATION",
-		"SSL_KEYSTORE_LOCATION",
-		"SSL_TRUSTSTORE_LOCATION",
+		"KAFKA_SSL_KEYSTORE_LOCATION", "KAFKA_SSL_TRUSTSTORE_LOCATION",
+		"SSL_KEYSTORE_LOCATION", "SSL_TRUSTSTORE_LOCATION",
 	} {
 		add(os.Getenv(env))
 	}
 
-	// Walk используется вместо filepath.Glob("**"), поскольку Go Glob
-	// не поддерживает рекурсивный glob в стиле shell.
 	for _, base := range []string{
 		"/etc/kafka", "/opt/kafka/config", "/opt/bitnami/kafka/config",
 		"/var/lib/kafka", "/kafka/config", "/etc/ssl", "/etc/pki",
@@ -146,14 +129,22 @@ func findLocalKeystores() []string {
 				return nil
 			}
 			ext := strings.ToLower(filepath.Ext(path))
-			if ext == ".jks" || ext == ".p12" || ext == ".pfx" || ext == ".pem" || ext == ".crt" || ext == ".cer" {
+			if isSupportedCertificateExtension(ext) {
 				add(path)
 			}
 			return nil
 		})
 	}
-
 	return result
+}
+
+func isSupportedCertificateExtension(ext string) bool {
+	switch strings.ToLower(ext) {
+	case ".jks", ".p12", ".pfx", ".pem", ".crt", ".cer", ".der", ".key", ".p8":
+		return true
+	default:
+		return false
+	}
 }
 
 func isLocalBootstrap(bootstrap string) bool {
@@ -170,8 +161,7 @@ func findKafkaContainerForBootstrap(bootstrap string) string {
 		return ""
 	}
 
-	output, err := exec.Command("sh", "-c",
-		"docker ps --format '{{.Names}}|{{.Ports}}' | grep -i kafka").Output()
+	output, err := exec.Command("sh", "-c", "docker ps --format '{{.Names}}|{{.Ports}}' | grep -i kafka").Output()
 	if err != nil {
 		return ""
 	}
@@ -181,8 +171,6 @@ func findKafkaContainerForBootstrap(bootstrap string) string {
 		if len(parts) != 2 {
 			continue
 		}
-		// Проверяем опубликованный host-port. Например:
-		// 0.0.0.0:9092->9092/tcp
 		if strings.Contains(parts[1], ":"+port+"->") {
 			return strings.TrimSpace(parts[0])
 		}
@@ -195,7 +183,7 @@ func findDockerKeystores(container string) []string {
 		return nil
 	}
 
-	command := `find /etc/kafka /opt/kafka/config /var/lib/kafka /opt/bitnami/kafka/config -type f \( -name "*.jks" -o -name "*.p12" -o -name "*.pfx" -o -name "*.pem" -o -name "*.crt" -o -name "*.cer" \) 2>/dev/null | head -100`
+	command := `find /etc/kafka /opt/kafka/config /var/lib/kafka /opt/bitnami/kafka/config -type f \( -name "*.jks" -o -name "*.p12" -o -name "*.pfx" -o -name "*.pem" -o -name "*.crt" -o -name "*.cer" -o -name "*.der" -o -name "*.key" -o -name "*.p8" \) 2>/dev/null | head -200`
 	output, err := exec.Command("docker", "exec", container, "sh", "-c", command).Output()
 	if err != nil {
 		return nil
@@ -210,38 +198,59 @@ func findDockerKeystores(container string) []string {
 	return result
 }
 
+func runCertificateCommand(container string, args ...string) ([]byte, error) {
+	if container != "" {
+		return exec.Command("docker", append([]string{"exec", container}, args...)...).CombinedOutput()
+	}
+	return exec.Command(args[0], args[1:]...).CombinedOutput()
+}
+
 func readKeystoreCertificate(path, container string) (CertificateInfo, bool) {
 	ext := strings.ToLower(filepath.Ext(path))
 
-	// PEM/CRT/CER — обычный X.509 сертификат. Для него не требуется пароль.
-	if ext == ".pem" || ext == ".crt" || ext == ".cer" {
-		var output []byte
-		var err error
-		if container != "" {
-			output, err = exec.Command("docker", "exec", container, "openssl", "x509", "-in", path, "-noout", "-enddate").CombinedOutput()
-		} else {
-			output, err = exec.Command("openssl", "x509", "-in", path, "-noout", "-enddate").CombinedOutput()
+	// X.509-файлы можно разобрать напрямую через openssl.
+	if ext == ".pem" || ext == ".crt" || ext == ".cer" || ext == ".der" {
+		args := []string{"openssl", "x509"}
+		if ext == ".der" {
+			args = append(args, "-inform", "DER")
+		}
+		args = append(args, "-in", path, "-noout", "-enddate", "-subject", "-issuer", "-nameopt", "RFC2253", "-ext", "subjectAltName")
+		output, err := runCertificateCommand(container, args...)
+		if err != nil {
+			return CertificateInfo{}, false
+		}
+		return parseOpenSSLCertificate(path, output), true
+	}
+
+	// KEY/P8 — приватный ключ. Он не имеет срока действия, но полезен в
+	// таблице как часть TLS-конфигурации. Проверяем, что файл действительно
+	// читается openssl, и показываем нейтральный статус срока.
+	if ext == ".key" || ext == ".p8" {
+		output, err := runCertificateCommand(container, "openssl", "pkey", "-in", path, "-noout")
+		if err != nil {
+			// PKCS#8 может быть DER; пробуем второй вариант.
+			if ext == ".p8" {
+				output, err = runCertificateCommand(container, "openssl", "pkey", "-inform", "DER", "-in", path, "-noout")
+			}
 		}
 		if err != nil {
 			return CertificateInfo{}, false
 		}
-
-		line := strings.TrimSpace(string(output))
-		if !strings.HasPrefix(line, "notAfter=") {
-			return CertificateInfo{}, false
+		_ = output
+		typeName := "Private Key / KEY"
+		if ext == ".p8" {
+			typeName = "PKCS#8 / P8"
 		}
-		raw := strings.TrimSpace(strings.TrimPrefix(line, "notAfter="))
-		expires, err := time.Parse("Jan 2 15:04:05 2006 MST", raw)
-		if err != nil {
-			return CertificateInfo{}, false
-		}
-
 		return CertificateInfo{
-			Name:      filepath.Base(path),
-			Path:      path,
-			Type:      "X.509 / PEM",
-			ExpiresAt: expires.Format(time.RFC3339),
-			DaysLeft:  int(time.Until(expires).Hours() / 24),
+			Name:       filepath.Base(path),
+			Path:       path,
+			Type:       typeName,
+			ExpiresAt:  "",
+			DaysLeft:   -1,
+			Subject:    "Приватный ключ",
+			Issuer:     "—",
+			CommonName: "—",
+			SAN:        "—",
 		}, true
 	}
 
@@ -250,60 +259,150 @@ func readKeystoreCertificate(path, container string) (CertificateInfo, bool) {
 		password = "changeit"
 	}
 
-	var output []byte
-	var err error
-
-	if container != "" {
-		output, err = exec.Command(
-			"docker", "exec", container, "keytool",
-			"-list", "-v", "-keystore", path, "-storepass", password,
-		).CombinedOutput()
-	} else {
-		output, err = exec.Command(
-			"keytool", "-list", "-v", "-keystore", path, "-storepass", password,
-		).CombinedOutput()
-	}
+	output, err := runCertificateCommand(container, "keytool", "-list", "-v", "-keystore", path, "-storepass", password)
 	if err != nil {
 		return CertificateInfo{}, false
 	}
 
+	text := string(output)
 	re := regexp.MustCompile(`Valid from: .* until:\s*(.+)`)
-	match := re.FindStringSubmatch(string(output))
+	match := re.FindStringSubmatch(text)
 	if len(match) < 2 {
 		return CertificateInfo{}, false
 	}
 
-	layouts := []string{
-		"Mon Jan 02 15:04:05 MST 2006",
-		"Mon Jan 02 15:04:05 UTC 2006",
-		"Mon Jan 02 15:04:05 -0700 2006",
-	}
-
-	var expires time.Time
-	for _, layout := range layouts {
-		if parsed, parseErr := time.Parse(layout, strings.TrimSpace(match[1])); parseErr == nil {
-			expires = parsed
-			break
-		}
-	}
+	expires := parseKeytoolDate(strings.TrimSpace(match[1]))
 	if expires.IsZero() {
 		return CertificateInfo{}, false
 	}
 
 	typeName := "JKS Keystore"
-	if ext == ".p12" || ext == ".pfx" {
-		typeName = "PKCS#12"
+	if ext == ".p12" {
+		typeName = "PKCS#12 / P12"
+	} else if ext == ".pfx" {
+		typeName = "PKCS#12 / PFX"
 	}
 	lowerName := strings.ToLower(filepath.Base(path))
 	if strings.Contains(lowerName, "truststore") {
 		typeName = "JKS Truststore"
 	}
 
+	owner := firstKeytoolValue(text, "Owner:")
+	issuer := firstKeytoolValue(text, "Issuer:")
+	commonName := extractCN(owner)
+	san := firstKeytoolSAN(text)
+
 	return CertificateInfo{
-		Name:      filepath.Base(path),
-		Path:      path,
-		Type:      typeName,
-		ExpiresAt: expires.Format(time.RFC3339),
-		DaysLeft:  int(time.Until(expires).Hours() / 24),
+		Name:       filepath.Base(path),
+		Path:       path,
+		Type:       typeName,
+		ExpiresAt:  expires.Format(time.RFC3339),
+		DaysLeft:   int(time.Until(expires).Hours() / 24),
+		Subject:    owner,
+		Issuer:     issuer,
+		CommonName: commonName,
+		SAN:        san,
 	}, true
+}
+
+func parseOpenSSLCertificate(path string, output []byte) CertificateInfo {
+	text := string(output)
+	expires := parseOpenSSLDate(firstLineValue(text, "notAfter="))
+	subject := firstLineValue(text, "subject=")
+	issuer := firstLineValue(text, "issuer=")
+	san := parseSAN(text)
+
+	return CertificateInfo{
+		Name:       filepath.Base(path),
+		Path:       path,
+		Type:       certificateType(filepath.Ext(path)),
+		ExpiresAt:  expires.Format(time.RFC3339),
+		DaysLeft:   int(time.Until(expires).Hours() / 24),
+		Subject:    subject,
+		Issuer:     issuer,
+		CommonName: extractCN(subject),
+		SAN:        san,
+	}
+}
+
+func certificateType(ext string) string {
+	switch strings.ToLower(ext) {
+	case ".der":
+		return "X.509 / DER"
+	case ".crt":
+		return "X.509 / CRT"
+	case ".cer":
+		return "X.509 / CER"
+	default:
+		return "X.509 / PEM"
+	}
+}
+
+func parseOpenSSLDate(value string) time.Time {
+	if value == "" {
+		return time.Time{}
+	}
+	for _, layout := range []string{"Jan 2 15:04:05 2006 MST", "Jan 02 15:04:05 2006 MST"} {
+		if parsed, err := time.Parse(layout, strings.TrimSpace(value)); err == nil {
+			return parsed
+		}
+	}
+	return time.Time{}
+}
+
+func parseKeytoolDate(value string) time.Time {
+	for _, layout := range []string{
+		"Mon Jan 02 15:04:05 MST 2006",
+		"Mon Jan 02 15:04:05 UTC 2006",
+		"Mon Jan 02 15:04:05 -0700 2006",
+	} {
+		if parsed, err := time.Parse(layout, value); err == nil {
+			return parsed
+		}
+	}
+	return time.Time{}
+}
+
+func firstLineValue(text, prefix string) string {
+	for _, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, prefix) {
+			return strings.TrimSpace(strings.TrimPrefix(line, prefix))
+		}
+	}
+	return ""
+}
+
+func firstKeytoolValue(text, prefix string) string {
+	return firstLineValue(text, prefix)
+}
+
+func extractCN(value string) string {
+	for _, part := range strings.Split(value, ",") {
+		part = strings.TrimSpace(part)
+		if strings.HasPrefix(part, "CN=") {
+			return strings.TrimPrefix(part, "CN=")
+		}
+	}
+	return ""
+}
+
+func parseSAN(text string) string {
+	lines := strings.Split(text, "\n")
+	for index, line := range lines {
+		if strings.Contains(line, "X509v3 Subject Alternative Name") && index+1 < len(lines) {
+			return strings.TrimSpace(lines[index+1])
+		}
+	}
+	return ""
+}
+
+func firstKeytoolSAN(text string) string {
+	for _, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "DNSName:") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "DNSName:"))
+		}
+	}
+	return ""
 }

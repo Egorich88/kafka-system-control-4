@@ -33,8 +33,6 @@ export const RELATIVE_TIME_RANGES: RelativeTimeRange[] = [
   { type: 'relative', id: '6h', label: '6 часов' },
   { type: 'relative', id: '12h', label: '12 часов' },
   { type: 'relative', id: '24h', label: '24 часа' },
-  { type: 'relative', id: '7d', label: '7 дней' },
-  { type: 'relative', id: '30d', label: '30 дней' },
 ];
 
 export const REFRESH_INTERVALS: RefreshInterval[] = [

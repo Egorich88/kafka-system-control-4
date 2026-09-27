@@ -28,9 +28,10 @@ import (
 
 // TopicsPanelPoint – точка графика для одного топика (скорость float64)
 type TopicsPanelPoint struct {
-	Time  string  `json:"time"`
-	Topic string  `json:"topic"`
-	Value float64 `json:"value"`
+	Time      string  `json:"time"`
+	Timestamp int64   `json:"timestamp"`
+	Topic     string  `json:"topic"`
+	Value     float64 `json:"value"`
 }
 
 type TopicsPanelResponse struct {
@@ -193,9 +194,10 @@ func (tc *TopicsPanelCollector) collect() {
 		rate := float64(delta) / elapsed
 		// Не умножаем, не округляем – оставляем как есть
 		point := TopicsPanelPoint{
-			Time:  now.Format("15:04:05"),
-			Topic: topic,
-			Value: rate,
+			Time:      now.Format("15:04:05"),
+			Timestamp: now.UnixMilli(),
+			Topic:     topic,
+			Value:     rate,
 		}
 		tc.storage.addPoint(topic, point)
 		log.Printf("[TopicsPanelCollector] topic=%s, delta=%d, rate=%.2f msg/s", topic, delta, rate)
@@ -270,7 +272,8 @@ func ensureTopicsCollectorForBootstrap(bootstrap string) {
 		currentTopicsCollector.Stop()
 	}
 	log.Printf("[TopicsPanelCollector] создаём сборщик для bootstrap: %s", bootstrap)
-	currentTopicsCollector = NewTopicsPanelCollector(bootstrap, 288, 10*time.Second)
+	// 10 секунд × 8640 точек = 24 часа истории в памяти.
+	currentTopicsCollector = NewTopicsPanelCollector(bootstrap, 8640, 10*time.Second)
 	currentTopicsCollector.Start()
 }
 
@@ -296,7 +299,15 @@ func GetTopicsPanelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	points := collector.GetPoints()
+	from, to := metricRange(r)
+	allPoints := collector.GetPoints()
+	points := make([]TopicsPanelPoint, 0, len(allPoints))
+	for _, point := range allPoints {
+		stamp := time.UnixMilli(point.Timestamp)
+		if point.Timestamp == 0 || (!stamp.Before(from) && !stamp.After(to)) {
+			points = append(points, point)
+		}
+	}
 	response := TopicsPanelResponse{Points: points}
 	log.Printf("[GetTopicsPanelHandler] возвращаем %d точек", len(points))
 	_ = json.NewEncoder(w).Encode(response)

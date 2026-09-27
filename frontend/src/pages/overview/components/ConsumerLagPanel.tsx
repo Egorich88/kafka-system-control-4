@@ -25,7 +25,7 @@
 
 import PanelInfo from '../../../components/common/PanelInfo';
 import PanelFullscreenButton from './PanelFullscreenButton';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -37,6 +37,10 @@ import {
 } from 'recharts';
 import axios from 'axios';
 import { useCluster } from '../../../contexts/ClusterContext';
+import { FiCheck, FiChevronDown } from 'react-icons/fi';
+
+interface LagPoint { time: string; timestamp?: number; group: string; value: number; topics?: Record<string, number>; }
+interface LagRow { group: string; topic: string; status: string; lag: number; change: number; lastActivity?: string; }
 
 const TOPIC_COLORS = [
   '#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444',
@@ -102,14 +106,19 @@ function LagTooltip({ active, payload, label }) {
   );
 }
 
-export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
+interface ConsumerLagPanelProps { timeRange?: string; refreshKey: number; }
+
+export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }: ConsumerLagPanelProps): JSX.Element {
   const { currentCluster } = useCluster();
 
   const [visibleLines, setVisibleLines] = useState([]);
   const [allLines, setAllLines] = useState([]);
-  const [rawData, setRawData] = useState([]);
-  const [rows, setRows] = useState([]);
+  const [rawData, setRawData] = useState<LagPoint[]>([]);
+  const [rows, setRows] = useState<LagRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+  const statusMenuRef = useRef<HTMLDivElement | null>(null);
 
   const loadConsumerLagData = async () => {
     if (!currentCluster) return;
@@ -123,7 +132,7 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
       };
 
       const response = await axios.get(
-        `/api/overview/consumer-lag?range=${timeRange}`,
+        `/api/overview/consumer-lag?${timeRange}`,
         { headers }
       );
 
@@ -183,11 +192,12 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
     rawData.forEach((point) => {
       if (!point.topics || typeof point.topics !== 'object') return;
 
-      if (!timeMap.has(point.time)) {
-        timeMap.set(point.time, { time: point.time });
+      const pointKey = point.timestamp || point.time;
+      if (!timeMap.has(pointKey)) {
+        timeMap.set(pointKey, { time: point.time, timestamp: point.timestamp || 0 });
       }
 
-      const entry = timeMap.get(point.time);
+      const entry = timeMap.get(pointKey);
 
       Object.entries(point.topics).forEach(([topic, value]) => {
         entry[`${point.group} (${topic})`] = Math.max(0, Number(value || 0));
@@ -195,7 +205,7 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
     });
 
     return Array.from(timeMap.values()).sort((a, b) =>
-      a.time.localeCompare(b.time)
+      Number(a.timestamp || 0) - Number(b.timestamp || 0)
     );
   }, [rawData]);
 
@@ -241,6 +251,20 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
     setVisibleLines(active.length ? active : allLines);
   };
 
+  useEffect(() => {
+    if (!statusMenuOpen) return;
+    const close = (event: MouseEvent) => {
+      if (!statusMenuRef.current?.contains(event.target as Node)) setStatusMenuOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [statusMenuOpen]);
+
+  const filteredRows = useMemo(
+    () => statusFilter === 'ALL' ? rows : rows.filter((row) => row.status === statusFilter),
+    [rows, statusFilter]
+  );
+
   if (!currentCluster) return null;
 
   return (
@@ -255,17 +279,38 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
             <span>Группы потребителей</span>
           </div>
 
-          <div className="consumer-status-help" aria-label="Обозначения статусов">
-            {Object.values(STATUS_META).map((status) => (
-              <span
-                key={status.label}
-                className={`consumer-status-help-item ${status.className}`}
-                title={status.short}
-              >
-                <i />
-                {status.label}
-              </span>
-            ))}
+          <div className="consumer-status-filter" ref={statusMenuRef}>
+            <span>Статус:</span>
+            <button
+              type="button"
+              className={`consumer-status-filter-button ${statusMenuOpen ? 'is-open' : ''}`}
+              onClick={() => setStatusMenuOpen((value) => !value)}
+              aria-haspopup="listbox"
+              aria-expanded={statusMenuOpen}
+            >
+              <span>{statusFilter === 'ALL' ? 'Все' : statusFilter}</span>
+              <FiChevronDown />
+            </button>
+            {statusMenuOpen && (
+              <div className="consumer-status-menu" role="listbox">
+                {['ALL', ...Object.keys(STATUS_META)].map((value) => {
+                  const label = value === 'ALL' ? 'Все' : value;
+                  return (
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={statusFilter === value}
+                      className={statusFilter === value ? 'selected' : ''}
+                      key={value}
+                      onClick={() => { setStatusFilter(value); setStatusMenuOpen(false); }}
+                    >
+                      <span>{label}</span>
+                      {statusFilter === value && <FiCheck />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       
@@ -348,7 +393,7 @@ export default function ConsumerLagPanel({ timeRange = '15m', refreshKey }) {
             </div>
 
             {rows.length ? (
-              rows.map((row) => {
+              filteredRows.map((row) => {
                 const status = STATUS_META[row.status] || {
                   label: row.status || 'Unknown',
                   className: 'consumer-status-unknown',

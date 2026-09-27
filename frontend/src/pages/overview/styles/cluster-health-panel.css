@@ -27,8 +27,8 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 9px;
+  padding: 7px 10px;
   border-left: 1px solid var(--sidebar-divider-color);
   background: transparent;
   border-radius: 0;
@@ -60,46 +60,31 @@
 
 .cluster-kpi-copy strong {
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1.1;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
-.cluster-kpi + .cluster-kpi { border-left-color: var(--border-color); }
-.cluster-kpi.is-danger { border-left-color: var(--danger-color); }
 .cluster-kpi.is-danger strong { color: var(--danger-color); }
 
-.cluster-status-summary {
-  display: flex;
+.cluster-status-inline {
+  display: inline-flex;
   align-items: center;
-  gap: 9px;
-  flex: 0 0 auto;
-  padding: 3px 4px;
-}
-
-.cluster-status-icon {
-  display: grid;
-  place-items: center;
-  color: var(--success-color);
-  font-size: 17px;
-}
-
-.cluster-status-warning .cluster-status-icon { color: #f59e0b; }
-.cluster-status-critical .cluster-status-icon { color: var(--danger-color); }
-.cluster-status-unknown .cluster-status-icon { color: var(--accent-hover); }
-
-.cluster-status-title {
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 650;
-}
-
-.cluster-status-description {
-  margin-top: 1px;
+  gap: 7px;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: 2px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
 }
+.cluster-status-inline svg { font-size: 17px; }
+.cluster-status-inline.cluster-status-healthy { color: var(--success-color); }
+.cluster-status-inline.cluster-status-warning { color: #f59e0b; }
+.cluster-status-inline.cluster-status-critical { color: var(--danger-color); }
+.cluster-status-inline.cluster-status-unknown { color: var(--accent-hover); }
 
 .cluster-brokers-table-wrap {
   min-height: 0;

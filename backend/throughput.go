@@ -32,9 +32,10 @@ import (
 // =============================================================================
 
 type DashboardThroughputPoint struct {
-	Time     string  `json:"time"`
-	Incoming float64 `json:"incoming"`
-	Outgoing float64 `json:"outgoing"`
+	Time      string  `json:"time"`
+	Timestamp int64   `json:"timestamp"`
+	Incoming  float64 `json:"incoming"`
+	Outgoing  float64 `json:"outgoing"`
 }
 
 type DashboardThroughputResponse struct {
@@ -231,9 +232,10 @@ func (tc *ThroughputCollector) collect() {
 
 	// Добавляем точку в буфер
 	point := DashboardThroughputPoint{
-		Time:     now.Format("15:04:05"),
-		Incoming: incomingRate,
-		Outgoing: outgoingRate,
+		Time:      now.Format("15:04:05"),
+		Timestamp: now.UnixMilli(),
+		Incoming:  incomingRate,
+		Outgoing:  outgoingRate,
 	}
 	tc.buffer.Add(point)
 }
@@ -330,7 +332,8 @@ func ensureCollectorForBootstrap(bootstrap string) {
 		currentCollector.Stop()
 	}
 	log.Printf("[ThroughputCollector] создаём новый сборщик для bootstrap: %s", bootstrap)
-	currentCollector = NewThroughputCollector(bootstrap, 288)
+	// 15 секунд × 5760 точек = 24 часа истории в памяти.
+	currentCollector = NewThroughputCollector(bootstrap, 5760)
 	currentCollector.Start(15 * time.Second)
 }
 
@@ -350,7 +353,15 @@ func getDashboardThroughputHandler(w http.ResponseWriter, r *http.Request) {
 		sendJSONError(w, "Сборщик метрик не инициализирован", http.StatusInternalServerError)
 		return
 	}
-	points := collector.GetPoints()
+	from, to := metricRange(r)
+	allPoints := collector.GetPoints()
+	points := make([]DashboardThroughputPoint, 0, len(allPoints))
+	for _, point := range allPoints {
+		stamp := time.UnixMilli(point.Timestamp)
+		if point.Timestamp == 0 || (!stamp.Before(from) && !stamp.After(to)) {
+			points = append(points, point)
+		}
+	}
 	response := DashboardThroughputResponse{Points: points}
 	_ = json.NewEncoder(w).Encode(response)
 }

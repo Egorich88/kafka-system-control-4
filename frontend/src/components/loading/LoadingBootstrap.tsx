@@ -57,19 +57,20 @@ import App from '../../App';
  * Основная точка перехода от стартового экрана к приложению.
  * =============================================================================
  */
-export default function LoadingBootstrap() {
+export default function LoadingBootstrap(): JSX.Element | null {
     const loading = useLoading();
 
     useEffect(() => {
-        // Удаляем статический splash сразу после монтирования React.
-        // Иначе на короткий момент одновременно видны два экрана загрузки,
-        // из-за чего логотип визуально увеличивается и накладывается на линию.
-        document.getElementById('initial-splash')?.remove();
-    }, []);
+        if (loading.completed) {
+            // Статический splash из index.html является единственным экраном
+            // самого раннего запуска. После готовности React он удаляется.
+            document.getElementById('initial-splash')?.remove();
+        }
+    }, [loading.completed]);
 
-    if (!loading.completed) {
-        return <LoadingScreen status={loading.message} />;
-    }
+    // Не рисуем второй React-splash поверх статического. Именно это раньше
+    // вызывало визуальный скачок логотипа и повторное появление полоски.
+    if (!loading.completed) return null;
 
     return <App />;
 }

@@ -51,6 +51,9 @@ export default function Overview(): JSX.Element {
   const previousClusterIdRef = useRef<string | null>(null);
 
   const apiRange = timeRange.type === 'relative' ? timeRange.id : '24h';
+  const panelTimeRange = timeRange.type === 'relative'
+    ? timeRange.id
+    : `absolute&from=${encodeURIComponent(timeRange.from)}&to=${encodeURIComponent(timeRange.to)}`;
   const currentClusterId = currentCluster?.id ?? null;
   const bootstrap = currentCluster?.brokers || currentCluster?.bootstrapServers || '';
 
@@ -128,7 +131,10 @@ export default function Overview(): JSX.Element {
             <img src="/logo.svg" alt="ODYSSEY" className="welcome-logo" />
           </div>
 
-          <p className="welcome-subtitle">ODYSSEY</p>
+          <div className="welcome-branding">
+            <div className="welcome-subtitle">ODYSSEY</div>
+            <div className="welcome-tagline">KAFKA MONITORING &amp; MANAGEMENT</div>
+          </div>
 
           <div className="welcome-feature">
             <div className="welcome-icon-box"><FiInfo /></div>
@@ -175,13 +181,13 @@ export default function Overview(): JSX.Element {
           <ThroughputPanel data={throughputData} />
         </div>
         <div className="panel-topics">
-          <TopicsPanel timeRange={apiRange} refreshKey={refreshKey} />
+          <TopicsPanel timeRange={panelTimeRange} refreshKey={refreshKey} />
         </div>
       </div>
 
       <div className="dashboard-row dashboard-row-main">
         <div className="panel-lag">
-          <ConsumerLagPanel timeRange={apiRange} refreshKey={refreshKey} />
+          <ConsumerLagPanel timeRange={panelTimeRange} refreshKey={refreshKey} />
         </div>
         <div className="panel-events">
           <EventsPanel refreshKey={refreshKey} />

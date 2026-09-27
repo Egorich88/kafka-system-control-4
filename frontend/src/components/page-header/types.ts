@@ -22,7 +22,7 @@
  * =============================================================================
  */
 
-export type RelativeTimeRangeId = '5m' | '15m' | '30m' | '1h' | '3h' | '6h' | '12h' | '24h' | '7d' | '30d';
+export type RelativeTimeRangeId = '5m' | '15m' | '30m' | '1h' | '3h' | '6h' | '12h' | '24h';
 
 export interface RelativeTimeRange {
   type: 'relative';

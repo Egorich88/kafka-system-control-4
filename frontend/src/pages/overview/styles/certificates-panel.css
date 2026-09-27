@@ -3,127 +3,43 @@
  * Licensed under the Apache License, Version 2.0.
  */
 
-/** @file certificates-panel.css Табличное представление сертификатов Kafka. */
+/** @file certificates-panel.css Таблица сертификатов Kafka. */
 
 .certificate-panel { min-width: 0; min-height: 0; }
-
-.certificate-panel-body {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 8px 12px 10px;
-  overflow: hidden;
-}
-
-.certificate-summary {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 0 0 auto;
-  min-height: 36px;
-  padding: 0 4px 7px;
-}
-
-.certificate-summary-main {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-}
-
-.certificate-summary-main strong {
-  color: var(--text-primary);
-  font-size: 22px;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.certificate-summary-main span,
-.certificate-summary-nearest {
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-
+.certificate-panel-body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 7px 11px 9px; overflow: hidden; }
+.certificate-title-icon { display: grid; place-items: center; color: #55e6dc; font-size: 18px; }
+.certificate-toolbar { display: flex; align-items: center; gap: 12px; min-height: 34px; padding: 0 3px 7px; }
+.certificate-summary-main { display: flex; align-items: baseline; gap: 6px; }
+.certificate-summary-main strong { color: var(--text-primary); font-size: 20px; line-height: 1; font-variant-numeric: tabular-nums; }
+.certificate-summary-main span, .certificate-summary-nearest { color: var(--text-secondary); font-size: 11px; }
 .certificate-summary-nearest strong { color: var(--text-primary); }
-
-.certificate-demo-badge {
-  margin-left: auto;
-  padding: 3px 7px;
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  color: var(--text-secondary);
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.certificate-table-wrap {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  border-top: 1px solid var(--border-color);
-  scrollbar-width: thin;
-  scrollbar-color: var(--sidebar-divider-color) transparent;
-}
-
-.certificate-table-wrap::-webkit-scrollbar { width: 5px; }
+.certificate-filters { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.certificate-filter { position: relative; display: flex; align-items: center; color: var(--text-secondary); }
+.certificate-filter > svg { position: absolute; left: 8px; z-index: 1; pointer-events: none; font-size: 13px; }
+.certificate-filter select { appearance: none; height: 30px; min-width: 112px; padding: 0 24px 0 10px; border: 1px solid var(--border-color); border-radius: 7px; background: var(--dropdown-bg); color: var(--text-primary); font: inherit; font-size: 10px; outline: none; cursor: pointer; }
+.certificate-filter:first-child select { padding-left: 27px; }
+.certificate-filter select:focus { border-color: var(--accent-hover); box-shadow: 0 0 0 2px var(--input-focus); }
+.certificate-demo-badge { padding: 3px 7px; border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-secondary); font-size: 10px; white-space: nowrap; }
+.certificate-table-wrap { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid var(--border-color); scrollbar-width: thin; scrollbar-color: var(--sidebar-divider-color) transparent; }
+.certificate-table-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
 .certificate-table-wrap::-webkit-scrollbar-thumb { background: var(--sidebar-divider-color); border-radius: 5px; }
-
-.certificate-table {
-  min-width: 440px;
-  display: flex;
-  flex-direction: column;
-}
-
-.certificate-table-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(108px, .95fr) minmax(82px, .8fr) 74px;
-  gap: 8px;
-  align-items: center;
-  min-height: 31px;
-  padding: 4px 6px;
-  border-bottom: 1px solid var(--border-color);
-  box-sizing: border-box;
-}
-
-.certificate-table-row.header {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  min-height: 29px;
-  background: var(--panel-bg);
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.certificate-table-row:not(.header) {
-  color: var(--text-primary);
-  font-size: 12px;
-}
-
-.certificate-table-row > span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.certificate-days { text-align: right; font-variant-numeric: tabular-nums; }
-.certificate-expiry { color: var(--text-secondary); }
-.certificate-warning { color: #f59e0b !important; font-weight: 650; }
+.certificate-table { min-width: 760px; display: flex; flex-direction: column; }
+.certificate-table-row { display: grid; grid-template-columns: minmax(105px, 1.1fr) minmax(100px, .9fr) 76px 72px minmax(120px, 1.2fr) minmax(150px, 1.45fr); gap: 7px; align-items: center; min-height: 31px; padding: 4px 5px; border-bottom: 1px solid var(--border-color); box-sizing: border-box; }
+.certificate-table-row.header { position: sticky; top: 0; z-index: 2; min-height: 30px; background: var(--panel-bg); }
+.certificate-table-row.header button { min-width: 0; display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; padding: 0; border: 0; background: transparent; color: var(--text-secondary); font: inherit; font-size: 10px; font-weight: 650; cursor: pointer; text-align: left; }
+.certificate-table-row.header button:hover { color: var(--text-primary); }
+.certificate-table-row.header button svg { flex: 0 0 auto; font-size: 11px; }
+.certificate-table-row:not(.header) { color: var(--text-primary); font-size: 11px; }
+.certificate-table-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.certificate-days { text-align: right; font-variant-numeric: tabular-nums; font-weight: 650; }
 .certificate-ok { color: var(--success-color) !important; }
-.certificate-empty { padding: 12px; text-align: center; color: var(--text-secondary); font-size: 12px; }
+.certificate-warning { color: #f59e0b !important; }
+.certificate-critical { color: var(--danger-color) !important; }
+.certificate-neutral { color: var(--text-secondary) !important; }
+.certificate-expiry, .certificate-location { color: var(--text-secondary); }
+.certificate-metadata { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.certificate-metadata strong { overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); font-size: 10px; font-weight: 600; white-space: nowrap; }
+.certificate-metadata small { overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary); font-size: 9px; white-space: nowrap; }
+.certificate-empty { padding: 12px; text-align: center; color: var(--text-secondary); font-size: 11px; }
 
-
-.certificate-title-icon {
-  flex: 0 0 auto;
-  color: var(--accent-hover);
-  font-size: 17px;
-  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent-hover) 22%, transparent));
-}
-
-
-.certificate-type {
-  color: var(--text-primary);
-  font-size: 11px;
-}
+@media (max-width: 1000px) { .certificate-toolbar { flex-wrap: wrap; } .certificate-filters { margin-left: 0; } }

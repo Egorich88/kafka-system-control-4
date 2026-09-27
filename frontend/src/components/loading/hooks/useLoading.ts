@@ -37,34 +37,36 @@ export function useLoading(): LoadingState {
 
     useEffect(() => {
         let cancelled = false;
-        const timers: number[] = [];
 
-        const stages: LoadingState[] = [
-            { progress: 20, currentStage: LoadingStage.INITIALIZATION, message: 'Инициализация...', completed: false },
-            { progress: 45, currentStage: LoadingStage.INITIALIZATION, message: 'Загрузка конфигурации...', completed: false },
-            { progress: 70, currentStage: LoadingStage.INITIALIZATION, message: 'Проверка подключения...', completed: false },
-            { progress: 90, currentStage: LoadingStage.INITIALIZATION, message: 'Запуск интерфейса...', completed: false },
-        ];
+        const start = async () => {
+            setState({
+                progress: 35,
+                currentStage: LoadingStage.INITIALIZATION,
+                message: 'Инициализация...',
+                completed: false
+            });
 
-        stages.forEach((stage, index) => {
-            timers.push(window.setTimeout(() => {
-                if (!cancelled) setState(stage);
-            }, index * 420));
-        });
+            // Небольшая минимальная длительность нужна, чтобы фирменный
+            // экран запуска не исчезал мгновенно на быстрых машинах.
+            await new Promise<void>(resolve => {
+                window.setTimeout(resolve, 900);
+            });
 
-        timers.push(window.setTimeout(() => {
             if (cancelled) return;
+
+            // Configuration is read synchronously by ClusterContext.
             setState({
                 progress: 100,
                 currentStage: LoadingStage.COMPLETE,
                 message: 'Готово',
                 completed: true
             });
-        }, 1800));
+        };
+
+        void start();
 
         return () => {
             cancelled = true;
-            timers.forEach(window.clearTimeout);
         };
     }, []);
 

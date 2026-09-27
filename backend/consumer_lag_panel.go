@@ -48,10 +48,11 @@ import (
 
 // LagPoint — точка графика одной Consumer Group с разбивкой lag по топикам.
 type LagPoint struct {
-	Time   string           `json:"time"`
-	Group  string           `json:"group"`
-	Value  int64            `json:"value"`
-	Topics map[string]int64 `json:"topics"`
+	Time      string           `json:"time"`
+	Timestamp int64            `json:"timestamp"`
+	Group     string           `json:"group"`
+	Value     int64            `json:"value"`
+	Topics    map[string]int64 `json:"topics"`
 }
 
 // ConsumerLagRow — текущая строка таблицы Group + Topic.
@@ -224,10 +225,11 @@ func (lc *LagCollector) collect() {
 		}
 
 		lc.storage.addPoint(group, LagPoint{
-			Time:   now.Format("15:04:05"),
-			Group:  group,
-			Value:  totalLag,
-			Topics: topicsMap[group],
+			Time:      now.Format("15:04:05"),
+			Timestamp: now.UnixMilli(),
+			Group:     group,
+			Value:     totalLag,
+			Topics:    topicsMap[group],
 		})
 	}
 }
@@ -463,7 +465,8 @@ func ensureLagCollectorForBootstrap(bootstrap string) {
 	}
 
 	log.Printf("[LagCollector] создаём сборщик для bootstrap: %s", bootstrap)
-	currentLagCollector = NewLagCollector(bootstrap, 288, 10*time.Second)
+	// 10 секунд × 8640 точек = 24 часа истории в памяти.
+	currentLagCollector = NewLagCollector(bootstrap, 8640, 10*time.Second)
 	currentLagCollector.Start()
 }
 
@@ -502,25 +505,14 @@ func GetConsumerLagHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rangeParam := r.URL.Query().Get("range")
-	limit := 0
-
-	switch rangeParam {
-	case "15m":
-		limit = 90
-	case "1h":
-		limit = 360
-	case "6h":
-		limit = 2160
-	case "24h":
-		limit = 8640
-	}
-
+	from, to := metricRange(r)
 	allPoints := collector.storage.getAllPoints()
-	points := allPoints
-
-	if limit > 0 && len(allPoints) > limit {
-		points = allPoints[len(allPoints)-limit:]
+	points := make([]LagPoint, 0, len(allPoints))
+	for _, point := range allPoints {
+		stamp := time.UnixMilli(point.Timestamp)
+		if point.Timestamp == 0 || (!stamp.Before(from) && !stamp.After(to)) {
+			points = append(points, point)
+		}
 	}
 
 	rows, rowsErr := collectConsumerLagRows(bootstrap)

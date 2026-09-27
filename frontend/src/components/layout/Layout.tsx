@@ -191,7 +191,7 @@ const Layout = () => {
   const currentPage = isWelcome
     ? {
         title: 'Добро пожаловать',
-        description: 'Добро пожаловать в ODYSSEY.',
+        description: '',
         mode: 'default' as const,
       }
     : configuredPage;
