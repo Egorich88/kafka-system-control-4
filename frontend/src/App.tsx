@@ -60,7 +60,9 @@ import Acl from './pages/Acl';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
 import AuditPage from './pages/audit/AuditPage';
-import IntegrationPlaceholder from './pages/IntegrationPlaceholder';
+import KafkaConnectPage from './pages/kafka-connect/KafkaConnectPage';
+import KsqlDbPage from './pages/ksqldb/KsqlDbPage';
+import SchemaRegistryPage from './pages/schema-registry/SchemaRegistryPage';
 import Alerts from './pages/Alerts';
 import User from './pages/User';
 
@@ -117,9 +119,9 @@ function App() {
             <Route path="user" element={<User />} />
 
             {/* Будущие Kafka-интеграции */}
-            <Route path="connect" element={<IntegrationPlaceholder titleKey="kafkaConnect" />} />
-            <Route path="ksqldb" element={<IntegrationPlaceholder titleKey="ksqlDb" />} />
-            <Route path="schema-registry" element={<IntegrationPlaceholder titleKey="schemaRegistry" />} />
+            <Route path="connect" element={<KafkaConnectPage />} />
+            <Route path="ksqldb" element={<KsqlDbPage />} />
+            <Route path="schema-registry" element={<SchemaRegistryPage />} />
 
              {/* Настройки приложения */}
             <Route path="/settings" element={<Settings />} />
