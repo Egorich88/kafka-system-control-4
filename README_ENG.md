@@ -1,124 +1,207 @@
-![img_4.png](img_4.png)
-# Kafka System Control
+<img width="1254" height="1254" alt="Startt" src="https://github.com/user-attachments/assets/834dcd94-cf62-42b7-97d7-055ec4a46647" />
+
+# Odyssey
+
+[Русский](README.md) | **English**
 
 <p align="left">
-  <a href="https://github.com/Egorich88/kafka-system-control-4/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Egorich88/kafka-system-control-4?color=blue&label=License" alt="License">
+  <a href="https://github.com/Egorich88/odyssey-kafka/blob/main/LICENSE">
+    <img src="https://badgen.net/github/license/Egorich88/odyssey-kafka?color=blue&label=License" alt="License">
   </a>
-  <a href="https://github.com/Egorich88/kafka-system-control-4/releases">
-    <img src="https://img.shields.io/github/v/release/Egorich88/kafka-system-control-4?label=Latest%20Release" alt="GitHub release">
+  <a href="https://github.com/Egorich88/odyssey-kafka/releases">
+    <img src="https://img.shields.io/github/v/release/Egorich88/odyssey-kafka?label=Latest%20Release" alt="GitHub release">
   </a>
-  <a href="https://github.com/Egorich88/kafka-system-control-4/actions/workflows/ci-cd.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/Egorich88/kafka-system-control-4/ci-cd.yml?branch=main&label=CI%2FCD" alt="CI/CD">
+  <a href="https://github.com/Egorich88/odyssey-kafka/actions/workflows/ci-cd.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Egorich88/odyssey-kafka/ci-cd.yml?branch=main&label=CI%2FCD" alt="CI/CD">
   </a>
 </p>
 
-**Kafka System Control** is a modern web UI for Apache Kafka administration. Built from scratch with **Go** and **React**, it evolved from console scripts into a production-ready microservice featuring CI/CD, containerization, and Kubernetes deployment.
+Odyssey is a modern web interface (Kafka Monitoring & Management) for administering
+Apache Kafka. Built with Go and React from scratch: from console utilities to
+a production-ready microservice with CI/CD, containerization, release
+notifications and Kubernetes deployment.
 
-## ✨ Key Features
+> The project was previously called Kafka System Control (KSC). The new name —
+> Odyssey — reflects the essence of the tool: to be a reliable helm and map
+> for the engineer in the stormy sea of Apache Kafka data.
 
-- **Intuitive UI** – Dark theme, sidebar navigation, multi‑cluster switching.
-- **Topic Management** – View, create, delete, and edit topic configuration (retention, cleanup.policy, etc.).
-- **Message Search** – Read messages from a selected partition with offset and limit filters.
-- **Multi‑cluster** – Add clusters with different authentication types (PLAINTEXT, SASL/SCRAM, mTLS planned).
-- **CI/CD out of the box** – Automatic builds, Docker Hub publishing, and GitHub Release creation on tag push.
-- **Containerized** – Ready‑to‑use Docker images for backend and frontend.
-- **K8s Deployment** – Manifests and Terraform for Yandex Cloud.
+## 🌊 Why Odyssey
 
-> ⏳ **In active development**: monitoring dashboard, consumer group management (offset reset), ACL, built‑in terminal.
+**A strong brand instead of a faceless name**
+
+Kafka System Control described the technical essence well, but sounded bland
+and cumbersome. Odyssey is a short, memorable name that is easy to type in the
+console, quick to search for and immediately forms a unique brand.
+
+**A metaphor for SRE and DevOps**
+
+In Greek mythology, Odysseus was a great navigator and captain who passed
+through reefs, storms and traps of the raging sea. Apache Kafka is that vast
+and unpredictable sea of data, where every day storms with consumer lags,
+broker failures and expired SSL certificates. Odyssey acts as a reliable helm
+and map for the engineer.
+
+**The spirit of solo development**
+
+Odysseus relied on his own cunning and intellect, winning where entire armies
+failed. This reflects the DNA of the project: it is maintained by a single
+engineer acting simultaneously as architect, backend and frontend developer.
+
+**Clear positioning**
+
+The word System in the old name could confuse: administrators might think the
+project was a replacement for Apache Kafka. The new positioning of Odyssey —
+**Kafka Monitoring & Management** — immediately states that it is a visual,
+lightweight and powerful tool for control, analysis and management.
+
+## ✨ Features and Development Status
+
+### 📌 Implemented
+
+- ✅ **Intuitive UI** — dark and light themes, sidebar, switching between multiple Kafka clusters.
+- ✅ **Sidebar** — fully reworked: collapse, quick logo for switching themes (light/dark).
+- ✅ **Custom logo** — the Odyssey brand mark.
+- ✅ **Loading page** — displayed inside pages during navigation.
+- ✅ **Top horizontal bar** — for pages with selectable display period and auto-refresh time.
+- ✅ **Topic management** — view, create, delete, edit configuration (retention, cleanup.policy, etc.).
+- ✅ **Message search** — reading messages from a selected partition with offset and limit filters.
+- ✅ **Multi-cluster support** — adding clusters with different authentication types (PLAINTEXT, SASL/SCRAM, mTLS planned).
+- ✅ **Release notifications** — automatic broadcast to Telegram and MAX on new version, with screenshot and changelog.
+- ✅ **CI/CD out of the box** — build, publish images to Docker Hub and create GitHub Release on tag push.
+- ✅ **Containerization** — ready-to-use Docker images for backend and frontend.
+- ✅ **K8s deployment** — manifests and Terraform for Yandex Cloud.
+
+### 🔄 In progress
+
+- 🛠️ **Overview (dashboard)** — ~90% done. Remaining: connect the backend to the
+  "Kafka Certificates" panel, minor visual improvements, add a `critical` level
+  to the "Recent Events" panel, rework the "Cluster State" panel, the
+  "Consumer Group" panel has been changed — statuses added and display updated.
+- 🛠️ **Audit** — done on mock data, minor edits remain.
+- 🛠️ **Topics** — works. Message creation needs to be added (either on this page
+  or in "Message Search").
+- 🛠️ **User** — on mock data.
+- 🛠️ **Settings** — interface language selection (only English added so far),
+  various known themes.
+- 🛠️ **Pages with mock data** — ksqlDB, Schema Registry, Kafka Connect.
+
+### 📝 In development
+
+- ⏳ **Brokers page**.
+- ⏳ **Notifications page**.
+- ⏳ **Console page** (web-shell for Kafka CLI).
+- ⏳ **ACL** — access control list management.
+- ⏳ **Consumer group management** — view, reset offsets.
 
 ## 🏗️ Architecture
 
-| Component       | Technologies                                                                 |
-|----------------|------------------------------------------------------------------------------|
-| **Frontend**   | React, Vite, Axios, CSS Modules                                             |
-| **Backend**    | Go, Sarama (Kafka Admin API), net/http                                      |
-| **Infrastructure** | Docker, Docker Compose, GitHub Actions, Docker Hub, Terraform, Yandex Cloud |
-| **Orchestration** | Kubernetes (Yandex Managed Kubernetes)                                    |
+![Architecture diagram](https://github.com/user-attachments/assets/ccdf7bc3-770c-4159-94f3-24129e8ed8bd)
+
+| Component | Technologies |
+|---|---|
+| Frontend | React, Vite, Axios, CSS Modules |
+| Backend | Go, Sarama (Kafka Admin API), net/http |
+| Infrastructure | Docker, Docker Compose, GitHub Actions, Docker Hub, Terraform, Yandex Cloud |
+| Orchestration | Kubernetes (Yandex Managed Kubernetes) |
+| Notifications | Telegram Bot API, MAX Bot API |
 
 ## 🚀 Quick Start
 
-### Local Development
+### Local development
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Egorich88/kafka-system-control-4.git
-   cd kafka-system-control-4
+1. Clone the repository:
 
-2. **Run the backend (requires a running Kafka instance at localhost:9092)**
-   ```bash
-   cd backend
-   go run main.go
+    ```bash
+    git clone https://github.com/Egorich88/odyssey-kafka.git
+    cd odyssey-kafka
+    ```
 
-3. **Run the frontend (in another terminal)**
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
+2. Start the backend (requires running Kafka on `localhost:9092`):
 
-4. **Open http://localhost:5173 – the UI is ready.**
+    ```bash
+    cd backend
+    go run main.go
+    ```
 
-## Docker Compose (all‑in‑one)
-   ```bash
-   docker-compose up --build
-   ```
+3. Start the frontend (in another terminal):
+
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
+
+4. Open `http://localhost:5173` — the interface is ready.
+
+### Docker Compose (all-in-one)
+
+```bash
+docker-compose up --build
+```
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8080/api/topics`
 
 ## 🔁 CI/CD (GitHub Actions)
-On every push to main or creation of a v* tag, the pipeline automatically:
 
-- Builds Docker images for backend and frontend.
+The workflow is split into three independent jobs:
 
-- Publishes them to Docker Hub (egorich27/kafka-control-backend, egorich27/kafka-control-frontend).
+- **verify** — runs on push to `main`. Only builds backend and frontend to
+  verify the code compiles. Nothing is published to Docker Hub.
+- **release** — runs only on tag `v*`. Builds and publishes images to Docker
+  Hub, creates GitHub Release.
+- 🧪 **deploy-to-kubernetes** — runs only manually via `workflow_dispatch` with
+  the `deploy=true` flag.
 
-- On tag push, additionally creates a GitHub Release with source archives and auto‑generated changelog (generate_release_notes).
+Published images:
 
-| 🧪 Manual deployment to Kubernetes is possible via the deploy flag in GitHub Actions.
+- `egorich27/kafka-control-backend`
+- `egorich27/kafka-control-frontend`
+
+## 🔔 Release Notifications
+
+When a new `v*` tag is pushed, a notification is automatically sent to two channels:
+
+- **Telegram** — message with changelog and release screenshot.
+- **MAX** — message with changelog and attached image.
+
+Notifications are generated from commits between the previous and the current tag.
+Screenshots are stored in `docs/screenshots/` and matched by name equal to the
+tag (e.g. `v4.2.24.png`).
 
 ## 📦 Releases
-All version history is available on the Releases page. Each release includes:
 
-- Ready‑to‑use Docker images.
+Full version history is available on the
+[Releases](https://github.com/Egorich88/odyssey-kafka/releases) page.
 
-- Detailed changelog (automatically collected from commits).
+Each release includes:
 
+- Ready-to-use Docker images.
+- Detailed changelog, automatically generated from commits.
 - Source code archive.
 
-## 🗺️ Development Roadmap
-  - ✅ Web UI (React + Go)
-
-  - ✅ Docker images & CI/CD
-
-  - ✅ Automatic releases on tags
-
-  - ✅ Cluster switching (frontend + backend)
-
-  - ✅ Kubernetes deployment (Yandex Cloud)
-
-  - ✅ Topic configuration management (retention, cleanup.policy)
-
-  - ✅ Message search (by partition, offset)
-
-  - ✅ Monitoring dashboard (lag graphs, throughput, errors)
-
-  - ⏳ Consumer group management (view, offset reset)
-
-  - ⏳ ACL management (list, create, delete)
-
-  - ⏳ Built‑in terminal (web shell for Kafka CLI)
-
-  - ⏳ Kafka Connect & Kafka Streams support
-
 ## 🤝 Author
-Egorich88
-The project demonstrates modern DevOps practices: from console scripts to production‑ready microservices with full CI/CD.
 
-“Movement – life!”
+**Egorich88**
+
+The project was created as a demonstration of modern DevOps practices:
+from console scripts to production-ready microservices with full CI/CD.
+
+> "Movement – life!"
 
 ## 📄 License
-This project is licensed under the Apache License 2.0. See the LICENSE file for details.
 
-## ⚠️ Trademark Notice
-The name “Kafka” and the Kafka logo are registered trademarks of The Apache Software Foundation (ASF).
-Kafka System Control is an independent open‑source tool designed to manage Apache Kafka clusters.
-KSC is not part of Apache Kafka, nor is it supported or sponsored by the ASF.
-All mentions of “Kafka” are used solely in a technical sense to indicate compatible technology.
+This project is licensed under the **Apache License 2.0**.
+See [LICENSE](LICENSE) for details.
+
+## ⚠️ Trademark
+
+The name "Kafka" and the Kafka logo are registered trademarks of
+The Apache Software Foundation (ASF). Odyssey is an independent open-source
+tool designed to manage Apache Kafka clusters. Odyssey is not part of Apache
+Kafka, not endorsed or sponsored by ASF. All references to "Kafka" are used
+purely in a technical sense to denote compatible technology.
+
+## Powered by
+
+<img width="461" height="176" alt="Монтажная область 1" src="https://github.com/user-attachments/assets/65593be3-d1f2-4c96-90a3-210702ea3c29" />
