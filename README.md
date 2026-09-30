@@ -2,7 +2,7 @@
 
 # Odyssey
 
-**Русский** | [English](README.en.md)
+**Русский** | [English](README_ENG.md)
 
 <p align="left">
   <a href="https://github.com/Egorich88/kafka-system-control-4/blob/main/LICENSE">
