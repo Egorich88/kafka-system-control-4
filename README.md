@@ -208,3 +208,7 @@ Apache Kafka. Odyssey не является частью Apache Kafka, не по
 ## Powered by
 
 <img width="461" height="176" alt="Монтажная область 1" src="https://github.com/user-attachments/assets/65593be3-d1f2-4c96-90a3-210702ea3c29" />
+
+## 💼 Enterprise & Support
+
+Если вашей компании необходима расширенная поддержка (SLA), ролевая модель доступа (RBAC), интеграция с корпоративным Keycloak/LDAP или аудит-логирование для ИБ, свяжитесь со мной 👉 prorok_27
