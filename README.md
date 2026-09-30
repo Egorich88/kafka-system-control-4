@@ -5,21 +5,21 @@
 **Русский** | [English](README_ENG.md)
 
 <p align="left">
-  <a href="https://github.com/Egorich88/kafka-system-control-4/blob/main/LICENSE">
-    <img src="https://badgen.net/github/license/Egorich88/kafka-system-control-4?color=blue&label=License" alt="License">
+  <a href="https://github.com/Egorich88/odyssey-kafka/blob/main/LICENSE">
+    <img src="https://badgen.net/github/license/Egorich88/odyssey-kafka?color=blue&label=License" alt="License">
   </a>
-  <a href="https://github.com/Egorich88/kafka-system-control-4/releases">
-    <img src="https://img.shields.io/github/v/release/Egorich88/kafka-system-control-4?label=Latest%20Release" alt="GitHub release">
+  <a href="https://github.com/Egorich88/odyssey-kafka/releases">
+    <img src="https://img.shields.io/github/v/release/Egorich88/odyssey-kafka?label=Latest%20Release" alt="GitHub release">
   </a>
-  <a href="https://github.com/Egorich88/kafka-system-control-4/actions/workflows/ci-cd.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/Egorich88/kafka-system-control-4/ci-cd.yml?branch=main&label=CI%2FCD" alt="CI/CD">
+  <a href="https://github.com/Egorich88/odyssey-kafka/actions/workflows/ci-cd.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Egorich88/odyssey-kafka/ci-cd.yml?branch=main&label=CI%2FCD" alt="CI/CD">
   </a>
 </p>
 
-Odyssey — современный веб-интерфейс (Kafka Monitoring & Management) для администрирования
-Apache Kafka. Построен на Go и React с нуля: от консольных утилит до
-production-готового микросервиса с CI/CD, контейнеризацией, уведомлениями
-о релизах и деплоем в Kubernetes.
+Odyssey — современный веб-интерфейс (Kafka Monitoring & Management) для
+администрирования Apache Kafka. Построен на Go и React с нуля: от консольных
+утилит до production-готового микросервиса с CI/CD, контейнеризацией,
+уведомлениями о релизах и деплоем в Kubernetes.
 
 > Раньше проект назывался Kafka System Control (KSC). Новое имя — Odyssey —
 > отражает суть инструмента: быть надёжным штурвалом и картой для инженера
@@ -51,8 +51,8 @@ Kafka System Control отлично описывало техническую с
 
 Слово System в старом названии могло путать: администраторы могли подумать,
 что проект — замена Apache Kafka. Новое позиционирование Odyssey —
-**Kafka Monitoring & Management** — сразу заявляет, что это визуальный, лёгкий и мощный
-инструмент контроля, анализа и управления.
+**Kafka Monitoring & Management** — сразу заявляет, что это визуальный,
+лёгкий и мощный инструмент контроля, анализа и управления.
 
 ## ✨ Возможности и статус разработки
 
@@ -112,85 +112,92 @@ Kafka System Control отлично описывало техническую с
 
 1. Клонируйте репозиторий:
 
-   ```bash
-   git clone https://github.com/Egorich88/kafka-system-control-4.git
-   cd kafka-system-control-4
+    ```bash
+    git clone https://github.com/Egorich88/odyssey-kafka.git
+    cd odyssey-kafka
+    ```
 
-2. **Запустите бэкенд (требуется работающая Kafka на localhost:9092)**
-   ```bash
-   cd backend
-   go run main.go
-   
-3. **Запустите фронтенд (в другом терминале)**
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
+2. Запустите бэкенд (требуется работающая Kafka на `localhost:9092`):
 
-4. **Откройте http://localhost:5173 – интерфейс готов к работе.**
+    ```bash
+    cd backend
+    go run main.go
+    ```
 
-## Docker Compose (всё в одном)
-  ```bash
-   docker-compose up --build
-   ```
-  - Фронтенд: http://localhost:5173
-  - Бэкенд: http://localhost:8080/api/topics
+3. Запустите фронтенд (в другом терминале):
+
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
+
+4. Откройте `http://localhost:5173` — интерфейс готов к работе.
+
+### Docker Compose (всё в одном)
+
+```bash
+docker-compose up --build
+```
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8080/api/topics`
 
 ## 🔁 CI/CD (GitHub Actions)
+
 Workflow разделён на три независимых job'а:
 
-- verify — запускается на push в main. Только собирает backend и
-frontend, чтобы убедиться, что код компилируется. В Docker Hub ничего не
-публикуется.
-
-- release — запускается только на тег v*. Собирает и публикует образы
-в Docker Hub, создаёт GitHub Release.
-
-|🧪deploy-to-kubernetes — запускается только вручную через
-workflow_dispatch с флагом deploy=true.
+- **verify** — запускается на push в `main`. Только собирает backend и
+  frontend, чтобы убедиться, что код компилируется. В Docker Hub ничего не
+  публикуется.
+- **release** — запускается только на тег `v*`. Собирает и публикует образы
+  в Docker Hub, создаёт GitHub Release.
+- 🧪 **deploy-to-kubernetes** — запускается только вручную через
+  `workflow_dispatch` с флагом `deploy=true`.
 
 Публикация образов:
 
-- egorich27/kafka-control-backend
-
-- egorich27/kafka-control-frontend
+- `egorich27/kafka-control-backend`
+- `egorich27/kafka-control-frontend`
 
 ## 🔔 Уведомления о релизах
-При выходе нового тега v* автоматически отправляется уведомление в два канала:
 
-- Telegram — сообщение с описанием изменений и скриншотом релиза.
+При выходе нового тега `v*` автоматически отправляется уведомление в два канала:
 
-- MAX — сообщение с описанием изменений и вложенным изображением.
+- **Telegram** — сообщение с описанием изменений и скриншотом релиза.
+- **MAX** — сообщение с описанием изменений и вложенным изображением.
 
 Уведомления формируются из коммитов между предыдущим и текущим тегом.
-Скриншоты хранятся в docs/screenshots/ и подхватываются по имени, совпадающему
-с тегом (например, v4.2.24.png).
+Скриншоты хранятся в `docs/screenshots/` и подхватываются по имени, совпадающему
+с тегом (например, `v4.2.24.png`).
 
 ## 📦 Релизы
+
 Вся история версий доступна на странице
-Releases.
+[Releases](https://github.com/Egorich88/odyssey-kafka/releases).
 
 Каждый релиз включает:
 
 - Docker-образы, готовые к использованию.
-
 - Подробный changelog, автоматически собранный из коммитов.
-
-Архив исходного кода.
+- Архив исходного кода.
 
 ## 🤝 Автор
-Egorich88
+
+**Egorich88**
 
 Проект создан как демонстрация современных DevOps-подходов:
 от консольных скриптов до production-готовых микросервисов с полным CI/CD.
 
-«Movement – life!»
+> «Movement – life!»
 
 ## 📄 Лицензия
-Этот проект распространяется под лицензией Apache License 2.0.
-Подробности в файле LICENSE.
+
+Этот проект распространяется под лицензией **Apache License 2.0**.
+Подробности в файле [LICENSE](LICENSE).
 
 ## ⚠️ Товарный знак
+
 Название «Kafka» и логотип Kafka являются зарегистрированными товарными знаками
 The Apache Software Foundation (ASF). Odyssey — это независимый инструмент
 с открытым исходным кодом, предназначенный для управления кластерами
@@ -199,5 +206,5 @@ Apache Kafka. Odyssey не является частью Apache Kafka, не по
 исключительно в техническом смысле для обозначения совместимой технологии.
 
 ## Powered by
-<img width="461" height="176" alt="Монтажная область 1" src="https://github.com/user-attachments/assets/65593be3-d1f2-4c96-90a3-210702ea3c29" />
 
+<img width="461" height="176" alt="Монтажная область 1" src="https://github.com/user-attachments/assets/65593be3-d1f2-4c96-90a3-210702ea3c29" />
