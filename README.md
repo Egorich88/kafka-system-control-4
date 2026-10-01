@@ -88,40 +88,23 @@
 
 ## 🚀 Быстрый старт
 
-### Локальная разработка
+Самый быстрый способ развернуть и протестировать Odyssey в вашем окружении — использовать готовые, оптимизированные Docker-образы из Docker Hub. Вам не нужно устанавливать зависимости или компилировать код.
 
-1. Клонируйте репозиторий:
+### Запуск через Docker Compose (всё в одном)
 
-    ```bash
-    git clone https://github.com/Egorich88/odyssey-kafka.git
-    cd odyssey-kafka
-    ```
-
-2. Запустите бэкенд (требуется работающая Kafka на `localhost:9092`):
-
-    ```bash
-    cd backend
-    go run main.go
-    ```
-
-3. Запустите фронтенд (в другом терминале):
-
-    ```bash
-    cd frontend
-    npm install
-    npm run dev
-    ```
-
-4. Откройте `http://localhost:5173` — интерфейс готов к работе.
-
-### Docker Compose (всё в одном)
+1. Создайте файл `docker-compose.yml` и добавьте в него конфигурацию для запуска Odyssey рядом с вашим кластером Kafka.
+2. Запустите стек одной командой:
 
 ```bash
-docker-compose up --build
+docker-compose up -d --build
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:8080/api/topics`
+После успешного запуска интерфейс управления будет доступен в вашем браузере:
+- **Frontend (Интерфейс):** `http://localhost:5173`
+- **Backend (API Gateway):** `http://localhost:8080/api/topics`
+
+> 💡 *Примечание: Для корректной работы мониторинга убедитесь, что в конфигурации бэкенда указан правильный и доступный адрес вашего bootstrap-брокера Kafka.*
+
 
 ## 🔁 CI/CD (GitHub Actions)
 
