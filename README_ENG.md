@@ -22,6 +22,15 @@ Built with Go and React from scratch: from console utilities to a production-rea
 > The project was previously called Kafka System Control (KSC).
 > The new name — Odyssey — reflects the essence of the tool: to be a reliable helm and map for the engineer in the stormy sea of Apache Kafka data.
 
+### 📌 What Makes Odyssey Special?
+
+When you look at alternatives like *UI for Apache Kafka*, *AKHQ*, or *Conductor*, you run into the need to deploy heavy enterprise platforms or resource-hungry JVM environments.
+
+**Odyssey's key difference is that it works absolutely "out of the box."**
+
+The tool is written in Go and React, which makes it incredibly lightweight, fast, and free of any Java runtime requirement. Just spin up two ready-made Docker images — and you have a fully-featured, responsive console for comprehensive analysis, real-time monitoring, and precise management of your Kafka clusters.
+
+
 ## 🌊 Why Odyssey
 
 **A strong brand instead of a faceless name**
