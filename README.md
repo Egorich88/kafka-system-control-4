@@ -125,13 +125,11 @@ Workflow разделен на три независимых автоматиз�
 - `egorich27/kafka-control-frontend`
 
 ## 🔔 Уведомления о релизах
-При выходе нового тега v* автоматически отправляется уведомление в два канала:
+При выходе нового тега v* автоматически отправляется уведомление в два канала **«Odyssey - Kafka Monitoring & Management»**:
 
-- <img src="https://cdn.simpleicons.org/telegram/26A5E4" width="16" height="16" alt="Telegram"> **Telegram** — сообщение с описанием изменений и скриншотом релиза.
+<img src="https://cdn.simpleicons.org/telegram/26A5E4" width="16" height="16" alt="Telegram"> **Telegram** — сообщение с описанием изменений и скриншотом релиза.
 
-- MAX — сообщение с описанием изменений и вложенным изображением.
-
-- <img src="https://cdn.simpleicons.org/max/8B5CF6" width="16" height="16" alt="MAX">
+<img src="https://github.com/user-attachments/assets/884de16b-5e86-4109-896c-19292cfd9d7e" width="16" height="16" alt="MAX" /> **MAX** — сообщение с описанием изменений и вложенным изображением.
 
 Уведомления формируются из коммитов между предыдущим и текущим тегом.
 Скриншоты хранятся в docs/screenshots/ и подхватываются по имени, совпадающему
